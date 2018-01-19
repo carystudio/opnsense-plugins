@@ -1,0 +1,383 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<style>
+#div_qosFilterList tr td:nth-child(1){width:68px;padding:0}
+#div_qosFilterList tr td:nth-child(2){width:120px;padding:0}
+#div_qosFilterList tr td:nth-child(3){width:149px;padding:0}
+#div_qosFilterList tr td:nth-child(4){width:149px;padding:0}
+#div_qosFilterList tr td:nth-child(5){width:97px;padding:0}
+#div_qosFilterList tr td:nth-child(6){width:97px;padding:0}
+</style>
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+</head>
+<body class="mainbody">
+<input type="hidden" id="lannum" name="lannum">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<form method=post id="formIpQos" name="formIpQos">
+<input type="hidden" id="ipStart" name="ipStart">
+<input type="hidden" id="ipEnd" name="ipEnd">
+<table border=0 width="100%"> 
+<tr><td class="content_title"><script>dw(MM_qos_setting)</script></td></tr>
+<tr id="div_content_help"><td class="content_help"><script>dw(MSG_qos_setting)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%">
+<tr>
+<td class="item_left"><script>dw(MM_onoff)</script></td>
+<td><select id="enabled" name="enabled">
+<option value="0">不开启</option>
+<option value="1">智能限速</option>
+<option value="2">自定义限速</option>
+</select></td>
+<td></td>
+</tr>
+<tr id="enabled_show_switch_1" style="display:none;">
+<td id="enabled_show_text_1" class="item_left"><script>dw(MM_total_uplink_speed)</script></td>
+<td><input type="hidden" id="manualUplinkSpeed" name="manualUplinkSpeed" value="">
+<input type="text" id="manualUplinkSpeed_tmp" name="manualUplinkSpeed_tmp" size="6" maxlength="6"  value="" > (100-125000KBytes)</td>
+</tr>
+<tr id="enabled_show_switch_2" style="display:none;">
+<td id="enabled_show_text_2" class="item_left"><script>dw(MM_total_downlink_speed)</script></td>
+<td><input type="hidden" id="manualDownlinkSpeed" name="manualDownlinkSpeed" value="" >
+<input type="text" id="manualDownlinkSpeed_tmp" name="manualDownlinkSpeed_tmp" size="6" maxlength="6"  value="" > (100-125000KBytes)</td>
+</tr>
+</table>
+
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr >
+<td align="right"><script>dw('<input type=button class=button value="'+BT_apply+'" name=add onClick="doSubmit();">')</script></td>
+</tr>
+</table>
+</form>
+
+<br />
+<form id="formIpQosAdd" name="formIpQosAdd" method="post" style="display: none;">
+<table border=0 width="100%">
+<tr><td colspan="2"><b><script>dw(MM_add_rule)</script></b></td></tr>
+<tr id="div_addline"><td colspan="2"><hr size=1 noshade align=top class=bline></td></tr>
+<!-- <tr>
+<td class="item_left"><script>dw(MM_policy_specify)</script></td>
+<td><select id="lan_num" name="lan_num" onChange="updateState_2()"></select></td>
+</tr> -->
+<tr>
+<td class="item_left"><script>dw(MM_ipaddr)</script></td>
+<td><input type="hidden" id="ip_address" name="ip_address">
+<input type="text" style="width:33px" id="ipAddress0" name="ips" onKeyDown="return ipVali(event,this.name,0);" maxlength="3" >.
+<input type="text" style="width:33px" id="ipAddress1" name="ips" onKeyDown="return ipVali(event,this.name,1);" maxlength="3" >.
+<input type="text" style="width:33px" id="ipAddress2" name="ips" onKeyDown="return ipVali(event,this.name,2);" maxlength="3" value="">.
+<input type="text" style="width:33px" id="ipAddress3" name="ips" onKeyDown="return ipVali(event,this.name,3);" maxlength="3" value="" >
+<!-- <input type="text" style="width:33px" id="ipend" name="ipend" maxlength="3" value="" >
+<script>dw('<input id=scan name=scan type=button value="'+BT_scan+'" onClick=arpTblClick(\"arpinfo.asp#flag=4\")>')</script>-->
+</td> 
+</tr>
+<tr>
+<td class="item_left">单IP上传带宽<script>//dw(MM_upload_bandwidth)</script></td>
+<td><input type="text" id="bandwidth" name="bandwidth" size="6" maxlength="6"> (100-125000KBytes)</td>
+</tr>
+<tr>
+<td class="item_left">单IP下载带宽<script>//dw(MM_download_bandwidth)</script></td>
+<td><input type="text" id="bandwidth_downlink" name="bandwidth_downlink" size="6" maxlength="6"> (100-125000KBytes)</td>
+</tr>
+<!-- <tr>
+<td class="item_left"><script>dw(MM_comment)</script></td>
+<td><input type="text" id="comment" name="comment" maxlength="20"></td>
+</tr> -->
+</table>
+
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_add+'" name=add id=add onClick="doSubmitRules();">')</script></td></tr>
+</table>
+</form>
+
+<form method=post name="formIpQosDel" style="display: none;">
+<input type="hidden" value="/firewall/qos.asp" name="submit-url">
+<table border=0 width="100%">
+<tr><td colspan="6"><b><script>dw(MM_qos_table)</script>&nbsp;&nbsp;<script>dw(JS_msg59)</script></b></td></tr>
+<tr><td colspan="6"><hr size=1 noshade align=top class=bline></td></tr>
+<tr align="center">
+<td class="item_center"><b>ID</b></td>
+<td class="item_center"><b><script>dw(MM_ipaddr)</script></b></td>
+<td class="item_center"><b><script>dw(MM_upload_bandwidth)</script></b></td>
+<td class="item_center"><b><script>dw(MM_download_bandwidth)</script></b></td>
+<!-- <td class="item_center"><b><script>dw(MM_comment)</script></b></td> -->
+<td class="item_center"><b><script>dw(MM_select)</script></b></td>
+</tr>
+</table>
+<div style="max-height:250px; overflow:auto;">
+<table border=0 width="100%">
+<tbody id="div_qosFilterList" style="overflow-x:hidden"></tbody>
+</table>
+</div>
+
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_delete+'" id="deleteSelQos" name="deleteSelQos" onClick="del_qos_click();">&nbsp;&nbsp;&nbsp;&nbsp;\
+<input type="button" class="button" value="'+BT_reset+'" id="delreset" name="delreset" onClick="resetForm()">')</script></td></tr>
+</table>
+</form>
+<script>showFooter()</script>
+<script>
+var dataType = '';
+	$(function(){
+		init();
+
+		$('#enabled').on('change', function(event) {
+			var current_obj = this.options[this.selectedIndex];
+			if (2 == current_obj.value) {
+				$('#enabled_show_switch_1,#enabled_show_switch_2').attr('style', null);
+				$('#enabled_show_text_1').html('默认单IP上传带宽');
+				$('#enabled_show_text_2').html('默认单IP下载带宽');
+				// $('#enabled_show_switch_1,#enabled_show_switch_2').attr('style', 'display:none');
+				if (2 == dataType) {
+					$('#formIpQosAdd').attr('style', null);
+					$('[name="formIpQosDel"]').attr('style', null);
+				}
+			} else if (1 == current_obj.value) {
+				$('#enabled_show_switch_1,#enabled_show_switch_2').attr('style', null);
+				// $('#formIpQosAdd').attr('style', null);
+				$('#formIpQosAdd').attr('style', 'display:none');
+				$('[name="formIpQosDel"]').attr('style', 'display:none');
+				$('#enabled_show_text_1').html(MM_total_uplink_speed);
+				$('#enabled_show_text_2').html(MM_total_downlink_speed);
+			} else {
+				$('#enabled_show_switch_1,#enabled_show_switch_2').attr('style', 'display:none');
+				$('#formIpQosAdd').attr('style', 'display:none');
+				$('[name="formIpQosDel"]').attr('style', 'display:none');
+			}
+		});
+	});
+	// 初始化
+	function init() {
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: '{"action":"getQosStatus","data":{}}',
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					var data = data.data;
+					dataType = data.Type;
+					$('#manualUplinkSpeed_tmp').val(data.Up);
+					$('#manualDownlinkSpeed_tmp').val(data.Down);
+					$('#enabled').val(data.Type).trigger('change');
+					// type =2 insert table data
+					if (2 == data.Type) {
+						var _html = '';
+						var Custom = data.Custom;
+						var idx =1;
+						for (var i in Custom) {
+							_html += '<tr align="center">';
+							_html += '<td>'+idx+'</td>';
+							_html += '<td>'+Custom[i].Ip+'</td>';
+							_html += '<td>'+Custom[i].Up+'</td>';
+							_html += '<td>'+Custom[i].Down+'</td>';
+							_html += '<td><input type="checkbox" name="qos_checked_del" value="'+Custom[i].Ip+'" /></td>';
+							_html += '</tr>';
+							idx += 1;
+						}
+						$('#div_qosFilterList').html(_html);
+					}
+				} else {
+					alert(data_msg_json[data.rescode]);
+				}
+			}
+		})
+	}
+
+	// 设置QoS
+	function doSubmit() {
+		var data = {};
+		var type = $('#enabled option:selected').val();
+		var up   = $('#manualUplinkSpeed_tmp').val();
+		var down = $('#manualDownlinkSpeed_tmp').val();
+
+		data.Type = type;
+		if (1 == type || 2 == type) {
+			if (up && down) {
+				if((up < 100) || (up > 125000)  || (down < 100) || (down > 125000) ){
+					alert('带宽限速值不正确');
+					return false;
+				}
+				data.Up   = up;
+				data.Down = down;
+			} else {
+				alert('请输入带宽限速值！');
+				return false;
+			}
+		}
+
+		var sub_data = {"action":"setQos", "data":data};
+		sub_data     = JSON.stringify(sub_data);
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: sub_data,
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					alert('应用成功！');
+					location.href = location.href;
+				} else {
+					alert('应用失败！'+data_msg_json[data.rescode]);
+				}
+			}
+		})
+	}
+
+	// 添加自定义规则
+	function doSubmitRules() {
+		var data = {};
+		var ip = ip_zip($('input[name="ips"]'),1);
+		if (false === ip) {
+			alert('请输入正确的IP地址！');
+			return false;
+		}
+		var up   = $('#bandwidth').val();
+		var down = $('#bandwidth_downlink').val();
+
+		data.Ip = ip;
+		if (up && down) {
+			if((up < 100) || (up > 125000)  || (down < 100) || (down > 125000) ){
+				alert('带宽限速值不正确');
+				return false;
+			}
+			data.Up   = up;
+			data.Down = down;
+		} else {
+			alert('请输入宽带限制！');
+			return false;
+		}
+
+		var sub_data = {"action":"addQosCustom", "data":data};
+		sub_data     = JSON.stringify(sub_data);
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: sub_data,
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					alert('规则添加成功！');
+					location.href = location.href;
+				} else {
+					alert('规则添加失败！'+data_msg_json[data.rescode]);
+				}
+			}
+		})
+	}
+
+	// 删除自定义规则
+	function del_qos_click() {
+		var qos_checked = $(':input[name="qos_checked_del"]');
+		var del_qos     = [];
+		var one_qos_msg = {};
+		qos_checked.each(function(index, el) {
+			if (el.checked) {
+				one_qos_msg.Ip = el.value;
+				del_qos.push(one_qos_msg);
+			}
+		});
+		if (1 != del_qos.length) {
+			alert('只能同时选择删除一条规则！');
+			return false;
+		}
+	    var sub_data = {"action":"delQosCustom", "data":one_qos_msg};
+	    sub_data = JSON.stringify(sub_data);
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: sub_data,
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					alert('删除成功！');
+					location.href = location.href;
+				} else {
+					alert('删除失败！'+data_msg_json[data.rescode]);
+				}
+			}
+		});
+	}
+
+// ================================ // 
+function ip_zip(ip_obj,isCheck) {
+    var ippar = '';
+    for (var i = 0; i < ip_obj.length; i++) {
+        ippar += ip_obj[i].value + '.'
+    }
+    var ip = ippar.substr(0,ippar.length-1);
+    if (1 == isCheck) {
+        if (0 == isIP(ip)) return false;
+    }else if(2 == isCheck){
+        if (0 == isMask(ip)) return false;
+    }
+    return ip;
+}
+function isIP(str) {
+    var re=/^(?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))$/;
+    if(!re.test(str)) return 0;
+    var buf=str.split(".");
+    if(buf[3]<1||buf[3]>254) return 0;
+    return 1;
+}
+function isMask(str) {
+    if(!isIPMask(str)) return 0;
+    var buf=str.split(".");
+    var m0=buf[0],m1=buf[1],m2=buf[2],m3=buf[3];
+    if(!(m3==0||m3==128||m3==192||m3==224||m3==240||m3==248||m3==252||m3==254)) return 0;
+    if(!(m2==0||m2==128||m2==192||m2==224||m2==240||m2==248||m2==252||m2==254||m2==255)) return 0;
+    if(!(m1==0||m1==128||m1==192||m1==224||m1==240||m1==248||m1==252||m1==254||m1==255)) return 0;
+    if(!(m0==128||m0==192||m0==224||m0==240||m0==248||m0==252||m0==254||m0==255)) return 0;
+    return 1;
+}
+function isIPMask(str) {
+    var re=/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+    if(!re.test(str)) return 0;
+    var buf=str.split("."); 
+    for(i=0;i<4;i++){
+        if(buf[i]<0||buf[i]>255) return 0;
+    }
+    return 1;
+}
+</script>
+</body></html>

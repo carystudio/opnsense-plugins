@@ -1,0 +1,119 @@
+<html><head>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="/css/menu.css" type="text/css">
+    <link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+    <script language="javascript" src="/js/language.js"></script>
+    <script language="javascript" src="/js/jcommon.js"></script>
+    <script language="javascript" src="/js/ajax.js"></script>
+    <script language="javascript" src="/js/jquery.min.js"></script>
+    <script language="javascript" src="/js/json2.min.js"></script>
+    <script language="javascript" src="/js/spec.js"></script>
+</head>
+<body class="mainbody" marginwidth="0" marginheight="0">
+<input type="hidden" id="lannum" name="lannum">
+<div id="languageDiv" style="display:none"><table width="172" border="0" cellpadding="3" cellspacing="0">
+        <tbody>
+        <tr><td colspan="2" height="12"></td></tr>
+        <tr><td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+            <td><img id="img_language1" src="../style/language_check.gif" border="0"></td></tr>
+        <tr><td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+            <td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td></tr>
+        </tbody></table>
+</div>
+<table width="700"><tbody><tr><td>
+            <form  method="post" name="formStaticDhcpAdd" id="formStaticDhcpAdd">
+                <table border="0" width="100%">
+                    <tbody><tr><td colspan="2"><b>添加Portal本地帐号</b></td>
+                    </tr><tr id="div_addline"><td colspan="2"><hr size="1" noshade="" align="top" class="bline"></td></tr>
+
+                    <tr>
+                        <td class="item_left">用户名</td>
+                        <td><input type="text" id="username" name="username" maxlength="20"></td>
+                    </tr>
+                    <tr>
+                        <td class="item_left">密码</td>
+                        <td><input type="text" id="password" name="password" maxlength="16"> *密码长度为(6-15字节)</td>
+                    </tr>
+                    <tr>
+                        <td class="item_left">登录有效截止时间</td>
+                        <td><input type="text" id="endtime" name="endtime" maxlength="20"> *格式： yyyy-mm-dd HH:MM:ss</td>
+                    </tr>
+                    <tr>
+                        <td class="item_left">可登录时间（分钟）</td>
+                        <td><input type="text" id="canlogin" name="canlogin" maxlength="20"></td>
+                    </tr>
+                    <tr>
+                        <td class="item_left">是否可重复登录</td>
+                        <td><input type="checkbox" id="relogin" name="relogin"></td>
+                    </tr>
+                    </tbody>
+
+                    <table border="0" width="100%">
+                        <tbody><tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+                        <tr><td height="10"></td></tr>
+                        <tr><td align="right"><script>dw('<input id="sbumit_bt_apply" type="button" class="button" value="'+BT_add+'" id="add" onClick="do_submit()">')</script></td></tr>
+                        </tbody>
+                    </table>
+            </form>
+            <script>showFooter()</script></td></tr></tbody></table>
+<iframe id="win78iframe" class="hidden" name="win78target"></iframe>
+
+<script>
+    $(function(){
+        var d = new Date();
+        var vYear = d.getFullYear();
+        var vMon = d.getMonth() + 1;
+        var vDay = d.getDate();
+        var h = d.getHours();
+        var m = d.getMinutes();
+        var se = d.getSeconds();
+        s=vYear+"-"+(vMon<10 ? "0" + vMon : vMon)+"-"+(vDay<10 ? "0"+ vDay : vDay)+" "+(h<10 ? "0"+ h : h)+":"+(m<10 ? "0" + m : m)+":"+(se<10 ? "0" +se : se);
+        $("#endtime").val(s);
+    });
+
+    function do_submit() {
+        if($("#username").val()==""){alert('用户名不能为空');return false;};
+        if($("#password").val()==""){alert('密码不能为空');return false;};
+        if($("#endtime").val()==""){alert('登录有效截止时间不能为空');return false;};
+        if($("#canlogin").val()==""){$("#canlogin").val("0")};
+        var data = {};
+        data.Username = $("#username").val();
+        data.Password = $("#password").val();
+        data.ExpireTime = $("#endtime").val();
+        data.RemainTime = $("#canlogin").val();
+        var chks =  document.getElementsByName("relogin");
+        var str = "";
+        for (var i = 0; i < chks.length; i++) {
+            if (chks[i].checked == true) {
+                str += chks[i].value;
+            }
+        }
+        if(str =="on"){data.MutilLogins = "1";}else{data.MutilLogins = "0";}
+        var sub_data = {"action":"addPortalUser", "data":data};
+        sub_data = JSON.stringify(sub_data);
+        $(":input").attr('disabled',true);
+        $.ajax({
+            url: '/webapi',
+            type: 'POST',
+            dataType: 'json',
+            data: sub_data,
+            success:function(data){
+                if (9999 == data.rescode){
+                    issetLogin();
+                }
+                if (0 == data.rescode) {
+                    alert('添加成功！');
+                    location.href = location.href;
+                } else {
+                    alert('添加失败！'+data_msg_json[data.rescode]);
+                }
+                $(":input").attr('disabled',false);
+            }
+        })
+    }
+</script>
+</body>
+</html>
+

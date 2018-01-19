@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>微信连Wi-Fi</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script language="javascript" src="/js/language.js"></script>
+    <script language="javascript" src="/js/jcommon.js"></script>
+    <script language="javascript" src="/js/jquery.min.js"></script>
+    <script language="javascript" src="/js/json2.min.js"></script>
+    <script language="javascript" src="/js/spec.js"></script>
+    <script type="text/javascript" src="https://wifi.weixin.qq.com/resources/js/wechatticket/wechatutil.js" ></script>
+</head>
+<body>
+    <h2>succeed</h2>
+
+<script type="text/javascript">
+    $(function () {
+        var isContact = GetQueryString('isContact');
+        var attention = GetQueryString('extend');
+        if(isContact == "0" && attention == "yes"){
+            doweixin();
+        }else {
+            var openid = GetQueryString('openId');
+            weixindologin(openid);
+        }
+    });
+
+    function doweixin(){
+        $(":input").attr('disabled',true);
+        $.ajax({
+            type: 'post',
+            url: "/api/captiveportal/portaltoweixin",
+            data : "",
+            dataType: 'json',
+            async : true,
+            success: function (data) {
+                if(data.res == "Success"){
+                    appId          = data.appId;
+                    secretkey      = data.secretkey;
+                    extend         = data.extend;    　　　 //开发者自定义参数集合
+                    timestamp      = data.timestamp;　　　//时间戳(毫秒)
+                    shop_id        = data.shop_id;            　　  //AP设备所在门店的ID
+                    authUrl        = data.authUrl;        //认证服务端URL
+                    mac            = data.mac;  　　　//用户手机mac地址 安卓设备必需
+                    ssid           = data.ssid;
+                    sign = data.sign;
+                    weixinUrl = 'weixin://connectToFreeWifi/?apKey=_p33beta&appId='+data.appId+'&shopId='+data.shop_id+'&authUrl='+data.authUrl+'&extend='+data.extend+'&timestamp='+data.timestamp+'&sign='+data.sign;
+                    $.getScript(data.getpassthrouthurl);
+                }
+            }
+        });
+    }
+
+    function checktoopenwechat(a) {
+        Wechat_GotoRedirect(appId,extend,timestamp,sign,shop_id,authUrl,mac,ssid);
+    }
+
+    //微信成功登陆后，后台对用户信息进行处理
+    function weixindologin(openId) {
+        $.ajax({
+            type: "POST",
+            url: "/api/captiveportal/weixinlogon",
+            dataType:"json",
+            data:{ openId: openId }
+        }).done(function(data) {
+            if (data['clientState'] == "AUTHORIZED") {
+                window.open("http://www.baidu.com");
+            }
+        }).fail(function(){
+            $("#errorMSGtext").html("连接登录服务器失败");
+            $("#alertMSG").removeClass("hidden");
+        });
+    }
+
+    //获取url参数
+    function GetQueryString(name)
+     {
+     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+     var r = window.location.search.substr(1).match(reg);
+     if (r != null) {
+         return decodeURI(r[2]);
+     }
+         return null;
+     }
+
+    function getURLparams()
+    {
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for(var i = 0; i < hashes.length; i++)
+        {
+            hash = hashes[i].split('=');
+            vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+        return vars;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="/css/menu.css" type="text/css">
+    <link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+    <link rel="stylesheet" href="/css/line.css" type="text/css">
+    <script language="javascript" src="/js/language.js"></script>
+    <script language="javascript" src="/js/jcommon.js"></script>
+    <script language="javascript" src="/js/jquery.min.js"></script>
+    <script language="javascript" src="/js/json2.min.js"></script>
+    <script language="javascript" src="/js/spec.js"></script>
+</head>
+<body class="mainbody">
+<div id="div_main">
+    <div id="languageDiv" style="display:none">
+        <table width="172" border="0" cellpadding="3" cellspacing="0">
+            <tr>
+                <td colspan="2" height="12"></td>
+            </tr>
+            <tr>
+                <td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+                <td><img id="img_language1" src="../images/language_check.gif" border="0"></td>
+            </tr>
+            <tr>
+                <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文
+                </td>
+                <td><img id="img_language2" src="../images/language_no_check.gif" border="0"></td>
+            </tr>
+        </table>
+    </div>
+    <script>showContainer()</script>
+    <form method=post id="uploadFirmware" name="uploadFirmware"
+          action="/cgi-bin/cstecgi.cgi?action=upload&setting/setUpgradeFW" enctype="multipart/form-data"
+          target="ifmShowMessage">
+        <table border=0 width="100%">
+            <tr>
+                <td class="content_title">
+                    <script>dw(MM_upgrade_firmware)</script>
+                </td>
+            </tr>
+            <tr id="div_content_help">
+                <td class="content_help">
+                    <script>dw(MSG_upgrade_firmware2)</script>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <hr size=1 noshade align=top class=bline>
+                </td>
+            </tr>
+        </table>
+    </form>
+    <table border=0 width="100%" id="homepage">
+        <tr>
+            <td class="item_left">当前
+                <script>dw(MM_firmware_version)</script>
+            </td>
+            <td id="showVersion"></td>
+        </tr>
+        <tr>
+            <td class="item_left">当前固件编译时间</td>
+            <td id="showbuilttime"></td>
+        </tr>
+        <tr>
+            <td class="item_left">U盘固件的版本</td>
+            <td id="showUSBVersion"></td>
+        </tr>
+        <tr>
+            <td class="item_left">U盘固件编译时间</td>
+            <td id="showUSBbuilttime"></td>
+        </tr>
+        <tr>
+            <td colspan="3" align="right" id="versionInto"></td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <hr size=1 noshade align=top class=bline>
+            </td>
+        </tr>
+        <tr>
+            <td align="right" colspan="3">
+                <script>dw('<input type="button" class=button value="' + BT_upgrade + '" name="upgrade" id="upgrade" onClick="uploadFirmwareClick()">')</script>
+            </td>
+        </tr>
+    </table>
+    <div id="div_wait" style="display:none">
+        <table width="700">
+            <tr>
+                <td>
+                    <table border=0 width="100%">
+                        <tr>
+                            <td style="font-weight:bold; font-size:14px;">
+                                <script>dw(MM_change_setting)</script>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <hr size=1 noshade align="top" class="bline">
+                            </td>
+                        </tr>
+                    </table>
+                    <table border="0" width="100%">
+                        <tr>
+                            <td rowspan=2 width="100" align="center"><img src="/style/load.gif"/></td>
+                            <td class="msg_title"><span id="show_msg"></span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <script>dw(MM_please_wait)</script>&nbsp;<span id="show_sec"></span>&nbsp;<script>dw(MM_seconds)</script>...
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <hr size=1 noshade align="top" class="bline">
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script language="javascript">
+    $(function () {
+        init();
+    });
+    function init() {
+        $("#upgrade").attr('disabled', true);
+        $("#upgrade").val("正在检测U盘固件信息...");
+        $.ajax({
+            url: '/webapi',
+            type: 'POST',
+            dataType: 'json',
+            data: '{"action":"getFirmwareInfo", "data":{}}',
+            async: true,
+            success: function (data) {
+                $("#upgrade").val(BT_upgrade);
+                if (9999 == data.rescode) {
+                    issetLogin();
+                }
+                if (0 == data.rescode) {
+                    var data = data.data;
+                    Fw_version = data.Fw_version;
+                    if (data) {
+                        $('#showVersion').html(data.Version);
+                        $('#showbuilttime').html(data.Build_date);
+                    }
+                    if (Fw_version == "") {
+                        $('#showUSBVersion').html('无');
+                        $('#versionInto').html('*现在没有可更新版本');
+                        $(":input").attr('disabled', true);
+                    } else {
+                        $('#showUSBVersion').html(Fw_version);
+                        $('#versionInto').html('*现在有可更新版本，可以进行升级');
+                        $("#upgrade").removeAttr('disabled');
+                    }
+                    if (data.Fw_build_date == "") {
+                        $('#showUSBbuilttime').html('无');
+                    }else{
+                        $('#showUSBbuilttime').html(data.Fw_build_date);
+                    }
+                }
+            }
+        });
+    }
+
+    function uploadFirmwareClick() {
+        $("#homepage").hide();
+        $("#div_wait").show();
+        do_count_down();
+        do_upload();
+    }
+
+    var wtime = 60;
+    function do_count_down() {
+        document.getElementById("show_sec").innerHTML = wtime;
+        if (wtime == 0) {
+            alert('完成升级！');
+            location.href = location.href;
+            return false;
+        }
+        if (wtime > 0) {
+            wtime--;
+            setTimeout('do_count_down()', 1000);
+        }
+    }
+
+    function do_upload() {
+        var version_num = {};
+        version_num.Fw_version = Fw_version;
+        var sub_data = {"action": "upgradeFirmware", "data": version_num};
+        sub_data = JSON.stringify(sub_data);
+        console.log(sub_data);
+        $.ajax({
+            url: '/webapi',
+            type: 'POST',
+            dataType: 'json',
+            data: sub_data,
+            async: false,
+            success: function (data) {
+                if (9999 == data.rescode) {
+                    issetLogin();
+                }
+                if (0 == data.rescode) {
+                    alert('正在升级，请稍等！');
+                } else {
+                    alert('升级失败！' + data_msg_json[data.rescode]);
+                    location.href = location.href;
+                }
+            }
+        });
+    }
+</script>
+</body></html>

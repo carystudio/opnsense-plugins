@@ -1,0 +1,337 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<style>
+a			{ outline:none}     /* for firefox */
+a:link      { text-decoration:underline; color:#0000FF;}   
+a:visited   { text-decoration:underline; color:#0000FF;}   
+a:hover     { text-decoration:underline; color:#0000FF; font-weight:bold;}   
+</style>
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/ajax.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+<script language="javascript">
+var JsonPptpRules,rules_num,v_vpnEn;
+function initValue(){
+	rules_num=JsonPptpRules.length;
+	if (!rules_num) {
+		setDisabled("#inquiry,#disconnect,#connect",true);
+	} else {
+       		setDisabled("#inquiry,#disconnect,#connect",false);
+	}
+	
+	createRulesTable();
+}
+
+function disconnect(Index){
+	var postVar="";
+	postVar ={"topicurl":"setting/disconnectVPN"};
+	postVar['pid'] = JsonPptpRules[Index-1].pid;
+	uiPost(postVar);
+}
+
+function createRulesTable(){
+	if(!rules_num) return false;
+	var strTmp,tmpJson,protocol,time;
+	for(var i=0;i<rules_num;i++){
+		tmpJson=JsonPptpRules[i];
+		if(tmpJson.authenticat == "*")
+			protocol="ALL";
+		if(tmpJson.authenticat == "pppoed")
+			protocol="PPPOE";
+		else if(tmpJson.authenticat == "pptpd")
+			protocol="PPTP";
+		else if(tmpJson.authenticat == "xl2tpd")
+			protocol="L2TP";
+
+		if(tmpJson.comment == "NULL")
+			tmpJson.comment = "- -";
+		if(tmpJson.device_ip == "NULL")
+			tmpJson.device_ip = "- -";
+		
+		var d=tmpJson.time.split(",");
+		time=d[0]+"/"+d[1]+"/"+d[2]+" "+d[3]+":"+d[4]+":"+d[5];
+		
+		strTmp+="<tr align=\"center\">\n";
+		strTmp+="<td>"+(i+1)+'</td>\n';
+		strTmp+="<td>"+tmpJson.name+"</td>\n";
+		strTmp+="<td>"+protocol+"</td>\n";
+		strTmp+="<td>"+tmpJson.ip+"</td>\n";
+		strTmp+="<td>"+tmpJson.device_ip+"</td>\n";
+		strTmp+="<td>"+time+"</td>\n";
+		strTmp+="<td>"+tmpJson.comment+"</td>\n";
+		strTmp+="<td><a href=\"#\" onClick=\"disconnect("+(i+1)+")\">"+BT_disconnect+"</a></td>\n";
+		strTmp+="</tr>\n";
+	}
+	$("#div_vpnList").html(strTmp);
+}
+
+function selectUser(){
+	var inquiry;
+	var strTmp="",tmpJson,protocol,time;
+	if($('#select_inquiry').val() == 0){
+		if($('#inquiry').val() ==""){
+			initValue();
+		}
+		else{
+			var strTmp,tmpJson,protocol,time;;
+			for(var i=0;i<rules_num;i++){
+				if(JsonPptpRules[i].ip == $('#inquiry').val() ||JsonPptpRules[i].name == $('#inquiry').val() || JsonPptpRules[i].comment == $('#inquiry').val() ){
+					tmpJson=JsonPptpRules[i];
+					if(tmpJson.authenticat == "*")
+						protocol="ALL";
+					if(tmpJson.authenticat == "pppoed")
+						protocol="PPPOE";
+					else if(tmpJson.authenticat == "pptpd")
+						protocol="PPTP";
+					else if(tmpJson.authenticat == "xl2tpd")
+						protocol="L2TP";
+
+					if(tmpJson.comment == "NULL")
+						tmpJson.comment = "- -";
+					if(tmpJson.device_ip == "NULL")
+						tmpJson.device_ip = "- -";
+					
+					var d=tmpJson.time.split(",");
+					time=d[0]+"/"+d[1]+"/"+d[2]+" "+d[3]+":"+d[4]+":"+d[5];
+					
+					strTmp+="<tr align=\"center\">\n";
+					strTmp+="<td>"+(i+1)+'</td>\n';
+					strTmp+="<td>"+tmpJson.name+"</td>\n";
+					strTmp+="<td>"+protocol+"</td>\n";
+					strTmp+="<td>"+tmpJson.ip+"</td>\n";
+					strTmp+="<td>"+tmpJson.device_ip+"</td>\n";
+					strTmp+="<td>"+time+"</td>\n";
+					strTmp+="<td>"+tmpJson.comment+"</td>\n";
+					strTmp+="<td><a href=\"#\" onClick=\"disconnect("+(i+1)+")\">"+BT_disconnect+"</a></td>\n";
+					strTmp+="</tr>\n";
+				}
+			}
+			$("#div_vpnList").html(strTmp);
+		}
+		
+	}
+	else if($('#select_inquiry').val() == 1){
+		if(!rules_num) return false;
+		if($('#inquiry').val() ==""){
+			alert(MM_warning);
+			return false;
+		}
+		
+		for(var i=0;i<rules_num;i++){
+			if(JsonPptpRules[i].ip == $('#inquiry').val()){
+				tmpJson=JsonPptpRules[i];
+				if(tmpJson.authenticat == "*")
+					protocol="ALL";
+				if(tmpJson.authenticat == "pppoed")
+					protocol="PPPOE";
+				else if(tmpJson.authenticat == "pptpd")
+					protocol="PPTP";
+				else if(tmpJson.authenticat == "xl2tpd")
+					protocol="L2TP";
+
+				if(tmpJson.comment == "NULL")
+					tmpJson.comment = "- -";
+				if(tmpJson.device_ip == "NULL")
+					tmpJson.device_ip = "- -";
+
+				var d=tmpJson.time.split(",");
+				time=d[0]+"/"+d[1]+"/"+d[2]+" "+d[3]+":"+d[4]+":"+d[5];
+				
+				strTmp+="<tr align=\"center\">\n";
+				strTmp+="<td>"+(i+1)+'</td>\n';
+				strTmp+="<td>"+tmpJson.name+"</td>\n";
+				strTmp+="<td>"+protocol+"</td>\n";
+				strTmp+="<td>"+tmpJson.ip+"</td>\n";
+				strTmp+="<td>"+tmpJson.device_ip+"</td>\n";
+				strTmp+="<td>"+time+"</td>\n";
+				strTmp+="<td>"+tmpJson.comment+"</td>\n";
+				strTmp+="<td><a href=\"#\" onClick=\"disconnect("+(i+1)+")\">"+BT_disconnect+"</a></td>\n";
+				strTmp+="</tr>\n";
+			}
+			$("#div_vpnList").html(strTmp);
+		}
+	}
+	else if($('#select_inquiry').val() == 2){
+		if(!rules_num) return false;
+		if($('#inquiry').val() ==""){
+			alert(MM_warning);
+			return false;
+		}
+		
+		for(var i=0;i<rules_num;i++){
+			if(JsonPptpRules[i].name == $('#inquiry').val()){
+				tmpJson=JsonPptpRules[i];
+				if(tmpJson.authenticat == "*")
+					protocol="ALL";
+				if(tmpJson.authenticat == "pppoed")
+					protocol="PPPOE";
+				else if(tmpJson.authenticat == "pptpd")
+					protocol="PPTP";
+				else if(tmpJson.authenticat == "xl2tpd")
+					protocol="L2TP";
+
+				if(tmpJson.comment == "NULL")
+					tmpJson.comment = "- -";
+				if(tmpJson.device_ip == "NULL")
+					tmpJson.device_ip = "- -";
+
+				var d=tmpJson.time.split(",");
+				time=d[0]+"/"+d[1]+"/"+d[2]+" "+d[3]+":"+d[4]+":"+d[5];
+				
+				strTmp+="<tr align=\"center\">\n";
+				strTmp+="<td>"+(i+1)+'</td>\n';
+				strTmp+="<td>"+tmpJson.name+"</td>\n";
+				strTmp+="<td>"+protocol+"</td>\n";
+				strTmp+="<td>"+tmpJson.ip+"</td>\n";
+				strTmp+="<td>"+tmpJson.device_ip+"</td>\n";
+				strTmp+="<td>"+time+"</td>\n";
+				strTmp+="<td>"+tmpJson.comment+"</td>\n";
+				strTmp+="<td><a href=\"#\" onClick=\"disconnect("+(i+1)+")\">"+BT_disconnect+"</a></td>\n";
+				strTmp+="</tr>\n";
+			}
+			$("#div_vpnList").html(strTmp);
+		}
+	}
+	else if($('#select_inquiry').val() == 3){
+		if(!rules_num) return false;
+		if($('#inquiry').val() ==""){
+			alert(MM_warning);
+			return false;
+		}
+		
+		for(var i=0;i<rules_num;i++){
+			if(JsonPptpRules[i].comment == $('#inquiry').val()){
+				tmpJson=JsonPptpRules[i];
+				if(tmpJson.authenticat == "*")
+					protocol="ALL";
+				if(tmpJson.authenticat == "pppoed")
+					protocol="PPPOE";
+				else if(tmpJson.authenticat == "pptpd")
+					protocol="PPTP";
+				else if(tmpJson.authenticat == "xl2tpd")
+					protocol="L2TP";
+
+				if(tmpJson.comment == "NULL")
+					tmpJson.comment = "- -";
+				if(tmpJson.device_ip == "NULL")
+					tmpJson.device_ip = "- -";
+
+				var d=tmpJson.time.split(",");
+				time=d[0]+"/"+d[1]+"/"+d[2]+" "+d[3]+":"+d[4]+":"+d[5];
+				
+				strTmp+="<tr align=\"center\">\n";
+				strTmp+="<td>"+(i+1)+'</td>\n';
+				strTmp+="<td>"+tmpJson.name+"</td>\n";
+				strTmp+="<td>"+protocol+"</td>\n";
+				strTmp+="<td>"+tmpJson.ip+"</td>\n";
+				strTmp+="<td>"+tmpJson.device_ip+"</td>\n";
+				strTmp+="<td>"+time+"</td>\n";
+				strTmp+="<td>"+tmpJson.comment+"</td>\n";
+				strTmp+="<td><a href=\"#\" onClick=\"disconnect("+(i+1)+")\">"+BT_disconnect+"</a></td>\n";
+				strTmp+="</tr>\n";
+			}
+			$("#div_vpnList").html(strTmp);
+		}
+	}
+}
+
+function connectVpn(){
+	var postVar="", Index = "";
+	var Num = 0;
+	
+	postVar ={"topicurl":"setting/connectVPN"};
+	for (i=0; i< rules_num; i++) {
+		var tmpNode=$("#delRule"+i).get(0);
+		if (tmpNode.checked == true){
+			Index += (i+";");
+			Num++;
+		}
+  	}
+	if(Num == 0){
+		alert(MM_connect_user);
+		return false;
+	}
+	Index = Index.substring(0, Index.length-1);
+	postVar['Index'] = Index;
+	postVar['Num'] = Num;
+	uiPost(postVar);
+}
+
+$(function(){
+	// var postVar1 = { topicurl : "setting/getUserInfo"};
+	// postVar1 = JSON.stringify(postVar1);		
+	// $.when($.post( " /cgi-bin/cstecgi.cgi", postVar1))
+ //    .done(function(Data) {
+	// 	JsonPptpRules = JSON.parse(Data);
+	// 	initValue();
+	// })
+	// .fail(function(){
+	// 	resetForm();
+	// });
+	// return;
+});
+
+</script>
+</head>
+<body class="mainbody">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<form  method=POST name="vpnBasicSettings">
+<table border=0 width="100%"> 
+<tr><td class="content_title"><script>dw(MM_users_online)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%">
+<tr>
+<td><input type="text" id="inquiry" name="inquiry" maxlength="32">
+<select id="select_inquiry" name="select_inquiry">
+<option value="0"><script>dw(MM_all)</script></option>
+<option value="1"><script>dw(MM_IP)</script></option>
+<option value="2"><script>dw(MM_account)</script></option>
+<option value="3"><script>dw(MM_comment)</script></option>
+</select>
+<script>dw('<input type=button class=button value="'+MM_inquiry+'" id=inquiry name=inquiry onClick="return selectUser();">')</script></td>
+</tr>
+</table>
+
+<table border=0 width="100%">
+<tr><td colspan="8"><hr size=1 noshade align=top class=bline></td></tr>
+<tr align="center">
+<td class="item_center"><b>ID</b></td>
+<td class="item_center"><b><script>dw(MM_account)</script></b></td>
+<td class="item_center"><b><script>dw(MM_Authenticat_Type)</script></b></td>
+<td class="item_center"><b><script>dw(MM_IP)</script></b></td>
+<td class="item_center"><b><script>dw(MM_device_IP)</script></b></td>
+<td class="item_center"><b><script>dw(MM_on_line_time)</script></b></td>
+<td class="item_center"><b><script>dw(MM_comment)</script></b></td>
+<td class="item_center"><b><script>dw(MM_cloud_option)</script></b></td>
+</tr>
+<tbody id="div_vpnList"></tbody>
+</table>
+
+</form>
+<script>showFooter()</script>
+</body></html>
+

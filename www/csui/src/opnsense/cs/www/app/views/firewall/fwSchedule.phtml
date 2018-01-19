@@ -1,0 +1,454 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+<script type="text/javascript">
+//submit TIME FORMAT enable|1-7|HH:MM:SS|HH:MM:SS
+var responseJson;
+var scheduleRulesListAdd;
+var scheduleRulesListDel;
+
+function addClick(){	
+	var timestr="";
+	var week;
+	var countWeekdays=0;
+	var weekdaysItem=getElements("weekdays");
+	var timeItem=getElements("timeItem");
+	var objSelect = document.getElementById("chooseRule");
+	if(objSelect.options.length==0){
+		alert(JS_choose_schedule);
+		return false;
+	}
+	
+	if(getElements('timeAllowed')[0].checked){//alway
+		timestr="255,00:00,23:59";
+	}else{
+		for(var i=0;i< weekdaysItem.length;i++){
+			if(weekdaysItem[i].checked){
+			//	timestr += weekdaysItem[i].value+","
+				week |= (0x1<<weekdaysItem[i].value);
+			}else{
+				countWeekdays++
+			}
+		}
+		timestr=week;
+		timestr += ","+timeItem[0].value+":"+timeItem[1].value;
+		timestr += "-"+timeItem[2].value+":"+timeItem[3].value;
+	}
+	
+//	$("ScheduleTime").value=timestr;
+	if(getElements('timeAllowed')[1].checked){//manual
+		if(countWeekdays==7){
+			alert(JS_choose_schedule_week);
+			return false;
+		}
+		if(timeItem[0].value=="" || timeItem[1].value=="" || timeItem[2].value=="" || timeItem[3].value==""){
+			alert(JS_choose_schedule_time);
+			return false;
+		}
+
+		if (!checkVaildVal.isNumber(timeItem[0].value) || !checkVaildVal.isNumber(timeItem[1].value) || !checkVaildVal.isNumber(timeItem[2].value) || !checkVaildVal.isNumber(timeItem[3].value)) {
+			alert(JS_choose_schedule_time_value);
+			return false;
+		}
+
+		var time1 = parseInt(timeItem[0].value);
+		var time2 = parseInt(timeItem[1].value);
+		var time3 = parseInt(timeItem[2].value);
+		var time4 = parseInt(timeItem[3].value);
+
+		if (time1 > 23 || time2 >59 || time3 > 23 || time4 > 59) {
+			alert(JS_choose_schedule_time_value);
+			return false;
+		}
+
+		if (time1 > time3) {
+			alert(JS_choose_schedule_hour);
+			return false;
+		}
+		
+		if (time1== time3) {
+			if (time2 > time4) {
+				alert(JS_choose_schedule_minute);
+				return false;
+			}
+		}		
+	}	
+
+	getAllItemValues("chooseRule",timestr);	
+  	return true;
+}
+
+function selectToSelect(fromObjSelectId, toObjectSelectId){  
+ 	var objSelect = document.getElementById(fromObjSelectId);
+ 	var delNum = 0;
+    if (null != objSelect && typeof(objSelect) != "undefined") {
+    	for(var i=0;i<objSelect.options.length;i=i+1) {  
+            if(objSelect.options[i].selected) {  
+                addItemToSelect(toObjectSelectId,objSelect.options[i].text,objSelect.options[i].value)
+                objSelect.options.remove(i);
+                i = i - 1;
+            }
+        }         
+  	} 
+}
+
+function addItemToSelect(objSelectId,objItemText,objItemValue){  
+ 	var objSelect = document.getElementById(objSelectId);
+    if (null != objSelect && typeof(objSelect) != "undefined") {
+     	if(0) {  //isSelectItemExit(objSelectId,objItemValue)
+         	alert(JS_choose_schedule_rule);
+     	}else  {
+         	var varItem = new Option(objItemText,objItemValue);  
+         	objSelect.options.add(varItem);  
+     	}  
+    } 
+}
+
+function isSelectItemExit(objSelectId,objItemValue){  
+ 	var objSelect = document.getElementById(objSelectId);
+    var isExit = false;  
+    if (null != objSelect && typeof(objSelect) != "undefined") {
+     	for(var i=0;i<objSelect.options.length;i++) {  
+         	if(objSelect.options[i].value == objItemValue) {  
+             	isExit = true;  
+             	break;  
+         	}  
+     	}  
+    }
+    return isExit; 
+}
+ 
+function clearSelect(objSelectId){  
+ 	var objSelect = document.getElementById(objSelectId);
+   	if (null != objSelect && typeof(objSelect) != "undefined") {
+        for(var i=0;i<objSelect.options.length;) {  
+          	objSelect.options.remove(i);  
+        }         
+    } 
+}
+
+function changeTime(){
+	var timeIetm = getElements("timeAllowed");
+	if(timeIetm[0].checked)
+		$("#weekID,#timeID").hide();
+	else
+		$("#weekID,#timeID").show();
+}
+//var weekdaystr=[' ',MM_mon,MM_tue,MM_wed,MM_thu,MM_fri,MM_sat,MM_sun];
+var weekdaystr={'Mon':MM_week1,'Tue':MM_week2,'Wed':MM_week3,'Thu':MM_week4,'Fri':MM_week5,'Sat':MM_week6,'Sun':MM_week7};
+
+function formmatTime(tmv){
+	var timeStr=tmv.split("|");
+	var weeks=timeStr[1];
+	var fromTime=timeStr[2];
+	var toTime=timeStr[3];
+	var timeSring="";
+	weeks=weeks.split(",");
+	for(var i=0;i<weeks.length;i++){
+		timeSring+=weekdaystr[weeks[i]]+",";
+	}
+	timeSring=timeSring.substring(0,timeSring.lastIndexOf(','));
+	return timeSring+=" "+fromTime+"-"+toTime;
+}
+
+function showFilterList(){
+	var showSchedule=document.getElementById("scheduleList");
+	var trNode={};
+	var tdNode={};
+	var schTime="";
+	var itemText="";
+	var itemValue="";
+	var obj={},len;
+	clearSelect("chooseRule");
+	clearSelect("ruleList");
+	
+	len=responseJson.length;
+	if ((len-1)>0){
+		for(var i=1;i<len;i++){
+			if(responseJson[i]["firewallMode"]=="MAC"){
+				itemText = responseJson[i]['mac'];
+				itemValue=responseJson[i]['delRuleName'];
+				addItemToSelect('ruleList',itemText,itemValue);
+				
+				trNode=showSchedule.insertRow(-1);
+				trNode.insertCell(0).innerHTML="--";
+				trNode.insertCell(1).innerHTML="--";
+				trNode.insertCell(2).innerHTML="--";
+				trNode.insertCell(3).innerHTML=responseJson[i]['mac'];
+				trNode.insertCell(4).innerHTML=responseJson[i]['week']+" "+responseJson[i]['time'];
+				trNode.insertCell(5).innerHTML='<input type=\"checkbox\" name=\"scheduleDel\"  id=\"scheduleDel'+i+'\"  value=\"'+itemValue+'\" >';
+			}
+			if(responseJson[i]["firewallMode"]=="IPPORT"){
+				itemText = responseJson[i]['ip']+" "+responseJson[i]['proto']+" "+responseJson[i]['portRange'];
+				itemValue=responseJson[i]['delRuleName'];
+				addItemToSelect('ruleList',itemText,itemValue);
+				
+				trNode=showSchedule.insertRow(-1);
+				trNode.insertCell(0).innerHTML=responseJson[i]['ip'];
+				trNode.insertCell(1).innerHTML=responseJson[i]['proto'];
+				trNode.insertCell(2).innerHTML=responseJson[i]['portRange'];
+				trNode.insertCell(3).innerHTML="--";
+				trNode.insertCell(4).innerHTML=responseJson[i]['week']+" "+responseJson[i]['time'];
+				trNode.insertCell(5).innerHTML='<input type=\"checkbox\" name=\"scheduleDel\"  id=\"scheduleDel'+i+'\"  value=\"'+itemValue+'\" >';	
+			}
+		}
+	}
+	
+	var scheduleLen=showSchedule.rows.length;
+	var submitStr="";
+	var timeStr="";
+	var weekSrt="";
+	var fromto=""
+	var tmp="";
+	for(var k=0;k<scheduleLen;k++){
+		timeStr=showSchedule.rows[k].cells[4].innerHTML;
+		tmp="";
+		if(timeStr != "Mon Tue Wed Thu Fri Sat Sun 00:00-23:59"){
+			weekSrt=timeStr.split(" ");
+			for(var m=0;m<weekSrt.length-1;m++){
+				tmp+=weekdaystr[weekSrt[m]]+" ";
+			}
+			timeStr=tmp+weekSrt[weekSrt.length-1];
+		}else{
+			timeStr = MM_always;
+		}
+		showSchedule.rows[k].cells[4].innerHTML=timeStr;
+	}
+	showSchedule.style.display = "";
+}
+
+function getAllItemValues(objSelectId,timestr){
+	var submitValue="";
+ 	var objSelect = document.getElementById(objSelectId);
+ 	var objSchedule = document.getElementById("submitFilterList");
+ 	var tmpNode={};
+
+ 	if (null != objSelect && typeof(objSelect) != "undefined") {
+      	var length = objSelect.options.length
+        for(var i = 0; i < length; i = i + 1) {  
+			submitValue+=objSelect.options[i].value+","+timestr+";";
+        }   
+		tmpNode = document.createElement("input");
+		tmpNode.setAttribute( "type" , "text") ;
+		tmpNode.setAttribute( "name" , "scheduleRulesList") ;
+		tmpNode.setAttribute( "value" , submitValue) ;
+		objSchedule.appendChild(tmpNode);
+		scheduleRulesListAdd=submitValue;
+   	}  
+  	return true;
+}
+
+function chooseDel(){
+
+}
+
+function getAllDelItem(timestr){
+	var objScheduleDel = document.getElementById("submitDelList");
+	var tmpNode={};
+	var submitValue="";
+	var delList=getElements("scheduleDel");
+	for(var i=0;i<delList.length;i++){
+		if(delList[i].checked){	
+			submitValue+=delList[i].value+","+timestr+";";
+		}	
+	}
+	tmpNode = document.createElement("input");
+	tmpNode.setAttribute( "type" , "text") ;
+	tmpNode.setAttribute( "name" , "scheduleDelRulesList") ;
+	tmpNode.setAttribute( "value" , submitValue) ;
+	objScheduleDel.appendChild(tmpNode);
+	scheduleRulesListDel=submitValue;	
+}
+
+function deleteClick(){
+	var flg=0;
+	for(var i=1;i<responseJson.length;i++){
+		var tmp =$("#scheduleDel"+i).get(0);
+		if (tmp.checked == true){
+			flg=1;
+		}
+	}
+	if(flg==0){
+		alert(JS_msg36);
+		return false;
+	}
+	if ( !confirm(JS_delete_select_entry) )	return false;
+  	else {
+		$("ScheduleTime1").value="255,00:00-23:59";//0|1,2,3,4,5,6,7|00:00:00|23:59:59
+		getAllDelItem("255,00:00-23:59");
+		return true;
+	}
+}
+
+function disableDelButton(){
+	for (var i=0;i<document.forms[0].length;i++)
+		document.forms[0].elements[i].disabled = true;
+			
+	for (var i=0;i<document.forms[1].length;i++)
+		document.forms[1].elements[i].disabled = true;
+}
+
+function initValue(){
+	changeTime();
+	showFilterList();
+	
+	var len=responseJson.length;
+	if (len<=1)
+		disableDelButton();
+}
+
+$(function(){
+	// var postVar = {topicurl : "setting/getScheduleRules"};
+	// postVar = JSON.stringify(postVar);
+	// $.when( $.post("/cgi-bin/cstecgi.cgi", postVar))
+ //    .done(function( Data) {
+	// 	responseJson = JSON.parse(Data);
+	// 	initValue();
+	// })
+	// .fail(function(){
+	// 	resetForm();
+	// });
+	return;
+});
+
+function doSubmit(){
+	if(addClick()==false)
+		return false;
+	
+	var postVar ={"topicurl":"setting/setScheduleRules"};
+	postVar['scheduleRulesList']= scheduleRulesListAdd;
+	postVar['addFilterUrl']= "add";
+	uiPost(postVar);
+}
+
+function delRules(){
+	var flg=0;
+	if(deleteClick()==false)
+		return false;
+	
+	var postVar ={"topicurl":"setting/setScheduleRules"};
+	postVar['scheduleDelRulesList']= scheduleRulesListDel;
+	uiPost(postVar);
+}
+
+var getElements=function(name){	return document.getElementsByName(name);}
+
+</script>
+</head>
+
+<body class="mainbody">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<form method=POST name="formFilterAdd">
+<input type="hidden" name="ScheduleTime" id="ScheduleTime">
+<table border=0 width="100%">
+<tr><td class="content_title"><script>dw(MM_rule_schedule_setting)</script></td></tr>
+<tr><td class="content_help"><script>dw(MSG_rule_schedule_setting)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%">
+<tr align="center">
+<td><b><script>dw(MM_current_list)</script></b></td>
+<td>&nbsp;</td>
+<td><b><script>dw(MM_choosed_list)</script></b></td>
+</tr>
+<tr>
+<td><select id="ruleList" size="15" multiple="multiple" style="width:300px;height:230px;" ><option value="1"></option></select></td> 
+<td align="center"><input type="button" name="operationtol" value="&nbsp;&nbsp;<<&nbsp;&nbsp;" onClick="selectToSelect('chooseRule','ruleList');">&nbsp;&nbsp;&nbsp;&nbsp;</br><input type="button" name="operationtor" value="&nbsp;&nbsp;>>&nbsp;&nbsp;" onClick="selectToSelect('ruleList','chooseRule');">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td><select id="chooseRule" size="15" multiple="multiple" style="width:300px;height:230px;"><option value="1"></option></select></td>
+</tr>
+</table>
+
+<table width="100%" border="0">
+<tr><td class="item_left">&nbsp;</td></tr>
+<tr style="display:none;">
+<td class="item_left"><script>dw(MM_schedule)</script></td>
+<td align="left" colspan="2"><input type="radio" name="timeAllowed" id="timeAllowed1" onClick="changeTime(this);" value="1" > <script>dw(MM_always)</script>
+<input type="radio" name="timeAllowed" id="timeAllowed2" onClick="changeTime(this);" value="2" checked> <script>dw(MM_manual)</script></td>
+</tr>
+<tr id="weekID">
+<td class="item_left"><script>dw(MM_week)</script></td>
+<td align="left" colspan="2"><input type="checkbox" name="weekdays" value="1"> <script>dw(MM_week1)</script>&nbsp;
+<input type="checkbox" name="weekdays" value="2"> <script>dw(MM_week2)</script>&nbsp;
+<input type="checkbox" name="weekdays" value="3"> <script>dw(MM_week3)</script>&nbsp;
+<input type="checkbox" name="weekdays" value="4"> <script>dw(MM_week4)</script>&nbsp;
+<input type="checkbox" name="weekdays" value="5"> <script>dw(MM_week5)</script>&nbsp;
+<input type="checkbox" name="weekdays" value="6"> <script>dw(MM_week6)</script>&nbsp;
+<input type="checkbox" name="weekdays" value="7"> <script>dw(MM_week7)</script></td>
+</tr>
+<tr id="timeID">
+<td class="item_left"><script>dw(MM_time)</script></td>
+<td align="left" colspan="2"><input type="text" name="timeItem" style="width:28px" maxlength="2">:
+<input type="text" name="timeItem" style="width:28px" maxlength="2">&nbsp;&nbsp;--&nbsp;&nbsp;
+<input type="text" name="timeItem" style="width:28px" maxlength="2">:
+<input type="text" name="timeItem" style="width:28px" maxlength="2">&nbsp;&nbsp;&nbsp;&nbsp;(HH:MM -- HH:MM)</td>
+</tr>
+</table>
+
+<div id="submitFilterList" style="display:none;"></div>
+<table border=0 width="100%">
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type="button" class="button" value="'+BT_add+'" name="addFilterUrl" onClick="doSubmit();">')</script></td></tr>
+</table>
+<input type="hidden" value="/firewall/fwSchedule.asp" name="submit-url">
+</form>
+
+<br>
+<form  method=POST name="formFilterDel">
+<input type="hidden" name="ScheduleTime" id="ScheduleTime1">
+<table border=0 width="100%">
+<tr><td class="item_head" colspan="7"><script>dw(MM_rule_schedule_list)</script></td></tr>
+<tr><td colspan="7"><hr size=1 noshade align=top class=bline></td></tr>
+<tr align=center>
+<td class="item_center"><b><script>dw(MM_ipaddr)</script></b></td>
+<td class="item_center"><b><script>dw(MM_protocol)</script></b></td>
+<td class="item_center"><b><script>dw(MM_port_range)</script></b></td>
+<td class="item_center"><b><script>dw(MM_macaddr)</script></b></td>
+<td class="item_center"><b><script>dw(MM_time)</script></b></td>
+<td class="item_center"><b><script>dw(MM_select)</script></b></td>
+</tr>
+<tbody id="scheduleList" align="center" style="display:none;">
+</tbody>
+</table>
+
+<div id="submitDelList" style="display:none;"></div>
+
+<table border=0 width="100%">
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr>
+<td align="right"><script>dw('<input type="button" class="button" value="'+BT_delete+'" name="deleteSelFilterUrl" onClick="delRules();">&nbsp;&nbsp;&nbsp;&nbsp;\
+<input type="button" class="button" value="'+BT_reset+'" name="delreset" onClick="resetForm()">')</script></td>
+</tr>
+</table>
+<input type="hidden" value="/firewall/fwSchedule.asp" name="submit-url">
+</form>
+
+<script>showFooter()</script>
+</body>
+</html>

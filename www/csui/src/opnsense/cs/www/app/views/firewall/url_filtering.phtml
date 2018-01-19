@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<style>
+#div_urlFilterList tr td:nth-child(1){width:116px;padding:0}
+#div_urlFilterList tr td:nth-child(2){width:400px;padding:0}
+#div_urlFilterList tr td:nth-child(3){width:170px;padding:0}
+</style>
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+<script language="javascript">
+var rules_num=0;
+function enableAddButton(){
+	setDisabled("#add",true);
+}
+function saveChanges(){
+	if (rules_num >= 40) {
+		alert(JS_msg28);
+		return false;
+	}
+		
+	if (!checkVaildVal.IsVaildString($("#addURLFilter").val(), MM_url_keyword,1)) 	return false;
+	for (var i=1; i<responseJson.length; i++){
+		if (($("#addURLFilter").val()==responseJson[i].url) || 
+			($("#addURLFilter").val().toLowerCase()==responseJson[i].url)) {
+			alert(JS_msg29);
+			return false;
+		}
+	}	
+	
+	if (scheduleWeekCheck(document.formFilterAdd)) return false;
+	if (scheduleTimeCheck(document.formFilterAdd)) 	return false;	
+	scheduleSyncTime(document.formFilterAdd);
+	return true;
+}
+function disableAddFiled(){
+	setDisabled("#add,#addURLFilter",true);
+}
+function disableDelButton(){
+	setDisabled("#deleteSelFilter,#delreset",true);
+}
+function initValue(){	
+	rules_num=responseJson.length-1;
+	if (responseJson[0].enable==0) {
+		disableAddFiled();
+		disableDelButton();
+	}
+	if ( rules_num == 0 )
+		disableDelButton();
+	
+	supplyValue("enabled",responseJson[0].enable);
+	var trNode;
+	var urlFilterListTab=$("#div_urlFilterList").get(0);
+	for(var i=1;i<responseJson.length;i++){
+		trNode=urlFilterListTab.insertRow(-1);
+		trNode.align="center";
+		trNode.insertCell(0).innerHTML=responseJson[i].idx;		
+		trNode.insertCell(1).innerHTML=responseJson[i].url;
+		trNode.insertCell(2).innerHTML='<input type=\"checkbox\" id=\"'+responseJson[i].delRuleName+'\" name=\"'+responseJson[i].delRuleName+'\" value=\"'+responseJson[i].delRuleName+'\" >';	
+	}
+}
+$(function(){
+	// var postVar = {topicurl : "setting/getUrlFilterRules"};
+	// postVar = JSON.stringify(postVar);
+	// $.when( $.post("/cgi-bin/cstecgi.cgi", postVar))
+ //    .done(function( Data) {
+	// 	responseJson = JSON.parse(Data);
+	// 	initValue();
+	// })
+	// .fail(function(){
+	// 	resetForm();
+	// });
+	return;
+});
+function doSubmit(){	
+	if (saveChanges()==false)
+		return false;
+	var postVar ={"topicurl":"setting/setUrlFilterRules"};
+	postVar['enabled']		= $("#enabled").val();
+	postVar['addEffect'] 	= "0";
+	postVar['addURLFilter'] = $("#addURLFilter").val();
+	postVar['week_all'] 	= "ON";
+	postVar['time_all'] 	= "ON";
+	uiPost(postVar);
+}
+function updateState(){
+	if ($("#enabled").get(0).selectedIndex==0) {
+		disableAddFiled();
+		disableDelButton();
+	}
+	var postVar ={"topicurl":"setting/setUrlFilterRules"};
+	postVar['enabled']=$("#enabled").val();
+	postVar['addEffect'] = "1";
+	uiPost(postVar);
+}
+function deleteClick(){	
+	var flg=0;
+	var postVar ={"topicurl":"setting/delUrlFilterRules"};
+    for (i=0; i< rules_num; i++){
+		var tmp = $("#delRule"+i).get(0);
+		if (tmp.checked == true){
+			postVar['delRule'+i]= i;
+			flg=1;
+		}
+	}
+	if(flg==0){
+		alert(JS_msg36);
+	 	event.returnValue = false;
+	}
+	if(flg==1){
+		uiPost(postVar);
+	}
+}
+</script>
+</head>
+<body class="mainbody">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<form method=post name="formFilterAdd" >
+<input type="hidden" name="CurTime1" id="CurTime1">
+<input type="hidden" name="CurTime2" id="CurTime2">
+<input type="hidden" id="addEffect" name="addEffect" value="1">
+<table border=0 width="100%">
+<tr><td class="content_title"><script>dw(MM_url_filtering)</script></td></tr> 
+<tr id="div_content_help"><td class="content_help"><script>dw(MSG_url_filtering)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%">
+<tr>
+<td class="item_left"><script>dw(MM_onoff)</script></td>
+<td><select id="enabled" name="enabled" onChange="updateState()">
+<option value="0" ><script>dw(MM_disable)</script></option>
+<option value="1" ><script>dw(MM_enable)</script></option>
+</select></td>
+</tr>
+<tr><td colspan="2"><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<br />
+<table border=0 width="100%">
+<tr><td colspan="2"><b><script>dw(MM_add_rule)</script></b></td></tr>
+<tr id="div_addline"><td colspan="2"><hr size=1 noshade align=top class=bline></td></tr>
+<tr>
+<td class="item_left"><script>dw(MM_url_keyword)</script></td>
+<td><input type="text" id="addURLFilter" name="addURLFilter" maxlength="32"></td>
+</tr>
+<tr style="display:none">
+<td class="item_left"><script>dw(MM_week)</script></td>
+<td><input type="checkbox" id="week_all" name="week_all" checked value="ON" onClick="scheduleWeek(this.form)"><script>dw(MM_all)</script>&nbsp;&nbsp;
+<input type="checkbox" name="week_1" checked value="ON"><script>dw(MM_week1)</script> 
+<input type="checkbox" name="week_2" checked value="ON"><script>dw(MM_week2)</script>
+<input type="checkbox" name="week_3" checked value="ON"><script>dw(MM_week3)</script> 
+<input type="checkbox" name="week_4" checked value="ON"><script>dw(MM_week4)</script> 
+<input type="checkbox" name="week_5" checked value="ON"><script>dw(MM_week5)</script> 
+<input type="checkbox" name="week_6" checked value="ON"><script>dw(MM_week6)</script> 
+<input type="checkbox" name="week_7" checked value="ON"><script>dw(MM_week7)</script></td>
+</tr>
+<tr style="display:none">
+<td class="item_left"><script>dw(MM_time_range)</script></td>
+<td><input type="checkbox" id="time_all" name="time_all" checked value="ON" onClick="scheduleTime(this.form)"><script>dw(MM_all)</script>&nbsp;&nbsp;
+<input type="text" class="text_time2" maxlength="2" name="time_h1" value="00">:<input type="text" class="text_time2" maxlength="2" name="time_m1" value="00"> - 
+<input type="text" class="text_time2" maxlength="2" name="time_h2" value="23">:<input type="text" class="text_time2" maxlength="2" name="time_m2" value="59"> (HH:MM)</td>
+</tr>
+</table>
+
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_add+'" id=add  name=add onClick="doSubmit()">')</script></td></tr>
+</table>
+</form>
+
+<form method=post name="formFilterDel">
+<table border=0 width="100%">
+<tr><td colspan="3"><b><script>dw(MM_url_filtering_table)</script>&nbsp;&nbsp;<script>dw(JS_msg59)</script></b></td></tr>
+<tr><td colspan="3"><hr size=1 noshade align=top class=bline></td></tr>
+<tr align="center">
+<td class="item_center"><b>ID</b></td>
+<td class="item_center"><b><script>dw(MM_url_keyword)</script></b></td>
+<!--
+<td class="item_center"><b><script>dw(MM_week)</script></b></td>
+<td class="item_center"><b><script>dw(MM_time_range)</script></b></td>
+-->
+<td class="item_center"><b><script>dw(MM_select)</script></b></td>
+</tr>
+</table>
+<div style="max-height:250px; overflow:auto">
+<table border=0 width="100%">
+<tbody id="div_urlFilterList"></tbody>
+</table>
+</div>
+
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_delete+'" id="deleteSelFilter" name="deleteSelFilter" onClick="deleteClick()">&nbsp;&nbsp;&nbsp;&nbsp;\
+<input type="button" class="button" value="'+BT_reset+'" id="delreset" name="delreset" onClick="resetForm()">')</script></td></tr>
+</table>
+</form>
+<script>showFooter()</script>
+</body></html>

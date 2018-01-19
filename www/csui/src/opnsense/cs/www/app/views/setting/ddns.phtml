@@ -1,0 +1,205 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+<script language="javascript">
+var responseJson,responseJsonStatus;
+var v_ddnsEnabled,v_ddnsProvider,v_authStatus;
+function saveChanges(){
+	if ($("#Enabled")[0].selectedIndex == 1) {
+		if($("#Provider").val() != "no-ip.com")
+			if (!checkVaildVal.IsVaildString($("#Domain").val(), MM_domainname,1)) return false;		
+		if (!checkVaildVal.IsVaildString($("#Account").val(), MM_username,1)) return false;
+		if (!checkVaildVal.IsVaildString($("#Password3").val(), MM_password,1)) return false;		
+		$("#Password").val($("#Password3").val());
+	}	
+	parent.menu.counts = 0;
+	return true;
+}
+function updateState(){
+	if ($("#Enabled")[0].selectedIndex == 1) 
+		$("#div_ddns_setting").show();
+	else 
+		$("#div_ddns_setting").hide();
+}
+function updateProvider( _val ){
+	if(1==_val)clearTimeout(0);
+	var f=document.ddnsCfg;
+	$("#div_domainname, #div_username, #div_password").hide();
+	$("#div_domainname, #div_username, #div_password").show();
+	
+	if (f.Provider.disabled == true) 
+		setDisabled("#Password,#Account,#Domain",true);
+	else 
+		setDisabled("#Password,#Account,#Domain",false);
+	
+	if ($("#Provider").val() == "dyndns.org")
+		$("#div_to_register").html("<a href='http://dyn.com/dns/' target='_blank'>"+MM_to_register+"</a>");
+	else if ($("#Provider").val() == "no-ip.com")
+		{
+			setDisabled("#Domain",true);
+			$("#div_to_register").html("<a href='http://www.no-ip.com/newUser.php/' target='_blank'>"+MM_to_register+"</a>");
+		}
+	else if ($("#Provider").val() == "3322.org")
+		$("#div_to_register").html("<a href='http://www.pubyun.com/accounts/signup/' target='_blank'>"+MM_to_register+"</a>");
+	else
+		$("#div_to_register").html("");
+}
+function changePasswordType(){
+	$("#passWord2").hide();//p
+	$("#passWord3").show();//t
+	$("#Password3").val("");
+	$("#Password3").focus();
+}
+function showDDNSInfo(){
+	$("#status").html(eval(v_authStatus)); 
+	if (v_authStatus=="MM_ddns_success")
+		$("#show_Ddnsip").html(responseJsonStatus['ddnsIPAddr']);
+	else
+		$("#show_Ddnsip").html(MM_ddns_no_ip);
+}
+function initValue(){	
+	v_ddnsEnabled=responseJson['Enabled'];
+	v_ddnsProvider=responseJson['Provider'];
+	
+	v_authStatus=responseJsonStatus['ddnsStatus'];
+	
+	var new_options,new_values;
+	new_options = ["DynDNS","No-IP","www.3322.org"];
+	new_values  = ['dyndns.org','no-ip.com','3322.org'];	
+	CreateOptions('Provider',new_options,new_values);
+	
+	setJSONValue({		
+		'Enabled'			:	v_ddnsEnabled,
+		'Provider'			:	v_ddnsProvider,
+		'Domain'			:	responseJson['Domain'],
+		'Account'			:	responseJson['Account'],
+		'Password'			:	responseJson['Password'],
+		'Password3'			:	responseJson['Password'],
+		'Password2'			:	responseJson['Password']
+	});
+	
+	$("#passWord2").show();//p
+	$("#passWord3").hide();//t
+	updateState();
+	updateProvider();
+	
+	if(v_ddnsEnabled==1){
+		$("#status").html(JS_msg90);		
+		$("#div_ddnsip").show();
+		window.setTimeout('showDDNSInfo();', 2000); 
+	}
+	else{
+		$("#status").html(MM_ddns_disabled);
+		$("#div_ddnsip").hide();
+	}
+}
+$(function(){
+	// var postVar0 = {topicurl : "setting/getDDNSCfg"};
+	// postVar0 = JSON.stringify(postVar0);
+	// var postVar1 = {topicurl : "setting/getDDNSStatus"};
+	// postVar1 = JSON.stringify(postVar1);
+	// $.when($.post("/cgi-bin/cstecgi.cgi", postVar0),
+ //            $.post("/cgi-bin/cstecgi.cgi", postVar1))
+ //    .done(function( Data0, Data1 ) {
+	// 	responseJson = JSON.parse(Data0[0]);
+	// 	responseJsonStatus = JSON.parse(Data1[0]);
+	// 	initValue();
+ //    })
+	// .fail(function(){
+	// 	resetForm();
+	// });
+   return;
+});
+function doSubmit(){
+	if (saveChanges()==false) return false;	
+	var postVar ={"topicurl":"setting/setDDNSCfg"};
+	postVar['Enabled'] = $('#Enabled').val();
+	postVar['Provider'] = $('#Provider').val();
+	postVar['Domain'] = $('#Domain').val();
+	postVar['Account'] = $('#Account').val();
+	postVar['Password'] = $('#Password').val();
+	uiPost(postVar);
+}
+</script>
+</head>
+<body  class="mainbody">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../images/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../images/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<form method="post" name="ddnsCfg">
+<table border=0 width="100%"> 
+<tr><td class="content_title"><script>dw(MM_ddns_setting)</script></td></tr>
+<tr id="div_content_help"><td class="content_help"><script>dw(MSG_ddns_setting)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%">
+<tr>
+<td class="item_left"><script>dw(MM_onoff)</script></td>
+<td><select name="Enabled" id="Enabled" onChange="updateState()">
+<option value="0"><script>dw(MM_disable)</script></option>
+<option value="1"><script>dw(MM_enable)</script></option>
+</select></td>
+</tr>
+</table>
+
+<table id="div_ddns_setting" style="display:none" border=0 width="100%">
+<tr>
+<td class="item_left"><script>dw(MM_provider)</script></td>
+<td><select onChange="updateProvider(1)" name="Provider" id="Provider">
+</select>&nbsp;&nbsp;&nbsp;&nbsp;<span id="div_to_register"> </span></td>
+</tr>
+<tr id="div_domainname" style="display:none">
+<td class="item_left"><script>dw(MM_domainname)</script></td>
+<td><input type="text" id="Domain" name="Domain" maxlength="32" > </td>
+</tr>
+<tr id="div_username" style="display:none">
+<td class="item_left"><script>dw(MM_username)</script></td>
+<td><input type="text" id="Account" name="Account" maxlength="32" > </td>
+</tr>
+<tr id="div_password" style="display:none">
+<td class="item_left"><script>dw(MM_password)</script></td>
+<td><input type="hidden" name="Password" id="Password">
+<span id="passWord2"><input type=password id="Password2" name="Password2" maxlength="32" onFocus="changePasswordType()" ></span>
+<span id="passWord3" style="display:none"><input type=text id="Password3" name="Password3" maxlength="32" ></span></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_ddns_status)</script></td>
+<td><span id="status"> </span></td>
+</tr>
+<tr id="div_ddnsip" style="display:none">
+<td class="item_left"><script>dw(MM_ddns_info)</script></td>
+<td><script>dw(MM_ddns_binding_ipaddr)</script> <span id="show_Ddnsip"></span></td>
+</tr>
+</table>
+
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_apply+'" onClick="doSubmit()">')</script></td></tr>
+</table>
+</form>
+<script>showFooter()</script>
+</body></html>

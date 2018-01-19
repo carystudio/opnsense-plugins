@@ -1,0 +1,138 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Home</title>
+<link href="css/style.css" rel="stylesheet" type="text/css" media="all"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<script type="text/javascript" src="https://wifi.weixin.qq.com/resources/js/wechatticket/wechatutil.js" ></script>
+<script type="text/javascript" src="js/zone.js"></script>
+<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
+<script type="application/x-javascript">
+	addEventListener("load", function() {
+		setTimeout(hideURLbar, 0);
+	}, false);
+
+	function hideURLbar(){
+		window.scrollTo(0,1);
+	}
+	function getURLparams()
+	{
+		var vars = [], hash;
+		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+		for(var i = 0; i < hashes.length; i++)
+		{
+			hash = hashes[i].split('=');
+			vars.push(hash[0]);
+			vars[hash[0]] = hash[1];
+		}
+		return vars;
+	}
+
+	function dologin() {
+		var user = $.trim($("#inputUsername").val());
+		var password = $.trim($("#inputPassword").val());
+		/**
+		 * logon action
+		 */
+		$.ajax({
+			type: "POST",
+			url: "/api/captiveportal/logon",
+			dataType:"json",
+			data:{ user: user, password: password }
+		}).done(function(data) {
+			// redirect on successful login
+			if (data['clientState'] == 'AUTHORIZED') {
+				if (getURLparams()['redirurl'] != undefined) {
+					window.location = 'http://' + getURLparams()['redirurl'] + '?refresh';
+				} else {
+					// no target, reload page
+					window.location.reload();
+				}
+			}else if('NO_QUOTA' == data['clientState']){
+				$("#inputUsername").val("");
+				$("#inputPassword").val("");
+				$("#errorMSGtext").html("没有可上网时间");
+				$("#alertMSG").removeClass("hidden");
+			} else {
+				$("#inputUsername").val("");
+				$("#inputPassword").val("");
+				$("#errorMSGtext").html("用户名或密码不正确");
+				$("#alertMSG").removeClass("hidden");
+			}
+		}).fail(function(){
+			$("#errorMSGtext").html("连接登录服务器失败");
+			$("#alertMSG").removeClass("hidden");
+		});
+	}
+
+	function keyListener(e){
+		// 当按下回车键，执行我们的代码
+		if(e.keyCode == 13){
+			dologin();
+		}
+	}
+
+	$(function(){
+		document.onkeydown=keyListener;
+	});
+
+	function doweixin(){
+		$(":input").attr('disabled',true);
+		$.ajax({
+			type: 'post',
+			url: "/api/captiveportal/portaltoweixin",
+			data : "",
+			dataType: 'json',
+			async : true,
+			success: function (data) {
+				if(data.res == "Success"){
+					appId          = data.appId;
+					secretkey      = data.secretkey;
+					extend         = data.extend;    　　　 //开发者自定义参数集合
+					timestamp      = data.timestamp;　　　//时间戳(毫秒)
+					shop_id        = data.shop_id;            　　  //AP设备所在门店的ID
+					authUrl        = data.authUrl;        //认证服务端URL
+					mac            = data.mac;  　　　//用户手机mac地址 安卓设备必需
+					ssid           = data.ssid;
+					sign = data.sign;
+					weixinUrl = 'weixin://connectToFreeWifi/?apKey=_p33beta&appId='+data.appId+'&shopId='+data.shop_id+'&authUrl='+data.authUrl+'&extend='+data.extend+'&timestamp='+data.timestamp+'&sign='+data.sign;
+					$.getScript(data.getpassthrouthurl);
+				}
+			}
+		});
+	}
+
+	function checktoopenwechat(a) {
+		Wechat_GotoRedirect(appId,extend,timestamp,sign,shop_id,authUrl,mac,ssid);
+	}
+
+</script>
+</head>
+<body>
+<div class="login">
+	<h2>认证登陆</h2>
+	<div class="login-top">
+		<h1>登录信息</h1>
+		<form>
+			<input id="inputUsername" type="text" placeholder="用户名" onfocus="this.placeholder = '';" onblur="if (this.placeholder == '') {this.placeholder = '用户名';}">
+			<input id="inputPassword" type="password" placeholder="密码" onfocus="this.placeholder = '';" onblur="if (this.placeholder == '') {this.placeholder = '密码';}">
+	    </form>
+	    <div class="forgot">
+	    	<button type="button" id="btn_submit"
+					onMouseOver="this.style.background='#818181';"
+					onmouseout="this.style.background='#F45B4B';"
+					style="background: #F45B4B;color: #FFF;font-size: 17px;font-weight: 400;padding: 8px 7px;width: 30%;display: inline-block;cursor: pointer;-webkit-border-radius: 19px;margin: 0px 7px 0px 3px;outline: none;border: none;" onclick="dologin()" >登录</button>
+			<button type="button" id="weixin" onclick="doweixin()" style="background: #F45B4B;color: #FFF;font-size: 17px;font-weight: 400;padding: 8px 7px;width: 40%;display: inline-block;cursor: pointer;-webkit-border-radius: 19px;margin: 0px 7px 0px 3px;outline: none;border: none;">微信登录</button>
+	    </div>
+	</div>
+	<div class="login-bottom" style="text-align: center;">
+		<div id="errorMSGtext" style="color: #fff;"></div>
+		<div id="alertMSG" style="color: #fff;"></div>
+	</div>
+</div>
+<!-- bootstrap script -->
+<script type="text/javascript" src="js/bootstrap.min.js"></script>\
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ChinaZ</title>
+<link href="css/style.css" rel='stylesheet' type='text/css' />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<script type="text/javascript" src="js/zone.js"></script>
+<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
+
+<script type="application/x-javascript">
+	addEventListener("load", function() {
+		setTimeout(hideURLbar, 0);
+	}, false);
+	
+	function hideURLbar(){
+		window.scrollTo(0,1);
+	}
+	function getURLparams()
+	{
+		var vars = [], hash;
+		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+		for(var i = 0; i < hashes.length; i++)
+		{
+			hash = hashes[i].split('=');
+			vars.push(hash[0]);
+			vars[hash[0]] = hash[1];
+		}
+		return vars;
+	}
+
+	function dologin() {
+		var user = $.trim($("#inputUsername").val());
+		var password = $.trim($("#inputPassword").val());
+		/**
+		 * logon action
+		 */
+		$.ajax({
+			type: "POST",
+			url: "/api/captiveportal/logon",
+			dataType:"json",
+			data:{ user: user, password: password }
+		}).done(function(data) {
+			// redirect on successful login
+			if (data['clientState'] == 'AUTHORIZED') {
+				if (getURLparams()['redirurl'] != undefined) {
+					window.location = 'http://'+getURLparams()['redirurl']+'?refresh';
+				} else {
+					// no target, reload page
+					window.location.reload();
+				}
+			} else {
+				$("#inputUsername").val("");
+				$("#inputPassword").val("");
+				$("#errorMSGtext").html("authentication failed");
+				$("#alertMSG").removeClass("hidden");
+			}
+		}).fail(function(){
+			$("#errorMSGtext").html("unable to connect to authentication server");
+			$("#alertMSG").removeClass("hidden");
+		});
+
+	}
+
+</script>
+</head>
+<body>
+	<h1>Please sign in</h1>
+		<div class="app-location">
+			<form>
+				<input id="inputUsername" type="text" class="text" placeholder="Username" onfocus="this.placeholder = '';" onblur="if (this.placeholder == '') {this.placeholder = 'Username';}" >
+				<input id="inputPassword" type="password" placeholder="Password" onfocus="this.placeholder = '';" onblur="if (this.placeholder == '') {this.placeholder = 'Password';}">
+				<div id="errorMSGtext" style="color: #ce340d;"></div>
+				<div id="alertMSG" style="color: #ce340d;"></div>
+				<div class="submit"><button onmouseout="this.style.background='#0bd38a'; this.style.color='#fff';"   onMouseOver="this.style.background='none';this.style.color='#0bd38a';" style="font-size: 20px;font-weight: 300;background:#0bd38a;color: #fff;cursor: pointer;outline: none;padding: 17px 15px;width: 100%;border: 3px solid #0bd38a;-webkit-border-radius: 0.3em;"   id="signin" type="button"onclick="dologin()" value="Sign in" >Sign in</button></div>
+			</form>
+		</div>
+
+
+	<!-- bootstrap script -->
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+</body>
+</html>

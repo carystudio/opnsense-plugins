@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+</head>
+<body class="mainbody">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../images/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../images/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<form method=post name="sche_reboot" >
+<table border=0 width="100%"> 
+<tr><td class="content_title"><script>dw(MM_rebootsch_setting)</script></td></tr>
+<tr><td class="content_help"><script>dw(MSG_schedule_reboot)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%">
+<tr>
+<td class="item_left"><script>dw(MM_onoff)</script></td>
+<td><select name="ScheEn" id="ScheEn" onChange="updateStateSchReboot()">
+<option value=0><script>dw(MM_disable)</script></option>
+<option value=1><script>dw(MM_enable)</script></option>
+</select></td>
+</tr>
+
+<tr id="TimeMonth" style="display: none;" >
+<td class="item_left">月份</td>
+<td><select name="reSchTimeMonth" id="reSchTimeMonth">
+</select></td>
+</tr>
+<tr id="TimeDate" style="display: none;" >
+<td class="item_left">日期</td>
+<td><select name="reSchTimeDate" id="reSchTimeDate">
+</select></td>
+</tr>
+
+<tr id="week" style="display: none;" >
+<td class="item_left"><script>dw(MM_week)</script></td>
+<td><select name="reSchWeek" id="reSchWeek">
+<option value="">所有</option>
+<option value="0"><script>dw(MM_week7)</script></option>
+<option value="1"><script>dw(MM_week1)</script></option>
+<option value="2"><script>dw(MM_week2)</script></option>
+<option value="3"><script>dw(MM_week3)</script></option>
+<option value="4"><script>dw(MM_week4)</script></option>
+<option value="5"><script>dw(MM_week5)</script></option>
+<option value="6"><script>dw(MM_week6)</script></option>
+</select></td>
+</tr>
+<tr id="time" style="display: none;" >
+<td class="item_left"><script>dw(MM_time)</script></td>
+<td><select name="time_h" id="time_h"></select>&nbsp;:&nbsp;
+<select name="time_m" id="time_m"></select>&nbsp;
+(<script>dw(MM_hour)</script>:<script>dw(MM_min)</script>)</td>
+</tr>
+</table>
+
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_apply+'" onClick="doSubmit()">')</script></td></tr>
+</table>
+</form>
+<script>showFooter()</script>
+<script>
+	$(function(){
+		var year = new Date().getFullYear();
+		init();
+
+		var _reSchTimeMonth = '<option value="">所有</option>';
+		var _time_h         = '';
+		var _time_m         = '';
+		for (var i = 1; i <= 12; i++) {
+			 _reSchTimeMonth += '<option value="'+i+'">'+i+'</option>';
+		}
+		for(var i = 0; i < 24; i++){
+			if(i<10)
+				_time_h += '<option value="'+i+'">'+0+i+'</option>';
+			else
+				_time_h += '<option value="'+i+'">'+i+'</option>';
+		}
+		for(var i = 0; i < 60; i++){
+			if(i<10)
+				_time_m += '<option value="'+i+'">'+0+i+'</option>';
+			else
+				_time_m += '<option value="'+i+'">'+i+'</option>';
+		}
+		$('#reSchTimeMonth').html(_reSchTimeMonth).on('change', function(event) {
+			getDayOption(year,this.value);
+		}).trigger('change');
+		$('#time_h').html(_time_h);
+		$('#time_m').html(_time_m);
+	});
+
+	function init() {
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: '{"action":"getRebootSched"}',
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					data = data.data;
+					if (data.Enable) {
+						$("#ScheEn").val(data.Enable);
+						$('#reSchTimeMonth').val('0' == data.TimeMonth?'' : data.TimeMonth);
+						$('#reSchTimeDate').val('0' == data.TimeDate?'' : data.TimeDate);
+						$('#reSchWeek').val(data.TimeWeek);
+						$('#time_h').val(data.TimeHour?data.TimeHour:0);
+						$('#time_m').val(data.TimeMin?data.TimeMin:0);
+					} else {
+						data.Enable    = $("#ScheEn").val(data.Enable);
+					}
+					updateStateSchReboot();
+				}
+			}
+		})
+	}
+
+	function updateStateSchReboot(){
+		if ($("#ScheEn").val() == 1){
+			$("#week,#time,#TimeDate,#TimeMonth").show();
+		} else {
+			$("#week,#time,#TimeDate,#TimeMonth").hide();
+		}
+	}
+
+	function doSubmit() {
+		var data = {};
+		data.Enable    = $("#ScheEn").val();
+		data.TimeMonth = $('#reSchTimeMonth').val();
+		data.TimeDate  = $('#reSchTimeDate').val();
+		data.TimeWeek  = $('#reSchWeek').val();
+		data.TimeHour  = $('#time_h').val();
+		data.TimeMin   = $('#time_m').val();
+		var sub_data = {"action":"setRebootSched", "data":data};
+		sub_data     = JSON.stringify(sub_data);
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: sub_data,
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					alert('设置定时成功！');
+					    location.href = location.href;
+				} else {
+					alert('设置定时失败！'+data_msg_json[data.rescode]);
+				}
+			}
+		});
+	}
+
+	/**
+	 * 今年的月份的天数下拉菜单
+	 * @Author Yexk
+	 * @Date   2017-03-24
+	 * @param  {[number]}  year  年份
+	 * @param  {[number]}  month 月份
+	 * @return {[number]}        返回html
+	 */
+	function getDayOption(year,month){ 
+		month = parseInt(('' != month) ? month : 1,10);
+		year = parseInt(('' != year) ? year : 2017,10);
+		var temp = new Date(year,month,0); 
+		temp = temp.getDate();
+		var _reSchTimeDate  = '<option value="">所有</option>';
+		for (var i = 1; i <= temp; i++) {
+			 _reSchTimeDate += '<option value="'+i+'">'+i+'</option>';
+		}
+		$('#reSchTimeDate').html(_reSchTimeDate);
+	}
+</script>
+</body></html>

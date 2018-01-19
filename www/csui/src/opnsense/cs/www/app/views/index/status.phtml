@@ -1,0 +1,281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="-1">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" href="/css/menu.css" type="text/css">
+	<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+	<script language="javascript" src="/js/language.js"></script>
+	<script language="javascript" src="/js/jcommon.js"></script>
+	<script language="javascript" src="/js/jquery.min.js"></script>
+	<script language="javascript" src="/js/json2.min.js"></script>
+	<script language="javascript" src="/js/spec.js"></script>
+</head>
+<body class="mainbody" marginwidth="0" marginheight="0">
+	<div id="languageDiv" style="display:none">
+		<table width="172" border="0" cellpadding="3" cellspacing="0">
+			<tbody>
+				<tr>
+					<td colspan="2" height="12"> </td>
+				</tr>
+				<tr>
+					<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)"> 英文 </td>
+					<td> <img id="img_language1" src="/images/language_check.gif" border="0"> </td>
+				</tr>
+				<tr>
+					<td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)"> 简体中文 </td>
+					<td> <img id="img_language2" src="/images/language_no_check.gif" border="0"> </td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<table width=700><tr><td>
+		<table width="700">
+			<tbody>
+				<tr>
+					<td>
+						<table border="0" width="100%">
+							<tbody>
+								<tr>
+									<td class="content_title"> <script>dw(MM_system_status)</script> </td>
+								</tr>
+								<tr id="div_content_help">
+									<td class="content_help"> <script>dw(MSG_system_status)</script> </td>
+								</tr>
+								<tr>
+									<td> <hr size="1" noshade="" align="top" class="bline"> </td>
+								</tr>
+							</tbody>
+						</table>
+						<table id="div_port_status" border="0" width="100%" style="">
+							<tbody id="tbody_port_status">
+							</tbody>
+						</table>
+						<br>
+						<table border="0" class="list" >
+							<tbody>
+								<tr>
+									<td class="item_head2"> <script>dw(MM_system_info)</script> </td>
+								</tr>
+								<tr>
+									<td>
+										<table class="list1">
+											<tbody>
+												<tr>
+													<td class="item_left"> <script>dw(MM_system_uptime)</script> </td>
+													<td id="div_systime"></td>
+												</tr>
+												<tr>
+													<td class="item_left"> <script>dw(MM_customer_url)</script> </td>
+													<td> <a id="div_CustomerUrl" href="http://www.carystudio.com/" target="_blank">www.carystudio.com</a> </td>
+												</tr>
+												<tr>
+													<td class="item_left"> <script>dw(MM_firmware_version)</script> </td>
+													<td> <span id="div_fwversion"></span> </td>
+												</tr>
+												<tr>
+													<td class="item_left"> <script>dw(MM_build_time)</script> </td>
+													<td>
+														<span id="div_builttime"></span>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<!--局域网-->
+						<div id="div_lan"><br/></div>
+						<!--广域网-->
+						<div id="div_wan" style=""><br></div>
+						<!--流量统计-->
+						<table border="0" class="list">
+							<tbody>
+							<tr>
+								<td class="item_head2"> <script>dw(MM_statistics)</script> </td>
+							</tr>
+							<tr>
+								<td>
+									<table class="list1">
+										<tbody id="packetsInfo">
+										<tr>
+											<td class="item_left"></td>
+											<td class="item_left"><b> <script>dw(MM_rx_packets)</script> </b></td>
+											<td id="div_systime"><b> <script>dw(MM_tx_packets)</script> </b></td>
+										</tr>
+										</tbody>
+									</table>
+								</td>
+							</tr>
+							</tbody>
+						</table>
+					</td></tr></table>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<script>
+// 初始化 函数
+$(function(){
+	get_system_info();
+});
+
+function get_system_info() {
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: '{"action":"getStatusInfo", "data":{}}',
+		success:function(data){
+			if (9999 == data.rescode){
+				issetLogin();
+			}
+			if (0 == data.rescode) 
+			{
+				/*局域网和广域网信息*/
+				var into = data.data.interface;
+				var niclist = data.data.niclist;
+				var div1 = '';
+				var div2 = '';
+				var packetsInfo_wan = '';
+				var packetsInfo_lan = '';
+				for(var i in into){
+					if(i.substring(0,3) == "lan"){
+						div1 += '<table border="0" class="list"><tbody><tr><td class="item_head2">'+
+							MM_lan_info+'('+i+'）</td></tr><tr><td><table class="list1"><tbody><tr><td class="item_left">'+
+							MM_ipaddr+'</td><td id="lan_ipaddr_'+i+'"></td></tr><tr><td class="item_left">'+
+							MM_netmask+'</td><td id="lan_netmask_'+i+'"></td></tr> <tr id="div_lan_dhcpsrv"><td class="item_left">'+
+							MM_dhcp_server+'</td> <td id="lan_dhcp_server_'+i+'"></td></tr><tr><td class="item_left">'+
+							MM_macaddr+'</td> <td id="lan_macaddr_'+i+'"></td></tr></tbody></table></td></tr></tbody></table>';
+						packetsInfo_lan += '<tr><td id="lan_pack_'+i+'"></td><td id="lan_inpkts_'+i+'"></td> <td id="lan_outpkts_'+i+'"></td></tr>';
+					}
+					if(i.substring(0,3) == "wan"){
+						div2 += '<table border="0" class="list"> <tbody> <tr> <td class="item_head2">'+ 
+							MM_wan_info+'('+i+')</td></tr><tr><td><table class="list1"><tbody><tr><td class="item_left">'+
+							MM_connection_status+'</td><td id="wan_status_'+i+'"></td></tr><tr> <td class="item_left">'+
+							MM_connection_type+'</td><td id="wan_way_'+i+'"></td></tr><tr><td class="item_left">'+
+							MM_ipaddr+'</td> <td id="wan_ipaddr_'+i+'"></td> </tr><tr><td class="item_left">'+
+							MM_netmask+'</td> <td id="wan_netmask_'+i+'"></td></tr><tr><td class="item_left">'+
+							MM_default_gateway+'</td><td id="wan_gateway_'+i+'"></td></tr><tr><td class="item_left">'+
+							MM_dns_server+'</td><td id="wan_dnsserve_'+i+'"></td></tr><tr><td class="item_left">'+
+							MM_macaddr+'</td><td id="wan_macaddr_'+i+'"></td></tr></tbody></table></td></tr></tbody></table><br>';
+						packetsInfo_wan += '<tr><td id="wan_pack_'+i+'"></td><td id="wan_inpkts_'+i+'"></td> <td id="wan_outpkts_'+i+'"></td></tr>';
+					}
+				}
+				$('#div_lan').append(div1);
+				$('#div_wan').append(div2);
+				$('#packetsInfo').append(packetsInfo_lan,packetsInfo_wan);
+
+				for (var j in into){
+					if(j.substring(0,3) == "lan"){
+						$('#lan_macaddr_'+j).html(into[j]["Status"]["macaddr"]);
+						$('#lan_ipaddr_'+j).html(into[j]["Status"]["ipaddr"]);
+						$('#lan_netmask_'+j).html(into[j]["Status"]["subnet"]);
+						$('#lan_dhcp_server_'+j).html(1==into[j]["DhcpSvrEnable"]?'启用':'未启用');
+						/*流量统计*/
+						$('#lan_pack_'+j).html(j.toUpperCase());
+						$('#lan_inpkts_'+j).html(into[j]["Status"]["inpkts"]);
+						$('#lan_outpkts_'+j).html(into[j]["Status"]["outpkts"]);
+					}
+					if(j.substring(0,3) == "wan"){
+						if('static' == into[j]["Protocol"]){
+							$('#wan_way_'+j).html('静态IP连接');
+						}else if('pppoe' == into[j]["Protocol"]){
+							$('#wan_way_'+j).html('PPPoE连接');
+						}else if('dhcp' == into[j]["Protocol"]){
+							$('#wan_way_'+j).html('DHCP连接');
+						}
+						$('#wan_netmask_'+j).html(into[j]["Status"]["subnet"]);
+						var emNum = into[j]["Nic"];
+						$('#wan_macaddr_'+j).html(niclist[emNum]["mac"]);
+						$('#wan_ipaddr_'+j).html(into[j]["Status"]["ipaddr"]);
+
+						if(into[j]["Status"].hasOwnProperty("gateway")) {
+							$('#wan_gateway_'+j).html(into[j]["Status"]["gateway"]);
+						}else{
+							$('#wan_gateway_'+j).html('0.0.0.0');
+						}
+						$('#wan_dnsserve_'+j).html(into[j]["Dns"]);
+						$('#wan_status_'+j).html(("up" == into[j]["Status"]["status"] && "0.0.0.0" != into[j]["Status"]['ipaddr'])?'已连接':'未连接');
+						/*流量统计*/
+						$('#wan_pack_'+j).html(j.toUpperCase());
+						$('#wan_inpkts_'+j).html(into[j]["Status"]["inpkts"]);
+						$('#wan_outpkts_'+j).html(into[j]["Status"]["outpkts"]);
+					}
+				}
+
+				/*系统信息*/
+				$('#div_systime').html(get_uptime_info(data.data.system.Uptime));
+				$('#div_fwversion').html('CSG2000P '+data.data.system.FirmwareVersion);
+				var builtTime = data.data.system.ReleaseDate+"";
+				$('#div_builttime').html(builtTime.substring(0,4)+'-'+builtTime.substring(4,6)+'-'+builtTime.substring(6,8));
+
+				/*接口信息*/
+				var tr1 ='';
+				var tr2 ='';
+				tr1 += '<tr>';
+				tr2 += '<tr>';
+				for(var k in niclist){
+					tr1 += '<td><img id="'+k+'" src="/images/port_Default.gif"></td>';
+					tr2 += '<td><span id="wan_'+k+'" class="port_link">&nbsp;&nbsp;&nbsp;'+k+'</span></td>';
+				}
+				tr1 += '</tr>';
+				tr2 += '</tr>';
+				$('#tbody_port_status').append(tr1,tr2);
+
+				var interface = data.data.interface;
+				for(var j in interface){
+					if (interface[j]["Status"]["status"] == "up"){
+						document.getElementById(interface[j]["Nic"]).src="/images/port_WAN_ON.gif";
+						document.getElementById("wan_"+interface[j]["Nic"]).innerHTML = "&nbsp;&nbsp;&nbsp;"+ j.toUpperCase();
+					}else{
+						document.getElementById("wan_"+interface[j]["Nic"]).innerHTML = "&nbsp;&nbsp;&nbsp;"+ j.toUpperCase();
+					}
+				}
+			}
+			else
+			{
+
+			}
+		}
+	})
+}
+function count(o){
+	var t = typeof o;
+	if(t == 'string'){
+		return o.length;
+	}else if(t == 'object'){
+		var n = 0;
+		for(var i in o){
+			n++;
+		}
+		return n;
+	}
+	return false;
+}
+// 追加系统信息到页面
+function get_uptime_info(time) {
+	// 时间
+	var uptime = 0;
+	var _uptime_str = '';
+	uptime = parseInt(time);
+	if (uptime>86400) {
+	_uptime_str += parseInt(uptime/86400)+'天,';
+	uptime = uptime - (parseInt(uptime/86400)*86400);
+	}
+	if (uptime>3600) {
+	_uptime_str += parseInt(uptime/3600)+'小时,';
+	uptime = uptime - (parseInt(uptime/3600)*3600);
+	}
+	if (uptime>60) {
+	_uptime_str += parseInt(uptime/60)+'分钟,';
+	uptime = uptime - (parseInt(uptime/60)*60);
+	}
+	_uptime_str += uptime + '秒';
+	return _uptime_str;
+}
+
+	</script>
+</body>
+</html>
