@@ -1,0 +1,106 @@
+
+.back_tit {
+    height: 30px;
+    width: 100%;
+    color: #777777;
+    line-height: 30px;
+    line-height: 32px \9;
+    _line-height: 30px;
+    background: url(/images/back_tit_bg.gif) repeat-x;
+    overflow: hidden;
+}
+
+#tagScroll {
+    float: left;
+    margin-left: 20px;
+    height: 30px;
+    overflow: hidden;
+    position: relative;
+}
+
+.tit_ico {
+    float: right;
+}
+
+.tit_ico a {
+    display: block;
+    height: 30px;
+    width: 30px;
+    float: right;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.tit_ico01 {
+    background-image: url(/images/tit_ico01.png);
+    background-position: 0 -30px;
+    background-color: #f17f04;
+}
+
+
+
+.fl {
+    float: left;
+}
+
+
+.back_tit_tob {
+    float: left;
+    overflow: hiddenl;
+    padding: 0 10px;
+}
+
+#rollBox {
+    padding: 0;
+}
+
+.back_tit_tob li {
+    float: left;
+    padding: 0;
+    cursor: pointer;
+    color: #929292;
+    font-weight: bold;
+}
+
+.back_tit_tob li.cut_tab {
+    background: #f7f7f7;
+    color: #777777;
+    position: relative;
+    top: 0px;
+    border-bottom: 1px solid #F7F7F7;
+}
+
+
+
+.back_tit_tob li a {
+    display: block;
+    color: #929292;
+    padding: 0 10px;
+    margin-right: 1px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 12px;
+}
+
+.back_tit_tob li.cut_tab a {
+    color: #777777;
+}
+
+.back_tit_tob_add {
+    display: block;
+    height: 100px;
+    width: 22px;
+    position: relative;
+    left: -5px;
+    background: url(/images/back_tit_tob_add.png) no-repeat;
+}
+
+.mytd td {
+	padding-top:10px;
+}
+
+.item_left_ {
+    width: 20%;
+    height: 20px;
+    font-size: 12px;
+}

@@ -1,0 +1,144 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+<script language="javascript">
+function updateConfigClick(){
+	if (document.ImportSettings.filename.value == "") {
+		alert(JS_msg80);
+		return false;
+	}		
+	if (document.ImportSettings.filename.value.toLowerCase().indexOf(".dat") == -1) {
+		alert(JS_msg81);
+		return false;
+	}
+	if(!confirm(JS_msg143)) return false;
+	$("#doing_msg").html(JS_msg84);
+	waitpage();
+	do_count_down();
+	return true;
+}
+
+
+
+function waitpage(){
+	$("#div_setting").hide();
+	$("#div_wait").show();
+}
+
+var wtime = 60;
+function do_count_down(){
+	document.getElementById("show_sec").innerHTML = wtime;
+	if(wtime == 0) {location.href = location.href; return false;}
+	if(wtime > 0) {wtime--;setTimeout('do_count_down()',1000);}
+}
+
+function reboot(){
+	if(!confirm(JS_msg82)) return false;
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: '{"action":"reboot"}',
+		success:function(data){
+			$("#doing_msg").html(JS_msg83);
+			waitpage();
+			do_count_down();
+		}
+	});
+}
+</script>
+</head>
+<body class="mainbody">
+<div id="div_setting">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../images/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../images/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<table border=0 width="100%"> 
+<tr><td class="content_title"><script>dw(MM_saveconf)</script></td></tr>
+<tr id="div_content_help"><td class="content_help"><script>dw(MSG_saveconf)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%">
+<form method="post" name="ExportSettings" action="/webapi">
+<input type="hidden" name="action" value="backupConfig" />
+<tr>
+	<td class="item_left"><script>dw(MM_save_config_file)</script></td>
+	<td><script>dw('<input type="submit" class="button_big" name="save" value="'+BT_save+'">')</script></td>
+</tr>
+</form>
+
+<form method="post" name="ImportSettings" action="/webapi" enctype="multipart/form-data" target="ifmShowMessage">
+<input type="hidden" name="action" value="restoreConfig" />
+<tr>
+<td class="item_left"><script>dw(MM_update_config_file)</script></td>
+<td><input type="File" id="filename" name="filename" size="20" maxlength="256" > 
+<script>dw('<input type=submit class=button_big value="'+BT_update+'" onClick="return updateConfigClick()">')</script></td>
+</tr>
+</form>
+<tr>
+	<td class="item_left"><script>dw(MM_reboot_system)</script></td>
+	<td>
+		<script>dw('<input type="button" class="button_big" value="'+MM_reboot+'" onClick="reboot()">')</script></td>
+</tr>
+
+<!-- 
+<form method="post" name="LoadDefaultSettings">
+<tr id="div_load_default">
+<td class="item_left"><script>dw(MM_restore_factory_default)</script></td>
+<td><script>dw('<input type="button" class=button_big name="restore" value="'+BT_restore+'" onClick="loadDefaultClick()">')</script></td>
+</tr>
+</form>
+
+<form method="post" name="rebootSystem">
+<tr>
+<td class="item_left"><script>dw(MM_reboot_system)</script></td>
+<td><script>dw('<input type="button" class=button_big value="'+BT_reboot+'" name="reboot" onClick="rebootClick()">')</script></td>
+</tr>
+</form> -->
+<tr><td colspan="2"><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+<script>showFooter()</script>
+</div>
+
+<div id="div_wait" style="display:none">
+<table width="700"><tr><td><table border=0 width="100%">
+<tr><td style="font-weight:bold; font-size:14px;"><span id="doing_msg"></span></td></tr>
+<tr><td><hr size=1 noshade align="top" class="bline"></td></tr>
+</table><table border="0" width="100%">
+<tr><td rowspan=2 width="100" align="center"><img src="/style/load.gif" /></td>
+<td class="msg_title"><span id="show_msg"></span></td></tr>
+<tr><td><script>dw(MM_please_wait)</script>&nbsp;<span id="show_sec"></span>&nbsp;<script>dw(MM_seconds)</script> ...</td></tr>
+<tr><td colspan="2"><hr size=1 noshade align="top" class="bline"></td></tr>
+</table></td></tr></table>
+</div>
+
+<div id="div_showMessage" style="display:none">
+<iframe id="ifmShowMessage" name="ifmShowMessage" src="#" onload="showMessage();" marginheight="0" marginwidth="0" frameBorder="0" width="100%" height="900;">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+</iframe>
+</div>
+</body></html>

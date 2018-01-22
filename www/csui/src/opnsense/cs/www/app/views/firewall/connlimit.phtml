@@ -1,0 +1,225 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+<script language="javascript">
+var responseJson,v_RulesNum,v_AllStr,v_lanNetmask,v_lanIp,v_NetIP;
+function deleteClick(){	
+	var flg=0;
+	var postVar ={"topicurl":"setting/delConnLimitRules"};
+    for (i=0; i<v_RulesNum; i++){
+		var tmp = $("#delRule"+i).get(0);
+		if (tmp.checked == true){ 
+			postVar['delRule'+i]= i;
+			flg=1;
+		}
+	}
+	if(flg==0){
+		alert(JS_msg36);
+	 	event.returnValue = false;
+	}
+	if(flg==1){
+		uiPost(postVar);
+	}
+}
+
+function IpRangeCheck(s1,s2){
+	var ip1=s1.split(".");
+	var ip2=s2.split(".");
+	for(var k=0;k<4;k++){
+		var a=Number(ip1[3]);
+		var b=Number(ip2[3]);
+      		if(a>b) {alert(JS_msg100); return 0;}
+	}
+	return 1;
+}
+
+function addClick(){
+	if ( v_RulesNum >= 10 ){
+		alert(JS_msg28);
+		return false;
+	}
+	
+	var ipStart = v_NetIP+$("#startip").val();
+	var ipEnd   = v_NetIP+$("#endip").val();
+	setJSONValue({
+		"ipStart" : ipStart,
+		"ipEnd"   : ipEnd
+	});
+	
+	if (!checkVaildVal.IsVaildIpAddr(ipStart, MM_start_ipaddr)) return false;
+	if(ipEnd==v_NetIP){	
+		supplyValue("ipEnd", ipStart);
+	}else{	
+		if (!checkVaildVal.IsVaildIpAddr(ipEnd, MM_end_ipaddr)) return false;
+		if (!checkVaildVal.IsIpSubnet(ipEnd, v_lanNetmask, v_lanIp)) {	alert(JS_msg38);return false;	}
+		if (!IpRangeCheck(ipStart, ipEnd))	return false;
+		if (ipStart == v_lanIp || ipEnd == v_lanIp){alert(JS_msg39);return false;}
+	}
+			
+	if (ipStart == v_lanIp) {alert(JS_msg39);return false;}
+	if (ipEnd == v_lanIp) {alert(JS_msg39);return false;}		
+	var Connlimit = $("#connlimit").val();
+	if (!checkVaildVal.IsVaildNumber(Connlimit, MM_qos_connlimit)) return false;
+	if (!checkVaildVal.IsVaildNumberRange(Connlimit, MM_qos_connlimit,32, 2048)) return false;
+	
+	if(v_RulesNum!=0) {
+		for (var i=0; i<v_RulesNum; i++){
+			v = responseJson[i+1]['ip'].split("-");
+			for (var j=0; j<v.length; j++){	
+				var ips = Number(ipStart.split(".")[3]);
+				var ipe = Number(ipEnd.split(".")[3]);
+				var v0 = Number(v[0].split(".")[3]);
+				var v1 = Number(v[1].split(".")[3]);					
+				if (ips == v0 || ips == v1 || ipe == v0 || ipe == v1) {alert(JS_msg29);return false;}								
+				if (ips < v0 && ipe > v0) {alert(JS_msg29);return false;}	
+				if (ips > v0 && ips < v1) {alert(JS_msg29);return false;}		
+			}
+		}
+	}
+	if ($("#comment").val()!="")	{
+		if (!checkVaildVal.IsVaildString($("#comment").val(), MM_comment,2)) 
+			return false;
+	}
+	var postVar ={"topicurl":"setting/setConnLimitRules"};
+	postVar['ipStart'] = ipStart;
+	postVar['ipEnd'] =  $("#ipEnd").val();
+	postVar["comment"] = $("#comment").val();
+	postVar["connlimit"] = $("#connlimit").val();
+	uiPost(postVar);
+}
+
+function CreateConnLimitRulesList(){
+	var i,tmp="";
+	for(i=1;i<=v_RulesNum;i++){
+		if(i==0)
+			tmp='<tr align="center"><td>'+responseJson[i]['idx']+'</td>';
+		else
+			tmp+='<tr align="center"><td class=item_center2>'+responseJson[i]['idx']+'</td>';
+		tmp+='<td class=item_center2>'+responseJson[i]['ip']+'</td>';
+		tmp+='<td class=item_center2>'+responseJson[i]['connlimit']+'</td>';
+		tmp+='<td class=item_center2>'+responseJson[i]['comment']+'</td>';
+		tmp+='<td class=item_center2> <input type="checkbox" id="delRule'+(i-1) + '" />'+'</td></tr>';
+	}
+	$("#ConnLimitRulesList").append(tmp);
+}
+
+function initValue(){
+	v_RulesNum=responseJson.length-1;
+	v_lanNetmask=responseJson[0]['lanNetmask'];
+	v_lanIp=responseJson[0]['lanIp'];
+	v_NetIP=v_lanIp.replace(/\.\d{1,3}$/,".");
+	
+	if (v_RulesNum==0) 
+		setDisabled("#deleteSelQos,#delreset", true);
+	else
+		CreateConnLimitRulesList();
+			
+	if (v_lanIp !="") decomIP2($(":input[name=ips]"),v_lanIp,0);
+}
+
+$(function(){
+	// var postVar = {topicurl : "setting/getConnLimitRules"};
+	// postVar = JSON.stringify(postVar);
+	// $.when( $.post("/cgi-bin/cstecgi.cgi", postVar))
+ //    .done(function( Data) {
+	// 	responseJson = JSON.parse(Data);
+	// 	initValue();
+	// })
+	// .fail(function(){
+	// 	resetForm();
+	// });
+	return;
+});
+
+function arpTblClick(url){
+	openWindow(url,"_blank",700,400);
+}
+</script>
+</head>
+<body class="mainbody">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<form  id="formCLQosAdd" name="formCLQosAdd">
+<input type="hidden" id="ipStart" name="ipStart">
+<input type="hidden" id="ipEnd" name="ipEnd">
+<table border=0 width="100%"> 
+<tr><td class="content_title"><script>dw(MM_conn_limit)</script></td></tr>
+<tr><td class="content_help"><script>dw(MSG_connlimit_ctrl)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%">
+<tr><td colspan="2"><b><script>dw(MM_add_rule)</script></b></td>
+<tr>
+<td class="item_left"><script>dw(MM_ipaddr)</script></td>
+<td><input type="text" style="width:33px" name="ips" maxlength="3" disabled>.
+<input type="text" style="width:33px" name="ips" maxlength="3" disabled>.
+<input type="text" style="width:33px" name="ips" maxlength="3" disabled>.
+<input type="text" style="width:33px" name="startip" maxlength="3" id="startip" value=""> - <input type="text" style="width:33px"  id="endip" name="endip" maxlength="3" value=""> 
+<script>dw('<input id="scan" name="scan" type=button value="'+BT_scan+'" onClick=arpTblClick(\"arpinfo.asp#flag=6\")>')</script></td>
+</tr>
+<tr id="ConnLimit">
+<td class="item_left"><script>dw(MM_qos_connlimit)</script></td>
+<td><input type="text" id="connlimit" name="connlimit" size="6" maxlength="4"> 32-2048</td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_comment)</script></td>
+<td><input type="text" id="comment" name="comment" maxlength="20"></td>
+</tr>
+</table>
+
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_add+'" id="add" name="add" onClick="return addClick()">')</script></td></tr>
+</table>
+</form>
+
+<form id="formCLQosDel" name="formCLQosDel">
+<table border=0 width="100%" id="ConnLimitRulesList">
+<tr><td colspan="5"><b><script>dw(MM_connlimit_table)</script>&nbsp;&nbsp;<script>dw(JS_msg59)</script></b></td></tr>
+<tr><td colspan="5"><hr size=1 noshade align=top class=bline></td></tr>
+<tr align="center">
+<td class="item_center"><b>ID</b></td>
+<td class="item_center"><b><script>dw(MM_ipaddr)</script></b></td>
+<td class="item_center"><b><script>dw(MM_qos_connlimit)</script></b></td>
+<td class="item_center"><b><script>dw(MM_comment)</script></b></td>
+<td class="item_center"><b><script>dw(MM_select)</script></b></td>
+</tr>
+</table>
+
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr>
+<td align="right"><script>dw('<input type=button class=button value="'+BT_delete+'" id="deleteSelQos" name="deleteSelQos" onClick="return deleteClick()">&nbsp;&nbsp;&nbsp;&nbsp;\
+<input type="button" class="button" value="'+BT_reset+'" id="delreset" name="delreset" onClick="resetForm()">')</script></td>
+</tr>
+</table>
+</form>
+
+<script>showFooter()</script>
+</body></html>

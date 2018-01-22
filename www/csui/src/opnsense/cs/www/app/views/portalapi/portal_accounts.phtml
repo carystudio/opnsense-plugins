@@ -1,0 +1,445 @@
+<html><head>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="/css/menu.css" type="text/css">
+    <link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+    <style>
+        #div_staticDhcpList {text-align: center;}
+        #div_staticDhcpList tr:nth-child(2n){background-color: #f1f1f1;}
+        #div_staticDhcpList tr td:nth-child(1){width: 61px;padding:0}
+        #div_staticDhcpList tr td:nth-child(2){width: 84px;padding:0}
+        #div_staticDhcpList tr td:nth-child(3){width: 105px;padding:0}
+        #div_staticDhcpList tr td:nth-child(4){width: 129px;padding:0}
+        #div_staticDhcpList tr td:nth-child(5){width: 130px;padding:0}
+        #div_staticDhcpList tr td:nth-child(6){width: 84px;padding:0}
+        #div_staticDhcpList tr td:nth-child(7){width: 85px;padding:0}
+    </style>
+    <script language="javascript" src="/js/language.js"></script>
+    <script language="javascript" src="/js/jcommon.js"></script>
+    <script language="javascript" src="/js/ajax.js"></script>
+    <script language="javascript" src="/js/jquery.min.js"></script>
+    <script language="javascript" src="/js/json2.min.js"></script>
+    <script language="javascript" src="/js/spec.js"></script>
+</head>
+<body class="mainbody" marginwidth="0" marginheight="0">
+<input type="hidden" id="lannum" name="lannum">
+<div id="languageDiv" style="display:none"><table width="172" border="0" cellpadding="3" cellspacing="0">
+        <tbody>
+        <tr><td colspan="2" height="12"></td></tr>
+        <tr><td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+            <td><img id="img_language1" src="../style/language_check.gif" border="0"></td></tr>
+        <tr><td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+            <td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td></tr>
+        </tbody></table>
+</div>
+
+<table id="type1" border="0" width="700">
+    <form name="form1">
+        <tbody><tr><td><b>当前Portal本地帐号列表</b></td></tr>
+        <tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+        <tr>
+            <td>
+                <input type="text" name="seek_info" id="seek_info" placeholder="请输入用户名查找账号">
+                <input type="button" class="button" id="seek" value="搜 索" onclick="locating()">
+            </td>
+        </tr>
+    </form>
+    </tbody>
+</table>
+
+<table id="type2" width="700"><tbody><tr><td>
+            <form name="formStaticDhcpDel" id="formStaticDhcpDel">
+                <table border="0" width="100%">
+                    <tbody>
+                    <tr align="center">
+                        <td class="item_center" width=5%><b>ID</b></td>
+                        <td class="item_center" width=15%><b>用户名</b></td>
+                        <td class="item_center" width=18%><b>创建时间</b></td>
+                        <td class="item_center" width=20%><b>登录有效截止时间</b></td>
+                        <td class="item_center"width=15%><b>可登录时间（分钟）</b></td>
+                        <td class="item_center" width=15%><b>是否可重复登录</b></td>
+                        <td class="item_center" width=15%><b>操作</b></td>
+                        <td class="item_center"><b><script>dw(MM_select)</script></b></td>
+                    </tr>
+                    <tbody id="div_staticDhcpList"></tbody>
+                    </tbody>
+                </table>
+
+                <table border="0" width="100%">
+                    <tbody align="center" id="Article_page" style="font-size: 13px;">
+
+                    </tbody>
+                    <tbody><tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+                    <tr><td height="10"></td></tr>
+                    <tr><td align="right">
+                            <script>dw('<input type=button class=button value="'+BT_delete+'" id="del_sel" onClick="del_route_click()">')</script>
+                        </td></tr>
+                    </tbody>
+                </table>
+            </form>
+            <script>showFooter()</script></td></tr></tbody></table>
+
+<table id="type3" width="700" style="display: none"><tbody><tr><td>
+            <form  method="post" name="formStaticDhcpAdd" id="formStaticDhcpAdd">
+                <table border="0" width="100%">
+                    <tbody><tr><td colspan="2"><b>编辑Portal本地帐号</b></td>
+                    </tr><tr id="div_addline"><td colspan="2"><hr size="1" noshade="" align="top" class="bline"></td></tr>
+
+                    <tr>
+                        <td class="item_left">用户名</td>
+                        <td><input type="text" id="username" name="username" maxlength="20"></td>
+                    </tr>
+                    <tr>
+                        <td class="item_left">密码</td>
+                        <td><input type="text" id="password" name="password" maxlength="15"> 不修改密码可为空</td>
+                    </tr>
+                    <tr>
+                        <td class="item_left">登录有效截止时间</td>
+                        <td><input type="text" id="endtime" name="endtime" maxlength="20"> *格式： yyyy-mm-dd HH:MM:ss</td>
+                    </tr>
+                    <tr>
+                        <td class="item_left">可登录时间（分钟）</td>
+                        <td><input type="text" id="canlogin" name="canlogin" maxlength="20"></td>
+                    </tr>
+                    <tr>
+                        <td class="item_left">是否可重复登录</td>
+                        <td><input type="checkbox" id="relogin" name="relogin"></td>
+                    </tr>
+                    </tbody>
+
+                    <table border="0" width="100%">
+                        <tbody><tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+                        <tr><td height="10"></td></tr>
+                        <tr><td align="right"><script>dw('<input id="sbumit_bt_apply" type="button" class="button" value="'+BT_save+'" id="add" onClick="do_submit()">')</script></td></tr>
+                        </tbody>
+                    </table>
+            </form>
+            <script>showFooter()</script></td></tr></tbody></table>
+<iframe id="win78iframe" class="hidden" name="win78target"></iframe>
+
+<script>
+    $(function(){
+        get_route_();
+    });
+    function get_route_() {
+        $.ajax({
+            url: '/webapi',
+            type: 'POST',
+            dataType: 'json',
+            data: '{"action":"getPortalUsers", "data":{"pagenum":"1"}}',
+            success:function(data){
+                if (9999 == data.rescode){
+                    issetLogin();
+                }
+                var _html = '';
+                if (0 == data.rescode) {
+                    var pagebegin = data.data[0].pagebegin;
+                    pagenum = data.data[0].pagenum;
+                    pagecnt = data.data[0].pagecnt;
+                    var data = data.data[0].users;
+                    if (0 < data.length) {
+                        for (var i = 0; i < data.length; i++) {
+                            if(data[i].MutilLogins == 0){
+                                data[i].MutilLogins = "不重复";
+                            }else {
+                                data[i].MutilLogins = "可重复";
+                            }
+                            _html += "<tr align='center' >";
+                            _html += "<td width=1%>"+(i+1+pagebegin)+"</td>";
+                            _html += "<td width=12%>"+data[i].Username+"</td>";
+                            _html += "<td width=25%>"+data[i].CreateTime+"</td>";
+                            _html += "<td width=25%>"+data[i].ExpireTime+"</td>";
+                            _html += "<td width=12%>"+data[i].RemainTime+"</td>";
+                            _html += "<td width=12%>"+data[i].MutilLogins+"</td>";
+                            _html += '<td width=12%><input type="button" value="编辑" id='+data[i].Username+' name=name_route onclick="edit_account(this)" /></td>';
+                            _html += '<td width=12%><input type="checkbox" id=id_route_'+i+' name=name_route data-username='+data[i].Username+' /></td>';
+                            _html += "</tr>";
+                        }
+                        $('#div_staticDhcpList').html(_html);
+                        var page_banner ="";
+                        if(pagenum >1){
+                            page_banner +='<a onclick="up_page(0)">首页-</a>';
+                            page_banner +='<a onclick="up_page(1)">上一页-</a>';
+                        }
+                        if(pagenum <pagecnt){
+                            page_banner +='<a onclick="up_page(2)">下一页-</a>';
+                            page_banner +='<a onclick="up_page(3)">尾页-</a>';
+                        }
+                        page_banner +='第'+pagenum+'页;共'+pagecnt+'页;';
+                        page_banner +='<form name="fop" method="post">';
+                        page_banner +='跳到第<input type="text" value="" size="1" name="p" id="p"/>页';
+                        page_banner +='<input type="button" class="button" value="确定" style="width:50px;height:28px;" onclick="up_page(4)"/>';
+                        page_banner +='</form>';
+                        $('#Article_page').html(page_banner);
+
+                    } else {
+                        $('#div_staticDhcpList').html('<tr><td colspan=8>暂无数据！</td></tr>');
+                    }
+                }
+            }
+        });
+    }
+
+    function del_route_click() {
+        var dhcp_all = $(':input[name="name_route"]');
+        var del_user = [];
+        var one_route_msg = {};
+        dhcp_all.each(function(index, el) {
+            if (el.checked) {
+                one_route_msg.Username = $(el).data('username');
+                del_user.push(one_route_msg);
+                var sub_data = {"action":"delPortalUser", "data":one_route_msg};
+                sub_data = JSON.stringify(sub_data);
+                console.log(sub_data);
+                $(":input").attr('disabled',true);
+                $.ajax({
+                    url: '/webapi',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: sub_data,
+                    async: false,
+                    success:function(data){
+                        if (9999 == data.rescode){
+                            issetLogin();
+                        }
+                        console.log(data);
+                        if (0 != data.rescode) {
+                            alert('删除失败！'+data_msg_json[data.rescode]);
+                            location.href = location.href;
+                            error();
+                        }
+                        $(":input").attr('disabled',false);
+                    }
+                })
+            }
+        });
+        if(0 == del_user.length){
+            alert('请选择要删除的账号！');
+            error();
+        }else{
+            alert('删除成功！');
+            location.href = location.href;
+        }
+    }
+
+    function locating() {
+        var username;
+        username = $(':input[name="seek_info"]').val();
+        if(username == ""){
+            alert('请输入查询的用户名！');
+            return false;
+        }
+        var p = 0 ;
+        $.ajax({
+            url: '/webapi',
+            type: 'POST',
+            dataType: 'json',
+            data: '{"action":"getPortalUsers", "data":{}}',
+            async: false ,
+            success:function(data){
+                if (9999 == data.rescode){
+                    issetLogin();
+                }
+                var _html = '';
+                if (0 == data.rescode) {
+                    var data = data.data[0].alluser;
+                    if (0 < data.length) {
+                        for (var i = 0; i < data.length; i++) {
+                            if(data[i].Username != username){
+                                continue;
+                            }
+                            if(data[i].MutilLogins == 0){
+                                data[i].MutilLogins = "不重复";
+                            }else {
+                                data[i].MutilLogins = "可重复";
+                            }
+                            _html += "<tr align='center' >";
+                            _html += "<td width=1%>"+1+"</td>";
+                            _html += "<td width=12%>"+data[i].Username+"</td>";
+                            _html += "<td width=25%>"+data[i].CreateTime+"</td>";
+                            _html += "<td width=25%>"+data[i].ExpireTime+"</td>";
+                            _html += "<td width=12%>"+data[i].RemainTime+"</td>";
+                            _html += "<td width=12%>"+data[i].MutilLogins+"</td>";
+                            _html += '<td width=12%><input type="button" value="编辑" id='+data[i].Username+' name=name_route onclick="edit_account(this)" /></td>';
+                            _html += '<td width=12%><input type="checkbox" id=id_route_'+i+' name=name_route data-username='+data[i].Username+' /></td>';
+                            _html += "</tr>";
+                            break;
+                        }
+                        if(_html == ""){
+                            alert('不存在该用户！');
+                    }else{
+                            $('#div_staticDhcpList').html(_html);
+                            $("#Article_page").hide();
+                        }
+                    } else {
+                        alert('不存在该用户！');
+                  }
+                }
+            }
+        });
+    }
+
+    //编辑本地账号
+    function edit_account(th) {
+        var one_username = {};
+        one_username.Username = th.id;
+        $("#type1,#type2").hide();
+        $("#type3").show();
+
+        $.ajax({
+            url: '/webapi',
+            type: 'POST',
+            dataType: 'json',
+            data: '{"action":"getPortalUsers", "data":{}}',
+            async: false ,
+            success:function(data){
+                if (9999 == data.rescode){
+                    issetLogin();
+                }
+                if (0 == data.rescode) {
+                    var data = data.data[0].alluser;
+                    if (0 < data.length) {
+                        for (var i = 0; i < data.length; i++) {
+                            if(data[i].Username != one_username.Username){
+                                continue;
+                            }
+                            document.getElementById("username").value= data[i].Username;
+                            document.getElementById("endtime").value= data[i].ExpireTime;
+                            document.getElementById("canlogin").value= data[i].RemainTime;
+                            if(1 == data[i].MutilLogins){
+                                document.getElementById("relogin").checked = true;
+                            }
+                            break;
+                        }
+                    }
+                } else {
+                    alert('编辑失败！'+data_msg_json[data.rescode]);
+                }
+            }
+        });
+    }
+
+    //保存编辑过的账号信息
+    function do_submit() {
+        if($("#username").val()==""){alert('用户名不能为空');return false;}
+        if($("#endtime").val()==""){alert('登录有效截止时间不能为空');return false;}
+        if($("#canlogin").val()==""){$("#canlogin").val("0")}
+        var data = {};
+        data.Username = $("#username").val();
+        data.Password = $("#password").val();
+        data.ExpireTime = $("#endtime").val();
+        data.RemainTime = $("#canlogin").val();
+        var chks =  document.getElementsByName("relogin");
+        var str = "";
+        for (var i = 0; i < chks.length; i++) {
+            if (chks[i].checked == true) {
+                str += chks[i].value;
+            }
+        }
+        if(str =="on"){data.MutilLogins = "1";}else{data.MutilLogins = "0";}
+        var sub_data = {"action":"updatePortalUser", "data":data};
+        sub_data = JSON.stringify(sub_data);
+        $(":input").attr('disabled',true);
+        $.ajax({
+            url: '/webapi',
+            type: 'POST',
+            dataType: 'json',
+            data: sub_data,
+            success:function(data){
+                if (9999 == data.rescode){
+                    issetLogin();
+                }
+                if (0 == data.rescode) {
+                    alert('保存成功！');
+                    location.href = location.href;
+                } else {
+                    alert('保存失败！'+data_msg_json[data.rescode]);
+                }
+                $(":input").attr('disabled',false);
+            }
+        })
+    }
+
+    function up_page(ps) {
+        var page = {};
+        if(ps ==0){page.pagenum = 1;}
+        if(ps ==1){page.pagenum = parseInt(pagenum)-parseInt(1);}
+        if(ps ==2){page.pagenum = parseInt(pagenum)+parseInt(1);}
+        if(ps ==3){page.pagenum = pagecnt;}
+        if(ps ==4){
+            if($("#p").val() != ""){
+                page.pagenum = $("#p").val();
+            }else{
+                alert('请输入跳到的页数！');
+                return false;
+            }
+            if($("#p").val() <1 ||$("#p").val()>pagecnt){
+                alert('请输入正确的页数！');
+                return false;
+            }
+        }
+        var sub_data = {"action":"getPortalUsers", "data":page};
+        sub_data = JSON.stringify(sub_data);
+        console.log(sub_data);
+        $.ajax({
+            url: '/webapi',
+            type: 'POST',
+            dataType: 'json',
+            data: sub_data,
+            success:function(data){
+                if (9999 == data.rescode){
+                    issetLogin();
+                }
+                var _html = '';
+                if (0 == data.rescode) {
+                    var pagebegin = data.data[0].pagebegin;
+                    pagenum = data.data[0].pagenum;
+                    pagecnt = data.data[0].pagecnt;
+                    var data = data.data[0].users;
+                    if (0 < data.length) {
+                        for (var i = 0; i < data.length; i++) {
+                            if(data[i].MutilLogins == 0){
+                                data[i].MutilLogins = "不重复";
+                            }else {
+                                data[i].MutilLogins = "可重复";
+                            }
+                            _html += "<tr align='center' >";
+                            _html += "<td width=1%>"+(i+1+pagebegin)+"</td>";
+                            _html += "<td width=12%>"+data[i].Username+"</td>";
+                            _html += "<td width=25%>"+data[i].CreateTime+"</td>";
+                            _html += "<td width=25%>"+data[i].ExpireTime+"</td>";
+                            _html += "<td width=12%>"+data[i].RemainTime+"</td>";
+                            _html += "<td width=12%>"+data[i].MutilLogins+"</td>";
+                            _html += '<td width=12%><input type="button" value="编辑" id='+data[i].Username+' name=name_route onclick="edit_account(this)" /></td>';
+                            _html += '<td width=12%><input type="checkbox" id=id_route_'+i+' name=name_route data-username='+data[i].Username+' /></td>';
+                            _html += "</tr>";
+                        }
+                        $('#div_staticDhcpList').html(_html);
+                        var page_banner ="";
+                        if(pagenum >1){
+                            page_banner +='<a onclick="up_page(0)">首页-</a>';
+                            page_banner +='<a onclick="up_page(1)">上一页-</a>';
+                        }
+                        if(pagenum <pagecnt){
+                            page_banner +='<a onclick="up_page(2)">下一页-</a>';
+                            page_banner +='<a onclick="up_page(3)">尾页-</a>';
+                        }
+                        page_banner +='第'+pagenum+'页;共'+pagecnt+'页;';
+                        page_banner +='<form name="fop" method="post">';
+                        page_banner +='跳到第<input type="text" value="" size="1" name="p" id="p"/>页';
+                        page_banner +='<input type="button" class="button" value="确定" style="width:50px;height:28px;" onclick="up_page(4)"/>';
+                        page_banner +='</form>';
+                        $('#Article_page').html(page_banner);
+                    } else {
+                        $('#div_staticDhcpList').html('<tr><td colspan=8>暂无数据！</td></tr>');
+                    }
+                }
+            }
+        });
+    }
+    
+</script>
+</body>
+</html>
+

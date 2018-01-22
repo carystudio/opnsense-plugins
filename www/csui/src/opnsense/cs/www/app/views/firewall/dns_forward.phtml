@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<style>
+#div_portForwardList {text-align: center;}
+#div_portForwardList tr:nth-child(2n){background-color: #f1f1f1;}
+#div_portForwardList tr td:nth-child(1){width:97px;padding:0}
+#div_portForwardList tr td:nth-child(2){width:136px;padding:0}
+#div_portForwardList tr td:nth-child(3){width:170px;padding:0}
+#div_portForwardList tr td:nth-child(4){width:136px;padding:0}
+#div_portForwardList tr td:nth-child(5){width:141px;padding:0}
+</style>
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+</head>
+<body class="mainbody">
+<input type="hidden" id="lannum" name="lannum">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<form method=post name="formPortFwdAdd">
+<input type="hidden" id="ip_address" name="ip_address">
+<input type="hidden" id="addEffect" name="addEffect" value="1">
+<table border=0 width="100%"> 
+<tr><td class="content_title">DNS转发</td></tr>
+<tr id="div_content_help"><td class="content_help">您可以设置DNS转发在互联网上提供服务。</td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%"> 
+<tr>
+<td class="item_left"><script>dw(MM_onoff)</script></td>
+<td><select	id="enabled" name="enabled">
+<option value="0"><script>dw(MM_disable)</script></option>
+<option value="1"><script>dw(MM_enable)</script></option>
+</select></td>
+</tr>
+<tr><td colspan="2"><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td colspan="2" align="right"><script>dw('<input type=button class=button value="'+BT_apply+'" id="apply" name="apply">')</script></td></tr>
+</table>
+
+<br />
+<div id="dns_forward_info" style="display: none;">
+<table border=0 width="100%" > 
+<tr><td colspan="2"><b><script>dw(MM_add_rule)</script></b></td></tr>
+<tr id="div_addline"><td colspan="2"><hr size=1 noshade align=top class=bline></td></tr>
+<tr> <td>域名</td> <td><input type="text" name="Domain" id="Domain" /><span style="color: #999;"> 例：xxx.xx</span></td> </tr>
+<tr>
+<td class="item_left"><script>dw(MM_ipaddr)</script></td>
+<td><input type="text" style="width:33px" id="ip_address0" name="ips" maxlength="3" onKeyDown="return ipVali(event,this.name,0);">.
+<input type="text" style="width:33px" id="ip_address1" name="ips" maxlength="3" onKeyDown="return ipVali(event,this.name,1);">.
+<input type="text" style="width:33px" id="ip_address2" name="ips" maxlength="3" onKeyDown="return ipVali(event,this.name,2);">.
+<input type="text" style="width:33px" id="ip_address3" name="ips" maxlength="3" onKeyDown="return ipVali(event,this.name,3);"> 
+</tr>
+<tr> <td>描述</td> <td><input type="text" name="Descr" id="Descr" /></td> </tr>
+</table>
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_add+'" id="add" name="add">')</script></td></tr>
+</table>
+</div>
+</form>
+
+<form method=post name="formPortFwdDel" style="display: none;" >
+<table border=0 width="100%"> 
+<tr><td colspan="7"><b><script>dw(MM_port_forwarding_table)</script>&nbsp;&nbsp;<script>dw(JS_msg59)</script></b></td></tr>
+<tr><td colspan="7"><hr size=1 noshade align=top class=bline></td></tr>
+<tr align="center">
+<td class="item_center"><b>ID</b></td>
+<td class="item_center"><b>域名</b></td>
+<td class="item_center"><b>IP地址</b></td>
+<td class="item_center"><b>描述</b></td>
+<td class="item_center"><b><script>dw(MM_select)</script></b></td>
+</tr>
+</table>
+<div style="max-height:250px; overflow:auto">
+<table border=0 width="100%">
+<tbody id="div_portForwardList">
+</tbody>
+</table>
+</div>
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_delete+'" onClick="cs_filter_del()">&nbsp;&nbsp;&nbsp;&nbsp;\
+<input type="button" class="button" value="'+BT_reset+'" id="delresest" name="delreset" onClick="resetForm()">')</script></td></tr>
+</table>
+</form>
+<script>showFooter()</script>
+</body></html>
+<script>
+$(function(){
+
+	init();
+	
+	$('#enabled').on('change', function(event) {
+		var enable_val = this.options[this.selectedIndex];
+		if (1 == enable_val.value && 1 == Enable) {
+			$('#dns_forward_info').css('display','block');
+			$('[name="formPortFwdDel"]').css('display','block');
+		} else {
+			$('#dns_forward_info').css('display','none');
+			$('[name="formPortFwdDel"]').css('display','none');
+		}
+	});
+
+	// 添加DNS端口转发
+	$('#apply').on('click', function(event) {
+		var sub_data = {"action":"setDnsForwardStatus", "data":{'Enable':$('#enabled').val()}};
+		sub_data     = JSON.stringify(sub_data);
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: sub_data,
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					alert('应用成功！');
+					location.href = location.href;
+				} else {
+					alert('应用失败！'+data_msg_json[data.rescode]);
+				}
+			}
+		});
+	});
+
+	// 添加DNS端口转发
+	$('#add').on('click', function(event) {
+		var ip_address = '';
+		var Domain     = $('#Domain').val();
+		var Descr      = $('#Descr').val();
+		
+		for (var i = 0; i < 4; i++) {
+			ip_address += $('input[name="ips"]')[i].value + '.';
+		}
+		ip_address   = ip_address.substr(0,ip_address.length-1);
+		var data     = {"Ip":ip_address,"Domain":Domain,"Descr":Descr};
+		var sub_data = {"action":"addDnsOverwrite", "data":data};
+		sub_data     = JSON.stringify(sub_data);
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: sub_data,
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					alert('添加成功！');
+				    location.href = location.href;
+				} else {
+					alert('添加失败！'+data_msg_json[data.rescode]);
+				}
+			}
+		});
+	});
+});
+var Enable = '';
+function init() {
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: '{"action":"getDnsForwardStatus"}',
+		success:function(data){
+			if (9999 == data.rescode){
+				issetLogin();
+			}
+			var _html = '';
+			if (0 == data.rescode) {
+				var data = data.data;
+				Enable = data.Enable;
+				$('#enabled').val(data.Enable).trigger('change');
+				var overwrites = data.Overwrites;
+				if (0 < overwrites.length) {
+					for (var i in overwrites) {
+						_html += "<tr align=center >";
+						_html += "<td>"+(Number(i)+1)+"</td>";
+						_html += "<td>"+overwrites[i].Domain+"</td>";
+						_html += "<td>"+overwrites[i].Ip+"</td>";
+						_html += "<td>"+overwrites[i].Descr+"</td>";
+						_html += '<td><input type="checkbox" name="rule" value='+overwrites[i].Domain+' /></td>';
+						_html += "</tr>";
+					}
+					$('#div_portForwardList').html(_html);
+				} else {
+					$('#div_portForwardList').html('<tr><td colspan=5>暂无数据！</td></tr>');
+				}
+			}
+		}
+	});
+}
+
+function cs_filter_del() {
+	var filtering_all = $(':input[name="rule"]');
+	var del_id = [];
+	var one_msg = {};
+	filtering_all.each(function(index, el) {
+		if (el.checked) {
+			one_msg.Domain = el.value;
+			del_id.push(one_msg);
+		}
+	});
+	if (1 != del_id.length) {
+		alert('只能同时选择删除一条规则！');
+		return false;
+	}
+    var sub_data = {"action":"delDnsOverwrite", "data":one_msg};
+    sub_data = JSON.stringify(sub_data);
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: sub_data,
+		success:function(data){
+			if (9999 == data.rescode){
+				issetLogin();
+			}
+			if (0 == data.rescode) {
+				alert('删除成功！');
+			    location.href = location.href;
+			} else {
+				alert('删除失败！'+data_msg_json[data.rescode]);
+			}
+		}
+	});
+}
+
+</script>

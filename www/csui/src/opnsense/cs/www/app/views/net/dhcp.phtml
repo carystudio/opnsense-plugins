@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="-1">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" href="/css/menu.css" type="text/css">
+	<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+	<style>
+	#div_staticDhcpList tr td:nth-child(1){width:87px;padding:0}
+	#div_staticDhcpList tr td:nth-child(2){width:154px;padding:0}
+	#div_staticDhcpList tr td:nth-child(3){width:196px;padding:0}
+	#div_staticDhcpList tr td:nth-child(4){width:123px;padding:0}
+	#div_staticDhcpList tr td:nth-child(5){width:123px;padding:0}
+	</style>
+	<script language="javascript" src="/js/language.js"></script>
+	<script language="javascript" src="/js/jcommon.js"></script>
+	<script language="javascript" src="/js/ajax.js"></script>
+	<script language="javascript" src="/js/jquery.min.js"></script>
+	<script language="javascript" src="/js/json2.min.js"></script>
+	<script language="javascript" src="/js/spec.js"></script>
+	<script language="javascript">
+var responseJson, responseJsonLan,responseJson2,JsonInterfaceList;
+var rules_num, v_lanip, v_lanmsk, v_enabled, v_dhcpEnd, v_dhcpStart;
+var arr_ip, arr_mac, arr_cmnt,flag=0,obj=1;
+window.onerror=function(){return true;} 
+function disableAddFiled(){	
+	$("#mac1, #mac2, #mac3, #mac4, #mac5, #mac6, #comment").attr("disabled",true);
+	$("#ip_address0,#ip_address1,#ip_address2,#ip_address3,#lan_num").attr("disabled",true);
+	$("#add, #scan").attr("disabled",true);
+}
+function disableDelButton(){	
+	$("#del_sel, #delreset").attr("disabled",true);
+}
+function initValue(val){
+	v_lanip=responseJson['lanIp'];
+	v_lanmsk=responseJson['lanNetmask'];
+	v_enabled=responseJson['enable'];		
+	rules_num=responseJson['RuleNum'];
+	v_dhcpStart=responseJsonLan['dhcpStart'];
+	v_dhcpEnd=responseJsonLan['dhcpEnd'];
+	if (v_enabled==0) {
+		disableAddFiled();
+		disableDelButton();
+	}
+	if(v_enabled==1)
+		$("#enabled")[0].selectedIndex=1;
+	else 
+		$("#enabled")[0].selectedIndex=0;	
+	
+	if (rules_num == 0)
+		disableDelButton();
+	else{
+		arr_ip = responseJson['IpRules'].split(";");
+		arr_mac = responseJson['MacRules'].split(";");
+		arr_cmnt = responseJson['Comments'].split(";");
+	}
+//	if (v_lanip !="") 
+//		decomIP2($(":input[name=ips]"),v_lanip,0);
+	
+	var dhcpListTab=$("#div_staticDhcpList").get(0);
+	var trNode;
+if(!flag)
+{
+	for(var i=1; i<parseInt(rules_num)+1; i++){
+		trNode=dhcpListTab.insertRow(-1);
+		trNode.align="center";
+		trNode.insertCell(0).innerHTML = i;
+		trNode.insertCell(1).innerHTML = arr_ip[i-1];
+		trNode.insertCell(2).innerHTML = arr_mac[i-1];
+		trNode.insertCell(3).innerHTML = arr_cmnt[i-1];
+		trNode.insertCell(4).innerHTML = '<input type=\"checkbox\" id=id_'+(i-1)+' name=name_'+(i-1)+' value=value_'+(i-1)+'>';		
+	}
+}
+	
+	var count = 0;
+	if(v_lanmsk !=""){
+		var msk = v_lanmsk.split(".");
+		for(var k=0; k<4; k++){
+			if(msk[k] == "255"){	
+				setDisabled("#ip_address"+k, true);
+				count++;
+			}
+		}
+	}
+	if (v_lanip !="") decomIP2($(":input[name=ips]"),v_lanip,0,count);
+	if(val != 0)
+		createRulesTable(val);
+	else
+		createRulesTable($('#lannum').val());
+}
+$(function(){
+	// var postVar = {topicurl : "setting/getStaticDhcpConfig"};
+	// postVar = JSON.stringify(postVar);
+	// var postVar1 = {topicurl : "setting/getLanConfig"};
+	// postVar1 = JSON.stringify(postVar1);
+	
+	// var postVar2 = { topicurl : "setting/getlanCurInterface"};
+	// postVar2 = JSON.stringify(postVar2);
+
+	// $.ajax({
+	// 		type: "post",
+	// 		url: " /cgi-bin/cstecgi.cgi",
+	// 		data: postVar2,
+	// 		async: false,
+	// 		success: function(Data2) {
+	// 			JsonInterfaceList = JSON.parse(Data2);
+	// 		}
+	// 	});
+			
+	// $.when( $.post("/cgi-bin/cstecgi.cgi", postVar),
+	// 		$.post("/cgi-bin/cstecgi.cgi", postVar1))
+ //    .done(function( Data, Data1) {
+	// 	responseJson = JSON.parse(Data[0]);
+	// 	responseJsonLan = JSON.parse(Data1[0]);
+	// 	initValue();
+	// })
+	// .fail(function(){
+	// 	resetForm();
+	// });
+	return;
+});
+
+
+function createRulesTable(val){
+	var tmpJson;
+	var Tmp="",interface_num;
+
+	interface_num=JsonInterfaceList.length;
+	for(i=0;i<interface_num;i++)
+	{
+		tmpJson=JsonInterfaceList[i];
+		if(tmpJson.enabled == "1")
+			if((i+1) == val)
+				Tmp+="<option selected value="+(i+1)+">"+"LAN"+(i+1)+"</option>";
+			else
+				Tmp+="<option value="+(i+1)+">"+"LAN"+(i+1)+"</option>";
+	}
+	
+	if(Tmp == "")
+	{
+		FLAG=1;
+		Tmp+="<option selected value=\"0\">"+"LAN1"+"</option>";
+		$("#lan_num").html(Tmp);
+		setDisabled("#lan_num",true);
+	}
+	else
+	{
+		$("#lan_num").html(Tmp);
+	}
+	
+}
+
+function updateState(){
+	if ($("#enabled").val()=="0") {
+		disableAddFiled();
+		disableDelButton();
+	}
+
+	var postVar ={"topicurl":"setting/setStaticDhcpConfig"};
+	postVar['enabled']= $("#enabled").val();
+	postVar['addEffect']= "1";
+	uiPost(postVar);
+}
+
+function updateState_2(){	
+	flag = 1;
+	obj=$("#lan_num").val();
+	var postVar = {topicurl : "setting/getStaticDhcpConfig"};
+	postVar['lanIndex']= $("#lan_num").val();
+	postVar = JSON.stringify(postVar);
+	var postVar1 = {topicurl : "setting/getLanConfig"};
+	postVar1['lanIndex']= $("#lan_num").val();
+	postVar1 = JSON.stringify(postVar1);
+	
+	var postVar2 = { topicurl : "setting/getlanCurInterface"};
+	postVar2 = JSON.stringify(postVar2);
+
+	$.ajax({
+			type: "post",
+			url: " /cgi-bin/cstecgi.cgi",
+			data: postVar2,
+			async: false,
+			success: function(Data2) {
+				JsonInterfaceList = JSON.parse(Data2);
+			}
+		});
+			
+	$.when( $.post("/cgi-bin/cstecgi.cgi", postVar),
+			$.post("/cgi-bin/cstecgi.cgi", postVar1))
+    .done(function( Data, Data1) {
+		responseJson = JSON.parse(Data[0]);
+		responseJsonLan = JSON.parse(Data1[0]);
+		initValue($("#lan_num").val());
+	})
+	.fail(function(){
+		resetForm();
+	});
+
+}
+
+function deleteClick(){
+	var postVar="", delIndex = "";
+	var delNum = 0;
+	
+	postVar ={"topicurl":"setting/delStaticDhcpConfig"};
+	for (i=0; i< rules_num; i++) {
+		var tmpNode=$("#id_"+i).get(0);
+		if (tmpNode.checked == true){
+			delIndex += (i+";");
+			delNum++;
+		}
+  	}
+	if(delNum == 0){
+		alert(JS_msg36);
+		return false;
+	}
+	delIndex = delIndex.substring(0, delIndex.length-1);
+	postVar['delIndex'] = delIndex;
+	postVar['delNum'] = delNum;
+	uiPost(postVar);
+}
+function saveChanges(){
+	if (rules_num >= 40){
+		alert(JS_msg28);
+		return false;
+	}
+	setJSONValue({
+		'ip_address'		:	combinIP($(":input[name=ips]"))
+	});
+	
+//	var netip=v_lanip.replace(/\.\d{1,3}$/,".");
+//	$("#ip_address").val(netip+$("#ip").val());	
+	if (!checkVaildVal.IsVaildIpAddr($("#ip_address").val(), MM_ipaddr)) return false;
+	if (!checkVaildVal.IsSameIp($("#ip_address").val(), v_lanmsk, v_lanip)) {alert(JS_msg38);return false;}
+//	if (!checkVaildVal.IsIpSubnet($("#ip_address").val(), v_lanmsk, v_lanip)) {alert(JS_msg38);return false;}
+	if (checkVaildVal.IsNotDhcpPool(v_dhcpStart, v_dhcpEnd,$("#ip_address").val())){alert(JS_msg164); return false;}
+	if ($("#ip_address").val()== v_lanip) {alert(JS_msg39);return false;}
+	
+	var mac_tmp=combinMAC2($("#mac1").val(),$("#mac2").val(),$("#mac3").val(),$("#mac4").val(),$("#mac5").val(),$("#mac6").val());
+	$("#mac_address").val(mac_tmp);
+	if (!checkVaildVal.IsVaildMacAddr($("#mac_address").val()))
+		return false;
+	
+	for (var i=0; i<rules_num; i++){
+		if (($("#mac_address").val()==arr_mac[i]) || 
+			($("#mac_address").val().toLowerCase()==arr_mac[i].toLowerCase()) || 
+			($("#ip_address").val()==arr_ip[i])) {
+			alert(JS_msg29);
+			return false;
+		}
+	}
+	if ($("#comment").val()!=""){if (!checkVaildVal.IsVaildString($("#comment").val(), MM_comment,2)) return false;}	
+	return true;
+}
+function doSubmit(){
+	if (saveChanges()==false)
+		return false;
+	
+	var postVar ={"topicurl":"setting/setStaticDhcpConfig"};
+	postVar['enabled']= $("#enabled").val();
+	postVar['addIp']=$("#ip_address").val();
+	postVar['addMac']=$("#mac_address").val();
+	postVar['addCmnt']=$("#comment").val();
+	postVar['addEffect']="0";
+	//postVar['lanIndex']= $("#lan_num").val();
+	
+	uiPost(postVar);
+}
+function resultFun(data){
+	if(data=="" || data==null)
+		win78reload();
+	else
+		window.location.href='/internet/static_dhcp.asp';
+}
+function errorFun(readyState,status){win78reload();}
+function win78reload(){setTimeout(function(){Ajax.getInstance('/login.asp','',0,resultFun,errorFun);Ajax.get();},"5000");}
+</script>
+
+</head>
+<body class="mainbody" marginwidth="0" marginheight="0" id="body_div">
+<div>
+	<input type="hidden" id="lannum" name="lannum">
+	<div id="languageDiv" style="display:none"><table width="172" border="0" cellpadding="3" cellspacing="0">
+	<tbody>
+		<tr><td colspan="2" height="12"></td></tr>
+		<tr><td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+		<td><img id="img_language1" src="../style/language_check.gif" border="0"></td></tr>
+		<tr><td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		<td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td></tr>
+	</tbody></table>
+	</div>
+	<div><table id="table_div" width="700"><tbody>
+			<div>
+			<div id="ipmaclist" style=" z-index:999;  width:100%; text-align:center; display: none;position: fixed; border:1px;" >
+				<!-- Modal 新增群组-->
+				<div style="background-color:#ffffff; width:70%;" data-backdrop="static" >
+					<div style="width: 700px;height: 700px;">
+						<div style="text-align: right;">
+							<!--<button type="button" class="close" style="text-align: right;" data-dismiss="modal" aria-hidden="true" onclick="displaymodel();">
+								×</button>-->
+							<div style="height: 20px;text-align: left;">
+							<span style="text-align: left;" type="button"  ><strong>您可以查看当前客户端MAC信息。</strong></span>
+							</div>
+							<h4 style="text-align: center;">
+								LAN设备列表</h4>
+						</div>
+						<div id="devicelist" style="text-align: center;">
+
+						</div>
+						<div id="button_s" style="text-align: right;">
+
+						</div>
+					</div>
+				</div>
+			</div>
+			<tr><td>
+	<form name="formStaticDhcpAdd" id="formStaticDhcpAdd">
+		<input type="hidden" id="addEffect" name="addEffect" value="1">
+		<table border="0" width="700">
+			<tbody><tr><td class="content_title"><script>dw(MM_static_dhcp_setting)</script></td></tr>
+			<tr id="div_content_help"><td class="content_help">本页用于将本地IP地址与局域网内的某台主机的MAC地址进行绑定设置，以便长期将此IP地址分配给这台主机使用。</td></tr>
+			<tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+		</tbody></table>
+		<table border="0" width="700" style="display: none;">
+			<tbody><tr>
+				<td class="item_left"><script>dw(MM_onoff)</script></td>
+				<td><select id="enabled" name="enabled" onchange="updateState()">
+					<option value="0"><script>dw(MM_disable)</script></option>
+					<option value="1"><script>dw(MM_enable)</script></option>
+				</select></td>
+			</tr>
+			<tr><td colspan="2"><hr size="1" noshade="" align="top" class="bline"></td></tr>
+		</tbody></table>
+		<br>
+		<table border="0" width="700">
+			<tbody><tr><td colspan="2"><b><script>dw(MM_add_rule)</script></b></td>
+			</tr><tr id="div_addline"><td colspan="2"><hr size="1" noshade="" align="top" class="bline"></td></tr>
+			<tr>
+			</tr><tr style="display: none;">
+			<td class="item_left"><script>dw(MM_policy_specify)</script></td>
+			<td><select id="lan_num" name="lan_num" onchange="updateState_2()" disabled="disabled"><option value="1">LAN1</option></select></td>
+		</tr>
+		<tr><td class="item_left"><script>dw(MM_ipaddr)</script></td>
+		<td><input type="hidden" id="ip_address" name="ip_address">
+		<input type="text" style="width:25px" maxlength="3" id="ip_address0" name="ips" onkeydown="return ipVali(event,this.name,0);" >.
+		<input type="text" style="width:25px" maxlength="3" id="ip_address1" name="ips" onkeydown="return ipVali(event,this.name,1);" >.
+		<input type="text" style="width:25px" maxlength="3" id="ip_address2" name="ips" onkeydown="return ipVali(event,this.name,2);" >.
+		<input type="text" style="width:25px" maxlength="3" id="ip_address3" name="ips" onkeydown="return ipVali(event,this.name,3);" ></td>
+	</tr>
+	<tr>
+		<td class="item_left"><script>dw(MM_macaddr)</script></td>
+		<td><input type="hidden" id="mac_address" name="mac_address">
+		<input type="text" style="width:20px" maxlength="2" name="mac1" id="mac1" onfocus="this.select();" onkeyup="HWKeyUp('mac',1,event);" onkeydown="return HWKeyDown('mac', 1,event)" >:
+		<input type="text" style="width:20px" maxlength="2" name="mac2" id="mac2" onfocus="this.select();" onkeyup="HWKeyUp('mac',2,event);" onkeydown="return HWKeyDown('mac', 2,event)" >:
+		<input type="text" style="width:20px" maxlength="2" name="mac3" id="mac3" onfocus="this.select();" onkeyup="HWKeyUp('mac',3,event);" onkeydown="return HWKeyDown('mac', 3,event)" >:
+		<input type="text" style="width:20px" maxlength="2" name="mac4" id="mac4" onfocus="this.select();" onkeyup="HWKeyUp('mac',4,event);" onkeydown="return HWKeyDown('mac', 4,event)" >:
+		<input type="text" style="width:20px" maxlength="2" name="mac5" id="mac5" onfocus="this.select();" onkeyup="HWKeyUp('mac',5,event);" onkeydown="return HWKeyDown('mac', 5,event)" >:
+		<input type="text" style="width:20px" maxlength="2" name="mac6" id="mac6" onfocus="this.select();" onkeyup="HWKeyUp('mac',6,event);" onkeydown="return HWKeyDown('mac', 6,event)" >
+		<script>  dw('<input id="scan" name=scan type=button value="'+BT_scan+'" onClick=arpTblClick(\"/net/arpinfo#flag=5\")>')</script></td>
+		</td>
+	</tr>
+	<tr>
+		<td class="item_left"><script>dw(MM_comment)</script></td>
+		<td><input type="text" id="comment" name="comment" maxlength="20"></td>
+	</tr>
+</tbody></table>
+<table border="0" width="700">
+	<tbody><tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+	<tr><td height="10"></td></tr>
+	<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_add+'" id="add" onClick="cs_do_submit()">')</script></td></tr>
+</tbody></table>
+</form>
+<form name="formStaticDhcpDel" id="formStaticDhcpDel">
+<table border="0" width="700">
+	<tbody><tr><td colspan="5"><b><script>dw(MM_static_dhcp_table);dw(JS_msg59);</script></b></td></tr>
+	<tr><td colspan="5"><hr size="1" noshade="" align="top" class="bline"></td></tr>
+	<tr align="center">
+		<td class="item_center"><b>ID</b></td>
+		<td class="item_center"><b><script>dw(MM_ipaddr)</script></b></td>
+		<td class="item_center"><b><script>dw(MM_macaddr)</script></b></td>
+		<td class="item_center"><b><script>dw(MM_comment)</script></b></td>
+		<td class="item_center"><b><script>dw(MM_select)</script></b></td>
+	</tr>
+</tbody></table>
+<div style="max-height:250px; overflow:auto">
+	<table border="0" width="700">
+	<tbody id="div_staticDhcpList"></tbody>
+</table></div>
+<table border="0" width="700">
+	<tbody><tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+	<tr><td height="10"></td></tr>
+	<tr><td align="right">
+	<script>
+		dw('<input type=button class=button value="'+BT_delete+'" id="del_sel" onClick="del_dhcp_click()">&nbsp;&nbsp;&nbsp;&nbsp;\
+			<input type="button" class="button" value="'+BT_reset+'" id="delreset" onClick="resetForm()">')
+	</script>
+	</td></tr>
+</tbody></table>
+</form>
+<script>showFooter()</script></td></tr></tbody></div>
+	</table></div>
+</div>
+
+
+
+<script>
+	$(function(){
+		get_dhcp();
+	});		
+	function get_dhcp() {
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: '{"action":"getStaticDhcp", "data":{}}',
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				var _html = '';
+				if (0 == data.rescode) {
+					var data = data.data;
+					if (0 < data.length) {
+						for (var i = 0; i < data.length; i++) {
+							_html += "<tr align=center >";
+							_html += "<td>"+(i+1)+"</td>";
+							_html += "<td>"+data[i].Ip+"</td>";
+							_html += "<td>"+data[i].Mac+"</td>";
+							_html += "<td>"+data[i].Descr+"</td>";
+							_html += '<td><input type="checkbox" id=id_dhcp_'+i+' name=name_dhcp value='+data[i].Mac+' /></td>';
+							_html += "</tr>";
+						}
+						$('#div_staticDhcpList').html(_html);
+					} else {
+						$('#div_staticDhcpList').html('<tr><td colspan=5>暂无数据！</td></tr>');
+					}
+				}
+			}
+		});
+	}
+	
+	function displaymodel() {
+		//document.getElementById("body_div").style.background = "#999999";
+		document.getElementById("ipmaclist").style.display = "none";
+	}
+
+	function arpTblClick(url) {
+		openWindow(url,"_blank",700,400);
+	}
+
+	function sure_select() {
+		var info = $("input[name='select_radio']:checked").val();
+		var arr = info.split("|");
+		var ip_info = arr[0].split(".");
+		var mac_info = arr[1].split(":");
+		for(var i = 0;i<ip_info.length;i++){
+			$("#ip_address"+i).val(ip_info[i]);
+		}
+		for(var j = 0;j<mac_info.length;j++){
+			var x =j+1;
+			$("#mac"+x).val(mac_info[j]);
+		}
+		document.getElementById("ipmaclist").style.display = "none";
+	}
+	
+	function cs_do_submit() {
+		var data   = {};
+		data.Ip    = combinIP($(":input[name=ips]"));
+		if (!checkVaildVal.IsVaildIpAddr(data.Ip, MM_ipaddr)) return false;
+
+		data.Mac   = combinMAC2($("#mac1").val(),$("#mac2").val(),$("#mac3").val(),$("#mac4").val(),$("#mac5").val(),$("#mac6").val());
+		if (!checkVaildVal.IsVaildMacAddr(data.Mac)) return false;
+
+		data.Descr = $("#comment").val();
+
+		var sub_data = {"action":"addStaticDhcp", "data":data};
+		sub_data     = JSON.stringify(sub_data);
+		$('input[type="button"]').attr('disabled',true);
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: sub_data,
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					alert('添加成功！');
+					location.href = location.href;
+				} else {
+					alert('添加失败！'+data_msg_json[data.rescode]);
+				}
+				$('input[type="button"]').attr('disabled',false);
+			}
+		})
+
+	}
+
+	function del_dhcp_click() {
+		var dhcp_all = $(':input[name="name_dhcp"]');
+		var del_mac = [];
+		dhcp_all.each(function(index, el) {
+			if (el.checked) {
+				del_mac.push(el.value);
+			}
+		});
+		if (0 == del_mac.length) {
+			alert(JS_msg36);
+			return false;
+		}
+        var sub_data = {"action":"delStaticDhcp", "data":{"Mac":del_mac}};
+        sub_data = JSON.stringify(sub_data);
+		$('input[type="button"]').attr('disabled',true);
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: sub_data,
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					alert('删除成功！');
+				    location.href = location.href;
+				} else {
+					alert('删除失败！'+data_msg_json[data.rescode]);
+				}
+				$('input[type="button"]').attr('disabled',false);
+			}
+		})
+	}
+</script>
+
+</body>
+</html>
+

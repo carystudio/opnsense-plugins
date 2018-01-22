@@ -1,0 +1,675 @@
+<html>
+<head>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="/css/menu.css" type="text/css">
+    <link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+    <link rel="stylesheet" href="/css/line.css" type="text/css">
+    <link rel="stylesheet" href="/css/tab.css" type="text/css">
+    <script language="javascript" src="/js/language.js"></script>
+    <script language="javascript" src="/js/jcommon.js"></script>
+    <script language="javascript" src="/js/ajax.js"></script>
+    <script language="javascript" src="/js/jquery.min.js"></script>
+    <script language="javascript" src="/js/json2.min.js"></script>
+    <script language="javascript" src="/js/spec.js"></script>
+</head>
+<body marginwidth="0" marginheight="0" class="mainbody"><input type="hidden" id="dhcpflg" name="dhcpflg">
+
+	<span id="div_body_setting">
+		<div id="languageDiv" style="display:none">
+		<table width="172" border="0" cellpadding="3" cellspacing="0">
+			<tbody>
+				<tr> <td colspan="2" height="12"></td> </tr>
+				<tr>
+					<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+					<td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+				</tr>
+				<tr>
+					<td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+					<td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+				</tr>
+			</tbody>
+		</table>
+		</div>
+		<script>showContainer()</script><table width="700"><tbody><tr><td>
+		<form method="post" name="lanCfg">
+			<table border="0" width="100%">
+				<tbody><tr><td class="content_title"><script>dw(MM_lan_setting)</script></td></tr>
+				<tr id="div_content_help"><td class="content_help">本页面用于设置局域网内的参数，即连接上本设备LAN端口的本地网络。您可以设置IP地址、子网掩码等参数。</td></tr>
+				<tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+			</tbody></table>
+            <!-- yexk 2016年9月27日  -->
+<table border="0" width="100%" style="display:none;">
+	<tbody><tr class="mytd">
+		<td class="item_left_"> <script> dw(MM_lan_port) </script></td> <td>
+		<select id="wanIndex" name="wanIndex" onchange="wanCfgSwitch()" style="display:none;"> <option
+                value="1">LAN1</option></select>
+			<div class="back_tit" style="position:relative;">
+				<div id="tagScroll">
+					<ul id="rollBox" class="back_tit_tob" style="">
+						<input type="hidden" value="1" name="curid">
+					<li class="allclass cut_tab" id="select_1"><a onclick="changeselect(1)">LAN1</a></li></ul>
+				</div>
+				<div id="tagBnt" class="fl" style="">
+					<a class="back_tit_tob_add fr" onclick="addwlan()" title="add">
+					</a>
+				</div>
+				<input value="2" id="saveallnum" type="hidden">
+				<input value="0" id="savenownum" type="hidden">
+			</div>
+		</td>
+	</tr>
+	<tr class="mytd">
+		<td class="item_left_" style="width:100px;">
+			<script>dw(MM_wan_bind)</script>
+		</td>
+		<td style="width:60%;" id="lanBang"><div><label style="color:#DDD" for="0"><input type="checkbox"
+                                                                                          data-val="wan1" data-var_i="0"
+                                                                                          data-bindifname="eth0"
+                                                                                          value="0" name="lanBang[]"
+                                                                                          id="0" disabled="disabled">eth0 | 00:0c:29:ef:28:75 | wan1</label></div><div><label
+                    for="1"><input type="checkbox" data-val="lan1" data-var_i="1" data-bindifname="eth1" value="1"
+                                   name="lanBang[]" id="1"
+                                   checked="checked">eth1 | 00:0c:29:ef:28:7f | lan1</label></div></td>
+		<td style="width:5%"></td>
+		<td></td>
+	</tr>
+	<tr class="mytd">
+		<td></td>
+		<td>
+			<script>dw('<input type=button class=button4 value="' + MM_bind + '" onClick="bandin_()" id = "bandin" />')</script><input
+                type="button" class="button4" value="绑定" onclick="bandin_()" id="bandin" style="display: none;">
+			<script>dw('<input type=button class=button4 value="' + MM_unbind + '" onClick="jieban_()" id = "jieban" style="display:none;" />')</script><input
+                type="button" class="button4" value="解绑" onclick="jieban_()" id="jieban" style="display:none;">
+			<script>dw('<input type=button class=button4 value="' + BT_delete + '" onClick="del_wan_()" id = "del_wan" />')</script><input
+                type="button" class="button4" value="删除" onclick="del_wan_()" id="del_wan" style="display: none;">
+		</td>
+	</tr>
+	<tr id="tr_line"> <td colspan="2"> <hr size="1" noshade="" align="top" class="bline"> </td> </tr>
+</tbody></table>
+            <!-- /.yexk 2016年9月27日 -->
+<div id="all_ip_mask">
+<table border="0" width="100%">
+<tbody><tr id="div_lan_autodhcpc" style="display: none;">
+<td class="item_left"><script>dw(MM_lan_networkmode)</script></td>
+<td><select name="LanAutoDhcp" id="LanAutoDhcp" onchange="lanDhcpcSwitch()">
+<option value="0"><script>dw(MM_manual)</script>手动</option>
+<option value="1"><script>dw(MM_auto)</script>自动</option>
+</select></td>
+
+</tr><tr id="div_lan_ipaddr" style="">
+<td class="item_left"><script>dw(MM_ipaddr)</script></td>
+<td>
+	<input type="hidden" id="lanIp" name="lanIp" value="192.168.10.1">
+	<input type="text" style="width:33px" maxlength="3" id="ip1" name="ip" onkeydown="return ipVali(event,this.name,0);" onChange="autoChangePool();">.
+	<input type="text" style="width:33px" maxlength="3" id="ip2" name="ip" onkeydown="return ipVali(event,this.name,1);" onChange="autoChangePool();">.
+	<input type="text" style="width:33px" maxlength="3" id="ip3" name="ip" onkeydown="return ipVali(event,this.name,2);" onChange="autoChangePool();">.
+	<input type="text" style="width:33px" maxlength="3" id="ip4" name="ip" onkeydown="return ipVali(event,this.name,3);" onChange="autoChangePool();">
+</td>
+</tr>
+<tr id="div_lan_netmask" style="">
+<td class="item_left"><script>dw(MM_netmask)</script></td>
+<td>
+	<input type="hidden" id="lanNetmask" name="lanNetmask" value="255.255.255.0">
+	<input type="hidden" id="lanMaskLen" name="lanMaskLen">
+	<input type="text" style="width:33px" maxlength="3" id="mask1" name="mask" onkeydown="return ipVali(event,this.name,0);" onChange="autoChangePool();">.
+	<input type="text" style="width:33px" maxlength="3" id="mask2" name="mask" onkeydown="return ipVali(event,this.name,1);" onChange="autoChangePool();">.
+	<input type="text" style="width:33px" maxlength="3" id="mask3" name="mask" onkeydown="return ipVali(event,this.name,2);" onChange="autoChangePool();">.
+	<input type="text" style="width:33px" maxlength="3" id="mask4" name="mask" onkeydown="return ipVali(event,this.name,3);" onChange="autoChangePool();">
+</td>
+</tr>
+<tr id="div_lan_gateway" style="display:none">
+<td class="item_left"><script>dw(MM_default_gateway)</script></td>
+<td><input type="hidden" id="lanGateway" name="lanGateway" value="">
+<input type="text" style="width:33px" maxlength="3" id="gateway1" name="gateway"
+       onkeydown="return ipVali(event,this.name,0);" >.
+<input type="text" style="width:33px" maxlength="3" id="gateway2" name="gateway"
+       onkeydown="return ipVali(event,this.name,1);" >.
+<input type="text" style="width:33px" maxlength="3" id="gateway3" name="gateway"
+       onkeydown="return ipVali(event,this.name,2);" >.
+<input type="text" style="width:33px" maxlength="3" id="gateway4" name="gateway"
+       onkeydown="return ipVali(event,this.name,3);" ></td>
+</tr>
+<tr id="div_lan_dns" style="display:none">
+<td class="item_left"><script>dw(MM_dns_server)</script></td>
+<td><input type="hidden" id="lanDns" name="lanDns" value="">
+<input type="text" style="width:33px" maxlength="3" id="dns1" name="dns" onkeydown="return ipVali(event,this.name,0);"
+       >.
+<input type="text" style="width:33px" maxlength="3" id="dns2" name="dns" onkeydown="return ipVali(event,this.name,1);"
+       >.
+<input type="text" style="width:33px" maxlength="3" id="dns3" name="dns" onkeydown="return ipVali(event,this.name,2);"
+       >.
+<input type="text" style="width:33px" maxlength="3" id="dns4" name="dns" onkeydown="return ipVali(event,this.name,3);"
+       ></td>
+</tr>
+</tbody></table>
+
+<table id="div_dhcp_server" style="" border="0" width="100%">
+<tbody><tr>
+<td class="item_left"><script>dw(MM_dhcp_server)</script></td>
+<td><select id="lanDhcpType" name="lanDhcpType" onchange="dhcpTypeSwitch()">
+<option value="0"><script>dw(MM_disable)</script></option>
+<option value="1"><script>dw(MM_enable)</script></option>
+</select></td>
+</tr>
+</tbody></table>
+
+<table id="div_dhcp_setting" style="" border="0" width="100%">
+<tbody><tr>
+<td class="item_left"><script>dw(MM_start_ipaddr)</script></td>
+<td><input type="hidden" id="dhcpStart" name="dhcpStart" value="192.168.10.2">
+<input type="text" style="width:33px" maxlength="3" id="sip1" name="sip" onkeydown="return ipVali(event,this.name,0);">.
+<input type="text" style="width:33px" maxlength="3" id="sip2" name="sip" onkeydown="return ipVali(event,this.name,1);">.
+<input type="text" style="width:33px" maxlength="3" id="sip3" name="sip" onkeydown="return ipVali(event,this.name,2);">.
+<input type="text" style="width:33px" maxlength="3" id="sip4" name="sip" onkeydown="return ipVali(event,this.name,3);"></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_end_ipaddr)</script></td>
+<td><input type="hidden" id="dhcpEnd" name="dhcpEnd" value="192.168.10.254">
+<input type="text" style="width:33px" maxlength="3" id="eip1" name="eip" onkeydown="return ipVali(event,this.name,0);">.
+<input type="text" style="width:33px" maxlength="3" id="eip2" name="eip" onkeydown="return ipVali(event,this.name,1);">.
+<input type="text" style="width:33px" maxlength="3" id="eip3" name="eip" onkeydown="return ipVali(event,this.name,2);">.
+<input type="text" style="width:33px" maxlength="3" id="eip4" name="eip" onkeydown="return ipVali(event,this.name,3);">
+<script>// dw('<input type="button" class="button" id="dhcpClient" value="' + BT_clients + '" onClick=dhcpClientClick()>')</script>
+</td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_lease_time)</script></td>
+<td><select id="dhcpLease" name="dhcpLease">
+<option value="86400">1 <script>dw(MM_day)</script></option>
+<option value="7200">2 <script>dw(MM_hours)</script></option>
+<option value="3600">1 <script>dw(MM_hour)</script></option>
+<option value="900">15 <script>dw(MM_minutes)</script></option>
+<option value="300">5 <script>dw(MM_minutes)</script></option>
+</select></td>
+</tr>
+</tbody></table>
+
+<table border="0" width="100%">
+<tbody><tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="' + BT_apply + '" onClick="doSubmit()">')</script></td>
+</tr>
+</tbody></table>
+</div>
+</form>
+<script>showFooter()</script></td></tr></tbody></table>
+</span>
+
+<span id="div_wait" style="display:none">
+<table width="700"><tbody><tr><td><table border="0" width="100%">
+<tbody><tr><td style="font-weight:bold; font-size:14px;"><script>dw(MM_change_setting)</script></td></tr>
+<tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+</tbody></table><table border="0" width="100%">
+<tbody><tr><td rowspan="2" width="100" align="center"><img src="/style/load.gif"></td>
+<td class="msg_title"><span id="show_msg"></span></td></tr>
+<tr><td><script>dw(MM_please_wait)</script>&nbsp;<span id="show_sec"></span>&nbsp;<script>dw(MM_seconds)</script> ...</td></tr>
+<tr><td colspan="2"><hr size="1" noshade="" align="top" class="bline"></td></tr>
+</tbody></table></td></tr></tbody></table>
+</span>
+<script language="javascript">
+var lan_info = {};
+$(function () {
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: '{"action":"getLanInfo", "data":{}}',
+		success:function(data){
+			if (9999 == data.rescode){
+				issetLogin();
+			}
+			if (0 == data.rescode)
+			{
+				lan_info = data.data;
+				initValue();
+			}
+		},
+		error:function() {
+			return false;
+		}
+	});
+});
+
+function autoChangePool()
+{
+	var f=document.lanCfg;
+	$("#lanIp").val(combinIP($(":input[name=ip]")));
+	$("#lanNetmask").val(combinIP($(":input[name=mask]")));
+	var ip = $("#lanIp").val().split('.');
+	var mask = $("#lanNetmask").val().split('.');
+
+	var ipadd1 = ip[0];
+	var ipadd2 = ip[1];
+	var ipadd3 = ip[2];
+	var ipadd4 = ip[3];
+	var maskadd1 = mask[0];
+	var maskadd2 = mask[1];
+	var maskadd3 = mask[2];
+	var maskadd4 = mask[3];
+
+	if (!checkVaildVal.isMask($("#lanNetmask").val()))return false;
+	firstIP(zip(ipadd1, ipadd2, ipadd3, ipadd4),zip(maskadd1,maskadd2,maskadd3,maskadd4));
+	lastIP(zip(ipadd1, ipadd2, ipadd3, ipadd4),zip(maskadd1,maskadd2,maskadd3,maskadd4));
+
+	for(var i=0;i<4;i++){
+		document.lanCfg.sip[i].value=dhcpsart.split(".")[i];
+		document.lanCfg.eip[i].value=dhcpend.split(".")[i];
+	}
+	return true;
+}
+
+
+//IP转成整型
+function _ip2int(ip)
+{
+	var num = 0;
+	ip = ip.split(".");
+	num = Number(ip[0]) * 256 * 256 * 256 + Number(ip[1]) * 256 * 256 + Number(ip[2]) * 256 + Number(ip[3]);
+	num = num >>> 0;
+	return num;
+}
+//整型解析为IP地址
+function _int2iP(num)
+{
+	var str;
+	var tt = new Array();
+	tt[0] = (num >>> 24) >>> 0;
+	tt[1] = ((num << 8) >>> 24) >>> 0;
+	tt[2] = (num << 16) >>> 24;
+	tt[3] = (num << 24) >>> 24;
+	str = String(tt[0]) + "." + String(tt[1]) + "." + String(tt[2]) + "." + String(tt[3]);
+	return str;
+}
+
+    function initValue() {
+		v_lanip       = lan_info.Interfaces[0].Ip;
+		v_lanmsk      = lan_info.Interfaces[0].Netmask;
+		v_dhcpEnabled = lan_info.Interfaces[0].DhcpSvrEnable;
+		v_dhcpLease   = lan_info.Interfaces[0].DhcpLeasetime ?  lan_info.Interfaces[0].DhcpLeasetime : 86400 ;
+		v_dhcpsart    = lan_info.Interfaces[0].DhcpStart;
+		v_dhcpend     = lan_info.Interfaces[0].DhcpEnd;
+
+        setJSONValue({
+            'lanIp': v_lanip,
+            'lanNetmask': v_lanmsk,
+            'dhcpStart': v_dhcpsart,
+            'dhcpEnd': v_dhcpend
+        });
+
+        decomIP($(":input[name=ip]"), v_lanip, 1);
+        decomIP($(":input[name=mask]"), v_lanmsk, 1);
+		//自动生成地址池
+		var lang_ipaddress = v_lanip;
+		var lan_submask = v_lanmsk;
+		var ip_long = _ip2int(lang_ipaddress);
+		var submask_long = _ip2int(lan_submask);
+		var getsub = _ip2int("0.0.0.255");
+		var getendip = ip_long & getsub;    //获取ip地址的最后一位数
+		var ip_submask = ip_long & submask_long;
+		var start_ip = _int2iP(ip_submask+getendip+1);
+		var end_ip = _int2iP(ip_submask+254);
+		if(253 == getendip){
+			start_ip = _int2iP(ip_submask+1);
+			end_ip =  _int2iP(ip_submask+252);
+		}
+		if(254 == getendip){
+			start_ip = _int2iP(ip_submask+1);
+			end_ip =  _int2iP(ip_submask+253);
+		}
+
+        if (!v_dhcpsart){
+			decomIP($(":input[name=sip]"), start_ip, 1);
+		}else{
+			decomIP($(":input[name=sip]"), v_dhcpsart, 1);
+		}  
+        if (!v_dhcpend){
+			decomIP($(":input[name=eip]"), end_ip, 1);
+		}else{
+			decomIP($(":input[name=eip]"), v_dhcpend, 1);
+		}
+
+        $("#lanDhcpType").get(0).selectedIndex = v_dhcpEnabled;
+        supplyValue("dhcpLease", v_dhcpLease);
+        dhcpTypeSwitch();
+
+        try {
+            parent.frames["title"].initValue();
+        } catch (e) {
+        }
+    }
+
+
+	function firstIP( IP,mask){
+		$("#lanIp").val(combinIP($(":input[name=ip]")));
+		$("#lanNetmask").val(combinIP($(":input[name=mask]")));
+		var iparry = $("#lanIp").val().split('.');
+		var ipadd4 = iparry[3];
+
+		var ip1=Math.floor(IP/4);
+		var ip2=Number(IP%4);
+
+		var mask1=Math.floor(mask/4);
+		var mask2=Number(mask%4);
+
+		var network=Number(ip1&mask1)*4+Number(ip2&mask2);//3221225472
+		var firstIPAdd=0;
+		var netIP=(IP&(~mask))+1;
+		if (netIP<256&&netIP>128) {
+			netIP=1;
+			firstIPAdd = network+netIP;//1+1;
+		}else{
+			if(Number(ipadd4) > 128) netIP=1;
+			firstIPAdd =network+netIP;
+		}
+		unzip(firstIPAdd,1);
+	}
+
+	function lastIP(IP,mask){
+		var ip1=Math.floor(IP/4);
+		var ip2=Number(IP%4);
+		var mask1=Math.floor(mask/4);
+		var mask2=Number(mask%4);
+		var network=Number(ip1&mask1)*4+Number(ip2&mask2);
+		var network1=Math.floor(network/2);
+		var network2=Number(network%2);
+		var lastIPAdd=Number(network2|((~mask)%2))+Number(network1|((~mask)/2))*2-1;
+		var netIP=(IP&(~mask))+1;
+		if (netIP==129) lastIPAdd = network+netIP-2;
+		if (netIP>129&&mask==4294967040) lastIPAdd = network+netIP-2;//4294967040==[255.255.255.0]
+		if (lastIPAdd==IP) lastIPAdd--;
+		unzip(lastIPAdd,2);
+	}
+
+	function checkPool(poolstart,poolend){
+		var ip1=$("#ip1").val();
+		var ip2=$("#ip2").val();
+		var ip3=$("#ip3").val();
+		var ip4=$("#ip4").val();
+		var mask1=$("#mask1").val();
+		var mask2=$("#mask2").val();
+		var mask3=$("#mask3").val();
+		var mask4=$("#mask4").val();
+
+		//autoChangePool();
+		firstIP(zip(ip1,ip2,ip3,ip4),zip(mask1,mask2,mask3,mask4));
+		lastIP(zip(ip1,ip2,ip3,ip4),zip(mask1,mask2,mask3,mask4));
+
+		var rightPools=zip(dhcpsart.split(".")[0], dhcpsart.split(".")[1], dhcpsart.split(".")[2], dhcpsart.split(".")[3]);
+		var rightPoole=zip(dhcpend.split(".")[0], dhcpend.split(".")[1], dhcpend.split(".")[2], dhcpend.split(".")[3]);
+		var currPoolStart=zip(poolstart.split(".")[0], poolstart.split(".")[1], poolstart.split(".")[2], poolstart.split(".")[3]);
+		var currPoolEnd=zip(poolend.split(".")[0], poolend.split(".")[1], poolend.split(".")[2], poolend.split(".")[3]);
+
+		if(currPoolStart<rightPools || currPoolEnd>rightPoole){
+			alert(JS_msg125+dhcpsart+"-"+dhcpend);
+			return false;
+		}
+		return true;
+	}
+
+	function unzip(zipc, flag){
+		var var1=Math.floor(Number(zipc/16777216));
+		var remainder1=Number(zipc%16777216);
+		var var2=Math.floor(remainder1/65536);
+		var remainder2=Math.floor(remainder1%65536);
+		var var3=Math.floor(remainder2/256);
+		var var4=Math.floor(remainder2%256);
+
+		if(flag==1){
+			dhcpsart = var1+'.'+ var2 +'.'+ var3 +'.'+ var4;
+		}else if(flag==2){
+			dhcpend = var1+'.'+ var2 +'.'+ var3 +'.'+ var4;
+		}
+	}
+
+	function zip(a, b, c, d){
+		var  re = 0;
+		re=(Number(a)*16777216)+(Number(b)<<16)+(Number(c)<<8)+(Number(d));
+		return re;
+	}
+
+	function checkpPrivateNetwork(ip){
+		var aNetSegs=zip("0","0","0","0");
+		var aNetSege=zip("127","255","255","255");
+		var bNetSegs=zip("128","0","0","0");
+		var bNetSege=zip("191","255","255","255");
+		var cNetSegs=zip("192","0","0","0");
+		var cNetSege=zip("233","255","255","255");
+
+		var aPrivateNets=zip("10","0","0","0");
+		var aPrivateNete=zip("10","255","255","255");
+		var bPrivateNets=zip("172","16","0","0");
+		var bPrivateNete=zip("172","31","255","255");
+		var cPrivateNets=zip("192","168","0","0");
+		var cPrivateNete=zip("192","168","255","255");
+		var currIP=zip(ip.split(".")[0],ip.split(".")[1],ip.split(".")[2],ip.split(".")[3]);
+		if(aNetSegs<currIP && currIP<aNetSege){
+			if(aPrivateNete<currIP || currIP<aPrivateNets){
+				alert(JS_msg43+"10.0.0.0-10.255.255.255");
+				return false;
+			}else{
+				return true;
+			}
+		}else if(bNetSegs<currIP && currIP<bNetSege){
+			if(bPrivateNete<currIP || currIP<bPrivateNets){
+				alert(JS_msg43+"172.16.0.0-172.31.255.255");
+				return false;
+			}else{
+				return true;
+			}
+		}else if(cNetSegs<currIP && currIP<cNetSege){
+			if(cPrivateNete<currIP || currIP<cPrivateNets){
+				alert(JS_msg43+"192.168.0.0-192.168.255.255");
+				return false;
+			}else{
+				return true;
+			}
+		}else{
+			return false;
+		}
+	}
+
+	function saveChanges(){
+		setJSONValue({
+			'lanIp'		:	combinIP($(":input[name=ip]")),
+			'lanNetmask':	combinIP($(":input[name=mask]")),
+			'dhcpStart'	:	combinIP($(":input[name=sip]")),
+			'dhcpEnd'	:	combinIP($(":input[name=eip]"))
+		});
+		if (!checkVaildVal.IsVaildIpAddr($("#lanIp").val(),MM_ipaddr)) return false;
+		if (!checkpPrivateNetwork($("#lanIp").val())) return false;
+		if (!checkVaildVal.IsVaildMaskAddr($("#lanNetmask").val(), MM_netmask)) return false;
+		var ip1=$("#ip1").val();
+		var ip2=$("#ip2").val();
+		var ip3=$("#ip3").val();
+		var ip4=$("#ip4").val();
+		var mask1=$("#mask1").val();
+		var mask2=$("#mask2").val();
+		var mask3=$("#mask3").val();
+		var mask4=$("#mask4").val();
+
+		if ($("#lanDhcpType").get(0).selectedIndex == 1) {
+			if (!checkVaildVal.IsVaildIpAddr($("#dhcpStart").val(), "DHCP "+MM_start_ipaddr))return false;
+			if (!checkVaildVal.IsVaildIpAddr($("#dhcpEnd").val(), "DHCP "+MM_end_ipaddr))return false;
+			if (!checkVaildVal.IsIpRange($("#dhcpStart").val(), $("#dhcpEnd").val())) return false;
+			if (($("#dhcpStart").val() ==$("#lanIp").val()) || ($("#dhcpEnd").val() == $("#lanIp").val())) {alert(JS_msg39);return false;}
+			if (!checkPool($("#dhcpStart").val(),$("#dhcpEnd").val())) return false;
+			if (!checkVaildVal.IsIpSubnet($("#lanIp").val(), $("#lanNetmask").val(),$("#dhcpStart").val())){alert(JS_msg55);return false;}
+			if (!checkVaildVal.IsIpSubnet($("#lanIp").val(), $("#lanNetmask").val(),$("#dhcpEnd").val())){alert(JS_msg56);return false;}
+			if (!checkVaildVal.IsVaildNumberRange($("#dhcpLease").val(),MM_lease_time, 60, 86400)) return false;
+		}
+		$("#lanMaskLen").val(getMaskLength($("#lanNetmask").val()));
+		return true;
+	}
+
+	function uiPost3(postVar){
+		$('input').attr('disabled',true);
+		postVar = JSON.stringify(postVar);
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: postVar,
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					resultInfo = '应用成功！';
+					//location.href = location.href;
+				} else {
+					resultInfo = '应用失败！'+data_msg_json[data.rescode];
+				}
+				$('input').attr('disabled',false);
+			}
+		});
+	}
+
+	function win78reload(){
+		lanip = $('#lanIp').val();
+		var userAgent = navigator.userAgent;
+		if(userAgent.indexOf("Windows NT 6.1") > -1 || userAgent.indexOf("Windows 7") > -1 || userAgent.indexOf("Windows 8") > -1){
+			wtime = 31;
+		}else{
+			wtime = 21;
+		}
+		do_count_down();
+	}
+
+// ------------
+
+var resultInfo = '';
+var redirect_url = '';
+/*倒计时*/
+var wtime =60;
+function do_count_down() {
+	document.getElementById("show_sec").innerHTML = wtime;
+	if(resultInfo.length > 0){
+		$("#div_body_setting").show();
+		$("#div_wait").hide();
+		alert(resultInfo);
+		resultInfo='';
+	}else if (wtime > 0) {
+		wtime--;
+		setTimeout('do_count_down()', 1000);
+	}else{
+		$("#div_body_setting").show();
+		$("#div_wait").hide();
+		if(redirect_url.length>0){
+			parent.location.href = redirect_url;
+		}else{
+			alert(resultInfo);
+		}
+
+		resultInfo='';
+		//location.href = location.href;
+	}
+}
+
+	function doSubmit(){
+		var postVar                = {};
+		postVar['Ip']              = ip_zip($('[name="ip"]'),1);
+		if (!postVar['Ip']) {alert('IP地址不正确');return false;}
+		postVar['Netmask']         = ip_zip($('[name="mask"]'),2);
+		if (!postVar['Netmask']) {alert('子网掩码地址不正确');return false;}
+		postVar['DhcpSvrEnable']   = $('#lanDhcpType').val();
+		if (1 == postVar['DhcpSvrEnable']) {
+			postVar['DhcpStart']   = ip_zip($('[name="sip"]'),1);
+			if (!postVar['DhcpStart']) {alert('起始IP地址不正确');return false;}
+			postVar['DhcpEnd']     = ip_zip($('[name="eip"]'),1);
+			if (!postVar['DhcpEnd']) {alert('结束IP地址不正确');return false;}
+			//检验DHCP的地址池是否正确
+			var res1 = [], res2 = [], res3 = [];
+			addr1 = postVar.Ip.split(".");
+			addr2 = postVar.DhcpStart.split(".");
+			addr3 = postVar.DhcpEnd.split(".");
+			mask  = postVar.Netmask.split(".");
+			for(var i = 0,ilen = addr1.length; i < ilen ; i += 1){
+				res1.push(parseInt(addr1[i]) & parseInt(mask[i]));
+				res2.push(parseInt(addr2[i]) & parseInt(mask[i]));
+				res3.push(parseInt(addr3[i]) & parseInt(mask[i]));
+			}
+			if(res1.join(".") != res2.join(".") ){alert("起始IP地址错误，不在同一个网段");return false;}
+			if(res1.join(".") != res3.join(".") ){alert("结束IP地址错误，不在同一个网段");return false;}
+		}
+		postVar['DhcpReleaseTime'] = $("#dhcpLease").val();
+		if (!postVar['DhcpReleaseTime']) {alert('请选择一个租约时间');return false;}
+
+		if ($('#lanIp').val()==v_lanip){
+			$("#show_msg").html(JS_msg75);
+		}else{
+			$("#show_msg").html(JS_msg77);
+			redirect_url = 'http://'+$('#lanIp').val()+'/';
+		}
+
+
+		postVar['Interface'] = lan_info.Interfaces[0].Interface;
+		postVar['Nic'] = lan_info.Interfaces[0].Nic;
+
+		var lanDataJsonObj = {"action":"setLanInfo","data":postVar};
+		$("#div_body_setting").hide();
+		$("#div_wait").show();
+		wtime=60;
+		do_count_down();
+		uiPost3(lanDataJsonObj);
+	}
+
+	function dhcpTypeSwitch(){
+		if ($("#lanDhcpType").get(0).selectedIndex == 1)
+			$("#div_dhcp_setting").show();
+		else
+			$("#div_dhcp_setting").hide();
+	}
+
+/**
+ * 拼接和检查ip地址。
+ * @Author Yexk
+ * @Date   2017-02-07
+ * @param  {Object}   ip_obj [当前需要拼凑的表单对象]
+ * @param  {Boolean}  isCheck[0，不检查1，需要检查ip，2，检查mask]
+ * @return {String}          [返回字符串地址或者布尔值]
+ */
+function ip_zip(ip_obj,isCheck) {
+    var ippar = '';
+    for (var i = 0; i < ip_obj.length; i++) {
+        ippar += ip_obj[i].value + '.'
+    }
+    var ip = ippar.substr(0,ippar.length-1);
+    if (1 == isCheck) {
+        if (0 == isIP(ip)) return false;
+    }else if(2 == isCheck){
+        if (0 == isMask(ip)) return false;
+    }
+    return ip;
+}
+
+function isIP(str) {
+    var re=/^(?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))$/;
+    if(!re.test(str)) return 0;
+    var buf=str.split(".");
+    if(buf[3]<1||buf[3]>254) return 0;
+    return 1;
+}
+function isMask(str) {
+    if(!isIPMask(str)) return 0;
+    var buf=str.split(".");
+    var m0=buf[0],m1=buf[1],m2=buf[2],m3=buf[3];
+    if(!(m3==0||m3==128||m3==192||m3==224||m3==240||m3==248||m3==252||m3==254)) return 0;
+    if(!(m2==0||m2==128||m2==192||m2==224||m2==240||m2==248||m2==252||m2==254||m2==255)) return 0;
+    if(!(m1==0||m1==128||m1==192||m1==224||m1==240||m1==248||m1==252||m1==254||m1==255)) return 0;
+    if(!(m0==128||m0==192||m0==224||m0==240||m0==248||m0==252||m0==254||m0==255)) return 0;
+    return 1;
+}
+function isIPMask(str) {
+    var re=/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+    if(!re.test(str)) return 0;
+    var buf=str.split("."); 
+    for(i=0;i<4;i++){
+        if(buf[i]<0||buf[i]>255) return 0;
+    }
+    return 1;
+}
+</script>
+</body>
+</html>

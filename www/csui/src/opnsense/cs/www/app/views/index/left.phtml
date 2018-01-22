@@ -1,0 +1,103 @@
+<html>
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="/css/menu.css" rel="stylesheet" type="text/css">
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/forbidView.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript">
+var menumode;
+var opmode = 1, opmode_support;
+var dhcpen, igmpb, ethspeedb, v_wanmode;
+var v_WiFiDualband, v_WiFiOff_5g, v_WiFiOff_2g, apcli_enable, apclii_enable, mssidb, wdsb, wscb, wifischedule;
+var conn_limit, authType, vpnb, fwLayer7Bt;
+var usb_basic, usb_sdcardBt, usb_ftp, usb_smb, usb_printer, usb_itunes, usb_dlna, usb_bt, usb_http, usb_nginx;
+var wifidogb, csauth ,hardac ,csteWebAuth, portalV2;
+var reboot_schedule,upnpEn,syslogdEn,domainEn;
+var ra0 = 1, saveCfg;
+var counts=0;//ddns use it
+var v_wifiOpenBt,open_ddnsBt;
+var hisense_custom;
+var cloud_ac,ac_permissionBt;
+var qosv4;
+var vpn_server;
+
+function initMenu()
+{
+	
+	a = new Menu('a');
+
+	a.add(1, 0, MM_system_status,  "/index/status",	"view", opmode,usb_basic,ra0,csauth);
+	
+	a.add(3,     0, MM_network,        	"/net/wan",	"view", opmode,usb_basic,ra0,csauth);
+		a.add(301,   3, MM_wan_setting,     "/net/wan");
+		a.add(302,   3, MM_lan_setting,     "/user/lan");
+		a.add(303,   3, MM_static_dhcp_setting,  "/net/dhcp");
+		a.add(3012,  3, MM_routing,     "/net/route");
+
+	a.add(23,     0, MM_server,        	"/server/pptp",	"view", opmode,usb_basic,ra0,csauth);
+		//a.add(2301,  	23, MM_PPPOE_server,     "/server/pppoe");
+		a.add(2301,  	23, MM_PPTP_server,     "/server/pptp");
+		a.add(2302,  	23, MM_L2TP_server,     "/server/l2tp");
+		a.add(2303,  	23, MM_account_management,     "/server/account");
+		//a.add(2305,  	23, MM_user_sta,     "/server/user");
+	
+	// a.add(8,   0, MM_auth_gateway,        	"internet/wifidog.asp",	"view", opmode,usb_basic,ra0,csauth);
+	// 	a.add(801,   8, MM_auth_manage,        	"internet/wifidog.asp");
+	// 	a.add(802,   8, MM_wifidog_status,        	"auth/wifidog_status.asp");
+
+	a.add(5,    0, "QoS",        	  "/firewall/qos",	"view", opmode,usb_basic,ra0,csauth);
+		a.add(501,  5, MM_qos_setting,    "/firewall/qos");
+		//a.add(502,  5, MM_conn_limit, "/firewall/connlimit");
+
+	a.add(6,    0, MM_firewall,      	"/firewall/ipport_filtering",	"view", opmode,usb_basic,ra0,csauth);
+		//	a.add(601,  6, MM_firewall_type,    "firewall/firewall_type.asp");
+		a.add(601,  6, MM_port_filtering,   "/firewall/ipport_filtering");
+		//a.add(602,  6, MM_mac_filtering,    "/firewall/mac_filtering");
+		//a.add(603,  6, MM_url_filtering,    "/firewall/url_filtering");
+		a.add(604,  6, MM_port_forwarding,  "/firewall/port_forward");
+		a.add(605,  6, 'DNS转发',  "/firewall/dns_forward");
+		//a.add(605,  6, MM_vpnpass_setting,  "/firewall/vpnpass");
+		//a.add(606,  6, MM_dmz_setting,      "/firewall/dmz");
+		//a.add(607,  6, MM_dos_setting,      "/firewall/dos");
+		//a.add(608,  6, MM_rule_schedule_setting,  "/firewall/fwSchedule");
+	a.add(4,    0, MM_portal_set,      "/portalapi/portal",	"view", opmode,usb_basic,ra0,csauth);
+	a.add(401,  4, MM_portal_set,        "/portalapi/portal");
+	a.add(402,  4, MM_local_accounts,        	   "/portalapi/portal_accounts");
+	a.add(403,  4, MM_add_local_account,        	   "/portalapi/add_account");
+	a.add(404,  4, MM_login_user,        	   "/portalapi/loginuser");
+
+	a.add(9,    0, MM_management,      "/setting/password",	"view", opmode,usb_basic,ra0,csauth);
+		a.add(901,  9, MM_admin_setting,   "/setting/password");
+		a.add(902,  9, MM_ntp_setting,     "/setting/ntp");
+		//a.add(903,  9, MM_ddns_setting,        	     "/setting/ddns");
+		a.add(904,  9, MM_remote_management_setting, "/setting/remote");
+		// a.add(905,  9, MM_upnp_setting,    "/setting/upnp");
+		a.add(906,  9, MM_upgrade_firmware,    "/setting/upload_firmware");
+		a.add(907,  9, MM_saveconf,        	   "/setting/settings");
+		//a.add(908,  9, MM_syslog,        	   "/setting/syslog");
+		a.add(909,  9, MM_rebootsch_setting, "/setting/schedule");
+		// a.add(910,  9,  MM_wlsch_setting,  "wireless/schedulewifi.asp",	"view", opmode,usb_basic,ra0,csauth);	
+		// a.add(911,  9, MM_wifidog_setting,  "internet/wifidog.asp",	"view");
+		a.add(913,  9, MM_logout,      			"/login/logout",	"view", opmode,usb_basic,ra0,csauth);
+
+
+
+
+	$("#div_Menu").html(a.toString());
+}
+$(function(){
+	initMenu();
+});
+</script>
+</head>
+<body style="overflow-x:hidden">
+<div id="div_Menu"></div>
+<form action="/cgi-bin/cstecgi.cgi" method=POST name="langCfg" target="_top">
+<input type="hidden" name="langType">
+</form>
+</body>
+</html>

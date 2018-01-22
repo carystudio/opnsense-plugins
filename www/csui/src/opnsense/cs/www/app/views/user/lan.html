@@ -1,0 +1,230 @@
+<html><head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="css/menu.css" type="text/css">
+<link rel="stylesheet" href="css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="css/line.css" type="text/css">
+<link rel="stylesheet" href="css/tab.css" type="text/css">
+<script language="javascript" src="js/language.js"></script>
+<script language="javascript" src="js/jcommon.js"></script>
+<script language="javascript" src="js/ajax.js"></script>
+<script language="javascript" src="js/jquery.min.js"></script>
+<script language="javascript" src="js/json2.min.js"></script>
+<script language="javascript" src="js/spec.js"></script>
+</head>
+<body marginwidth="0" marginheight="0" class="mainbody"><input type="hidden" id="dhcpflg" name="dhcpflg">
+
+	<span id="div_body_setting">
+		<script>showToper()</script><div id="languageDiv" style="display:none"><table width="172" border="0" cellpadding="3" cellspacing="0">	<tbody><tr><td colspan="2" height="12"></td></tr>	<tr><td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>	<td><img id="img_language1" src="../style/language_check.gif" border="0"></td></tr>	<tr><td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>	<td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td></tr>	</tbody></table></div>
+		<script>showContainer()</script><table width="700"><tbody><tr><td>
+		<form method="post" name="lanCfg">
+			<table border="0" width="100%">
+				<tbody><tr><td class="content_title">局域网设置</td></tr>
+				<tr id="div_content_help"><td class="content_help">本页面用于设置局域网内的参数，即连接上本设备LAN端口的本地网络。您可以设置IP地址、子网掩码等参数。</td></tr>
+				<tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+			</tbody></table>
+<!-- yexk 2016年9月27日  -->
+<table border="0" width="100%">
+	<tbody><tr class="mytd">
+		<td class="item_left_"> <script> dw(MM_lan_port) </script>LAN端口 </td> <td>
+		<select id="wanIndex" name="wanIndex" onchange="wanCfgSwitch()" style="display:none;"> <option value="1">LAN1</option></select>
+			<div class="back_tit" style="position:relative;">
+				<div id="tagScroll">
+					<ul id="rollBox" class="back_tit_tob" style="">
+						<input type="hidden" value="1" name="curid">
+					<li class="allclass cut_tab" id="select_1"><a onclick="changeselect(1)">LAN1</a></li></ul>
+				</div>
+				<div id="tagBnt" class="fl" style="">
+					<a class="back_tit_tob_add fr" onclick="addwlan()" title="add">
+					</a>
+				</div>
+				<input value="2" id="saveallnum" type="hidden">
+				<input value="0" id="savenownum" type="hidden">
+			</div>
+		</td>
+	</tr>
+	<tr class="mytd">
+		<td class="item_left_" style="width:100px;">
+			<script>dw(MM_wan_bind)</script>网卡绑定
+		</td>
+		<td style="width:60%;" id="lanBang"><div><label style="color:#DDD" for="0"><input type="checkbox" data-val="wan1" data-var_i="0" data-bindifname="eth0" value="0" name="lanBang[]" id="0" disabled="disabled">eth0 | 00:0c:29:ef:28:75 | wan1</label></div><div><label for="1"><input type="checkbox" data-val="lan1" data-var_i="1" data-bindifname="eth1" value="1" name="lanBang[]" id="1" checked="checked">eth1 | 00:0c:29:ef:28:7f | lan1</label></div></td>
+		<td style="width:5%"></td>
+		<td></td>
+	</tr>
+	<tr class="mytd">
+		<td></td>
+		<td>
+			<script>dw('<input type=button class=button4 value="'+MM_bind+'" onClick="bandin_()" id = "bandin" />')</script><input type="button" class="button4" value="绑定" onclick="bandin_()" id="bandin" style="display: none;">
+			<script>dw('<input type=button class=button4 value="'+MM_unbind+'" onClick="jieban_()" id = "jieban" style="display:none;" />')</script><input type="button" class="button4" value="解绑" onclick="jieban_()" id="jieban" style="display:none;">
+			<script>dw('<input type=button class=button4 value="'+BT_delete+'" onClick="del_wan_()" id = "del_wan" />')</script><input type="button" class="button4" value="删除" onclick="del_wan_()" id="del_wan" style="display: none;">
+		</td>
+	</tr>
+	<tr id="tr_line"> <td colspan="2"> <hr size="1" noshade="" align="top" class="bline"> </td> </tr>
+</tbody></table>
+<!-- /.yexk 2016年9月27日 -->
+<div id="all_ip_mask">
+<table border="0" width="100%">
+<tbody><tr id="div_lan_autodhcpc" style="display: none;">
+<td class="item_left"><script>dw(MM_lan_networkmode)</script>组网方式</td>
+<td><select name="LanAutoDhcp" id="LanAutoDhcp" onchange="lanDhcpcSwitch()">
+<option value="0"><script>dw(MM_manual)</script>手动</option>
+<option value="1"><script>dw(MM_auto)</script>自动</option>
+</select></td>
+
+</tr><tr id="div_lan_ipaddr" style="">
+<td class="item_left"><script>dw(MM_ipaddr)</script>IP地址</td>
+<td><input type="hidden" id="lanIp" name="lanIp" value="192.168.11.190">
+<input type="text" style="width:33px" maxlength="3" id="ip1" name="ip" onkeydown="return ipVali(event,this.name,0);" onchange="autoChangePool();">.
+<input type="text" style="width:33px" maxlength="3" id="ip2" name="ip" onkeydown="return ipVali(event,this.name,1);" onchange="autoChangePool();">.
+<input type="text" style="width:33px" maxlength="3" id="ip3" name="ip" onkeydown="return ipVali(event,this.name,2);" onchange="autoChangePool();">.
+<input type="text" style="width:33px" maxlength="3" id="ip4" name="ip" onkeydown="return ipVali(event,this.name,3);" onchange="autoChangePool();"></td>
+</tr>
+<tr id="div_lan_netmask" style="">
+<td class="item_left"><script>dw(MM_netmask)</script>子网掩码</td>
+<td><input type="hidden" id="lanNetmask" name="lanNetmask" value="255.255.255.0">
+<input type="hidden" id="lanMaskLen" name="lanMaskLen">
+<input type="text" style="width:33px" maxlength="3" id="mask1" name="mask" onkeydown="return ipVali(event,this.name,0);" onchange="autoChangePool();">.
+<input type="text" style="width:33px" maxlength="3" id="mask2" name="mask" onkeydown="return ipVali(event,this.name,1);" onchange="autoChangePool();">.
+<input type="text" style="width:33px" maxlength="3" id="mask3" name="mask" onkeydown="return ipVali(event,this.name,2);" onchange="autoChangePool();">.
+<input type="text" style="width:33px" maxlength="3" id="mask4" name="mask" onkeydown="return ipVali(event,this.name,3);" onchange="autoChangePool();"></td>
+</tr>
+<tr id="div_lan_gateway" style="display:none">
+<td class="item_left"><script>dw(MM_default_gateway)</script>默认网关</td>
+<td><input type="hidden" id="lanGateway" name="lanGateway" value="">
+<input type="text" style="width:33px" maxlength="3" id="gateway1" name="gateway" onkeydown="return ipVali(event,this.name,0);" onchange="autoChangePool();">.
+<input type="text" style="width:33px" maxlength="3" id="gateway2" name="gateway" onkeydown="return ipVali(event,this.name,1);" onchange="autoChangePool();">.
+<input type="text" style="width:33px" maxlength="3" id="gateway3" name="gateway" onkeydown="return ipVali(event,this.name,2);" onchange="autoChangePool();">.
+<input type="text" style="width:33px" maxlength="3" id="gateway4" name="gateway" onkeydown="return ipVali(event,this.name,3);" onchange="autoChangePool();"></td>
+</tr>
+<tr id="div_lan_dns" style="display:none">
+<td class="item_left"><script>dw(MM_dns_server)</script>DNS服务器</td>
+<td><input type="hidden" id="lanDns" name="lanDns" value="">
+<input type="text" style="width:33px" maxlength="3" id="dns1" name="dns" onkeydown="return ipVali(event,this.name,0);" onchange="autoChangePool();">.
+<input type="text" style="width:33px" maxlength="3" id="dns2" name="dns" onkeydown="return ipVali(event,this.name,1);" onchange="autoChangePool();">.
+<input type="text" style="width:33px" maxlength="3" id="dns3" name="dns" onkeydown="return ipVali(event,this.name,2);" onchange="autoChangePool();">.
+<input type="text" style="width:33px" maxlength="3" id="dns4" name="dns" onkeydown="return ipVali(event,this.name,3);" onchange="autoChangePool();"></td>
+</tr>
+
+<tr>
+<td class="item_left"><script>dw(MM_mwan3_maxbw)</script>最大带宽</td>
+<td>
+    <input type="text" id="lanMaxBw" name="lanMaxBw" size="4" maxlength="6">
+    &nbsp;&nbsp;&nbsp;
+	<script>
+        dw(MM_mwan3_maxbw_message_down)
+    </script>最大下载带宽
+    125000KB=1000Mb
+</td>
+</tr>
+</tbody></table>
+
+<table id="div_sec_lan" border="0" width="100%" style="display: none;">
+<tbody><tr><td colspan="2"><hr size="1" noshade="" align="top" class="bline"></td></tr>
+<tr id="div_seclan_autodhcpc">
+<td class="item_left"><script>dw(MM_lan_networkmode)</script>组网方式</td>
+<td><select name="SecLanAutoDhcp" id="SecLanAutoDhcp" onchange="lanDhcpcSwitch()">
+<option value="0"><script>dw(MM_manual)</script>手动</option>
+<option value="1"><script>dw(MM_auto)</script>自动</option>
+</select></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_secipaddr)</script>第二IP地址</td>
+<td><input type="hidden" id="seclanIp" name="seclanIp">
+<input type="text" style="width:33px" maxlength="3" id="secip1" name="secip" onkeydown="return ipVali(event,this.name,0);">.
+<input type="text" style="width:33px" maxlength="3" id="secip2" name="secip" onkeydown="return ipVali(event,this.name,1);">.
+<input type="text" style="width:33px" maxlength="3" id="secip3" name="secip" onkeydown="return ipVali(event,this.name,2);">.
+<input type="text" style="width:33px" maxlength="3" id="secip4" name="secip" onkeydown="return ipVali(event,this.name,3);"></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_secnetmask)</script>第二子网掩码</td>
+<td><input type="hidden" id="seclanNetmask" name="seclanNetmask">
+<input type="hidden" id="seclanMaskLen" name="seclanMaskLen">
+<input type="text" style="width:33px" maxlength="3" id="secmask1" name="secmask" onkeydown="return ipVali(event,this.name,0);">.
+<input type="text" style="width:33px" maxlength="3" id="secmask2" name="secmask" onkeydown="return ipVali(event,this.name,1);">.
+<input type="text" style="width:33px" maxlength="3" id="secmask3" name="secmask" onkeydown="return ipVali(event,this.name,2);">.
+<input type="text" style="width:33px" maxlength="3" id="secmask4" name="secmask" onkeydown="return ipVali(event,this.name,3);"></td>
+</tr>
+</tbody></table>
+
+<table id="div_dhcp_server" style="" border="0" width="100%">
+<tbody><tr>
+<td class="item_left"><script>dw(MM_dhcp_server)</script>DHCP服务器</td>
+<td><select id="lanDhcpType" name="lanDhcpType" onchange="dhcpTypeSwitch()">
+<option value="0"><script>dw(MM_disable)</script>禁用</option>
+<option value="1"><script>dw(MM_enable)</script>启用</option>
+</select></td>
+</tr>
+</tbody></table>
+
+<table id="div_dhcp_setting" style="" border="0" width="100%">
+<tbody><tr>
+<td class="item_left"><script>dw(MM_start_ipaddr)</script>起始IP地址</td>
+<td><input type="hidden" id="dhcpStart" name="dhcpStart" value="192.168.10.2">
+<input type="text" style="width:33px" maxlength="3" id="sip1" name="sip" onkeydown="return ipVali(event,this.name,0);">.
+<input type="text" style="width:33px" maxlength="3" id="sip2" name="sip" onkeydown="return ipVali(event,this.name,1);">.
+<input type="text" style="width:33px" maxlength="3" id="sip3" name="sip" onkeydown="return ipVali(event,this.name,2);">.
+<input type="text" style="width:33px" maxlength="3" id="sip4" name="sip" onkeydown="return ipVali(event,this.name,3);"></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_end_ipaddr)</script>结束IP地址</td>
+<td><input type="hidden" id="dhcpEnd" name="dhcpEnd" value="192.168.10.254">
+<input type="text" style="width:33px" maxlength="3" id="eip1" name="eip" onkeydown="return ipVali(event,this.name,0);">.
+<input type="text" style="width:33px" maxlength="3" id="eip2" name="eip" onkeydown="return ipVali(event,this.name,1);">.
+<input type="text" style="width:33px" maxlength="3" id="eip3" name="eip" onkeydown="return ipVali(event,this.name,2);">.
+<input type="text" style="width:33px" maxlength="3" id="eip4" name="eip" onkeydown="return ipVali(event,this.name,3);">
+<script>dw('<input type="button" class="button" id="dhcpClient" value="'+BT_clients+'" onClick=dhcpClientClick()>')</script><input type="button" class="button" id="dhcpClient" value="显示客户端" onclick="dhcpClientClick()"></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_lease_time)</script>租约时间</td>
+<td><select id="dhcpLease" name="dhcpLease">
+<option value="24h">1 <script>dw(MM_day)</script>天</option>
+<option value="2h">2 <script>dw(MM_hours)</script>小时</option>
+<option value="1h">1 <script>dw(MM_hour)</script>小时</option>
+<option value="15m">15 <script>dw(MM_minutes)</script>分钟</option>
+<option value="5m">5 <script>dw(MM_minutes)</script>分钟</option>
+</select></td>
+</tr>
+</tbody></table>
+
+<table id="div_lan_ext" border="0" width="100%">
+<tbody><tr>
+<td class="item_left"><script>dw(MM_lan_chat_h)</script>允许相互访问LAN</td>
+<td><select id="lan_chat" name="lan_chat">
+<option value="0"><script>dw(MM_disable)</script>禁用</option>
+<option value="1"><script>dw(MM_enable)</script>启用</option>
+</select></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_lan_pppoed)</script>PPPoE服务器</td>
+<td><select id="lan_pppoed" name="lan_pppoed">
+<option value="0"><script>dw(MM_disable)</script>禁用</option>
+<option value="1"><script>dw(MM_enable)</script>启用</option>
+</select></td>
+</tr>
+</tbody></table>
+
+<table border="0" width="100%">
+<tbody><tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_apply+'" onClick="doSubmit()">')</script><input type="button" class="button" value="应用" onclick="doSubmit()"></td>
+</tr>
+</tbody></table>
+</div>
+</form>
+<script>showFooter()</script></td></tr></tbody></table>
+</span>
+
+<span id="div_wait" style="display:none">
+<table width="700"><tbody><tr><td><table border="0" width="100%">
+<tbody><tr><td style="font-weight:bold; font-size:14px;"><script>dw(MM_change_setting)</script>正在处理</td></tr>
+<tr><td><hr size="1" noshade="" align="top" class="bline"></td></tr>
+</tbody></table><table border="0" width="100%">
+<tbody><tr><td rowspan="2" width="100" align="center"><img src="/style/load.gif"></td>
+<td class="msg_title"><span id="show_msg"></span></td></tr>
+<tr><td><script>dw(MM_please_wait)</script>请稍等&nbsp;<span id="show_sec"></span>&nbsp;<script>dw(MM_seconds)</script>秒 ...</td></tr>
+<tr><td colspan="2"><hr size="1" noshade="" align="top" class="bline"></td></tr>
+</tbody></table></td></tr></tbody></table>
+</span>
+
+</body></html>

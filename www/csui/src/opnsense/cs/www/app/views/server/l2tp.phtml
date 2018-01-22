@@ -1,0 +1,236 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+<script language="javascript">
+$(function(){
+	init();
+});
+function init() {
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: '{"action":"getL2tpStatus"}',
+		success:function(data){
+			console.log(data);
+			if (9999 == data.rescode){
+				issetLogin();
+			}
+			if (0 == data.rescode) {
+				var Enable = data.data.Enable;
+				if(Enable !=0){
+					document.getElementById("l2tpserver").value = "1" ;
+					$("#div_l2tp").show();
+				}else{
+					$("#div_l2tp").hide();
+				}
+				var get_IpStart = data.data.ClientIpStart.split('.');
+				var get_IpEnd = data.data.ClientIpEnd.split('.');
+				var get_LocalIp = data.data.LocalIp.split('.');
+				var get_Dns1 = data.data.Dns1.split('.');
+				var get_Dns2 = data.data.Dns2.split('.');
+				var get_Wins = data.data.Wins.split('.');
+				for (var i = 0;get_IpStart.length >i; i++) {
+					$('input[name="sip"]')[i].value = get_IpStart[i];
+					$('input[name="eip"]')[i].value = get_IpEnd[i];
+					$('input[name="localip"]')[i].value = get_LocalIp[i];
+				}
+				if(get_Dns1 !=""){
+					for (var i = 0;get_Dns1.length >i; i++){
+						$('input[name="wanpridns"]')[i].value = get_Dns1[i];
+					}
+				}
+				if(get_Dns2 !=""){
+					for (var i = 0;get_Dns2.length >i; i++){
+						$('input[name="wansecdns"]')[i].value = get_Dns2[i];
+					}
+				}
+				if(get_Wins !=""){
+					for (var i = 0;get_Wins.length >i; i++){
+						$('input[name="winslocalip"]')[i].value = get_Wins[i];
+					}
+				}
+				if(data.data.AuthType == "chap"){
+					document.getElementById("mppeencrypt").value = "chap" ;
+				}
+				if(data.data.AuthType == "pap"){
+					document.getElementById("mppeencrypt").value = "pap" ;
+				}
+			}
+		}
+	});
+}
+
+function L2tpEnabledSwitch(){
+	if($("#l2tpserver").val() == 0){
+		$("#div_l2tp").hide();
+	}else{
+		$("#div_l2tp").show();
+	}
+}
+
+function doSubmit(){
+	var data = {};
+	if($('#l2tpserver').val() == 1){
+		setJSONValue({
+			'pridns'		:	combinIP($(":input[name=wanpridns]")),
+			'secdns'		:	combinIP($(":input[name=wansecdns]")),
+			'StarAddr'	:	combinIP($(":input[name=sip]")),
+			'EndAddr'	:	combinIP($(":input[name=eip]")),
+			'serveraddr'		:	combinIP($(":input[name=localip]")),
+			'winsserveraddr'		:	combinIP($(":input[name=winslocalip]"))
+		});
+		if (!checkVaildVal.IsVaildIpAddr($("#serveraddr").val(),MM_server_ipaddr)) return false;
+		if (!checkVaildVal.IsVaildIpAddr($("#StarAddr").val(),MM_start_ipaddr)) return false;
+		if (!checkVaildVal.IsVaildIpAddr($("#EndAddr").val(),MM_end_ipaddr)) return false;
+		if (!checkVaildVal.IsIpRange($("#StarAddr").val(), $("#EndAddr").val())) return false;
+		data.Enable = $('#l2tpserver').val();
+		data.LocalIp = $('#serveraddr').val();
+		data.ClientIpStart = $('#StarAddr').val();
+		data.ClientIpEnd = $('#EndAddr').val();
+		data.Dns1 = $('#pridns').val();
+		data.Dns2 = $('#secdns').val();
+		data.Wins = $('#winsserveraddr').val();
+		data.AuthType = $('#mppeencrypt').val();
+	} else{
+		data.Enable = $('#l2tpserver').val();
+	}
+	var sub_data = {"action":"setL2tpStatus", "data":data};
+	sub_data = JSON.stringify(sub_data);
+	$(":input").attr('disabled',true);
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: sub_data,
+		success:function(data){
+			if (9999 == data.rescode){
+				issetLogin();
+			}
+			if (0 == data.rescode) {
+				alert('设置成功！');
+				location.href = location.href;
+			} else {
+				alert('设置失败！'+data_msg_json[data.rescode]);
+			}
+			$(":input").attr('disabled',false);
+		}
+	});
+}
+</script>
+</head>
+<body class="mainbody">
+<div id="languageDiv" style="display:none">
+<table width="172" border="0" cellpadding="3" cellspacing="0">
+<tr><td colspan="2" height="12"></td></tr>
+<tr>
+<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+<td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+</tr>
+<tr>
+<td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+<td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+</tr>
+</table>
+</div>
+<script>showContainer()</script>
+<form method=post name="vpnpass">
+<table border=0 width="100%"> 
+<tr><td class="content_title"><script>dw(MM_L2TP_server)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%">
+<tr>
+<td class="item_left"><script>dw(MM_L2TP_server)</script></td>
+<td><select id="l2tpserver" name="l2tpserver"  onChange="L2tpEnabledSwitch()">
+<option value="0"><script>dw(MM_disable)</script></option>
+<option value="1"><script>dw(MM_enable)</script></option>
+</select></td>
+</tr>
+</table>
+
+<table id="div_l2tp" border=0 width="100%" style="display:none">
+<tr>
+<td height="10"></td>
+</tr>
+<tr>
+<td colspan="2"><b><script>dw(MM_client_pool)</script></b></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_start_ipaddr)</script></td>
+<td><input type="hidden" id="StarAddr" name="StarAddr">
+<input type="text" style="width:33px" maxlength="3" id="sip1" name="sip" onKeyDown="return ipVali(event,this.name,0);">. 
+<input type="text" style="width:33px" maxlength="3" id="sip2" name="sip" onKeyDown="return ipVali(event,this.name,1);">. 
+<input type="text" style="width:33px" maxlength="3" id="sip3" name="sip" onKeyDown="return ipVali(event,this.name,2);">. 
+<input type="text" style="width:33px" maxlength="3" id="sip4" name="sip" onKeyDown="return ipVali(event,this.name,3);"></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_end_ipaddr)</script></td>
+<td><input type="hidden" id="EndAddr" name="EndAddr">
+<input type="text" style="width:33px" maxlength="3" id="eip1" name="eip" onKeyDown="return ipVali(event,this.name,0);">. 
+<input type="text" style="width:33px" maxlength="3" id="eip2" name="eip" onKeyDown="return ipVali(event,this.name,1);">. 
+<input type="text" style="width:33px" maxlength="3" id="eip3" name="eip" onKeyDown="return ipVali(event,this.name,2);">. 
+<input type="text" style="width:33px" maxlength="3" id="eip4" name="eip" onKeyDown="return ipVali(event,this.name,3);"></td>
+</tr>
+<tr>
+<td height="10"></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_server_addr)</script></td>
+<td><input type="hidden" id="serveraddr" name="serveraddr">
+<input type="text" style="width:33px" maxlength="3" id="localip1" name="localip" onKeyDown="return ipVali(event,this.name,0);" >. 
+<input type="text" style="width:33px" maxlength="3" id="localip2" name="localip" onKeyDown="return ipVali(event,this.name,1);" >. 
+<input type="text" style="width:33px" maxlength="3" id="localip3" name="localip" onKeyDown="return ipVali(event,this.name,2);" >. 
+<input type="text" style="width:33px" maxlength="3" id="localip4" name="localip" onKeyDown="return ipVali(event,this.name,3);" ></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_pridns)</script></td>
+<td><input type="hidden" id="pridns" name="pridns">
+<input type="text" style="width:33px" maxlength="3" id="wanpridns1" name="wanpridns" onKeyDown="return ipVali(event,this.name,0);" >. 
+<input type="text" style="width:33px" maxlength="3" id="wanpridns2" name="wanpridns" onKeyDown="return ipVali(event,this.name,1);" >. 
+<input type="text" style="width:33px" maxlength="3" id="wanpridns3" name="wanpridns" onKeyDown="return ipVali(event,this.name,2);" >. 
+<input type="text" style="width:33px" maxlength="3" id="wanpridns4" name="wanpridns" onKeyDown="return ipVali(event,this.name,3);" ></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_secdns)</script></td>
+<td><input type="hidden" id="secdns" name="secdns">
+<input type="text" style="width:33px" maxlength="3" id="wansecdns1" name="wansecdns" onKeyDown="return ipVali(event,this.name,0);" >. 
+<input type="text" style="width:33px" maxlength="3" id="wansecdns2" name="wansecdns" onKeyDown="return ipVali(event,this.name,1);" >. 
+<input type="text" style="width:33px" maxlength="3" id="wansecdns3" name="wansecdns" onKeyDown="return ipVali(event,this.name,2);" >. 
+<input type="text" style="width:33px" maxlength="3" id="wansecdns4" name="wansecdns" onKeyDown="return ipVali(event,this.name,3);" ></td>	
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_winsserver_addr)</script></td>
+<td><input type="hidden" id="winsserveraddr" name="winsserveraddr">
+<input type="text" style="width:33px" maxlength="3" id="winslocalip1" name="winslocalip" onKeyDown="return ipVali(event,this.name,0);" >.
+<input type="text" style="width:33px" maxlength="3" id="winslocalip2" name="winslocalip" onKeyDown="return ipVali(event,this.name,1);" >.
+<input type="text" style="width:33px" maxlength="3" id="winslocalip3" name="winslocalip" onKeyDown="return ipVali(event,this.name,2);" >.
+<input type="text" style="width:33px" maxlength="3" id="winslocalip4" name="winslocalip" onKeyDown="return ipVali(event,this.name,3);" ></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_Authenticat_Type)</script></td>
+<td><select id="mppeencrypt" name="mppeencrypt">
+<option value="chap">chap</option>
+<option value="pap">pap</option>
+</select></td>
+</tr>
+</table>
+<table border=0 width="100%">
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_apply+'" onClick="doSubmit()">')</script></td></tr>
+</table>
+</form>
+<script>showFooter()</script>
+</body></html>

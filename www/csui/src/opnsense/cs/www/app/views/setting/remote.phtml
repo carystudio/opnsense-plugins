@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<title></title>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+<script language="javascript">
+
+	$(function(){
+		init();
+	});
+	function init() {
+		var _html = '';
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: '{"action":"getRemoteAccess"}',
+			success:function(data){
+				console.log(data);
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					var port = data.data.Web;
+					var ssh_port = data.data.Ssh;
+					if(port !=0){
+						document.getElementById("rmEnabled").value = "1" ;
+						$("#div_port").show();
+						document.getElementById("port").value = port ;
+					}
+					if (ssh_port !=0){
+						document.getElementById("sshEnabled").value = "1" ;
+						$("#div_ssh_port").show();
+						document.getElementById("ssh_port").value = ssh_port ;
+					}
+
+				}
+			}
+		});
+	}
+	var responseJson;
+	function saveChanges(){
+		if ($("#rmEnabled")[0].selectedIndex == 1) {
+			if(!checkVaildVal.IsVaildNumberRange($("#port").val(),MM_port,1024,65535)) return false;
+		}
+		if ($("#sshEnabled")[0].selectedIndex == 1) {
+			if(!checkVaildVal.IsVaildNumberRange($("#ssh_port").val(),MM_port,1,65535)) return false;
+		}
+		return true;
+	}
+
+	function doSubmit(){
+		if(saveChanges()==false) return false;
+		var data = {};
+		if($("#rmEnabled")[0].selectedIndex == 1){
+			data['Web'] = $('#port').val();
+		}else{
+			data['Web'] = "";
+		}
+		if ($("#sshEnabled")[0].selectedIndex == 1){
+			data['Ssh'] = $("#ssh_port").val();
+		}else{
+			data['Ssh'] = "";
+		}
+		var postVar ={"action":"setRemoteAccess","data":{"Web":data['Web'],"Ssh":data['Ssh']}};
+		uiPost(postVar);
+	}
+
+	function uiPost(postVar){
+		postVar = JSON.stringify(postVar);
+		$(":input").attr('disabled',true);
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: postVar,
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					alert('设置成功！');
+					location.href = location.href;
+				} else {
+					alert('设置失败！'+data_msg_json[data.rescode]);
+				}
+				$(":input").attr('disabled',false);
+			}
+		});
+	}
+	function updateState(val){
+		if(val==1){
+			if ($("#rmEnabled")[0].selectedIndex == 1)
+				$("#div_port").show();
+			else
+				$("#div_port").hide();
+		}
+		else if(val==2)
+		{
+			if ($("#sshEnabled")[0].selectedIndex == 1)
+				$("#div_ssh_port").show();
+			else
+				$("#div_ssh_port").hide();
+		}
+		else
+		{
+			if ($("#rmEnabled")[0].selectedIndex == 1)
+				$("#div_port").show();
+			else
+				$("#div_port").hide();
+
+			if ($("#sshEnabled")[0].selectedIndex == 1)
+				$("#div_ssh_port").show();
+			else
+				$("#div_ssh_port").hide();
+		}
+	}
+
+</script>
+</head>
+<body class="mainbody">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../images/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../images/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<form method=post name="remoteCfg" id="remoteCfg">
+<table border=0 width="100%"> 
+<tr><td class="content_title"><script>dw(MM_remote_management_setting)</script></td></tr>
+<tr id="div_content_help"><td class="content_help"><script>dw(MSG_remote_management)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%">
+<tr>
+<td class="item_left"><script>dw(MM_WEB)</script></td>
+<td><select name="rmEnabled" id="rmEnabled" onChange="updateState(1)">
+<option value="0"><script>dw(MM_disable)</script></option>
+<option value="1"><script>dw(MM_enable)</script></option>
+</select></td>
+</tr>
+<tr id="div_port" style="display:none">
+<td class="item_left"><script>dw(MM_port)</script></td>
+<td><input type="text" size="5" id="port" name="port" maxlength="5"> (1024-65535)</td>
+</tr>
+<tr><td height="10"></td></tr>
+<tr>
+<td class="item_left"><script>dw(MM_SSH)</script></td>
+<td><select name="sshEnabled" id="sshEnabled" onChange="updateState(2)">
+<option value="0"><script>dw(MM_disable)</script></option>
+<option value="1"><script>dw(MM_enable)</script></option>
+</select></td>
+</tr>
+<tr id="div_ssh_port" style="display:none">
+<td class="item_left"><script>dw(MM_port)</script></td>
+<td><input type="text" size="5" id="ssh_port" name="ssh_port" maxlength="5"></td>
+</tr>
+</table>
+
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_apply+'" onClick="doSubmit()">')</script></td></tr>
+</table>
+</form>
+<script>showFooter()</script>
+</body></html>

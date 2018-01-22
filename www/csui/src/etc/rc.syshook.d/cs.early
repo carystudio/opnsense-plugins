@@ -1,0 +1,32 @@
+if [ -f /etc/rc.conf.d/csui ];then
+    inited="1"
+else
+    inited="0"
+fi
+echo "csui_enable=\"YES\"">/etc/rc.conf.d/csui
+chmod +x /usr/local/etc/rc.d/csui
+chmod +x /usr/local/etc/rc.d/captiveportal
+chmod +x /usr/local/opnsense/scripts/OPNsense/CaptivePortal/allow.py
+if [ -f /usr/local/boot/brand-opnsense.4th ];then
+    cp -rf /usr/local/boot/brand-opnsense.4th /boot/brand-opnsense.4th
+fi
+if [ -f /usr/local/boot/logo-hourglass.4th ];then
+    cp -rf /usr/local/boot/logo-hourglass.4th /boot/logo-hourglass.4th
+fi
+mcode="`/bin/sh /usr/local/opnsense/cs/script/getmcode.sh`"
+echo "mcode:$mcode" 
+if [ ! -d /usr/local/opnsense/cs/tmp ];then
+	mkdir -p /usr/local/opnsense/cs/tmp
+fi
+/sbin/mount -o size=104857600 -t tmpfs tmpfs /usr/local/opnsense/cs/tmp
+echo -n $mcode>/usr/local/opnsense/cs/tmp/mcode.txt
+if [ -f /usr/local/opnsense/cs/conf/captiveportal/portal_server.txt ]; then
+    cat /usr/local/opnsense/cs/conf/captiveportal/portal_server.txt>/usr/local/opnsense/cs/tmp/portal_server
+fi
+if [ -f /usr/local/opnsense/cs/conf/captiveportal/portal_gatewayid.txt ]; then
+    cat /usr/local/opnsense/cs/conf/captiveportal/portal_gatewayid.txt>/usr/local/opnsense/cs/tmp/portal_gatewayid
+fi
+cat /usr/local/opnsense/cs/conf/captiveportal/portal_loginpage.txt>/usr/local/opnsense/cs/tmp/portal_loginpage
+if [ "$inited" = "0" ];then
+    umount /usr/local/opnsense/cs/tmp
+fi
