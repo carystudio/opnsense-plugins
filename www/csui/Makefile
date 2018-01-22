@@ -1,7 +1,7 @@
 PLUGIN_NAME=		csui
 PLUGIN_VERSION=		0.8
 PLUGIN_COMMENT=		Cary Studio style UI
-#PLUGIN_DEPENDS=		
+PLUGIN_DEPENDS=		mysql-server56
 PLUGIN_MAINTAINER=	lifuqiang@carystudio.com
 
 .include "../../Mk/plugins.mk"
