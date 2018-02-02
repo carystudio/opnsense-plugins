@@ -1,7 +1,6 @@
 <?php
 require_once('rrd.inc');
 require_once('filter.inc');
-require_once("ipsec.inc");
 require_once("services.inc");
 require_once("config.inc");
 require_once("system.inc");
@@ -63,6 +62,15 @@ class Network extends Csbackend
 
     private static $availableNic = false;
     private static $infInfo = array();
+    private static $infStatus = false;
+    
+    private static function getInfStatus(){
+    	if(!self::$infStatus){
+    		self::$infStatus = get_interfaces_info();
+    	}
+    	
+    	return self::$infStatus;
+    }
 
     private static function applyGatewayConfig(){
         global $config;
@@ -259,7 +267,12 @@ class Network extends Csbackend
 
                 }
 
-                $interfaceInfo['Status'] = get_interface_info($inf);
+		$infStatus = self::getInfStatus();
+		if(is_array($infStatus) && isset($infStatus[$inf])){
+                		$interfaceInfo['Status'] = $infStatus[$inf];
+                }else{
+                		$interfaceInfo['Status'] = array();;
+                }
                 $interfaceInfo['Status']['subnet'] = Util::maskbit2ip($interfaceInfo['Status']['subnet']);
                 self::$infInfo[$interface] = $interfaceInfo;
 
@@ -991,12 +1004,14 @@ class Network extends Csbackend
         global $config;
 
         $static_dhcp = array();
-        foreach($config['dhcpd']['lan']['staticmap'] as $macip){
+        if(is_array($config['dhcpd']['lan']['staticmap'])){
+        	foreach($config['dhcpd']['lan']['staticmap'] as $macip){
             $a_macip = array('Mac'=>$macip['mac'],'Ip'=>$macip['ipaddr'],'Descr'=>'');
             if(isset($macip['descr'])){
                 $a_macip['Descr']=$macip['descr'];
             }
             $static_dhcp[] = $a_macip;
+        	}
         }
 
         return $static_dhcp;
