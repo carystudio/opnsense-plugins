@@ -1,0 +1,338 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/ajax.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+<script language="javascript">
+var JsonPptpRules,rules_num,v_vpnEn;
+/*function initValue(){
+	rules_num=JsonPptpRules.length;
+	if (!rules_num) {
+		setDisabled("#deleteSelRule,#del_reset",true);
+	} else {
+       		setDisabled("#deleteSelRule,#del_reset",false);
+	}
+	
+	createRulesTable();
+}*/
+
+$(function(){
+	get_route_();
+});
+function get_route_() {
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: '{"action":"getPptpdUsers","data":{}}',
+		success:function(data){
+			if (9999 == data.rescode){
+				issetLogin();
+			}
+			 _html = '';
+			if (0 == data.rescode) {
+				var data = data.data;
+				if (0 < data.length) {
+					for (var i = 0; i < data.length; i++) {
+						_html += "<tr align='center' >";
+						_html += "<td>"+(i+1)+"</td>";
+						_html += "<td>"+"PPTP"+"</td>";
+						_html += "<td>"+data[i].Username+"</td>";
+						_html += "<td>"+data[i].Password+"</td>";
+						_html += "<td>"+data[i].Ip+"</td>";
+						_html += '<td><input type="checkbox" id=id_route_'+i+' name=name_route data-username='+data[i].Username+' /></td>';
+						_html += "</tr>";
+					}
+					$('#div_staticList').html(_html);
+				}
+				IDlist = data.length ;
+				get_route_2();
+			}
+		}
+	});
+}
+function get_route_2(){
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: '{"action":"getL2tpUsers","data":{}}',
+		success:function(data){
+			if (9999 == data.rescode){
+				issetLogin();
+			}
+			var _html2 = _html;
+			if (0 == data.rescode) {
+				var data = data.data;
+				var j =IDlist;
+				if (0 < data.length) {
+					for (var i =0; i < data.length; i++) {
+						_html2 += "<tr align='center' >";
+						_html2 += "<td>"+(i+j+1)+"</td>";
+						_html2 += "<td>"+"L2TP"+"</td>";
+						_html2 += "<td>"+data[i].Username+"</td>";
+						_html2 += "<td>"+data[i].Password+"</td>";
+						_html2 += "<td>"+data[i].Ip+"</td>";
+						_html2 += '<td><input type="checkbox" id=id_route_'+(i+j)+' name=name_route data-username='+data[i].Username+' data-id='+(i+j+1)+' /></td>';
+						_html2 += "</tr>";
+					}
+					$('#div_staticList').html(_html2);
+				} else {
+					if(0 >= j){
+						$('#div_staticList').html('<tr><td colspan=6>暂无数据！</td></tr>');
+					}
+				}
+			}
+		}
+	});
+}
+//function createRulesTable(){
+//	if(!rules_num) return false;
+//	var strTmp,tmpJson,protocol;
+//	for(var i=0;i<rules_num;i++){
+//		tmpJson=JsonPptpRules[i];
+//		if(tmpJson.authenticat == "*")
+//			protocol=MM_all;
+//		if(tmpJson.authenticat == "pppoe-server")
+//			protocol="PPPOE";
+//		else if(tmpJson.authenticat == "pptp-server")
+//			protocol="PPTP";
+//		else if(tmpJson.authenticat == "l2tp-server")
+//			protocol="L2TP";
+//
+//		if(tmpJson.comment == "NULL")
+//			tmpJson.comment = "- -";
+//
+//		strTmp+="<tr align=\"center\">\n";
+//		strTmp+="<td>"+(i+1)+'</td>\n';
+//		strTmp+="<td>"+tmpJson.username+"</td>\n";
+//		strTmp+="<td>"+tmpJson.password+"</td>\n";
+//		strTmp+="<td>"+protocol+"</td>\n";
+//		if(tmpJson.upbandwidth=="" && tmpJson.downbandwidth=="")
+//			strTmp+="<td>"+"- -/- -"+"</td>\n";
+//		else if(tmpJson.upbandwidth=="")
+//			strTmp+="<td>"+"- -/"+tmpJson.downbandwidth+"</td>\n";
+//		else if(tmpJson.downbandwidth=="")
+//			strTmp+="<td>"+tmpJson.upbandwidth+"/- -"+"</td>\n";
+//		else
+//			strTmp+="<td>"+tmpJson.upbandwidth+"/"+tmpJson.downbandwidth+"</td>\n";
+//		strTmp+="<td>"+tmpJson.comment+"</td>\n";
+//		strTmp+="<td>"+'<input type="checkbox" id="delRule'+i+'" /></td>\n';
+//		strTmp+="</tr>\n";
+//	}
+//	$("#div_vpnList").html(strTmp);
+//}
+
+function saveChanges(){
+	if (!checkVaildVal.IsVaildString($("#vpn_user").val(), MM_username,1)) return false;		
+	if (!checkVaildVal.IsVaildString($("#vpn_password").val(), MM_password,1)) return false;
+//	if (!checkVaildVal.IsVaildNumberRange($("#upbandwidth").val(),MM_total_uplink_speed, 0, 125000)) return false;
+//	if (!checkVaildVal.IsVaildNumberRange($("#downbandwidth").val(),MM_total_downlink_speed, 0, 125000)) return false;
+
+//	var p = JsonPptpRules;
+//	for(i=0; i<p.length;i++){
+//		var q=p[i];
+//		if(q.username == $("#vpn_user").val()){
+//			alert(JS_msg101);
+//			$("#vpn_user").focus();
+//			return false;
+//		}
+//	}
+	return true;
+}
+
+function doSubmitRules(){
+	if(saveChanges()==false)
+		return false;
+	var postVar = {};
+	postVar['Username']=$('#vpn_user').val();
+	postVar['Password']=$('#vpn_password').val();
+	if($('#vpn_ip').val() != ""){
+		str = document.getElementById("vpn_ip").value;
+		str = str.match(/(\d+)\.(\d+)\.(\d+)\.(\d+)/g);
+		if (RegExp.$1>255 || RegExp.$2>255 || RegExp.$3>255 || RegExp.$4>255){
+			alert("你输入的IP地址无效");
+			return false;
+		}
+		postVar['Ip'] = $('#vpn_ip').val();
+	}else{
+		postVar['Ip']=$('#vpn_ip').val();
+	}
+	if($('#authenticattype').val() == 2){
+		var sub_data = {"action":"addPptpdUser", "data":postVar};
+	}
+	if($('#authenticattype').val() == 3){
+		var sub_data = {"action":"addL2tpUser", "data":postVar};
+	}
+	sub_data = JSON.stringify(sub_data);
+	$(":input").attr('disabled',true);
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: sub_data,
+		success:function(data){
+			if (9999 == data.rescode){
+				issetLogin();
+			}
+			if (0 == data.rescode) {
+				alert('添加成功！');
+				location.href = location.href;
+			} else {
+				alert('添加失败！'+data_msg_json[data.rescode]);
+			}
+			$(":input").attr('disabled',false);
+		}
+	});
+}
+
+function deleteClick(){
+	var dhcp_all = $(':input[name="name_route"]');
+	var del_user = [];
+	var one_route_msg = {};
+	dhcp_all.each(function(index, el) {
+		if (el.checked) {
+			one_route_msg.Username = $(el).data('username');
+			idnote = $(el).data('id');
+			del_user.push(one_route_msg);
+			if(idnote - IDlist >0 ){
+				var sub_data = {"action":"delL2tpUser", "data":one_route_msg};
+			}else{
+				var sub_data = {"action":"delPptpdUser", "data":one_route_msg};
+			}
+			sub_data = JSON.stringify(sub_data);
+			console.log(sub_data);
+			$(":input").attr('disabled',true);
+			$.ajax({
+				url: '/webapi',
+				type: 'POST',
+				dataType: 'json',
+				data: sub_data,
+				async: false,
+				success:function(data){
+					console.log(data);
+					if (9999 == data.rescode){
+						issetLogin();
+					}
+					if (0 != data.rescode) {
+						alert('删除失败！'+data_msg_json[data.rescode]);
+						location.href = location.href;
+						error();
+					}
+					$(":input").attr('disabled',false);
+				}
+			})
+		}
+	});
+	if(0 == del_user.length){
+		alert('请选择要删除的账号！');
+		error();
+	}else{
+		alert('删除成功！');
+		location.href = location.href;
+	}
+}
+</script>
+</head>
+<style>
+	#div_staticList {text-align: center;}
+	#div_staticList tr:nth-child(2n){background-color: #f1f1f1;}
+	#div_staticList tr td:nth-child(1){width: 85px;padding:0}
+	#div_staticList tr td:nth-child(2){width: 120px;padding:0}
+	#div_staticList tr td:nth-child(3){width: 120px;padding:0}
+	#div_staticList tr td:nth-child(5){width: 130px;padding:0}
+	#div_staticList tr td:nth-child(7){width: 85px;padding:0}
+</style>
+
+<body class="mainbody">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<form  method=POST name="vpnBasicSettings">
+<table border=0 width="100%"> 
+<tr><td class="content_title"><script>dw(MM_account_management)</script></td></tr>
+<tr id="div_content_help"><td class="content_help"><script>dw(MSG_account_management)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%">
+<tr><td colspan="2"><b><script>dw(MM_add_rule)</script></b></td></tr>
+<tr id="div_addline"><td colspan="2"><hr size=1 noshade align=top class=bline></td></tr>
+<tr>
+<td class="item_left"><script>dw(MM_Authenticat_Type)</script></td>
+<td><select id="authenticattype" name="authenticattype">
+<!--<option value="1"><script>dw(MM_pppoe)</script></option>-->
+<option value="2"><script>dw(MM_pptp)</script></option>
+<option value="3"><script>dw(MM_l2pt)</script></option>
+</select></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_account)</script></td>
+<td><input type="text" id="vpn_user" name="vpn_user" maxlength="32"></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_password)</script></td>
+<td><input type="text" id="vpn_password" name="vpn_password" maxlength="32"></td>
+</tr>
+	<tr>
+		<td class="item_left">指定添加的IP</td>
+		<td><input type="text" id="vpn_ip" name="vpn_ip" maxlength="32"></td>
+	</tr>
+</table>
+
+<table border=0 width="100%">
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_add+'" id=add name=add onClick="return doSubmitRules();">')</script></td>
+</tr>
+</table>
+</form>
+
+<form action=/goform/vpnDelete method=POST name="vpnDelete">
+<table border=0 width="100%">
+<tr><td colspan="7"><b>账号列表</b></td></tr>
+<tr><td colspan="7"><hr size=1 noshade align=top class=bline></td></tr>
+<tr align="center">
+<td class="item_center" id="IDlist"><b>ID</b></td>
+<td class="item_center"><b>账号类型</b></td>
+<td class="item_center"><b><script>dw(MM_account)</script></b></td>
+<td class="item_center"><b><script>dw(MM_password)</script></b></td>
+<td class="item_center"><b>指定添加的IP</b></td>
+<td class="item_center"><b><script>dw(MM_select)</script></b></td>
+</tr>
+<tbody id="div_staticList"></tbody>
+<tbody id="div_vpnList"></tbody>
+</table>
+
+<table border=0 width="100%">
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_delete+'" id="deleteSelRule" name="deleteSelRule" onClick="deleteClick()"> &nbsp; &nbsp;\
+<input type=button class=button value="'+BT_reset+'" id="del_reset" name="del_reset" onClick="resetForm();">')</script></td>
+</tr>
+</table>
+</form>
+<script>showFooter()</script>
+</body></html>
+

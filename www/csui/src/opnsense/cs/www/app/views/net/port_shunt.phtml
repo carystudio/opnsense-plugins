@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+  <meta http-equiv="Pragma" content="no-cache" /> 
+  <meta http-equiv="Expires" content="-1" /> 
+  <link rel="stylesheet" href="/css/menu.css" type="text/css" /> 
+  <link rel="stylesheet" href="/css/normal_ws.css" type="text/css" /> 
+  <link rel="stylesheet" href="/css/line.css" type="text/css" /> 
+  <script language="javascript" src="/js/language.js"></script> 
+  <script language="javascript" src="/js/jcommon.js"></script> 
+  <script language="javascript" src="/js/ajax.js"></script> 
+  <script language="javascript" src="/js/jquery.min.js"></script> 
+  <script language="javascript" src="/js/json2.min.js"></script> 
+  <script language="javascript" src="/js/spec.js"></script> 
+ </head> 
+ <body class="mainbody"> 
+  <script>showToper()</script>
+  <div id="languageDiv" style="display:none">
+   <table width="172" border="0" cellpadding="3" cellspacing="0"> 
+    <tbody>
+     <tr>
+      <td colspan="2" height="12"></td>
+     </tr> 
+     <tr>
+      <td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td> 
+      <td><img id="img_language1" src="./port_shunt.asp_files/language_check.gif" border="0" /></td>
+     </tr> 
+     <tr>
+      <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td> 
+      <td><img id="img_language2" src="./port_shunt.asp_files/language_no_check.gif" border="0" /></td>
+     </tr> 
+    </tbody>
+   </table>
+  </div> 
+  <script>showContainer()</script>
+  <table width="700">
+   <tbody>
+    <tr>
+     <td> 
+      <form method="POST" name="vpnBasicSettings"> 
+       <table border="0" width="100%"> 
+        <tbody>
+         <tr>
+          <td class="content_title"><script>dw(MM_port_shunt)</script></td>
+         </tr> 
+        </tbody>
+       </table> 
+       <table border="0" width="100%"> 
+        <tbody>
+         <tr>
+          <td colspan="2"><b><script>dw(MM_add_rule)</script></b></td>
+         </tr> 
+         <tr id="div_addline">
+          <td colspan="2">
+           <hr size="1" noshade="" align="top" class="bline" /></td>
+         </tr> 
+         <tr> 
+          <td class="item_left"><script>dw(MM_rule_name)</script></td> 
+          <td><input type="text" id="rule_name" name="rule_name" maxlength="32" /></td> 
+         </tr> 
+         <tr> 
+          <td class="item_left"><script>dw(MM_source_addr)</script></td> 
+          <td><input type="hidden" id="src_ip" name="src_ip" /> <input type="text" style="width:33px" maxlength="3" id="sip1" name="sip" onkeydown="return ipVali(event,this.name,0);" />. <input type="text" style="width:33px" maxlength="3" id="sip2" name="sip" onkeydown="return ipVali(event,this.name,1);" />. <input type="text" style="width:33px" maxlength="3" id="sip3" name="sip" onkeydown="return ipVali(event,this.name,2);" />. <input type="text" style="width:33px" maxlength="3" id="sip4" name="sip" onkeydown="return ipVali(event,this.name,3);" /></td> 
+         </tr> 
+         <tr>
+          <td class="item_left"><script>dw(MM_dest_addr)</script></td> 
+          <td><input type="hidden" id="dest_ip" name="dest_ip" /> <input type="text" style="width:33px" maxlength="3" id="dip1" name="dip" onkeydown="return ipVali(event,this.name,0);" />. <input type="text" style="width:33px" maxlength="3" id="dip2" name="dip" onkeydown="return ipVali(event,this.name,1);" />. <input type="text" style="width:33px" maxlength="3" id="dip3" name="dip" onkeydown="return ipVali(event,this.name,2);" />. <input type="text" style="width:33px" maxlength="3" id="dip4" name="dip" onkeydown="return ipVali(event,this.name,3);" /></td> 
+         </tr> 
+         <tr> 
+          <td class="item_left"><script>dw(MM_source_port)</script></td> 
+          <td><input type="text" maxlength="5" size="5" id="src_port" name="src_port" />&nbsp;&nbsp;&nbsp;&nbsp;(1-65535)</td> 
+         </tr> 
+         <tr> 
+          <td class="item_left"><script>dw(MM_dest_port)</script></td> 
+          <td><input type="text" maxlength="5" size="5" id="dest_port" name="dest_port" />&nbsp;&nbsp;&nbsp;&nbsp;(1-65535)</td> 
+         </tr> 
+         <tr> 
+          <td class="item_left"><script>dw(MM_protocol)</script></td> 
+          <td><select id="protocol" name="protocol"> <option selected="" value="all">ALL</option> <option value="tcp">TCP</option> <option value="udp">UDP</option> </select></td> 
+         </tr> 
+         <tr> 
+          <td class="item_left"><script>dw(MM_policy_specify)</script></td> 
+          <td><select id="use_policy" name="use_policy"><option selected="" value="1">WAN1</option></select></td> 
+         </tr> 
+        </tbody>
+       </table> 
+       <table border="0" width="100%"> 
+        <tbody>
+         <tr>
+          <td>
+           <hr size="1" noshade="" align="top" class="bline" /></td>
+         </tr> 
+         <tr>
+          <td height="10"></td>
+         </tr> 
+         <tr>
+          <td align="right"><script>dw('<input type=button class=button value="'+BT_add+'" id=add name=add onClick="return doSubmitRules();">')</script></td> 
+         </tr> 
+        </tbody>
+       </table> 
+      </form> 
+      <form action="http://192.168.11.19/goform/vpnDelete" method="POST" name="vpnDelete"> 
+       <table border="0" width="100%"> 
+        <tbody>
+         <tr>
+          <td colspan="9"><b><script>dw(MM_prot_rule)</script></b></td>
+         </tr> 
+         <tr>
+          <td colspan="9">
+           <hr size="1" noshade="" align="top" class="bline" /></td>
+         </tr> 
+         <tr align="center"> 
+          <td class="item_center"><b>ID</b></td> 
+          <td class="item_center"><b><script>dw(MM_rule_name)</script></b></td> 
+          <td class="item_center"><b><script>dw(MM_source_addr)</script></b></td> 
+          <td class="item_center"><b><script>dw(MM_source_port)</script></b></td> 
+          <td class="item_center"><b><script>dw(MM_dest_addr)</script></b></td> 
+          <td class="item_center"><b><script>dw(MM_dest_port)</script></b></td> 
+          <td class="item_center"><b><script>dw(MM_protpcol)</script></b></td> 
+          <td class="item_center"><b><script>dw(MM_policy_specify)</script></b></td> 
+          <td class="item_center"><b><script>dw(MM_select)</script></b></td> 
+         </tr> 
+        </tbody>
+        <tbody id="div_vpnList"></tbody> 
+       </table> 
+       <table border="0" width="100%"> 
+        <tbody>
+         <tr>
+          <td>
+           <hr size="1" noshade="" align="top" class="bline" /></td>
+         </tr> 
+         <tr>
+          <td height="10"></td>
+         </tr> 
+         <tr>
+          <td align="right"><script>dw('<input type=button class=button value="'+BT_delete+'" id="deleteSelRule" name="deleteSelRule" onClick="return deleteClick()"> &nbsp; &nbsp; <input type=button class=button value="'+BT_reset+'" id="del_reset" name="del_reset" onClick="resetForm();">')</script></td>
+         </tr> 
+        </tbody>
+       </table> 
+      </form> <script>showFooter()</script></td>
+    </tr>
+   </tbody>
+  </table> 
+ </body>
+</html>

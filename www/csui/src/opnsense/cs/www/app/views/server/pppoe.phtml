@@ -1,0 +1,260 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+<script language="javascript">
+var responseJson, respLanJson;
+
+function pppoeEnabledSwitch(){
+	if($("#pppoeserver").val() == 0){
+		$("#div_pppoe").hide();
+	}else{
+		$("#div_pppoe").show();
+	}
+}
+
+function getIpPool(ip){
+	var re = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\-\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/;
+	if (re.test(ip)){
+		var d =  ip.split(".");
+		for (i = 0; i < 3; i++){
+			$(":input[name=sip]")[i].value=d[i];
+			$(":input[name=eip]")[i].value=d[i];
+		}
+		var p = d[3].split("-");
+		$(":input[name=sip]")[3].value=p[0];
+		$(":input[name=eip]")[3].value=d[6];
+	}
+}
+
+function setIpPool(){
+	var StarAddr = $("#StarAddr").val();
+	var EndAddr = $("#EndAddr").val();
+	var RemoteIp = StarAddr +"-"+EndAddr;
+	return RemoteIp;
+}
+
+function showLanPppoedInfo(mLan)
+{
+	var tb_tmp="";
+	tb_tmp += '<td class="item_left">'+MM_PPPOE_server_Lan+'</td>';
+	tb_tmp += '<td>';
+	for(var i=0;i<mLan.length;i++){
+		if(mLan[i]['enabled'] == 1){
+		    if(mLan[i]['pppoed_en'] == 1){
+				tb_tmp += '<label><input type=checkbox checked value='+ mLan[i].interface.toUpperCase()+' />'+ mLan[i].interface.toUpperCase()+'</label>';	    
+   		    }else{
+   		        tb_tmp += '<label><input type=checkbox value='+ mLan[i].interface.toUpperCase()+' />'+ mLan[i].interface.toUpperCase()+'</label>';
+   		    }	
+		}
+	}
+	tb_tmp +='</td>';
+	
+	$("#div_mlan_pppoed").html(tb_tmp);
+}
+
+function initValue(){	
+	$("#pppoeserver").get(0).selectedIndex=responseJson['Enabled'];
+	if (responseJson['wanpridns'] !="")  decomIP($(":input[name=wanpridns]"),responseJson['wanpridns'],1);
+	if (responseJson['wansecdns'] !="")  decomIP($(":input[name=wansecdns]"),responseJson['wansecdns'],1);
+	if (responseJson['localip'] !="")  decomIP($(":input[name=localip]"),responseJson['localip'],1);
+	getIpPool(responseJson['remoteip']);
+	
+	supplyValue("server_mtu",responseJson['servermtu']);
+	supplyValue("server_mru",responseJson['servermru']);
+	pppoeEnabledSwitch();
+
+	showLanPppoedInfo(respLanJson);
+}
+
+function doSubmit(){
+	if (!checkVaildVal.IsVaildNumber($("#server_mtu").val(), "MTU")){setValAttr("server_mtu");return false;}
+	if (!checkVaildVal.IsVaildNumberRange($("#server_mtu").val(),"MTU", 1400, 1500)){setValAttr("server_mtu");return false;}
+	if (!checkVaildVal.IsVaildNumber($("#server_mru").val(), "MRU")){setValAttr("server_mru");return false;}
+	if (!checkVaildVal.IsVaildNumberRange($("#server_mru").val(),"MRU", 1400, 1500)){setValAttr("server_mru");return false;}
+	setJSONValue({
+		'pridns'		:	combinIP($(":input[name=wanpridns]")),
+		'secdns'		:	combinIP($(":input[name=wansecdns]")),
+		'StarAddr'	:	combinIP($(":input[name=sip]")),
+		'EndAddr'	:	combinIP($(":input[name=eip]")),
+		'serveraddr'		:	combinIP($(":input[name=localip]"))
+	});
+
+	if (!checkVaildVal.IsVaildIpAddr($("#StarAddr").val(),MM_start_ipaddr)) return false;
+	if (!checkVaildVal.IsVaildIpAddr($("#EndAddr").val(),MM_end_ipaddr)) return false;
+	if (!checkVaildVal.IsVaildIpAddr($("#serveraddr").val(),MM_server_addr)) return false;
+	if (!checkVaildVal.IsVaildIpAddr($("#pridns").val(),MM_pridns)) return false;
+	if (!checkVaildVal.IsVaildIpAddr($("#secdns").val(),MM_secdns)) return false;
+	if (!checkVaildVal.IsIpRange($("#StarAddr").val(), $("#EndAddr").val())) return false;
+	
+	var postVar ={"topicurl":"setting/setPppoedConfig"};
+
+	var pppoed_lan_en="";
+	$('#div_mlan_pppoed input').each(function(i,v){
+    	pppoed_lan_en += $(v).val();
+    	if ( v.checked )
+    		pppoed_lan_en += ",1;"
+    	else
+    		pppoed_lan_en += ",0;"
+	});
+
+	if($('#pppoeserver').val() == 1){
+		postVar['Enabled']=$('#pppoeserver').val();
+		postVar['pridns']=$('#pridns').val();
+		postVar['secdns']=$("#secdns").val();
+		postVar['remoteip']=setIpPool();
+		
+		postVar['mppeencrypt']=$('#mppeencrypt').val();
+		postVar['serveraddr']=$('#serveraddr').val();
+		postVar['servermtu']=$('#server_mtu').val();
+		postVar['servermru']=$('#server_mru').val();
+
+		postVar['pppoedLanEn']=pppoed_lan_en;
+	}
+	else{
+		postVar['pppoeserver']=$('#pppoeserver').val();
+	}
+	uiPost(postVar);
+}
+
+$(function(){
+	// var postVar = {topicurl : "setting/getPppoedConfig"};
+	// postVar = JSON.stringify(postVar);
+
+	// var postVar2 = { topicurl : "setting/getlanCurInterface"};
+	// postVar2 = JSON.stringify(postVar2);
+	// $.ajax({
+	// 	type: "post",
+	// 	url: " /cgi-bin/cstecgi.cgi",
+	// 	data: postVar2,
+	// 	async: false,
+	// 	success: function(Data2) {
+	// 		respLanJson = JSON.parse(Data2);
+	// 	}
+	// });
+
+	// $.when( $.post("/cgi-bin/cstecgi.cgi", postVar))
+	// .done(function( Data) {
+	// 	responseJson = JSON.parse(Data);
+	// 	initValue();
+	// })
+	// .fail(function(){
+	// 	resetForm();
+	// });
+	// return;
+});
+
+</script>
+</head>
+<body class="mainbody">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<form method=post name="vpnpass">
+<table border=0 width="100%"> 
+<tr><td class="content_title"><script>dw(MM_PPPOE_server)</script></td></tr>
+<tr id="div_content_help"><td class="content_help"><script>dw(MSG_PPPOE_server)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%">
+<tr>
+<td class="item_left"><script>dw(MM_PPPOE_server)</script></td>
+<td><select id="pppoeserver" name="pppoeserver"  onChange="pppoeEnabledSwitch()">
+<option value="0"><script>dw(MM_disable)</script></option>
+<option value="1"><script>dw(MM_enable)</script></option>
+</select></td>
+</tr>
+</table>
+
+<table id="div_pppoe" border=0 width="100%">
+<tr>
+<td height="10"></td>
+</tr>
+<tr id="div_mlan_pppoed"></tr>
+<tr>
+<td colspan="2"><b><script>dw(MM_client_pool)</script></b></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_start_ipaddr)</script></td>
+<td><input type="hidden" id="StarAddr" name="StarAddr">
+<input type="text" style="width:33px" maxlength="3" id="sip1" name="sip" onKeyDown="return ipVali(event,this.name,0);">. 
+<input type="text" style="width:33px" maxlength="3" id="sip2" name="sip" onKeyDown="return ipVali(event,this.name,1);">. 
+<input type="text" style="width:33px" maxlength="3" id="sip3" name="sip" onKeyDown="return ipVali(event,this.name,2);">. 
+<input type="text" style="width:33px" maxlength="3" id="sip4" name="sip" onKeyDown="return ipVali(event,this.name,3);"></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_end_ipaddr)</script></td>
+<td><input type="hidden" id="EndAddr" name="EndAddr">
+<input type="text" style="width:33px" maxlength="3" id="eip1" name="eip" onKeyDown="return ipVali(event,this.name,0);">. 
+<input type="text" style="width:33px" maxlength="3" id="eip2" name="eip" onKeyDown="return ipVali(event,this.name,1);">. 
+<input type="text" style="width:33px" maxlength="3" id="eip3" name="eip" onKeyDown="return ipVali(event,this.name,2);">. 
+<input type="text" style="width:33px" maxlength="3" id="eip4" name="eip" onKeyDown="return ipVali(event,this.name,3);"></td>
+</tr>
+<tr>
+<td height="10"></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_server_addr)</script></td>
+<td><input type="hidden" id="serveraddr" name="serveraddr">
+<input type="text" style="width:33px" maxlength="3" id="localip1" name="localip" onKeyDown="return ipVali(event,this.name,0);" >. 
+<input type="text" style="width:33px" maxlength="3" id="localip2" name="localip" onKeyDown="return ipVali(event,this.name,1);" >. 
+<input type="text" style="width:33px" maxlength="3" id="localip3" name="localip" onKeyDown="return ipVali(event,this.name,2);" >. 
+<input type="text" style="width:33px" maxlength="3" id="localip4" name="localip" onKeyDown="return ipVali(event,this.name,3);" ></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_pridns)</script></td>
+<td><input type="hidden" id="pridns" name="pridns">
+<input type="text" style="width:33px" maxlength="3" id="wanpridns1" name="wanpridns" onKeyDown="return ipVali(event,this.name,0);" >. 
+<input type="text" style="width:33px" maxlength="3" id="wanpridns2" name="wanpridns" onKeyDown="return ipVali(event,this.name,1);" >. 
+<input type="text" style="width:33px" maxlength="3" id="wanpridns3" name="wanpridns" onKeyDown="return ipVali(event,this.name,2);" >. 
+<input type="text" style="width:33px" maxlength="3" id="wanpridns4" name="wanpridns" onKeyDown="return ipVali(event,this.name,3);" ></td>
+</tr>
+<tr>
+<td class="item_left"><script>dw(MM_secdns)</script></td>
+<td><input type="hidden" id="secdns" name="secdns">
+<input type="text" style="width:33px" maxlength="3" id="wansecdns1" name="wansecdns" onKeyDown="return ipVali(event,this.name,0);" >. 
+<input type="text" style="width:33px" maxlength="3" id="wansecdns2" name="wansecdns" onKeyDown="return ipVali(event,this.name,1);" >. 
+<input type="text" style="width:33px" maxlength="3" id="wansecdns3" name="wansecdns" onKeyDown="return ipVali(event,this.name,2);" >. 
+<input type="text" style="width:33px" maxlength="3" id="wansecdns4" name="wansecdns" onKeyDown="return ipVali(event,this.name,3);" ></td>	
+</tr>
+<tr>
+<td class="item_left"><script>dw("MTU")</script></td>
+<td><input type="text" id="server_mtu" name="server_mtu" size="4" maxlength="32">&nbsp; (1400~1500)</td>
+</tr>
+<tr>
+<td class="item_left"><script>dw("MRU")</script></td>
+<td><input type="text" id="server_mru" name="server_mru" size="4" maxlength="32">&nbsp; (1400~1500)</td>
+</tr>
+</table>
+
+<table border=0 width="100%">
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_apply+'" onClick="doSubmit()">')</script></td></tr>
+</table>
+
+</form>
+<script>showFooter()</script>
+</body></html>
+

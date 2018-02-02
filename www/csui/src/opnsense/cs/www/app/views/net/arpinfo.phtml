@@ -1,0 +1,120 @@
+<html>
+<head>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="../style/normal_ws.css" type="text/css">
+    <link rel="stylesheet" href="../style/line.css" type="text/css">
+    <script language="javascript" src="../js/language.js"></script>
+    <script language="javascript" src="../js/jcommon.js"></script>
+    <script language="javascript" src="../js/jquery.min.js"></script>
+    <script language="javascript" src="../js/json2.min.js"></script>
+    <script language="javascript">
+        var flag=eval(location.href.split("#")[1]);
+        var responseJson;
+
+        function selectArpTbl(ip, mac){
+            if(window.opener.closed){
+                alert(JS_msg68);
+                window.close();
+                return false;
+            }
+            if (flag==1){
+                window.opener.document.formFilterAdd.mac1.value = mac.split(":")[0];
+                window.opener.document.formFilterAdd.mac2.value = mac.split(":")[1];
+                window.opener.document.formFilterAdd.mac3.value = mac.split(":")[2];
+                window.opener.document.formFilterAdd.mac4.value = mac.split(":")[3];
+                window.opener.document.formFilterAdd.mac5.value = mac.split(":")[4];
+                window.opener.document.formFilterAdd.mac6.value = mac.split(":")[5];
+            }else if (flag==2){
+                window.opener.document.formFilterAdd.ip_address0.value = ip.split(".")[0];
+                window.opener.document.formFilterAdd.ip_address1.value = ip.split(".")[1];
+                window.opener.document.formFilterAdd.ip_address2.value = ip.split(".")[2];
+                window.opener.document.formFilterAdd.ip_address3.value = ip.split(".")[3];
+            }else if (flag==3){
+                window.opener.document.formPortFwdAdd.ip_address0.value = ip.split(".")[0];
+                window.opener.document.formPortFwdAdd.ip_address1.value = ip.split(".")[1];
+                window.opener.document.formPortFwdAdd.ip_address2.value = ip.split(".")[2];
+                window.opener.document.formPortFwdAdd.ip_address3.value = ip.split(".")[3];
+            }else if (flag==4) {
+                window.opener.document.formIpQosAdd.ipstart.value = ip.split(".")[3];
+                window.opener.document.formIpQosAdd.ipend.value = ip.split(".")[3];
+            }else if (flag==5) {
+                window.opener.document.formStaticDhcpAdd.mac1.value = mac.split(":")[0];
+                window.opener.document.formStaticDhcpAdd.mac2.value = mac.split(":")[1];
+                window.opener.document.formStaticDhcpAdd.mac3.value = mac.split(":")[2];
+                window.opener.document.formStaticDhcpAdd.mac4.value = mac.split(":")[3];
+                window.opener.document.formStaticDhcpAdd.mac5.value = mac.split(":")[4];
+                window.opener.document.formStaticDhcpAdd.mac6.value = mac.split(":")[5];
+                window.opener.document.formStaticDhcpAdd.ip_address0.value = ip.split(".")[0];
+                window.opener.document.formStaticDhcpAdd.ip_address1.value = ip.split(".")[1];
+                window.opener.document.formStaticDhcpAdd.ip_address2.value = ip.split(".")[2];
+                window.opener.document.formStaticDhcpAdd.ip_address3.value = ip.split(".")[3];
+            }else if (flag==6){
+                window.opener.document.formCLQosAdd.startip.value = ip.split(".")[3];
+                window.opener.document.formCLQosAdd.endip.value = ip.split(".")[3];
+            }else if (flag==7){
+                window.opener.document.l7FilterAdd.ipstart.value = ip.split(".")[3];
+                window.opener.document.l7FilterAdd.ipend.value = ip.split(".")[3];
+            }
+            window.close();
+        }
+
+        $(function(){
+            $.ajax({
+                url: '/webapi',
+                type: 'POST',
+                dataType: 'json',
+                data: '{"action":"getArpInfo", "data":{}}',
+                success:function(data){
+                    if (9999 == data.rescode){
+                        issetLogin();
+                    }
+                    if (0 == data['rescode']) {
+                        responseJson = data.data;
+                        var arpTab = $("#arpTable").get(0);
+                        var trNode;
+                        for (var i = 0; i < responseJson.length; i++) {
+                            if (!responseJson[i].ip) continue;
+                            if (responseJson[i].mac == "00:00:00:00:00:00") continue;
+                            trNode = arpTab.insertRow(-1);
+                            trNode.align = "center";
+                            trNode.insertCell(0).innerHTML = "<p id=\"ip\">" + responseJson[i].ip + "</p>";
+                            trNode.insertCell(1).innerHTML = "<p id=\"mac\">" + responseJson[i].mac + "</p>";
+                            trNode.insertCell(2).innerHTML = "<input type=radio  id=checkArp name=checkArp onclick=selectArpTbl('" + responseJson[i].ip + "','" + responseJson[i].mac + "')>";
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</head>
+<body class="mainbody">
+<table width=600><tr><td>
+            <form method=post id="formIpMacTbl" name="formIpMacTbl">
+                <table border=0 width="100%">
+                    <tr><td class="content_title"><script>dw(MM_ipmac_list)</script></td></tr>
+                    <tr><td class="content_help"><script>dw(MSG_ipmac_list)</script></td></tr>
+                    <tr><td><hr size=1 noshade align=top class=bline></td></tr>
+                </table>
+
+                <table border=0 width="100%">
+                    <tr align="center">
+                        <td class="item_center"><b><script>dw(MM_ipaddr)</script></b></td>
+                        <td class="item_center"><b><script>dw(MM_macaddr)</script></b></td>
+                        <td class="item_center"><b><script>dw(MM_select)</script></b></td>
+                    </tr>
+                    <tbody id="arpTable">
+                    </tbody>
+                </table>
+
+                <table border=0 width="100%">
+                    <tr><td><hr size=1 noshade align=top class=bline></td></tr>
+                    <tr><td height="10"></td></tr>
+                    <tr><td align="right"><script>dw('<input type=button class=button value="'+BT_refresh+'" onClick="window.location.reload()"> &nbsp; &nbsp;\
+<input type=button class=button value="'+BT_close+'" onClick="window.close();">')</script></td></tr>
+                </table>
+            </form>
+
+        </td></tr></table>
+</body></html>

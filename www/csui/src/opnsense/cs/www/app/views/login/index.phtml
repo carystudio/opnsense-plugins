@@ -1,0 +1,214 @@
+<html>
+    <head>
+        <title>
+            TOTOLINK
+        </title>
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="-1">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link href="/css/normal_ws.css" rel="stylesheet" type="text/css">
+        <link href="/css/style.css" rel="stylesheet" type="text/css">
+        <link rel="shortcut icon" href="/favicon.ico">
+        <script language="javascript" src="/js/jquery.min.js"></script>
+        <script language="javascript" src="/js/language.js"></script>
+        <script language="javascript" src="/js/jcommon.js"></script>
+        <script language="javascript" src="/js/json2.min.js"></script>
+    </head>
+    
+    <body style="overflow-x:hidden">
+        <form method="post" id="Login" name="Login" action="/login/dologin">
+
+            <table height="44" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <tr>
+                        <td width="6">
+                        </td>
+                        <td class="first_table">
+                            <table id="div_main" height="751" width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tbody>
+                                    <tr>
+                                        <td valign="top" class="first_table">
+                                            <div align="center">
+                                                <table border="0" width="370" align="center">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td height="80">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="login_title">
+                                                                <script>
+                                                                    dw(MM_login)
+                                                                </script>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="login_help">
+                                                                <span id="msg_login_1">
+                                                                登录网关
+                                                                </span>
+                                                                &nbsp;
+                                                                <span id="div_loginIp">
+                                                                    <?php echo $_SERVER["SERVER_ADDR"]?>
+                                                                </span>
+                                                                &nbsp;
+                                                                <span id="msg_login_2">
+                                                                需要填写用户名和密码。
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td height="10">
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <table width="370" height="227" border="0" cellpadding="0" cellspacing="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td colspan="3" background="/images/login.gif" width="370" height="227">
+                                                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td colspan="2" height="25">
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td class="login_label">
+                                                                                用户名
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="text" name="username" id="username" maxlength="32" class="login_input" onkeydown="clearLoginErrMsg()" >
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td colspan="2" height="20">
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td class="login_label">
+                                                                                密码
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="password" name="password" id="password" maxlength="32" class="login_input"
+                                                                                onkeydown="if(event.keyCode==13)saveChanges();" onfocus="clearLoginErrMsg()">
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td colspan="2" height="60" align="center">
+                                                                                <span id="div_login_err_msg">
+                                                                                    <?php echo $msg ?>
+                                                                                </span>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td colspan="2" align="center" id="submitBtn">
+                                                                                <button type="button" onclick="return saveChanges()" style="cursor:pointer;padding:0;margin:0;border:0;background:none">
+                                                                                    <img style="cursor:pointer;padding:0;margin:-5px;border:0;" src="/images/login_button_cn.gif">
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                        <td width="6">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table height="41" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <tr>
+                        <td class="bottom_left">
+                            &nbsp;
+                        </td>
+                        <td class="bottom_center1">
+                            &nbsp;
+                        </td>
+                        <td class="bottom_center1">
+                            <script>
+                                var curDate = new Date();
+                                dw(MM_Copyright_Left) + document.write(curDate.getFullYear()) + dw(MM_Copyright_Right);
+                            </script>
+                            Copyright © 2016 TOTOLINK Ltd., All Rights Reserved
+                        </td>
+                        <td class="bottom_center1">
+                            &nbsp;
+                        </td>
+                        <td class="bottom_right">
+                            &nbsp;
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+        <form action="/goform/setLanguage" method="POST" name="langCfg" target="_top">
+            <input type="hidden" name="langType">
+            <input type="hidden" value="/wizard.asp" name="submit-url">
+            <div id="languageDiv2" style="display:none">
+                <table width="172" border="0" cellpadding="3" cellspacing="0">
+                    <tbody>
+                        <tr>
+                            <td colspan="2" height="22">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td id="languageTitle1" class="languageTitle" onclick="chgLanguage(v_lang1)">
+                                英文
+                            </td>
+                            <td>
+                                <img id="img_language1" src="/images/language_no_check.gif" border="0">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" height="8">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(v_lang2)">
+                                简体中文
+                            </td>
+                            <td>
+                                <img id="img_language2" src="/images/language_check.gif" border="0">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+        <script>
+            $(function(){
+                $('#username').focus();
+            });
+
+            function clearLoginErrMsg(){    
+                $("#div_login_err_msg").html("");
+            }
+
+            // 检测和登陆跳转
+            function saveChanges(){
+                if($("#username").val() == ""){
+                    alert(MM_username+JS_msg1);
+                    $("#username").focus();
+                    return false;
+                }   
+                if($("#password").val() == ""){
+                    alert(MM_password+JS_msg1);
+                    $("#password").focus();
+                    return false;
+                }   
+                $("#Login").submit();
+                return true;
+            }
+        </script>
+    </body>
+</html>

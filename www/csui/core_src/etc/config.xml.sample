@@ -1,0 +1,517 @@
+<?xml version="1.0"?>
+<opnsense>
+  <trigger_initial_wizard/>
+  <version>11.2</version>
+  <theme>opnsense</theme>
+  <sysctl>
+    <item>
+      <descr><![CDATA[Disable the pf ftp proxy handler.]]></descr>
+      <tunable>debug.pfftpproxy</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Increase UFS read-ahead speeds to match current state of hard drives and NCQ. More information here: http://ivoras.sharanet.org/blog/tree/2010-11-19.ufs-read-ahead.html]]></descr>
+      <tunable>vfs.read_max</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Set the ephemeral port range to be lower.]]></descr>
+      <tunable>net.inet.ip.portrange.first</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Drop packets to closed TCP ports without returning a RST]]></descr>
+      <tunable>net.inet.tcp.blackhole</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Do not send ICMP port unreachable messages for closed UDP ports]]></descr>
+      <tunable>net.inet.udp.blackhole</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Randomize the ID field in IP packets (default is 0: sequential IP IDs)]]></descr>
+      <tunable>net.inet.ip.random_id</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[
+        Source routing is another way for an attacker to try to reach non-routable addresses behind your box.
+        It can also be used to probe for information about your internal networks. These functions come enabled
+        as part of the standard FreeBSD core system.
+      ]]></descr>
+      <tunable>net.inet.ip.sourceroute</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[
+        Source routing is another way for an attacker to try to reach non-routable addresses behind your box.
+        It can also be used to probe for information about your internal networks. These functions come enabled
+        as part of the standard FreeBSD core system.
+      ]]></descr>
+      <tunable>net.inet.ip.accept_sourceroute</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[
+        Redirect attacks are the purposeful mass-issuing of ICMP type 5 packets. In a normal network, redirects
+        to the end stations should not be required. This option enables the NIC to drop all inbound ICMP redirect
+        packets without returning a response.
+      ]]></descr>
+      <tunable>net.inet.icmp.drop_redirect</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[
+        This option turns off the logging of redirect packets because there is no limit and this could fill
+        up your logs consuming your whole hard drive.
+      ]]></descr>
+      <tunable>net.inet.icmp.log_redirect</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Drop SYN-FIN packets (breaks RFC1379, but nobody uses it anyway)]]></descr>
+      <tunable>net.inet.tcp.drop_synfin</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Enable sending IPv4 redirects]]></descr>
+      <tunable>net.inet.ip.redirect</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Enable sending IPv6 redirects]]></descr>
+      <tunable>net.inet6.ip6.redirect</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Enable privacy settings for IPv6 (RFC 4941)]]></descr>
+      <tunable>net.inet6.ip6.use_tempaddr</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Prefer privacy addresses and use them over the normal addresses]]></descr>
+      <tunable>net.inet6.ip6.prefer_tempaddr</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Generate SYN cookies for outbound SYN-ACK packets]]></descr>
+      <tunable>net.inet.tcp.syncookies</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Maximum incoming/outgoing TCP datagram size (receive)]]></descr>
+      <tunable>net.inet.tcp.recvspace</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Maximum incoming/outgoing TCP datagram size (send)]]></descr>
+      <tunable>net.inet.tcp.sendspace</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[IP Fastforwarding]]></descr>
+      <tunable>net.inet.ip.fastforwarding</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Do not delay ACK to try and piggyback it onto a data packet]]></descr>
+      <tunable>net.inet.tcp.delayed_ack</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Maximum outgoing UDP datagram size]]></descr>
+      <tunable>net.inet.udp.maxdgram</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Handling of non-IP packets which are not passed to pfil (see if_bridge(4))]]></descr>
+      <tunable>net.link.bridge.pfil_onlyip</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Set to 0 to disable filtering on the incoming and outgoing member interfaces.]]></descr>
+      <tunable>net.link.bridge.pfil_member</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Set to 1 to enable filtering on the bridge interface]]></descr>
+      <tunable>net.link.bridge.pfil_bridge</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Allow unprivileged access to tap(4) device nodes]]></descr>
+      <tunable>net.link.tap.user_open</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Randomize PID's (see src/sys/kern/kern_fork.c: sysctl_kern_randompid())]]></descr>
+      <tunable>kern.randompid</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Maximum size of the IP input queue]]></descr>
+      <tunable>net.inet.ip.intr_queue_maxlen</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Disable CTRL+ALT+Delete reboot from keyboard.]]></descr>
+      <tunable>hw.syscons.kbd_reboot</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Enable TCP extended debugging]]></descr>
+      <tunable>net.inet.tcp.log_debug</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Set ICMP Limits]]></descr>
+      <tunable>net.inet.icmp.icmplim</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[TCP Offload Engine]]></descr>
+      <tunable>net.inet.tcp.tso</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[UDP Checksums]]></descr>
+      <tunable>net.inet.udp.checksum</tunable>
+      <value>default</value>
+    </item>
+    <item>
+      <descr><![CDATA[Maximum socket buffer size]]></descr>
+      <tunable>kern.ipc.maxsockbuf</tunable>
+      <value>default</value>
+    </item>
+  </sysctl>
+  <system>
+    <optimization>normal</optimization>
+    <hostname>CSG2000P</hostname>
+    <domain>localdomain</domain>
+    <dnsallowoverride>1</dnsallowoverride>
+    <group>
+      <name>admins</name>
+      <description><![CDATA[System Administrators]]></description>
+      <scope>system</scope>
+      <gid>1999</gid>
+      <member>0</member>
+      <priv>user-shell-access</priv>
+      <priv>page-all</priv>
+    </group>
+    <user>
+      <name>root</name>
+      <descr><![CDATA[System Administrator]]></descr>
+      <scope>system</scope>
+      <groupname>admins</groupname>
+      <password>$2b$10$gvJZJr4u.EjTBq7gv1hxnOVwEKu4e2OsXRER/eAZvL2P2CTqNhpp2</password>
+      <uid>0</uid>
+    </user>
+    <user>
+        <password>$2b$10$VEgSRiV4qkVpd31J8TCgTeaD2TSXuwzZT.aWnOHHDFucLwo1dtw8C</password>
+        <scope>system</scope>
+        <groupname>admins</groupname>
+        <name>csadmin</name>
+        <descr/>
+        <uid>0</uid>
+    </user>
+    <nextuid>2000</nextuid>
+    <nextgid>2000</nextgid>
+    <timezone>Asia/Shanghai</timezone>
+    <time-update-interval>300</time-update-interval>
+    <timeservers>1.asia.pool.ntp.org</timeservers>
+    <webgui>
+      <protocol>http</protocol>
+      <port>30008</port>
+    </webgui>
+    <disablenatreflection>yes</disablenatreflection>
+    <usevirtualterminal>1</usevirtualterminal>
+    <disableconsolemenu/>
+    <disablechecksumoffloading>1</disablechecksumoffloading>
+    <disablesegmentationoffloading>1</disablesegmentationoffloading>
+    <disablelargereceiveoffloading>1</disablelargereceiveoffloading>
+    <ipv6allow/>
+    <powerd_ac_mode>hadp</powerd_ac_mode>
+    <powerd_battery_mode>hadp</powerd_battery_mode>
+    <powerd_normal_mode>hadp</powerd_normal_mode>
+    <bogons>
+      <interval>monthly</interval>
+    </bogons>
+    <kill_states/>
+    <backupcount>60</backupcount>
+    <crypto_hardware>aesni</crypto_hardware>
+    <dnsserver>8.8.8.8</dnsserver>
+    <dns1gw>WAN1_DHCP</dns1gw>
+    <dns2gw>none</dns2gw>
+    <dns3gw>none</dns3gw>
+    <dns4gw>none</dns4gw>
+    <ssh>
+        <enabled>enabled</enabled>
+        <passwordauth>1</passwordauth>
+        <permitrootlogin>1</permitrootlogin>
+    </ssh>
+    <gw_switch_default>1</gw_switch_default>
+  </system>
+  <interfaces>
+    <wan>
+      <enable/>
+      <if>mismatch0</if>
+      <descr>wan1</descr>
+      <mtu/>
+      <ipaddr>dhcp</ipaddr>
+      <ipaddrv6>dhcp6</ipaddrv6>
+      <subnet/>
+      <gateway>WAN1_DHCP</gateway>
+      <blockbogons/>
+      <dhcphostname/>
+      <media/>
+      <mediaopt/>
+      <dhcp6-ia-pd-len>0</dhcp6-ia-pd-len>
+    </wan>
+    <lan>
+      <enable/>
+      <if>mismatch1</if>
+      <descr>lan1</descr>
+      <ipaddr>192.168.10.1</ipaddr>
+      <subnet>24</subnet>
+      <ipaddrv6>track6</ipaddrv6>
+      <subnetv6>64</subnetv6>
+      <media/>
+      <mediaopt/>
+      <track6-interface>wan</track6-interface>
+      <track6-prefix-id>0</track6-prefix-id>
+    </lan>
+  </interfaces>
+  <dhcpd>
+    <lan>
+      <enable/>
+      <range>
+        <from>192.168.10.2</from>
+        <to>192.168.10.254</to>
+      </range>
+    </lan>
+  </dhcpd>
+  <dnsmasq>
+    <enable/>
+    <hosts>
+        <host>portal</host>
+        <domain>csg2000p.me</domain>
+        <ip>192.168.10.1</ip>
+        <descr>PORTAL_SERVER</descr>
+        <aliases/>
+     </hosts>
+  </dnsmasq>
+  <snmpd>
+    <syslocation/>
+    <syscontact/>
+    <rocommunity>public</rocommunity>
+  </snmpd>
+  <syslog>
+    <reverse/>
+  </syslog>
+  <nat>
+    <outbound>
+      <mode>automatic</mode>
+    </outbound>
+    <rule>
+        <disabled>1</disabled>
+        <protocol>tcp/udp</protocol>
+        <interface>lan</interface>
+        <ipprotocol>inet</ipprotocol>
+        <descr>PORTAL_STRICT_DNS_TO_GW</descr>
+        <tag/>
+        <tagged/>
+        <poolopts/>
+        <associated-rule-id>pass</associated-rule-id>
+        <target>127.0.0.1</target>
+        <local-port>53</local-port>
+        <source>
+            <any>1</any>
+        </source>
+        <destination>
+            <any>1</any>
+            <port>53</port>
+        </destination>
+        <natreflection>disable</natreflection>
+    </rule>
+  </nat>
+  <filter>
+    <rule>
+        <type>pass</type>
+        <interface>lan</interface>
+        <ipprotocol>inet</ipprotocol>
+        <statetype>keep state</statetype>
+        <descr><![CDATA[LAN_TO_GATEWAY]]></descr>
+        <category>GW</category>
+        <source>
+          <any>1</any>
+        </source>
+        <destination>
+          <network>lanip</network>
+        </destination>
+    </rule>
+    <rule>
+      <disabled>1</disabled>
+      <type>pass</type>
+      <ipprotocol>inet</ipprotocol>
+      <descr><![CDATA[DEFAULT_ALLOW_MULTIWAN_RULE]]></descr>
+      <interface>lan</interface>
+      <source>
+        <address>LAN1_TO_MULTIWAN</address>
+      </source>
+      <destination>
+        <any>1</any>
+      </destination>
+    </rule>
+    <rule>
+      <type>pass</type>
+      <ipprotocol>inet46</ipprotocol>
+      <statetype>keep state</statetype>
+      <descr><![CDATA[DEFAULT_ALLOW_RULE]]></descr>
+      <interface>lan</interface>
+      <source>
+        <any/>
+      </source>
+      <destination>
+        <any>1</any>
+      </destination>
+    </rule>
+  </filter>
+  <rrd>
+    <enable/>
+  </rrd>
+  <load_balancer>
+    <monitor_type>
+      <name>ICMP</name>
+      <type>icmp</type>
+      <descr><![CDATA[ICMP]]></descr>
+      <options/>
+    </monitor_type>
+    <monitor_type>
+      <name>TCP</name>
+      <type>tcp</type>
+      <descr><![CDATA[Generic TCP]]></descr>
+      <options/>
+    </monitor_type>
+    <monitor_type>
+      <name>HTTP</name>
+      <type>http</type>
+      <descr><![CDATA[Generic HTTP]]></descr>
+      <options>
+        <path>/</path>
+        <host/>
+        <code>200</code>
+      </options>
+    </monitor_type>
+    <monitor_type>
+      <name>HTTPS</name>
+      <type>https</type>
+      <descr><![CDATA[Generic HTTPS]]></descr>
+      <options>
+        <path>/</path>
+        <host/>
+        <code>200</code>
+      </options>
+    </monitor_type>
+    <monitor_type>
+      <name>SMTP</name>
+      <type>send</type>
+      <descr><![CDATA[Generic SMTP]]></descr>
+      <options>
+        <send/>
+        <expect>220 *</expect>
+      </options>
+    </monitor_type>
+  </load_balancer>
+  <widgets>
+    <sequence>system_information-container:00000000-col3:show,services_status-container:00000001-col4:show,gateways-container:00000002-col4:show,interface_list-container:00000003-col4:show</sequence>
+    <column_count>2</column_count>
+  </widgets>
+  <gateways>
+      <gateway_item>
+        <interface>wan</interface>
+        <gateway>dynamic</gateway>
+        <tier>1</tier>
+        <weight>1</weight>
+        <ipprotocol>inet</ipprotocol>
+        <interval/>
+        <avg_delay_samples/>
+        <avg_loss_samples/>
+        <avg_loss_delay_samples/>
+        <defaultgw>1</defaultgw>
+        <name>WAN1_DHCP</name>
+        <monitor>8.8.8.8</monitor>
+        <descr>Interface WAN1 GW</descr>
+      </gateway_item>
+    </gateways>
+    <aliases>
+        <alias>
+          <name>LAN1_TO_MULTIWAN</name>
+          <type>network</type>
+          <descr>LAN1_TO_MULTIWAN</descr>
+          <address>192.168.10.0/24</address>
+          <detail>init</detail>
+        </alias>
+      </aliases>
+      <ca>
+         <refid>592fa6d7bf05a</refid>
+         <descr>CSG2000P</descr>
+         <crt>LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURzekNDQXB1Z0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREIwTVFzd0NRWURWUVFHRXdKRFRqRUwKTUFrR0ExVUVDQXdDUjBReEN6QUpCZ05WQkFjTUFsTmFN
+      UXN3Q1FZRFZRUUtEQUpEVXpFb01DWUdDU3FHU0liMwpEUUVKQVJZWlkyRnllWE4wZFdScGIwQmpZWEo1YzNSMVpHbHZMbU52YlRFVU1CSUdBMVVFQXd3TFExTkhNakF3Ck1GQXRZMkV3SGhjTk1UY3dOakF4TURVek1qQTNXaGNOTVRnd
+      05qQXhNRFV6TWpBM1dqQjBNUXN3Q1FZRFZRUUcKRXdKRFRqRUxNQWtHQTFVRUNBd0NSMFF4Q3pBSkJnTlZCQWNNQWxOYU1Rc3dDUVlEVlFRS0RBSkRVekVvTUNZRwpDU3FHU0liM0RRRUpBUllaWTJGeWVYTjBkV1JwYjBCallYSjVjM1
+      IxWkdsdkxtTnZiVEVVTUJJR0ExVUVBd3dMClExTkhNakF3TUZBdFkyRXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFES0Qzc3QKQWlIUDdDa0VZcCt0MGlBeEY0M1hlMSt0MVQwa2wwUGZ3Vi9GcFpxTVc
+      xd0xNK3NUY0FQMjJqTjNRQi9RWG9oMwphRUNtTXEvVXBXN29KUmw0enVyTm1tVmhCcFN6clllNmtaUFhGVWYxTTJYdHJrN1luRFJ5MnhYL3Q1YWxzZmtMCnVpOHVFRnN0c2x0bkdLNTlyTGlQS01BYUJSR1YxTnkzQlV5QldDWXhlUUtw
+      azkwWXc4K2k4K0xiR1lxdFR4eDIKZ25zT1J5WFdIQmd4QWliVVkxM2ZkdWpHRkluaWhhYU5IaTRoTDJvRUxYd3YzcFNWU09DdXhiZ21SRXJxOXpyaQpjRUw5dEVJeUFNMWdXQS93bmZqcWNlYm5JRTdBOFY1bmNxL2szbldjNXVlbU9qb
+      jZnRStjU3BNc3FOMlBsOUJEClJ6cFpjVjJCR0xTSWZvWTFBZ01CQUFHalVEQk9NQjBHQTFVZERnUVdCQlJMblh3all4VUJIOXgzQkswbGplY1kKT0ZLejJ6QWZCZ05WSFNNRUdEQVdnQlJMblh3all4VUJIOXgzQkswbGplY1lPRkt6Mn
+      pBTUJnTlZIUk1FQlRBRApBUUgvTUEwR0NTcUdTSWIzRFFFQkN3VUFBNElCQVFDcWxoSFluV2Z4OTVNd0VUWnVuRml0SHJwaE9ZVHBCVFNECkhaUEhpMnF4MWpCYkQ4ZGRNcDhTMUdETUJZMGRmR0E3Mzh2SzVQcFFXSW9qeVpqSXU2TVd
+      2WmYyMHlqb0NlRmkKUnhVT3pMUkp3c0psYmg4UEVmVWkzdXA0ejhPMjZUKzU1TGVJSldWRDNWUlNJYmF0SEF0SUlrYUFiQzR6SXpRQwo3ZmdNSVpsOW0wM1I2bjBZTUxxc0dSTzhLb1loZU9MMWNFZ1RTYlBOOUFua2JqRS85ajkwZDYw
+      ZFRiUEtmcklrCnRCdlZ5cGN1c0JkVXVqVWFNLzhYYWdrMTd0QzhIdW9POXA2K0J1Ykw4d3psa2hwUzFIZ2tjSGdkYmFhOHMwbU8KYVIwM251ZGFiK2lXcmhMdHVGZ0I5cndrMlNXS3h5a3Y4aE82UXFwSFFCUER3ZHBKc0NlVwotLS0tL
+      UVORCBDRVJUSUZJQ0FURS0tLS0tCg==</crt>
+          <prv>LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRREtEM3N0QWlIUDdDa0UKWXArdDBpQXhGNDNYZTErdDFUMGtsMFBmd1YvRnBacU1X
+      MXdMTStzVGNBUDIyak4zUUIvUVhvaDNhRUNtTXEvVQpwVzdvSlJsNHp1ck5tbVZoQnBTenJZZTZrWlBYRlVmMU0yWHRyazdZbkRSeTJ4WC90NWFsc2ZrTHVpOHVFRnN0CnNsdG5HSzU5ckxpUEtNQWFCUkdWMU55M0JVeUJXQ1l4ZVFLc
+      Gs5MFl3OCtpOCtMYkdZcXRUeHgyZ25zT1J5WFcKSEJneEFpYlVZMTNmZHVqR0ZJbmloYWFOSGk0aEwyb0VMWHd2M3BTVlNPQ3V4YmdtUkVycTl6cmljRUw5dEVJeQpBTTFnV0Evd25manFjZWJuSUU3QThWNW5jcS9rM25XYzV1ZW1Pam
+      42Z0UrY1NwTXNxTjJQbDlCRFJ6cFpjVjJCCkdMU0lmb1kxQWdNQkFBRUNnZ0VBWGE1NXpHOU5uK245Um1RM1prNmkwRC84YW1odi90ZDd4cWcvTnRHZ0JySDIKQ3BjZEFMQ3NqOUdDZFFQTGtzRnZQcHRscC83MDRsbGp2aktKVGlaTlB
+      mNnBUSFFHQnNzWFRJcnEvK3dZNEVLawpueUdhWTIxS2J4RlZHOTlKdnNxdWxOb0QvcFR1NU90K2FweGoxbFBTS3NCV3ZVRUdkOG5iMGx6ampCTnYyaE5oClQyOFZJU0RmMTZuZ2hwYSs1ZmVDTUlqZHFQOXdWeks4eEZQSVUwcVFKS1M0
+      UUNLYzZmU1AxT0syMWtXZDFDM1QKRFZvMWpOaFc1NWR5dCttaDFvU3BOM1M3UytCZHkzZlZsaTlhSEkvWHlXcWF1REVZVGVHUWVzZFFlYVFWQkxLRwo5SlB5OUZCU2pVNmJJWmZTNFp4RUpFRGVHSlNLOXZIYkdzTHVaUEpKYlFLQmdRR
+      Dl5bmZ0djZFdGVkaUJlWnAyCldGS3dJYVRqdnZLVDR1bWo4Y0djVmhIVWlsVEk5ckp4R3hiL1ZaaXdjWWo5Q2FOemJHQThuQnBIVVZQMzN1S2UKNm43WVJEd2RzSlRYMEtJS0FZbWxkN3doL0drS0lDS3ZKUDJWL2U2eTZDUERJUWdtNl
+      k3ZHhpem9PNmlwSjNEYgp3VjRzbVVzUHBiNEZPK3dlSVpZelNzTEVMd0tCZ1FETDBiMXFBYmNwZ3g1TENDYlZ0ZDlMUGFXaTkvQTFieW1LCmZseVZxVGozNXVLTmE2TXJyUm5pcW41WE40SXZBejZ4bHNuY3UzRXArUXVQN0Uxbzg1akR
+      SV2xvajhKSDFXMUYKTUhMNWVEZVpZMDZFM0tDZU5ZZEdDR1ROKzJndGx5VXR3ZEc0S2xGalFaVmRpd0pXdnAyb0NSSXo0cVNBSldoegpKQXRhcmhQdTJ3S0JnUUNSVlpMY0tYTUpjYzlVUmVqNGdKZkptVnF0dVRsOUN1SzFLY3F2MW5J
+      YmZxUVMrWU15ClZrc1RLVmRwSTN0SlBHM0h1WFphL3lIbFdXTjJmTUxXTW44MUpjNHZTbUhTUFAydU1UYzc5SmRkOXdmSDdxTXUKSFViQzBFb1RWZkMwMjRPcGxQSmxlZ2xaYkdDbmpaaUpuL0JvSmRqZ093L1lPM3A1dnM0ZXpWOC9yU
+      UtCZ0c0cAplUFU0NUNTOXg3dktOaU5BWCtZczliKzF2dEZDdWZNdkJSK25EVEdBUzJjZ2pGcm8vcHF5aUFMZjc2ODFVOGRzCnRzSmxWVzdZT3RXWlpPV2E5REJtN2VnaisyQVVEVEZlVkdaZUFiOFlHN0pZQlVBOXNsVzU1N0lsZGxOZD
+      VDeHQKRzhzc3BEeS9qOW0xYnBnd0FzcDF6SzdhaXdyd0xSbytteHh5QmpnTkFvR0JBSk5qMEh1T0tjdm4zSWl3OHVreQo4bTdjYk1BZFY1RVUwMzQ0NnMxd0RuZlRrTXZqaGJ0NEFMNGFvUzZPRlhlV3BiMUhQK0p4VVZGUVlaWDU2Vkh
+      zCmxQWS9mWWdDQWJ6eDluUEplNWswdUFRWXlldERxME5jMytmNVFVOFlxZTlSWkIxZllrSUlTdHFjMFBpcmdVa0gKTGJCQTdTVGlkSEtxOCsva2FrR3pTVVR3Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K</prv>
+         <serial>3</serial>
+      </ca>
+      <cert>
+         <refid>592fb0cf2dd36</refid>
+         <descr>portal_server</descr>
+         <caref>592fa6d7bf05a</caref>
+         <crt>LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUUxRENDQTd5Z0F3SUJBZ0lCQXpBTkJna3Foa2lHOXcwQkFRc0ZBREIwTVFzd0NRWURWUVFHRXdKRFRqRUwKTUFrR0ExVUVDQXdDUjBReEN6QUpCZ05WQkFjTUFsTmFN
+        UXN3Q1FZRFZRUUtEQUpEVXpFb01DWUdDU3FHU0liMwpEUUVKQVJZWlkyRnllWE4wZFdScGIwQmpZWEo1YzNSMVpHbHZMbU52YlRFVU1CSUdBMVVFQXd3TFExTkhNakF3Ck1GQXRZMkV3SGhjTk1UY3dOakF4TURZeE5ETTVXaGNOTVRnd
+        05qQXhNRFl4TkRNNVdqQjdNUXN3Q1FZRFZRUUcKRXdKRFRqRUxNQWtHQTFVRUNBd0NSMFF4Q3pBSkJnTlZCQWNNQWxOYU1Rc3dDUVlEVlFRS0RBSkRVekVvTUNZRwpDU3FHU0liM0RRRUpBUllaWTJGeWVYTjBkV1JwYjBCallYSjVjM1
+        IxWkdsdkxtTnZiVEViTUJrR0ExVUVBd3dTCmNHOXlkR0ZzTG1Oelp6SXdNREJ3TG0xbE1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0MKQVFFQXJ3Q2RHMm43M1pVSUNtM0ZhU1NzQWxlVmhKZFV5djMrYis0amc
+        5ZXhJOUE1NU1CL05tQUVSeGp3VUwvSwpOR0VJUjEzcEZFcHJvTk5uN0VVY3hCYVl4SGpSYWFRSGhQMmVENXNYMU5JWnB1M3J3clJWR0p3eFlRK0VwUnljCjcrWXM2Y1BobXVrSFM0MlpNck9mYUVjRDR3VWt2eUF5Q1QxaEMxQkdoMTk0
+        ZG1OcW1Sejc2MnEyMEh3WWRFN0IKSjM5R25GLytYODVsQjhxeUtPdHQwa0NQTEducVZFVkRwL0FUUDRXT1ZFaGVjVnVWSWlCOWFMeXI1cEgvY2hIUAp5TVhwNFBpaGV5cGNnSnpBN3NIdCtkZDhoNW9QREhiNHBkdmhTekpjQitRM2NKT
+        TdKT0c2MHBJK3Y1VW16RnZnCkI4Nng0N3BLTlNPZVpzTldUU1RlQ01KUm5RSURBUUFCbzRJQmFEQ0NBV1F3Q1FZRFZSMFRCQUl3QURBUkJnbGcKaGtnQmh2aENBUUVFQkFNQ0JrQXdNd1lKWUlaSUFZYjRRZ0VOQkNZV0pFOXdaVzVUVT
+        B3Z1IyVnVaWEpoZEdWawpJRk5sY25abGNpQkRaWEowYVdacFkyRjBaVEFkQmdOVkhRNEVGZ1FVaWxBTElISm1GVExHYTNwb2ZRUDJsMUtOCjAzVXdnWjRHQTFVZEl3U0JsakNCazRBVVM1MThJMk1WQVIvY2R3U3RKWTNuR0RoU3M5dWh
+        lS1IyTUhReEN6QUoKQmdOVkJBWVRBa05PTVFzd0NRWURWUVFJREFKSFJERUxNQWtHQTFVRUJ3d0NVMW94Q3pBSkJnTlZCQW9NQWtOVApNU2d3SmdZSktvWklodmNOQVFrQkZobGpZWEo1YzNSMVpHbHZRR05oY25semRIVmthVzh1WTI5
+        dE1SUXdFZ1lEClZRUUREQXREVTBjeU1EQXdVQzFqWVlJQkFEQWRCZ05WSFNVRUZqQVVCZ2dyQmdFRkJRY0RBUVlJS3dZQkJRVUkKQWdJd0N3WURWUjBQQkFRREFnV2dNQ01HQTFVZEVRUWNNQnFIQk1Db0NnR0NFbkJ2Y25SaGJDNWpjM
+        mN5TURBdwpjQzV0WlRBTkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQVhQS3lNdUpXVSsrNWw2UlZQSnJPdTFQVXhUa3VrVnVjCkdZY0QxUFJ0aVI3UkdCY3N0UTdrUm9mTTloRzRQZTR2WCtta1RDb3NrY3d5dTZjL3g4bVIyRXZVYlc4V2
+        htdnUKMU0xZkVOS3dCc1lnV0RJb2J6MjhaTDNjeldxMzlIWWU4Z2V1SWlaYUxsemtWbTV3dkpDVndUekpFSkZvRHZCNwowVW41L1ZwZzg5Z2dLNHdoekxNS0Z4NWFPZlowbnlpdURsM3NTWkJzZHVwZEl0S0t5UzFUNGRreUJNK1lSLy9
+        QCmVCZzZrd2tVOURJRXNJekNqL0xGWDZaWHBkNVRIcm55SmZyTDFXTVlPZTBnTXdBYnVQYXVaMjNSTGRLalRaMHAKaWIyU2hnSmNpeHZqeVdHU0lHMHVGTGtkTWNNOTdnOG16UTk3RTZqdFJrN25kQjBDTFMyZzJBPT0KLS0tLS1FTkQg
+        Q0VSVElGSUNBVEUtLS0tLQo=</crt>
+         <prv>LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2QUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktZd2dnU2lBZ0VBQW9JQkFRQ3ZBSjBiYWZ2ZGxRZ0sKYmNWcEpLd0NWNVdFbDFUSy9mNXY3aU9EMTdFajBEbmt3
+        SDgyWUFSSEdQQlF2OG8wWVFoSFhla1VTbXVnMDJmcwpSUnpFRnBqRWVORnBwQWVFL1o0UG14ZlUwaG1tN2V2Q3RGVVluREZoRDRTbEhKenY1aXpwdytHYTZRZExqWmt5CnM1OW9Sd1BqQlNTL0lESUpQV0VMVUVhSFgzaDJZMnFaSFB2c
+        mFyYlFmQmgwVHNFbmYwYWNYLzVmem1VSHlySW8KNjIzU1FJOHNhZXBVUlVPbjhCTS9oWTVVU0Y1eFc1VWlJSDFvdkt2bWtmOXlFYy9JeGVuZytLRjdLbHlBbk1EdQp3ZTM1MTN5SG1nOE1kdmlsMitGTE1sd0g1RGR3a3pzazRiclNraj
+        YvbFNiTVcrQUh6ckhqdWtvMUk1NW13MVpOCkpONEl3bEdkQWdNQkFBRUNnZ0VBY2x1S1RzSEJMcGtXdWdubGVNSFlEV2ZDY3ZTWkdsVkVFVXlpdEtNY1JIVHIKZ0FveWx3dkRmOXBTSDlKVWhrbnFLUWk3S09GQTE4V09JWjFBSVB0TE5
+        RaG1nQXdLUmVPZGlFRW5INUZ6NWR1UAp0cG8xQ1hIMzZwOURaTW4vMjl5aitOWmg5T0xXTzQ3NlQyR0ZoNVR3ZTBkL0xjNFNKR3VSb04wQ1diQVBmZnlBCmZ0UE5uUk85Y2gxNVZxbGxXdkordkR0RlU3OExuR2J4SGpaRytXMjFqR1hE
+        d3BKOUQ4NHpSSXZIQlc3d3A0ZVQKM0tZRG1JeW83dk5yMHBsTWllRmswZndDK1ZHUkd1NDFvdS9xc1ovWU5PUjMyRGpkNFc0b3V4d0NsMHhIOURiUAowY0I1aVVhdmxjWmMrRTB2dzFaRkpLdU9WZEdQOFg4VkViZ1lVWUtZMlFLQmdRR
+        GJGT0JpQktJcHcyVFFiQ0lJCksvdEh3Njc1NlZtQzhoQzBjREVzbzRucUYyTHp3V082SWllS2tSZVppSTlKNHNWbW55Sis2My9vQ242UDhWYnoKNUJXZm1YM1hJYnlVekdBc1N4NDg4Rko4Q1hzMmdsVjJxMGgwcE0rWWd4TUZ6UHEyZj
+        FyTlNack9WVGRqM0RNQQpBVkRDTkk4UWVQV042Y0V4NllZUEdiOTMwd0tCZ1FETWZpeHZWYzMvM3dpT1ByTGNqeit5U3I3YU4rZG9SbXJaCmVsOCtUWkR1akJJZDJGY1NqWmczUmR5YkNpcUFEb1QrVjV0ZmQ3bHpWN3BnSU00dkdIU3F
+        KQlk2YkQ1S2QvOXAKNUZndkNaTjdHalNmeFh3bkVZcTRUc3ZqazBRVzNqaGlpK3E4Ukx4c0h1cVVRcXl4eDJkQkMvbGRuZWpiTlh3OQpJY1oyeWdjYXp3S0JnRDFudDVDaG5kWTQxd3Y0RXYzWlhmLzZZQlBhRE9XLzlXQ3R4WXF1ZDl4
+        dUc2VVl3bHdNCmNLck5DaUZWZmx3R1BMQUwwSDVrZ2FCSE9Md2R0L0o2TG5saWF6d2VUNTRoUHArTG1ua1lIdlozTGRyVVl5SDAKMWtVallMQnRwS3BPanNNU0pTQS9EaTNoQXJweG9MWFNxSkVXYkRjQXdFcTdoeFAzVVVUd1FaTlRBb
+        0dBYlk4TAo3M3BoSzcwcXNFc1hPT1BtbEhkSFdWS3FRRXU1NDFxVXZLU0NDY3d4eUp1bnl1RGh0SHRSZmg4c05mK1JjVk11Cmd5OTV4RG8wT0Z4Ykd4QlhNUEMwbUFoMk54K2pUL0J1N29TSzUyRmE0RjdGN1lpUWNiNkZyaCt3VXpBcn
+        RXQ1IKR3QwWXRqUzZLVVN2a1cvcitnV1lUSGZWMGR3Ti9CS2thZkJEYmpFQ2dZQWMvTk5xeTlMYzY5Q2FSeVhFckRTYQo4VEZmSFFobnIzTHA5K00vbEpweVBvd1F6SWJxY3BZcXlKSTkycDNjakF5L1lxZzNLV0FtV2hSRFgzR2NoelJ
+        RClpRWDE1OFl6L2h6R2VLTDRzeEw2Y3djYkNrc0ovWHplNitTSmVoUG1LVTJ1MXVyTElxR1J3VnJ2anJhblozRE0KZGZMNENwWnZpNnN3MVhSNldSYUN1QT09Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K</prv>
+     </cert>
+</opnsense>

@@ -1,0 +1,346 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="-1">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" href="/css/menu.css" type="text/css">
+	<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+	<link rel="stylesheet" href="/css/line.css" type="text/css">
+	<style>
+	#div_ipportList {text-align: center;}
+	#div_ipportList tr:nth-child(2n){background-color: #f1f1f1;}
+	#div_ipportList tr td:nth-child(1){width:60px;padding:0}
+	#div_ipportList tr td:nth-child(2){width:82px;padding:0}
+	#div_ipportList tr td:nth-child(3){width:105px;padding:0}
+	#div_ipportList tr td:nth-child(4){width:85px;padding:0}
+	#div_ipportList tr td:nth-child(5){width:128px;padding:0}
+	#div_ipportList tr td:nth-child(6){width:85px;padding:0}
+	#div_ipportList tr td:nth-child(7){width:80px;padding:0}
+	</style>
+	<script language="javascript" src="/js/language.js"></script>
+	<script language="javascript" src="/js/jcommon.js"></script>
+	<script language="javascript" src="/js/jquery.min.js"></script>
+	<script language="javascript" src="/js/json2.min.js"></script>
+	<script language="javascript" src="/js/spec.js"></script>
+</head>
+<body class="mainbody">
+	<input type="hidden" id="lannum" name="lannum">
+	<div id="languageDiv" style="display:none">
+		<table width="172" border="0" cellpadding="3" cellspacing="0">
+			<tr><td colspan="2" height="12"></td></tr>
+			<tr>
+				<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+				<td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+			</tr>
+			<tr>
+				<td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+				<td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+			</tr>
+		</table>
+	</div>
+	<script>showContainer()</script>
+	<form method=post name="formFilterAdd" id="formFilterAdd" >
+		<input type="hidden" id="sip_address" name="sip_address">
+		<input type="hidden" id="mac_address" name="mac_address">
+		<input type="hidden" id="dip_address" name="dip_address">
+		<input type="hidden" id="sFromPort" name="sFromPort">
+		<input type="hidden" id="sToPort" name="sToPort">
+		<input type="hidden" id="addEffect" name="addEffect" value="1">
+		<div id="ipmaclist" style=" z-index:999;  width:100%; text-align:center; display: none;position: fixed; border:1px;" >
+			<!-- Modal 新增群组-->
+			<div style="background-color:#ffffff; width:70%;" data-backdrop="static" >
+				<div style="width: 700px;height: 700px;">
+					<div style="text-align: right;">
+						<!--<button type="button" class="close" style="text-align: right;" data-dismiss="modal" aria-hidden="true" onclick="displaymodel();">
+                            ×</button>-->
+						<div style="height: 20px;text-align: left;">
+							<span style="text-align: left;" type="button"  ><strong>您可以查看当前客户端MAC信息。</strong></span>
+						</div>
+						<h4 style="text-align: center;">
+							LAN设备列表</h4>
+					</div>
+					<div id="devicelist" style="text-align: center;">
+
+					</div>
+					<div id="button_s" style="text-align: right;">
+
+					</div>
+				</div>
+			</div>
+		</div>
+		<table border=0 width="100%">
+			<tr><td class="content_title"><script>dw(MM_port_filtering)</script></td></tr>
+			<tr id="div_content_help"><td class="content_help"><script>dw(MSG_port_filtering)</script></td></tr>
+			<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+		</table>
+		<table border=0 width="100%" style="display: none;">
+			<tr>
+				<td class="item_left"><script>dw(MM_onoff)</script></td>
+				<td><select name="enabled" id="enabled" onChange="updateState()">
+					<option value="0"><script>dw(MM_disable)</script></option>
+					<option value="1"><script>dw(MM_enable)</script></option>
+				</select></td>
+			</tr>
+			<tr><td colspan="2"><hr size=1 noshade align=top class=bline></td></tr>
+			<!--<tr><td colspan="2" align="right"><script>dw('<input type=button class=button value="'+BT_apply+'" id="apply" name="apply">')</script></td></tr>-->
+			<tr style="display:none">
+				<td class="item_left">Default Policy</td>
+				<td><select id="defaultFirewallPolicy" name="defaultFirewallPolicy">
+					<option value=0 selected>Aaccept</option>
+					<option value=1>Drop</option>
+				</select></td>
+			</tr>
+			<!--<tr><td colspan="2"><hr size=1 noshade align=top class=bline></td></tr>-->
+		</table>
+		<div id="set_ipportList">
+		<br />
+		<table border=0 width="100%">
+			<tr><td colspan="2"><b><script>dw(MM_add_rule)</script></b></td></tr>
+			<tr id="div_addline"><td colspan="2"><hr size=1 noshade align=top class=bline></td></tr>
+			<tr>
+				<td class="item_left">类型</td>
+				<td><select id="filter_type" name="filter_type" >
+						<!--<option value="1">WAN</option>-->
+						<option value="2">LAN1</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="item_left"><script>dw(MM_ipaddr)</script></td>
+				<td>
+					<input type="text" style="width:33px" id="ip_address0" name="ips" maxlength="3" onKeyDown="return ipVali(event,this.name,0);">.
+					<input type="text" style="width:33px" id="ip_address1" name="ips" maxlength="3" onKeyDown="return ipVali(event,this.name,1);">.
+					<input type="text" style="width:33px" id="ip_address2" name="ips" maxlength="3" onKeyDown="return ipVali(event,this.name,2);">.
+					<input type="text" style="width:33px" id="ip_address3" name="ips" maxlength="3" onKeyDown="return ipVali(event,this.name,3);">
+					<script>  dw('<input id="scan" name=scan type=button value="'+BT_scan+'" onClick=arpTblClick(\"/net/arpinfo#flag=2\")>')</script>
+				</td>
+			</tr>
+			<tr>
+				<td class="item_left"><script>dw(MM_protocol)</script></td>
+				<td><select name="protocol" id="protocol">
+					<option value="tcp/udp">TCP+UDP</option>
+					<option value="tcp">TCP</option>
+					<option value="udp">UDP</option>
+				</select></td>
+			</tr>
+			<tr>
+				<td class="item_left"><script>dw(MM_port_range)</script></td>
+				<td><input type="text" size="5" id="dFromPort" name="dFromPort" maxlength="5"> - <input type="text" size="5" id="dToPort" name="dToPort" maxlength="5"> (1-65535)</td>
+			</tr>
+			<tr style="display:none">
+				<td class="item_left">Action</td>
+				<td><select name="action" id="action">
+					<option value="Drop" selected>Drop</option>
+					<option value="Accept">Accept</option>
+				</select></td>
+			</tr>
+			 <tr>
+				<td class="item_left"><script>dw(MM_comment)</script></td>
+				<td><input type="text" name="comment" id="comment" maxlength="20"></td>
+			</tr>
+		</table>
+		<table border=0 width="100%">
+			<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+			<tr><td height="10"></td></tr>
+			<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_add+'" id="add" name="add">')</script></td></tr>
+		</table>
+			</div>
+	</form>
+	<form method=post id="formFilterDel" name="formFilterDel" >
+		<table border=0 width="100%">
+			<tr><td colspan="7"><b><script>dw(MM_port_filtering_table)</script>&nbsp;&nbsp;<script>dw(JS_msg59)</script></b></td></tr>
+			<tr><td colspan="7"><hr size=1 noshade align=top class=bline></td></tr>
+			<tr align="center">
+				<td class="item_center"><b>ID</b></td>
+				<td class="item_center"><b>类型</b></td>
+				<td class="item_center"><b><script>dw(MM_ipaddr)</script></b></td>
+				<td class="item_center"><b><script>dw(MM_protocol)</script></b></td>
+				<td class="item_center"><b><script>dw(MM_port_range)</script></b></td>
+				<td class="item_center"><b><script>dw(MM_comment)</script></b></td>
+				<td class="item_center"><b><script>dw(MM_select)</script></b></td>
+			</tr>
+		</table>
+		<div style="max-height:250px; overflow:auto">
+		<table border=0 width="100%" >
+			<tbody id="div_ipportList">
+			</tbody>
+		</table>
+		</div>
+	<table border=0 width="100%">
+		<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+		<tr><td height="10"></td></tr>
+		<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_delete+'" id="deleteSelFilter" name="deleteSelFilter" onClick="del_filtering_click()">&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" class="button" value="'+BT_reset+'" id="delreset" name="delreset" onClick="resetForm()">')</script></td></tr>
+	</table>
+</form>
+<script>showFooter()</script>
+</body></html>
+<script>
+$(function(){
+	init();
+	//get_lanip_port();
+
+	// 添加IP端口转发
+	$('#add').on('click', function(event) {
+		var ip_address = '';
+		var filter_type    = $('#filter_type').val();
+		var protocol   = $('#protocol').val();
+		var PortStart  = $('#dFromPort').val();
+		var PortEnd    = $('#dToPort').val();
+		var comment    = $('#comment').val();
+		
+		for (var i = 0; i < 4; i++) {
+			ip_address += $('input[name="ips"]')[i].value + '.';
+		}
+		ip_address   = ip_address.substr(0,ip_address.length-1);
+		var data     = {"Type":filter_type,"Protocol":protocol,"Ip":ip_address,"PortStart":PortStart,"PortEnd":PortEnd,"comment":comment};
+		var sub_data = {"action":"addFilter", "data":data};
+		sub_data     = JSON.stringify(sub_data);
+		$('input').attr('disabled',true);
+		$.ajax({
+			url: '/webapi',
+			type: 'POST',
+			dataType: 'json',
+			data: sub_data,
+			success:function(data){
+				if (9999 == data.rescode){
+					issetLogin();
+				}
+				if (0 == data.rescode) {
+					alert('添加成功！');
+				    location.href = location.href;
+				} else {
+					alert('添加失败！'+data_msg_json[data.rescode]);
+				}
+				$('input').attr('disabled',false);
+			}
+		});
+	});
+});
+
+function displaymodel() {
+	//document.getElementById("body_div").style.background = "#999999";
+	document.getElementById("ipmaclist").style.display = "none";
+}
+
+function arpTblClick(url) {
+	openWindow(url,"_blank",700,400);
+}
+
+function sure_select() {
+	var info = $("input[name='select_radio']:checked").val();
+	var arr = info.split("|");
+	var ip_info = arr[0].split(".");
+	//var mac_info = arr[1].split(":");
+	for(var i = 0;i<ip_info.length;i++){
+		$("#ip_address"+i).val(ip_info[i]);
+	}
+	document.getElementById("ipmaclist").style.display = "none";
+}
+
+function get_lanip_port() {
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: '{"action":"getStatusInfo", "data":{}}',
+		success: function (data) {
+			if (9999 == data.rescode){
+				issetLogin();
+			}
+			if (0 == data.rescode) {
+				/*局域网和广域网信息*/
+				var into = data.data.interface;
+				var lan_1 = into['lan1']['Ip'];
+				var Ipport = lan_1.split('.');
+				if($("#filter_type").val() == 2){
+					if(Ipport.length == 4){
+						$("#ip_address0").val(Ipport[0]);
+						$("#ip_address1").val(Ipport[1]);
+						$("#ip_address2").val(Ipport[2]);
+						$("#ip_address0").attr("disabled","disabled");
+						$("#ip_address1").attr("disabled","disabled");
+						$("#ip_address2").attr("disabled","disabled");
+					}
+				}else {
+					$("#ip_address0").val("");
+					$("#ip_address1").val("");
+					$("#ip_address2").val("");
+					$("#ip_address0").attr("disabled",false);
+					$("#ip_address1").attr("disabled",false);
+					$("#ip_address2").attr("disabled",false);
+				}
+
+			}
+		}
+
+	});
+}
+
+var filtertype = {"1":"WAN","2":"LAN1"};
+function init() {
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: '{"action":"getFilterStatus"}',
+		success:function(data){
+			if (9999 == data.rescode){
+				issetLogin();
+			}
+			var _html = '';
+			if (0 == data.rescode) {
+				var data = data.data;
+				if (0 < data.length) {
+					for (var i = 0; i < data.length; i++) {
+						_html += "<tr align=center >";
+						_html += "<td>"+(i+1)+"</td>";
+						_html += "<td>"+filtertype[data[i].Type]+"</td>";
+						_html += "<td>"+data[i].Ip+"</td>";
+						_html += "<td>"+data[i].Protocol+"</td>";
+						_html += "<td>"+data[i].PortStart +'-'+data[i].PortEnd +"</td>";
+						_html += "<td>"+data[i].Descr + "</td>";
+						_html += "<td><input type='checkbox' name='rule' value="+data[i].Id+" /></td>";
+						_html += "</tr>";
+					}
+					$('#div_ipportList').html(_html);
+				} else {
+					$('#div_ipportList').html('<tr><td colspan=7>暂无数据！</td></tr>');
+				}
+			}
+		}
+	});
+}
+function del_filtering_click() {
+	var filtering_all = $(':input[name="rule"]');
+	var del_id = [];
+	filtering_all.each(function(index, el) {
+		if (el.checked) {
+			del_id.push(el.value);
+		}
+	});
+	if (0 == del_id.length) {
+		alert(JS_msg36);
+		return false;
+	}
+    var sub_data = {"action":"delFilter", "data":{"Id":del_id}};
+    sub_data = JSON.stringify(sub_data);
+	$.ajax({
+		url: '/webapi',
+		type: 'POST',
+		dataType: 'json',
+		data: sub_data,
+		success:function(data){
+			if (9999 == data.rescode){
+				issetLogin();
+			}
+			if (0 == data.rescode) {
+				alert('删除成功！');
+			    location.href = location.href;
+			} else {
+				alert('删除失败！'+data_msg_json[data.rescode]);
+			}
+		}
+	})
+}
+
+</script>

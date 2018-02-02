@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<link rel="stylesheet" href="/css/tab.css" type="text/css">
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+</head>
+<body class="mainbody" marginwidth="0" marginheight="0">
+    <span id="div_body_setting">
+        <script>
+        </script><div id="languageDiv" style="display:none"><table width="172" border="0" cellpadding="3" cellspacing="0">	<tbody><tr><td colspan="2" height="12"></td></tr>	<tr><td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>	<td><img id="img_language1" src="../style/language_check.gif" border="0"></td></tr>	<tr><td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>	<td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td></tr>	</tbody></table></div>
+        <script>
+            showContainer()
+        </script><table width="700"><tbody><tr><td>
+        <form method="post" name="wanCfg" id="wanCfg">
+            <table border="0" width="100%">
+                <tbody><tr>
+                    <td class="content_title">
+                        <script>
+                            dw(MM_wan_setting)
+                        </script>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="content_help">
+                        <script>
+                            dw(MSG_wan_setting)
+                        </script>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <hr size="1" noshade="" align="top" class="bline">
+                    </td>
+                </tr>
+            </tbody></table>
+            <table border="0" width="100%">
+                <tbody>
+                <tr class="mytd" style="">
+                    <td class="item_left_">
+                        <script>
+                            dw(MM_wan_port)
+                        </script>
+                    </td>
+                    <td>
+
+                        <select id="wanIndex" name="wanIndex" onchange="wanCfgSwitch()" style="display:none;">
+<!--                            <option value="1">WAN1</option>-->
+                        </select>
+
+						<div class="back_tit" style=" position:relative;">
+							<div id="tagScroll">
+								<ul id="rollBox" class="back_tit_tob" style="">
+									<input type="hidden" value="1" name="curid">
+                                </ul>
+							</div>
+                            <!--+加号-->
+							<div id="tagBnt" class="fl" style="display: none">
+								<a class="back_tit_tob_add fr" onclick="addwlan()" title="add">
+								</a>
+							</div>
+						</div>
+						<input value="2" id="saveallnum" type="hidden">
+						<input value="1" id="savenownum" type="hidden">
+                    </td>
+                </tr>
+                <!--网卡绑定区域-->
+                    <tr class="mytd" style="">
+                    <td class="item_left_" style="width:100px;">
+                    <script>dw(MM_wan_bind)</script>
+                    </td>
+                    <td style="width:60%;">
+                    <select id="select_wangka" style="float:left;display: none;" name="submit_add">
+                    </select>
+                    <!-- 显示绑定的网卡 -->
+                        <input id="wangka" type="text" disabled="disabled">
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <script>dw('<input type=button class=button4 value="'+MM_bind+'" onClick="bandin_()" id = "bandin" style="display:none;" />')</script>
+					<script>dw('<input type=button class=button4 value="'+MM_unbind+'" onClick="jieban_()" id = "jieban" style="display:none;" />')</script>
+					<script>dw('<input type=button class=button4 value="'+BT_delete+'" onClick="del_wan_()" id = "del_wan" style="display:none;" />')</script>
+                    <span id="swtich_html"></span>
+                    </td>
+                    <td style="width:5%">
+					</td>
+					<td>
+					</td>
+					</tr>
+
+
+                <tr class="mytd" style="display:none;">
+                    <td class="item_left_">
+                        <script>
+                            dw(MM_onoff)
+                        </script>启用/禁用
+                    </td>
+                    <td>
+                        <select name="enabled" id="enabled" onchange="wanEnabledSwitch()">
+                            <option value="0">
+                                <script>
+                                    dw(MM_disable)
+                                </script>禁用
+                            </option>
+                            <option value="1">
+                                <script>
+                                    dw(MM_enable)
+                                </script>启用
+                            </option>
+                        </select>
+                    </td>
+                </tr>
+                <tr id="tr_line" style="">
+                    <td colspan="2">
+                        <hr size="1" noshade="" align="top" class="bline">
+                    </td>
+                </tr>
+            </tbody></table>
+            <!-- 我是华丽的分割线 -->
+            <div id="div_wan_setting">
+                <table border="0" width="100%">
+                    <tbody><tr>
+                        <td class="item_left_">
+                            <script>
+                                dw(MM_connection_type)
+                            </script>
+                        </td>
+                        <td>
+                            <select id="connectionType" name="connectionType" onchange="connectionTypeSwitch(this)">
+                                <option value="static">静态IP</option>
+                                <option value="dhcp" selected>DHCP</option>
+                                <option value="pppoe">PPPoE</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody></table>
+                <!--1.静态IP-->
+                <table id="div_static" style="display:none" border="0" width="100%">
+                    <tbody><tr>
+                        <td class="item_left_">
+                            <script>
+                                dw(MM_ipaddr)
+                            </script>
+                        </td>
+                        <td>
+                            <input type="hidden" id="staticIp" name="staticIp" value="">
+                            <input type="text" style="width:33px" maxlength="3" name="ip" onkeydown="return ipVali(event,this.name,0);">
+                            .
+                            <input type="text" style="width:33px" maxlength="3" name="ip" onkeydown="return ipVali(event,this.name,1);">
+                            .
+                            <input type="text" style="width:33px" maxlength="3" name="ip" onkeydown="return ipVali(event,this.name,2);">
+                            .
+                            <input type="text" style="width:33px" maxlength="3" name="ip" onkeydown="return ipVali(event,this.name,3);">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="item_left_">
+                            <script>
+                                dw(MM_netmask)
+                            </script>
+                        </td>
+                        <td>
+                            <input type="hidden" id="staticNetmask" name="staticNetmask" value="">
+                            <input type="text" style="width:33px" maxlength="3" name="mask" onkeydown="return ipVali(event,this.name,0);">
+                            .
+                            <input type="text" style="width:33px" maxlength="3" name="mask" onkeydown="return ipVali(event,this.name,1);">
+                            .
+                            <input type="text" style="width:33px" maxlength="3" name="mask" onkeydown="return ipVali(event,this.name,2);">
+                            .
+                            <input type="text" style="width:33px" maxlength="3" name="mask" onkeydown="return ipVali(event,this.name,3);">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="item_left_">
+                            <script>
+                                dw(MM_default_gateway)
+                            </script>
+                        </td>
+                        <td>
+                            <input type="hidden" id="staticGateway" name="staticGateway" value="">
+                            <input type="text" style="width:33px" maxlength="3" name="gateway" onkeydown="return ipVali(event,this.name,0);">
+                            .
+                            <input type="text" style="width:33px" maxlength="3" name="gateway" onkeydown="return ipVali(event,this.name,1);">
+                            .
+                            <input type="text" style="width:33px" maxlength="3" name="gateway" onkeydown="return ipVali(event,this.name,2);">
+                            .
+                            <input type="text" style="width:33px" maxlength="3" name="gateway" onkeydown="return ipVali(event,this.name,3);">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="item_left_">
+                            MTU
+                        </td>
+                        <td>
+                            <input type="text" id="staticmtu" name="staticmtu" size="4" maxlength="4">
+                            &nbsp;(1400~1500)
+                        </td>
+                    </tr>
+                </tbody></table>
+             <!--   2.DHCP连接-->
+                <table id="div_dhcp" style="display:none;" border="0" width="100%">
+                    <tbody>
+                    <tr>
+                        <td class="item_left_">
+                            MTU
+                        </td>
+                        <td>
+                            <input type="text" id="dhcpmtu" name="dhcpmtu" size="4" maxlength="4">
+                            &nbsp;(1400-1500)
+                        </td>
+                    </tr>
+                </tbody></table>
+              <!--  3.PPPOE连接-->
+                <table id="div_pppoe" style="display:none" border="0" width="100%">
+                    <tbody><tr>
+                        <td class="item_left_">
+                            <script>
+                                dw(MM_username)
+                            </script>
+                        </td>
+                        <td>
+                            <input type="text" id="pppoeUser" name="pppoeUser" maxlength="32">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="item_left_">
+                            <script>
+                                dw(MM_password)
+                            </script>
+                        </td>
+                        <td>
+                            <input type="hidden" id="pppoePass" name="pppoePass">
+                            <span id="div_pppoe_pass2">
+                                <input type="password" id="pppoePass2" name="pppoePass2" maxlength="32" >
+                            </span>
+                        </td>
+                    </tr>
+                    <tr style="display:none">
+                        <td class="item_left_">
+                            <script>
+                                dw(MM_connection_mode)
+                            </script>
+                        </td>
+                        <td>
+                            <select id="pppoeOPMode" name="pppoeOPMode" onchange="pppoeOPModeSwitch()">
+                                <option value="KeepAlive">
+                                    <script>
+                                        dw(MM_keep_alive)
+                                    </script>
+                                </option>
+                                <option value="Manual">
+                                    <script>
+                                        dw(MM_manual)
+                                    </script>
+                                </option>
+                            </select>
+                            &nbsp;&nbsp;
+                            <span id="div_pppoe_manual" style="display:none">
+                                <script>
+                                    dw('<input type="button" class="button4" id="pppConnect" name="pppConnect" value="' + BT_connect + '" onClick="pppConnectClick(0)">')
+                                </script>
+                                &nbsp;&nbsp;
+                                <script>
+                                    dw('<input type="button" class="button4" id="pppDisconnect" name="pppDisconnect" value="' + BT_disconnect + '" onClick="pppConnectClick(1)">')
+                                </script>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="item_left_">
+                            MTU
+                        </td>
+                        <td>
+                            <input type="text" id="pppoemtu" name="pppoemtu" size="4" maxlength="4">
+                            &nbsp;(1400-1500)
+                        </td>
+                    </tr>
+                </tbody></table>
+
+                <table id="div_dns" style="display: table;" border="0" width="100%">
+                    <tbody>
+                    <tr>
+                        <td class="item_left_">
+                            <script>
+                                dw(MM_dns_server)
+                            </script>
+                        </td>
+                        <td>
+                            <input type="hidden" id="priDns" name="priDns" value="">
+                            <input type="text" style="width:33px" maxlength="3" id="wanpridns1" name="wanpridns" onkeydown="return ipVali(event,this.name,0);" >
+                            <input type="text" style="width:33px" maxlength="3" id="wanpridns2" name="wanpridns" onkeydown="return ipVali(event,this.name,1);" >
+                            <input type="text" style="width:33px" maxlength="3" id="wanpridns3" name="wanpridns" onkeydown="return ipVali(event,this.name,2);" >
+                            <input type="text" style="width:33px" maxlength="3" id="wanpridns4" name="wanpridns" onkeydown="return ipVali(event,this.name,3);" >
+                            <span> * 各WAN端口不能相同</span>
+                        </td>
+                    </tr>
+                      <tr>
+                        <td class="item_left_">
+                            <script>
+                                 dw(MM_monitorip)
+                            </script>
+                        </td>
+                        <td>
+                            <input type="hidden" id="priDns" name="priDns" value="">
+                            <input type="text" style="width:33px" maxlength="3" id="monitorIp1" name="monitorIp" onkeydown="return ipVali(event,this.name,0);" >
+                            .
+                            <input type="text" style="width:33px" maxlength="3" id="monitorIp2" name="monitorIp" onkeydown="return ipVali(event,this.name,1);" >
+                            .
+                            <input type="text" style="width:33px" maxlength="3" id="monitorIp3" name="monitorIp" onkeydown="return ipVali(event,this.name,2);" >
+                            .
+                            <input type="text" style="width:33px" maxlength="3" id="monitorIp4" name="monitorIp" onkeydown="return ipVali(event,this.name,3);" >
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="item_left_">
+                            <script>
+                                 dw(MM_multiwan_metric)
+                            </script>
+                        </td>
+                        <td>
+                            <select name="tier" id="tier">
+                                <option value="1" selected="selected">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        <span><script>dw(MM_multiwan_metric_message)</script></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="item_left_">
+                            <script>
+                                 dw(MM_multiwan_weight)
+                            </script>
+                        </td>
+                        <td>
+                            <select name="weight" id="weight">
+                                <option value="1" selected="selected">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        <span><script>dw(MM_multiwan_weight_message)</script></span>
+                        </td>
+                    </tr>
+                </tbody></table>
+                <table id="div_macclone" style="display: none;" border="0" width="100%">
+                    <tbody><tr>
+                        <td class="item_left_">
+                            <script>
+                                dw(MM_macaddr_clone)
+                            </script>
+                        </td>
+                        <td>
+                            <input type="hidden" id="macCloneEnbl" name="macCloneEnbl">
+                            <input type="hidden" name="macCloneMac" id="macCloneMac" value="00:0C:29:EF:28:75">
+                            <input type="text" style="width:28px" maxlength="2" name="mac1" id="mac1" onfocus="this.select();" onkeyup="HWKeyUp('mac',1,event);" onkeydown="return HWKeyDown('mac', 1,event)">
+                            :
+                            <input type="text" style="width:28px" maxlength="2" name="mac2" id="mac2" onfocus="this.select();" onkeyup="HWKeyUp('mac',2,event);" onkeydown="return HWKeyDown('mac', 2,event)">
+                            :
+                            <input type="text" style="width:28px" maxlength="2" name="mac3" id="mac3" onfocus="this.select();" onkeyup="HWKeyUp('mac',3,event);" onkeydown="return HWKeyDown('mac', 3,event)">
+                            :
+                            <input type="text" style="width:28px" maxlength="2" name="mac4" id="mac4" onfocus="this.select();" onkeyup="HWKeyUp('mac',4,event);" onkeydown="return HWKeyDown('mac', 4,event)">
+                            :
+                            <input type="text" style="width:28px" maxlength="2" name="mac5" id="mac5" onfocus="this.select();" onkeyup="HWKeyUp('mac',5,event);" onkeydown="return HWKeyDown('mac', 5,event)">
+                            :
+                            <input type="text" style="width:28px" maxlength="2" name="mac6" id="mac6" onfocus="this.select();" onkeyup="HWKeyUp('mac',6,event);" onkeydown="return HWKeyDown('mac', 6,event)">
+                            <script>
+                                dw('<input type="button" class=button4 id=cloneMacBtn name=cloneMacBtn value="' + BT_clone_mac + '" onClick="cloneMacClick()">&nbsp;&nbsp;<input type="button" class=button4 id=factoryMacBtn name=factoryMacBtn value="' + BT_factory_mac + '" onClick="factoryMacClick()">')
+                            </script><input type="button" class="button4" id="cloneMacBtn" name="cloneMacBtn" value="克隆MAC" onclick="cloneMacClick()">&nbsp;&nbsp;<input type="button" class="button4" id="factoryMacBtn" name="factoryMacBtn" value="缺省MAC" onclick="factoryMacClick()">
+                        </td>
+                    </tr>
+                </tbody></table>
+            <table border="0" width="100%">
+                <tbody><tr>
+                    <td>
+                        <hr size="1" noshade="" align="top" class="bline">
+                    </td>
+                </tr>
+                <tr>
+                    <td height="10">
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <script>
+                            dw('<input id="sbumit_bt_apply" type="submit" class=button value="' + BT_apply + '">')
+                        </script>
+                    </td>
+                </tr>
+            </tbody></table>
+            </div>
+        </form>
+        <script>
+            showFooter()
+        </script></td></tr></tbody></table>
+    </span>
+    
+    <span id="div_wait" style="display:none">
+       <table width="700">
+            <tr>
+                <td>
+                    <table border=0 width="100%">
+                        <tr>
+                            <td style="font-weight:bold; font-size:14px;">
+                                <script>dw(MM_change_setting)</script>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <hr size=1 noshade align="top" class="bline">
+                            </td>
+                        </tr>
+                    </table>
+                    <table border="0" width="100%">
+                        <tr>
+                            <td rowspan=2 width="100" align="center"><img src="/style/load.gif"/></td>
+                            <td class="msg_title"><span id="show_msg"></span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <script>dw(MM_please_wait)</script>&nbsp;<span id="show_sec"></span>&nbsp;<script>dw(MM_seconds)</script>...
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <hr size=1 noshade align="top" class="bline">
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </span>
+    
+<script>
+// 切换连接方式前台页面
+function connectionTypeSwitch(obj) {
+    var current_obj = obj.options[obj.selectedIndex];
+    for (var i = 0; i < obj.options.length; i++) {
+        $('#div_'+obj.options[i].value).css('display', 'none');
+    }
+    $('#div_'+current_obj.value).css('display', 'table');
+    if ('dhcp' == current_obj.value || 'pppoe'==current_obj.value) {
+    }else{
+        $("input[type=radio]").attr("checked",'0');
+        $('#div_dns').css('display', 'table');
+    }
+}
+
+$(function(){
+    $.ajax({
+        url: '/webapi',
+        type: 'POST',
+        dataType: 'json',
+        data: '{"action":"getWanInfo", "data":{}}',
+        success:function(data){
+            if (9999 == data.rescode){
+                issetLogin();
+            }
+            if (0 == data['rescode']) {
+                dataInfo = data.data;
+                // 显示已设置的数据
+                if(dataInfo["Interfaces"].length != 0){
+                    $("#tier").val(dataInfo.Interfaces[0].Tier);
+                    $("#weight").val(dataInfo.Interfaces[0].Weight);
+                    if ('dhcp' == dataInfo.Interfaces[0].Protocol && "" != dataInfo.Interfaces[0].Protocol) {
+                        $('#div_dhcp').show();
+                        $('#div_static').hide();
+                        $('#div_pppoe').hide();
+                        $('#connectionType').val('dhcp');
+                        $('#dhcpmtu').val(dataInfo.Interfaces[0].Mtu);
+                    }else if ('pppoe' == dataInfo.Interfaces[0].Protocol && "" != dataInfo.Interfaces[0].Protocol) {
+                        $('#div_pppoe').show();
+                        $('#div_static').hide();
+                        $('#div_dhcp').hide();
+                        $('#connectionType').val('pppoe');
+                        $('#pppoemtu').val(dataInfo.Interfaces[0].Mtu);
+                        $('#pppoeUser').val(dataInfo.Interfaces[0].Username);
+                        $('#pppoePass2').val(dataInfo.Interfaces[0].Password);
+                    }else if ('static' == dataInfo.Interfaces[0].Protocol && "" != dataInfo.Interfaces[0].Protocol){
+                        $('#div_static').show();
+                        $('#div_dhcp').hide();
+                        $('#div_pppoe').hide();
+                        $('#connectionType').val('static');
+                        var Ip = dataInfo.Interfaces[0].Ip;
+                        var Netmask = dataInfo.Interfaces[0].Netmask;
+                        var Gateway = dataInfo.Interfaces[0].Gateway;
+
+                        var ip_arr_append = Ip.split('.');
+                        var mask_arr_append = Netmask.split('.');
+                        var getways_arr_append = Gateway.split('.');
+                        for (var i = 0; i < ip_arr_append.length; i++) {
+                            $('input[name="ip"]')[i].value = ip_arr_append[i];
+                            $('input[name="mask"]')[i].value = mask_arr_append[i];
+                            $('input[name="gateway"]')[i].value = getways_arr_append[i];
+                        }
+                        $('#staticmtu').val(dataInfo.Interfaces[0].Mtu);
+                    }else{
+                        $('#div_dhcp').show();
+                        $('#div_static').hide();
+                        $('#div_pppoe').hide();
+                        $('#connectionType').val('dhcp');
+                        $('#dhcpmtu').val(dataInfo.Interfaces[0].Mtu);
+                    }
+                    if(dataInfo.Interfaces[0].Monitor != ""){
+                        var Monitor = dataInfo.Interfaces[0].Monitor.split('.');
+                        for (var i = 0; i < Monitor.length; i++) {
+                            $('input[name="monitorIp"]')[i].value = Monitor[i];
+                        }
+                    }else{
+                        for (var i = 0; i < 4; i++) {
+                            $('input[name="monitorIp"]')[i].value = "";
+                        }
+                    }
+                    if(dataInfo.Interfaces[0].Dns != ""){
+                        var Dns = dataInfo.Interfaces[0].Dns.split('.');
+                        for (var i = 0; i < Dns.length; i++) {
+                            $('input[name="wanpridns"]')[i].value = Dns[i];
+                        }
+                    }else {
+                        for (var i = 0; i < 4; i++) {
+                            $('input[name="wanpridns"]')[i].value = "";
+                        }
+                    }
+
+                    var AvailableNic = dataInfo.AvailableNic;
+                    if(AvailableNic != ""){
+                        $('#tagBnt').show();
+                    }
+                    $('#bandin').hide();
+                    $('#del_wan').hide();
+                    if(dataInfo.Interfaces[0].Status.if == "pppoe0"){
+                        document.getElementById("wangka").value = dataInfo.Interfaces[0].Nic;
+                    }else{
+                        document.getElementById("wangka").value = dataInfo.Interfaces[0].Nic+" | "+dataInfo.Interfaces[0].Status.macaddr;
+                    }
+                    for (var k in dataInfo["Interfaces"]){
+                        var wanSum = dataInfo.Interfaces[k].Interface;
+                        var tr_sl ='';
+                        var tr ='';
+                        tr_sl += '<option value="'+k+'">'+wanSum.toUpperCase()+'</option>';
+                        if(dataInfo.Interfaces[k].Interface == "wan1")
+                            tr = '<li class="cut_tab allclass" id="select_'+k+'"><a onclick="changeselect('+k+')">'+wanSum.toUpperCase()+'</a></li>';
+                        else
+                            tr = '<li class="allclass" id="select_'+k+'"><a onclick="changeselect('+k+')">'+wanSum.toUpperCase()+'</a></li>';
+                        $('#wanIndex').append(tr_sl);
+                        $('#rollBox').append(tr);
+                    }
+                }else {
+                    var AvailableNic = dataInfo.AvailableNic;
+                    if(AvailableNic != ""){$('#tagBnt').show();}
+                    $('#div_wan_setting').hide();
+                }
+            }
+        }
+    });
+
+    $('#wanCfg').submit(function(event) {
+        var data      = {};
+        var descr    = $('#wanIndex option:selected').val();
+        data.Interface = dataInfo.Interfaces[descr].Interface;
+        data.Tier = $('#tier option:selected').val();
+        data.Weight = $('#weight option:selected').val();
+        var nic = $('#wangka').val().substring(0,3);
+        data.Nic = nic;
+        data.Protocol = this.elements['connectionType'].options[this.elements['connectionType'].selectedIndex].value;
+        data.Mtu      = this.elements[data.Protocol+'mtu'].value;
+        if (!(data.Mtu>=1400&&data.Mtu<=1500)) {alert('MTU只能在1400~1500之间。');return false;}
+        // 静态ip
+        if ('static' == data.Protocol) {
+            data.Ip      = ip_zip(this.elements['ip'],1);
+            if (!data.Ip) {alert('IP地址不正确');return false;}
+            data.Netmask = ip_zip(this.elements['mask'],2);
+            if (!data.Netmask) {alert('mask地址不正确');return false;}
+            data.Gateway = ip_zip(this.elements['gateway'],1);
+            if (!data.Gateway) {alert('网关地址不正确');return false;}
+            data.Dns = this.elements['wanpridns'].value;
+        }else if ('pppoe' == data.Protocol) {
+            data.Username = this.elements['pppoeUser'].value;
+            data.Password = this.elements['pppoePass2'].value;
+            data.Dns = this.elements['wanpridns'].value;
+        }else if ('dhcp' == data.Protocol) {
+            data.Dns = this.elements['wanpridns'].value;
+        }
+
+        if($("#monitorIp1").val()=="" && $("#monitorIp2").val()=="" && $("#monitorIp3").val()=="" && $("#monitorIp4").val()==""){
+            data.Monitor  = "";
+        }else{
+            data.Monitor  = ip_zip(this.elements['monitorIp'],1);
+            if (!data.Monitor) {alert('监视IP地址不正确');return false;}
+        }
+
+        if ("1" != data.Dns) {
+            data.Dns    = ip_zip(this.elements['wanpridns'],1);
+            if (!data.Dns) {alert('DNS地址不正确');return false;}
+        }
+
+        $("#wanCfg").hide();
+        $("#div_wait").show();
+        wtime=60;
+        do_count_down();
+        var sub_data = {"action":"setWanInfo", "data":data};
+        sub_data = JSON.stringify(sub_data);
+        $('input').attr('disabled',true);
+        $.ajax({
+            url: '/webapi',
+            type: 'POST',
+            dataType: 'json',
+            data: sub_data,
+            success:function(data){
+                if (9999 == data.rescode){
+                    issetLogin();
+                }
+                if (0 == data.rescode) {
+                    resultInfo = '设置成功！';
+                }else{
+                    resultInfo = '设置失败！'+data_msg_json[data.rescode];
+                }
+                $('input').attr('disabled',false);
+            }
+        });
+        return false;
+    });
+});
+
+var resultInfo = '';
+/*倒计时*/
+var wtime =60;
+function do_count_down() {
+    document.getElementById("show_sec").innerHTML = wtime;
+    if(resultInfo.length > 0){
+        $("#wanCfg").show();
+        $("#div_wait").hide();
+        alert(resultInfo);
+        resultInfo='';
+    }else if (wtime > 0) {
+        wtime--;
+        setTimeout('do_count_down()', 1000);
+    }else{
+        $("#wanCfg").show();
+        $("#div_wait").hide();
+        alert(resultInfo);
+        resultInfo='';
+        //location.href = location.href;
+    }
+}
+//选项卡切换
+function changeselect(wanid){
+    $('#div_wan_setting').show();
+    $('#wangka').show();
+    $('#select_wangka').hide();
+    $("#wanIndex").val(wanid);
+    $('.allclass').prop("class","allclass");
+    $('#select_'+wanid).prop("class","allclass cut_tab");
+    // 显示已设置的数据
+    if ('dhcp' == dataInfo.Interfaces[wanid].Protocol) {
+        $('#div_dhcp').show();
+        $('#div_static').hide();
+        $('#div_pppoe').hide();
+        $('#connectionType').val('dhcp');
+        $('#dhcpmtu').val(dataInfo.Interfaces[wanid].Mtu);
+    }else if ('pppoe' == dataInfo.Interfaces[wanid].Protocol) {
+        $('#div_pppoe').show();
+        $('#div_static').hide();
+        $('#div_dhcp').hide();
+        $('#connectionType').val('pppoe');
+        $('#pppoemtu').val(dataInfo.Interfaces[wanid].Mtu);
+        $('#pppoeUser').val(dataInfo.Interfaces[wanid].Username);
+        $('#pppoePass2').val(dataInfo.Interfaces[wanid].Password);
+    }else if ('static' == dataInfo.Interfaces[wanid].Protocol){
+        $('#div_static').show();
+        $('#div_dhcp').hide();
+        $('#div_pppoe').hide();
+        $('#connectionType').val('static');
+        $('#staticmtu').val(dataInfo.Interfaces[wanid].Mtu);
+
+        var Ip = dataInfo.Interfaces[wanid].Ip;
+        var Netmask = dataInfo.Interfaces[wanid].Netmask;
+        var Gateway = dataInfo.Interfaces[wanid].Gateway;
+        var ip_arr_append = Ip.split('.');
+        var mask_arr_append = Netmask.split('.');
+        var getways_arr_append = Gateway.split('.');
+        for (var i = 0; i < ip_arr_append.length; i++) {
+            $('input[name="ip"]')[i].value = ip_arr_append[i];
+            $('input[name="mask"]')[i].value = mask_arr_append[i];
+            $('input[name="gateway"]')[i].value = getways_arr_append[i];
+        }
+    }else{
+        $('#div_dhcp').show();
+        $('#div_static').hide();
+        $('#div_pppoe').hide();
+        $('#connectionType').val('dhcp');
+        $('#dhcpmtu').val(dataInfo.Interfaces[wanid].Mtu);
+    }
+
+    $("#tier").val(dataInfo.Interfaces[wanid].Tier);
+    $("#weight").val(dataInfo.Interfaces[wanid].Weight);
+
+    if(dataInfo.Interfaces[wanid].Monitor != ""){
+        var Monitor = dataInfo.Interfaces[wanid].Monitor.split('.');
+        for (var i = 0; i < Monitor.length; i++) {
+            $('input[name="monitorIp"]')[i].value = Monitor[i];
+        }
+    }else{
+        for (var i = 0; i < 4; i++) {
+            $('input[name="monitorIp"]')[i].value = "";
+        }
+    }
+
+    if(dataInfo.Interfaces[wanid].Dns != ""){
+        var Dns = dataInfo.Interfaces[wanid].Dns.split('.');
+        for (var i = 0; i < Dns.length; i++) {
+            $('input[name="wanpridns"]')[i].value = Dns[i];
+        }
+    }else{
+        for (var i = 0; i < 4; i++) {
+            $('input[name="wanpridns"]')[i].value = "";
+        }
+    }
+
+    var AvailableNic = dataInfo.AvailableNic;
+    if(AvailableNic != ""){
+        $('#tagBnt').show();
+    }
+    $('#bandin').hide();
+    if(wanid == 0){
+        $('#del_wan').hide();
+    }else{
+        $('#del_wan').show();
+    }
+
+    if(dataInfo.Interfaces[wanid].Status.if == "pppoe0"){
+        document.getElementById("wangka").value = dataInfo.Interfaces[wanid].Nic;
+    }else{
+        document.getElementById("wangka").value = dataInfo.Interfaces[wanid].Nic+" | "+dataInfo.Interfaces[wanid].Status.macaddr;
+    }
+
+}
+//添加wan
+function addwlan(){
+    $('#div_wan_setting').hide();
+    $('#wangka').hide();
+    $('#select_wangka').show();
+    $('#bandin').show();
+    $('#del_wan').hide();
+    var AvailableNic = dataInfo.AvailableNic;
+    var option2 ='';
+    for (var i in AvailableNic){
+         option2 += '<option value="'+i+'">'+i+' | '+AvailableNic[i]["mac"]+'</option>';
+    }
+    $('#select_wangka').append(option2);
+}
+// 绑定wan
+function bandin_(){
+    var options=$("#select_wangka option:selected").val();
+    var data ={};
+    data.Interface = "wan";
+    data.Nic = options;
+    var sub_data = {"action":"setInterfaceBind", "data":data};
+    sub_data = JSON.stringify(sub_data);
+    $('input').attr('disabled',true);
+    $.ajax({
+        url: '/webapi',
+        type: 'POST',
+        dataType: 'json',
+        data: sub_data,
+        success:function(data){
+            if (9999 == data.rescode){
+                issetLogin();
+            }
+            if (0 == data.rescode) {
+                alert('绑定成功！');
+                location.href = location.href;
+            }else{
+                alert('绑定失败！'+data_msg_json[data.rescode]);
+            }
+            $('input').attr('disabled',false);
+        }
+    });
+}
+// 删除wan
+function del_wan_(){
+    var wanIndex = $('#wanIndex').val();
+    if(wanIndex==0){alert(MM_wan1_warn); return false; }
+    var data ={};
+    data.Interface = dataInfo.Interfaces[wanIndex].Interface;
+    data.Nic = dataInfo.Interfaces[wanIndex].Nic;
+
+    var postVar = {"action":"delInterfaceBind","data":data};
+    postVar = JSON.stringify(postVar);
+    $('input').attr('disabled',true);
+    $.ajax({
+        url: '/webapi',
+        type: 'POST',
+        dataType: 'json',
+        data: postVar,
+        success:function(data){
+            if (9999 == data.rescode){
+                issetLogin();
+            }
+            if (0 == data.rescode) {
+                alert('删除成功！');
+                location.href = location.href;
+            }else{
+                alert('删除失败！'+data_msg_json[data.rescode]);
+            }
+            $('input').attr('disabled',false);
+        }
+    });
+}
+
+/**
+ * 拼接和检查ip地址。
+ * @Author Yexk
+ * @Date   2017-02-07
+ * @param  {Object}   ip_obj [当前需要拼凑的表单对象]
+ * @param  {Boolean}  isCheck[0，不检查1，需要检查ip，2，检查mask]
+ * @return {String}          [返回字符串地址或者布尔值]
+ */
+function ip_zip(ip_obj,isCheck) {
+    var ippar = '';
+    for (var i = 0; i < ip_obj.length; i++) {
+        ippar += ip_obj[i].value + '.'
+    }
+    var ip = ippar.substr(0,ippar.length-1);
+    if (1 == isCheck) {
+        if (0 == isIP(ip)) return false;
+    }else if(2 == isCheck){
+        if (0 == isMask(ip)) return false;
+    }
+    return ip;
+}
+
+function isIP(str) {
+    var re=/^(?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))$/;
+    if(!re.test(str)) return 0;
+    var buf=str.split(".");
+    if(buf[3]<1||buf[3]>254) return 0;
+    return 1;
+}
+function isMask(str) {
+    if(!isIPMask(str)) return 0;
+    var buf=str.split(".");
+    var m0=buf[0],m1=buf[1],m2=buf[2],m3=buf[3];
+    if(!(m3==0||m3==128||m3==192||m3==224||m3==240||m3==248||m3==252||m3==254)) return 0;
+    if(!(m2==0||m2==128||m2==192||m2==224||m2==240||m2==248||m2==252||m2==254||m2==255)) return 0;
+    if(!(m1==0||m1==128||m1==192||m1==224||m1==240||m1==248||m1==252||m1==254||m1==255)) return 0;
+    if(!(m0==128||m0==192||m0==224||m0==240||m0==248||m0==252||m0==254||m0==255)) return 0;
+    return 1;
+}
+function isIPMask(str) {
+    var re=/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+    if(!re.test(str)) return 0;
+    var buf=str.split("."); 
+    for(i=0;i<4;i++){
+        if(buf[i]<0||buf[i]>255) return 0;
+    }
+    return 1;
+}
+
+// 解绑wan
+function jieban_(){
+
+    var wanIndex = $('#wanIndex').val();
+    if(wanIndex==1){alert(MM_wan1_warn2); return false; }
+    $("#wangka option").each(function () {
+        var txt = $(this).text(); //获取单个text
+        var arr_ = txt.split(' | ');
+        if(arr_[2].trim()=="wan"+wanIndex)
+        {
+            //console.log(arr_[2].trim());
+            var bindIfname = arr_[0];
+            var postVar = {topicurl : "setting/remWanBind"};
+            postVar['wanIndex'] = wanIndex;
+            postVar['bindIfname'] = bindIfname;
+            uiPost2(postVar);
+        }
+
+    });
+}
+
+</script>
+</body></html>

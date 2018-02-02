@@ -1,0 +1,315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="/css/menu.css" type="text/css">
+    <link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+    <link rel="stylesheet" href="/css/line.css" type="text/css">
+    <script language="javascript" src="/js/language.js"></script>
+    <script language="javascript" src="/js/jcommon.js"></script>
+    <script language="javascript" src="/js/jquery.min.js"></script>
+    <script language="javascript" src="/js/json2.min.js"></script>
+    <script language="javascript" src="/js/spec.js"></script>
+</head>
+<body class="mainbody">
+<div id="languageDiv" style="display:none">
+    <table width="172" border="0" cellpadding="3" cellspacing="0">
+        <tr><td colspan="2" height="12"></td></tr>
+        <tr>
+            <td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+            <td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+        </tr>
+        <tr>
+            <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+            <td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+        </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<table border=0 width="100%">
+    <tr><td class="content_title"><script>dw(MM_portal_set)</script></td></tr>
+    <tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+<table border=0 width="100%">
+    <tr>
+        <td class="item_left"><script>dw(MM_portal_set)</script></td>
+        <td><select id="portalserver" name="portalserver"  onChange="portalEnabledSwitch()">
+                <option value="0"><script>dw(MM_disable)</script></option>
+                <option value="1"><script>dw(MM_enable)</script></option>
+            </select></td>
+    </tr>
+</table>
+<table id="typeserver" border=0 width="100%" style="display:none">
+    <tr><td height="10"></td></tr>
+    <tr>
+        <td class="item_left">Portal服务类型</td>
+        <td><select id="portaltype" name="portaltype" onChange="typeSwitch()">
+                <option value="local">本地</option>
+                <option value="server">对接云中心</option>
+            </select></td>
+    </tr>
+</table>
+
+<table id="type1" border=0 width="100%" style="display:none">
+    <tr>
+        <td class="item_left">空闲超时时间(分)</td>
+        <td><input type="text" size="8"  id="idletimeout" name="idletimeout" maxlength="32"></td>
+    </tr>
+    <tr>
+        <td class="item_left">登录超时时间(分)</td>
+        <td><input type="text" size="8"  id="logintimeout" name="logintimeout" maxlength="32"></td>
+    </tr>
+    <tr>
+        <td class="item_left">IP白名单</td>
+        <td><input type="text" size="40"  id="iplist" name="iplist" maxlength="180"> 多个IP用逗号分隔</td>
+    </tr>
+    <tr>
+        <td class="item_left">MAC白名单</td>
+        <td><input type="text" size="40" id="maclist" name="maclist" maxlength="180"> 多个MAC用逗号分隔</td>
+    </tr>
+    <tr><td colspan="2"><hr size=1 noshade align=top class=bline></td></tr>
+    <tr>
+        <td class="item_left">微信登录信息</td>
+<!--        <td><input type="checkbox" size="40" id="weixin" name="weixin" onchange="weixinSwitch()"></td>-->
+    </tr>
+
+    <tr>
+        <td class="item_left">appId</td>
+        <td><input type="text" size="40" id="appId" name="appId" maxlength="40"></td>
+    </tr>
+    <tr>
+        <td class="item_left">shopId</td>
+        <td><input type="text" size="40" id="shop_id" name="shop_id" maxlength="40"></td>
+    </tr>
+    <tr>
+        <td class="item_left">ssid</td>
+        <td><input type="text" size="40" id="ssid" name="ssid" maxlength="40"></td>
+    </tr>
+    <tr>
+        <td class="item_left">secretkey</td>
+        <td><input type="text" size="40" id="secretkey" name="secretkey" maxlength="40"></td>
+    </tr>
+    <tr>
+        <td class="item_left">强制关注</td>
+        <td><select id="attention" name="attention">
+                <option value="0">强制</option>
+                <option value="1">不强制</option>
+            </select></td>
+    </tr>
+</table>
+
+<table id="type2" border=0 width="100%" style="display:none">
+    <tr>
+        <td class="item_left">机器码</td>
+        <td><input type="text" size="40" id="mcode" name="mcode" readonly="readonly"></td>
+    </tr>
+    <tr>
+        <td class="item_left">热点ID</td>
+        <td><input type="text" size="30" id="hotid" name="hotid"></td>
+    </tr>
+</table>
+
+<table id="type3" border=0 width="100%" style="display:none">
+    <tr><td colspan="2"><hr size=1 noshade align=top class=bline></td></tr>
+    <tr>
+        <td class="item_left">登录页面</td>
+        <td>
+            <select id="portal_login_page" name="portal_login_page">
+                <option value="0"> 默认登录页面 </option>
+                <option value="1">自定义登录页面</option>
+            </select>
+        </td>
+    </tr>
+    <tr id="portal_login_page_down">
+        <td class="item_left">页面下传</td>
+        <td> <a href="/portalapi/loginpagedl">下载</a></td>
+    </tr>
+    <form method="post" id="loginPage11" action="/webapi" enctype="multipart/form-data" target="rfFrame">
+    <input type="hidden" name="action" value="setPortalStatusUp" />
+    <tr id="portal_login_page_up">
+        <td class="item_left">页面上传</td>
+        <td> <input type="file" name="loginPage"></td>
+    </tr>
+    </form>
+    <iframe id="rfFrame" name="rfFrame" src="about:blank" style="display:none;"></iframe>
+</table>
+<table border=0 width="100%">
+    <tr><td><hr size=1 noshade align=top class=bline></td></tr>
+    <tr><td align="right"><script>dw('<input id="sbumit_bt_apply" type="button" class=button value="'+BT_apply+'" onClick="doSubmit()">')</script></td></tr>
+</table>
+<script>showFooter()</script>
+<script>
+
+    $(function(){
+        init();
+
+        $('#portal_login_page').on('change', function(event) {
+            event.preventDefault();
+            if ( 1 == this.value ) {
+                $('#portal_login_page_up').show();
+                $('#portal_login_page_down').hide();
+            }else{
+                $('#portal_login_page_up').hide();
+                $('#portal_login_page_down').show();
+            }
+        }).trigger('change');
+
+        $('[name="loginPage"]').on('change', function(event) {
+            event.preventDefault();
+            var file_name = this.value;
+            var file_ext = file_name.substr(file_name.lastIndexOf('.')+1);
+            if ('zip' != file_ext) {
+                alert('请选择以zip后缀的压缩包。');
+                this.value = '';
+                return false;
+            }
+        });
+
+    });
+    function init() {
+        $.ajax({
+            url: '/webapi',
+            type: 'POST',
+            dataType: 'json',
+            data: '{"action":"getPortalStatus"}',
+            async: false,
+            success:function(data){
+                if (9999 == data.rescode){
+                    issetLogin();
+                }
+                if (0 == data.rescode) {
+                    var Enable = data.data.Enable;
+                    var get_Type = data.data.Type;
+                    if(get_Type =="local"){
+                        $("#type1").show();
+                        document.getElementById("portaltype").value = "local" ;
+                        document.getElementById("idletimeout").value = data.data.IdleTimeout;
+                        document.getElementById("logintimeout").value = data.data.SessionTimeout;
+                        document.getElementById("iplist").value = data.data.AllowedIp;
+                        document.getElementById("maclist").value = data.data.AllowedMac;
+                        document.getElementById("appId").value = data.data.appId;
+                        document.getElementById("shop_id").value = data.data.shop_id;
+                        document.getElementById("ssid").value = data.data.ssid;
+                        document.getElementById("secretkey").value = data.data.secretkey;
+                        if (data.data.attention == "yes"){
+                            document.getElementById("attention").value = "0";
+                        }
+                        if (data.data.attention == "no"){
+                            document.getElementById("attention").value = "1";
+                        }
+                    }else{
+                        $("#type2").show();
+                        $("#type3").hide();
+                        document.getElementById("portaltype").value = "server" ;
+                        document.getElementById("hotid").value = data.data.GatewayId;
+                    }
+                    document.getElementById("mcode").value = data.data.Mcode;
+                    if(Enable == "1"){
+                        document.getElementById("portalserver").value = "1" ;
+                        $("#typeserver").show();
+                        if(get_Type =="local"){
+                            $("#type3").show();
+                            $('#portal_login_page').val(data.data.LoginPageStatus).trigger('change');
+                        }else{
+                            $("#type3").hide();
+                        }
+                    }else{
+                        $("#typeserver").hide();
+                        $("#type1,#type2,#type3").hide();
+                    }
+                }else {
+                    alert(data_msg_json[data.rescode]);
+                }
+            }
+        });
+    }
+
+    function portalEnabledSwitch(){
+        if($("#portalserver").val() == "0"){
+            $("#typeserver,#type1,#type2,#type3").hide();
+        }else{
+            if($("#portaltype").val() == "local"){
+                $("#typeserver").show();
+                $("#type1").show();
+                $("#type2").hide();
+                $("#type3").show();
+            }else{
+                $("#typeserver").show();
+                $("#type1").hide();
+                $("#type2").show();
+                $("#type3").hide();
+            }
+        }
+    }
+
+    function typeSwitch() {
+        if($("#portaltype").val() == "local"){
+            $("#type1").show();
+            $("#type2").hide();
+            $("#type3").show();
+        }else {
+            $("#type1").hide();
+            $("#type2").show();
+            $("#type3").hide();
+        }
+    }
+
+    function doSubmit(){
+        var data = {};
+        if($('#portalserver').val() == 1){
+            if($('#portaltype').val() == "local"){
+                data.Enable = $('#portalserver').val();
+                data.Type = $('#portaltype').val();
+                data.IdleTimeout = $('#idletimeout').val();
+                data.SessionTimeout = $('#logintimeout').val();
+                data.AllowedIp = $('#iplist').val();
+                data.AllowedMac = $('#maclist').val();
+                data.LoginPageStatus = $('#portal_login_page').val();
+
+                if($("#appId").val()==""){alert('appId不能为空');return false;}
+                if($("#shop_id").val()==""){alert('shop_id不能为空');return false;}
+                if($("#ssid").val()==""){alert('ssid不能为空');return false;}
+                if($("#secretkey").val()==""){alert('secretkey不能为空');return false;}
+                data.appId = $('#appId').val();
+                data.shop_id = $('#shop_id').val();
+                data.ssid = $('#ssid').val();
+                data.secretkey = $('#secretkey').val();
+                data.attention = $('#attention').val();
+
+            }else{
+                if($("#hotid").val()==""){alert('热点ID不能为空');return false;}
+                data.Enable = $('#portalserver').val();
+                data.Type = $('#portaltype').val();
+                data.GatewayId = $('#hotid').val();
+            }
+        } else{
+            data.Enable = $('#portalserver').val();
+        }
+        var sub_data = {"action":"setPortalStatus", "data":data};
+        sub_data = JSON.stringify(sub_data);
+        var file_name = $('[name="loginPage"]').val();
+        $("#loginPage11").submit();
+        $(":input").attr('disabled',true);
+        $.ajax({
+            url: '/webapi',
+            type: 'POST',
+            dataType: 'json',
+            data: sub_data,
+            success:function(data){
+                if (9999 == data.rescode){
+                    issetLogin();
+                }
+                if (0 == data.rescode) {
+                    alert('设置成功！');
+                    location.href = location.href;
+                } else {
+                    alert('设置失败！'+data_msg_json[data.rescode]);
+                }
+                $(":input").attr('disabled',false);
+            }
+        });
+    }
+
+</script>
+</body></html>

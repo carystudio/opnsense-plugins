@@ -1,0 +1,256 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/css/menu.css" type="text/css">
+<link rel="stylesheet" href="/css/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/css/line.css" type="text/css">
+<script language="javascript" src="/js/language.js"></script>
+<script language="javascript" src="/js/jcommon.js"></script>
+<script language="javascript" src="/js/jquery.min.js"></script>
+<script language="javascript" src="/js/json2.min.js"></script>
+<script language="javascript" src="/js/spec.js"></script>
+<script language="javascript">
+var responseJson, JsonInterfaceList;
+var v_DMZEnable,v_DMZAddress,v_lanNetmask,v_lanIp,v_stationIP, v_lanIndex,flag=0, obj=0;
+function saveChanges(){
+//	supplyValue("DMZAddress", v_lanIp.replace(/\.\d{1,3}$/,".")+$("#dmzip4").val());
+	setJSONValue({
+		'DMZAddress'		:	combinIP($(":input[name=ips]"))
+	});
+	if ($("#DMZEnabled").val() == "1") {
+		var DMZAddress=$("#DMZAddress").val();
+		if (!checkVaildVal.IsVaildIpAddr(DMZAddress, MM_host_ipaddr)) return false;		
+		if (!checkVaildVal.IsIpSubnet(DMZAddress, v_lanNetmask, v_lanIp)) {alert(JS_msg38);	return false;}		
+		if (DMZAddress == v_lanIp) {alert(JS_msg39);return false;}
+	}	
+	return true;
+}
+function selectMyIP(){
+
+	if ($("#DMZMyIP").is(":checked"))
+	//	supplyValue("DMZAddress", $("#myip").html().split(".")[3]);
+		decomIP2($(":input[name=ips]"),$("#myip").html(),0,4);
+	else if(v_DMZAddress ==""||v_DMZAddress =="undefined")
+    //	supplyValue("DMZAddress", "");
+		decomIP2($(":input[name=ips]"),"",0,4);
+	else
+	//	supplyValue("DMZAddress", v_DMZAddress.split("."));
+		decomIP2($(":input[name=ips]"),v_DMZAddress,0,4);
+}  
+function updateState(){
+	$("#DMZMyIP").prop('checked',false);
+	if ($("#DMZEnabled").val() == 1){
+		$("#div_dmzip,#div_pcip,#div_lannum").show();
+		setDisabled("#DMZMyIP,#ip_address3",false);
+	}else {
+		$("#div_dmzip,#div_pcip,#div_lannum").hide();
+		setDisabled("#DMZMyIP,#ip_address3",true);
+	}
+}
+
+function updateState_2(){	
+	flag = 1;
+	obj = $("#lan_num").val();	
+	var postVar = {topicurl : "setting/getDMZCfg"};
+	postVar['lanIndex']= $("#lan_num").val();
+	postVar['fg']= "1";
+	postVar = JSON.stringify(postVar);
+
+		
+	var postVar2 = { topicurl : "setting/getlanCurInterface"};
+	postVar2 = JSON.stringify(postVar2);
+	$.ajax({
+			type: "post",
+			url: " /cgi-bin/cstecgi.cgi",
+			data: postVar2,
+			async: false,
+			success: function(Data2) {
+				JsonInterfaceList = JSON.parse(Data2);
+			}
+		});
+	
+	$.when( $.post("/cgi-bin/cstecgi.cgi", postVar))
+    .done(function( Data) {
+		responseJson = JSON.parse(Data);
+		initValue();
+		updateState();
+	})
+	.fail(function(){
+		resetForm();
+	});
+}
+function initValue(){
+	
+	v_DMZEnable=responseJson['DMZEnable'];
+	v_DMZAddress=responseJson['DMZAddress'];
+	v_lanNetmask=responseJson['lanNetmask'];
+	v_lanIp=responseJson['lanIp'];
+	v_stationIP=responseJson['stationIP'];
+	v_lanIndex = responseJson['Index'];
+	if(!flag)	
+		supplyValue("DMZEnabled",v_DMZEnable);
+	supplyValue("myip",v_stationIP);
+	
+	if (v_DMZEnable == "0"){
+		$("#div_dmzip,#div_pcip,#div_lannum").hide();
+		setDisabled("#DMZMyIP,#ip_address3",true);
+	}else {
+		$("#div_dmzip,#div_pcip,#div_lannum").show();
+		setDisabled("#DMZMyIP,#ip_address3",false);
+		}
+	
+	if (v_DMZAddress != "") decomIP2($(":input[name=ips]"),v_DMZAddress,0,4);
+//	if (v_lanIp !="") decomIP2($(":input[name=ips]"),v_lanIp,0);
+
+	var count = 0;
+	if(v_lanNetmask !=""){
+		var msk = v_lanNetmask.split(".");
+		for(var k=0; k<4; k++){
+			if(msk[k] == "255"){	
+				setDisabled("#ip_address"+k, true);
+				count++;
+			}
+		}
+	//	lanip = lanIP.join(".");
+	}
+	$("#DMZMyIP").disabled=true;
+	$("#DMZMyIP").attr('disabled',true);
+	$("#DMZMyIP").val("");
+	if (v_lanIp !="") decomIP2($(":input[name=ips]"),v_lanIp,0,count);
+	if(obj != 0)
+		createRulesTable(obj);
+	else
+		createRulesTable(v_lanIndex);
+	
+}
+
+function createRulesTable(val){
+	var tmpJson;
+	var Tmp="",interface_num;
+
+	interface_num=JsonInterfaceList.length;
+	for(i=0;i<interface_num;i++)
+	{
+		tmpJson=JsonInterfaceList[i];
+		if(tmpJson.enabled == "1")
+			if((i+1) == val)
+				Tmp+="<option selected value="+(i+1)+">"+"LAN"+(i+1)+"</option>";
+			else
+				Tmp+="<option value="+(i+1)+">"+"LAN"+(i+1)+"</option>";
+	}
+	
+	if(Tmp == "")
+	{
+		FLAG=1;
+		Tmp+="<option selected value=\"0\">"+"LAN1"+"</option>";
+		$("#lan_num").html(Tmp);
+		setDisabled("#lan_num",true);
+	}
+	else
+	{
+		$("#lan_num").html(Tmp);
+	}
+	
+}
+
+
+$(function(){
+	// var postVar = {topicurl : "setting/getDMZCfg"};
+	// postVar = JSON.stringify(postVar);
+
+		
+	// var postVar2 = { topicurl : "setting/getlanCurInterface"};
+	// postVar2 = JSON.stringify(postVar2);
+	// $.ajax({
+	// 		type: "post",
+	// 		url: " /cgi-bin/cstecgi.cgi",
+	// 		data: postVar2,
+	// 		async: false,
+	// 		success: function(Data2) {
+	// 			JsonInterfaceList = JSON.parse(Data2);
+	// 		}
+	// 	});
+	
+	// $.when( $.post("/cgi-bin/cstecgi.cgi", postVar))
+ //    .done(function( Data) {
+	// 	responseJson = JSON.parse(Data);
+	// 	initValue();
+	// })
+	// .fail(function(){
+	// 	resetForm();
+	// });
+	return;
+});
+function doSubmit(){
+	if(!saveChanges()) return false;
+	var postVar ={"topicurl":"setting/setDMZCfg"};
+	postVar['DMZEnabled'] = $("#DMZEnabled").val();
+	postVar['DMZAddress'] = $("#DMZAddress").val();
+	postVar['week_all'] = "ON";
+	postVar['time_all'] = "ON";
+	postVar['Index'] = $("#lan_num").val();
+	uiPost(postVar);
+}
+</script>
+</head>
+<body class="mainbody">
+<input type="hidden" id="lannum" name="lannum">
+<div id="languageDiv" style="display:none">
+	<table width="172" border="0" cellpadding="3" cellspacing="0">
+	    <tr><td colspan="2" height="12"></td></tr>
+  		<tr>
+	  		<td id="languageTitle1" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang1)">英文</td>
+  			<td><img id="img_language1" src="../style/language_check.gif" border="0"></td>
+  		</tr>
+	    <tr>
+		    <td id="languageTitle2" class="languageTitle" onclick="chgLanguage(top.frames['title'].v_lang2)">简体中文</td>
+		    <td><img id="img_language2" src="../style/language_no_check.gif" border="0"></td>
+	    </tr>
+    </table>
+</div>
+<script>showContainer()</script>
+<form id="dmzCfg" name="dmzCfg">
+<input type="hidden" id="DMZAddress" name="DMZAddress">
+<table border=0 width="100%">
+<tr><td class="content_title"><script>dw(MM_dmz_setting)</script></td></tr>
+<tr id="div_content_help"><td class="content_help"><script>dw(MSG_dmz_setting)</script></td></tr>
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+</table>
+
+<table border=0 width="100%"> 
+<tr>
+<td class="item_left"><script>dw(MM_onoff)</script></td>
+<td><select id="DMZEnabled" name="DMZEnabled" onChange="updateState()">
+<option value="0"><script>dw(MM_disable)</script></option>
+<option value="1"><script>dw(MM_enable)</script></option>
+</select></td>
+</tr>
+<tr id="div_lannum" style="display:none">
+<td class="item_left"><script>dw(MM_policy_specify)</script></td>
+<td><select id="lan_num" name="lan_num" onChange="updateState_2()"></select></td>
+</tr>
+<tr id="div_dmzip" style="display:none">
+<td class="item_left"><script>dw(MM_host_ipaddr)</script></td>
+<td><input type="hidden" id="ip_address" name="ip_address">
+<input type="text" style="width:33px" maxlength="3" id="ip_address0" name="ips" onKeyDown="return ipVali(event,this.name,0);">.
+<input type="text" style="width:33px" maxlength="3" id="ip_address1" name="ips" onKeyDown="return ipVali(event,this.name,1);">.
+<input type="text" style="width:33px" maxlength="3" id="ip_address2" name="ips" onKeyDown="return ipVali(event,this.name,2);">.
+<input type="text" style="width:33px" maxlength="3" id="ip_address3" name="ips" onKeyDown="return ipVali(event,this.name,3);"></td>
+</tr>
+<tr id="div_pcip" style="display:none">
+<td class="item_left">&nbsp;</td>
+<td><input type="checkbox" id="DMZMyIP" name="DMZMyIP" onClick="selectMyIP()"> <script>dw(MM_currentPC)</script> <span id="myip"></span></td>
+</tr>
+</table>
+
+<table border=0 width="100%"> 
+<tr><td><hr size=1 noshade align=top class=bline></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td align="right"><script>dw('<input type=button class=button value="'+BT_apply+'" onClick="return doSubmit();">')</script></td></tr>
+</table>
+</form>
+<script>showFooter()</script>
+</body></html>
