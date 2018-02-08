@@ -32,10 +32,11 @@ if [ -f /usr/local/opnsense/cs/conf/captiveportal/portal_gatewayid.txt ]; then
 fi
 cat /usr/local/opnsense/cs/conf/captiveportal/portal_loginpage.txt>/usr/local/opnsense/cs/tmp/portal_loginpage
 if [ "$inited" = "0" ];then
+		umount /usr/local/opnsense/cs/tmp
+fi
+if [ ! -d /var/db/mysql/mysql ];then
+	/bin/rm -rf /var/db/mysql/*
 	/usr/local/bin/mysql_install_db
 	/usr/sbin/chown -R mysql /var/db/mysql
 	/usr/bin/chgrp -R mysql /var/db/mysql
-	/bin/cp -f /usr/local/opnsense/cs/conf/my.cnf /usr/local/etc/my.cnf
-	umount /usr/local/opnsense/cs/tmp
 fi
-/bin/cp -R /var/db/mysql /usr/local/opnsense/cs/tmp/db/

@@ -53,7 +53,12 @@ csac_start()
 	echo "start csac process"
 	/bin/cp -rf /usr/local/opnsense/cs/conf/lighty-webConfigurator-ac.conf /usr/local/opnsense/cs/tmp/etc/
 	/usr/local/sbin/lighttpd -f /usr/local/opnsense/cs/tmp/etc/lighty-webConfigurator-ac.conf
-	/usr/local/bin/mysqld_safe &
+	/usr/local/bin/mysqladmin -uroot ping >/dev/null
+	if [ $? -eq 0 ];then
+		/usr/local/bin/mysqld_safe &
+		/bin/sleep 3
+	fi
+	
 	/usr/local/bin/mysqladmin -uroot ping >/dev/null
 	if [ $? -eq 0 ];then
 		echo "mysql server start success"
