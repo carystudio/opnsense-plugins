@@ -5,6 +5,7 @@ else
 fi
 echo "csui_enable=\"YES\"">/etc/rc.conf.d/csui
 chmod +x /usr/local/etc/rc.d/csui
+chmod +x /usr/local/etc/rc.d/csac
 chmod +x /usr/local/etc/rc.d/captiveportal
 chmod +x /usr/local/opnsense/scripts/OPNsense/CaptivePortal/allow.py
 if [ -f /usr/local/boot/brand-opnsense.4th ];then
@@ -18,7 +19,10 @@ echo "mcode:$mcode"
 if [ ! -d /usr/local/opnsense/cs/tmp ];then
 	mkdir -p /usr/local/opnsense/cs/tmp
 fi
+
 /sbin/mount -o size=104857600 -t tmpfs tmpfs /usr/local/opnsense/cs/tmp
+mkdir -p /usr/local/opnsense/cs/tmp/run
+mkdir -p /usr/local/opnsense/cs/tmp/etc
 echo -n $mcode>/usr/local/opnsense/cs/tmp/mcode.txt
 if [ -f /usr/local/opnsense/cs/conf/captiveportal/portal_server.txt ]; then
     cat /usr/local/opnsense/cs/conf/captiveportal/portal_server.txt>/usr/local/opnsense/cs/tmp/portal_server
@@ -28,5 +32,10 @@ if [ -f /usr/local/opnsense/cs/conf/captiveportal/portal_gatewayid.txt ]; then
 fi
 cat /usr/local/opnsense/cs/conf/captiveportal/portal_loginpage.txt>/usr/local/opnsense/cs/tmp/portal_loginpage
 if [ "$inited" = "0" ];then
-    umount /usr/local/opnsense/cs/tmp
+	/usr/local/bin/mysql_install_db
+	/usr/sbin/chown -R mysql /var/db/mysql
+	/usr/bin/chgrp -R mysql /var/db/mysql
+	/bin/cp -f /usr/local/opnsense/cs/conf/my.cnf /usr/local/etc/my.cnf
+	umount /usr/local/opnsense/cs/tmp
 fi
+/bin/cp -R /var/db/mysql /usr/local/opnsense/cs/tmp/db/

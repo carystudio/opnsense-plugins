@@ -1,0 +1,75 @@
+#!/bin/sh
+
+# Copyright (C) 2014 Deciso B.V.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+# OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+# load standard rc
+echo "csac_enable=\"YES\"">/etc/rc.conf.d/csac
+. /etc/rc.subr
+
+name=csac
+rcvar=csac_enable
+start_precmd=""
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+
+[ -z "$csac_enable" ]       && csac_enable="NO"
+
+csac_prestart()
+{
+}
+
+csac_start()
+{
+	if [ -f /usr/local/opnsense/cs/tmp/run/lighty-webConfigurator-ac.pid ]; then
+		echo "stop csac process"
+		/bin/pkill -TERM -F /usr/local/opnsense/cs/tmp/run/lighty-webConfigurator-ac.pid
+	fi
+	if [ -f /var/run/lighty-webConfigurator.pid ]; then
+		echo "stop web process"
+		/bin/pkill -TERM -F /var/run/lighty-webConfigurator.pid
+	fi
+	echo "start csac process"
+	/bin/cp -rf /usr/local/opnsense/cs/conf/lighty-webConfigurator-ac.conf /usr/local/opnsense/cs/tmp/etc/
+	/usr/local/sbin/lighttpd -f /usr/local/opnsense/cs/tmp/etc/lighty-webConfigurator-ac.conf
+	/usr/local/bin/mysqld_safe &
+	/usr/local/bin/mysqladmin -uroot ping >/dev/null
+	if [ $? -eq 0 ];then
+		echo "mysql server start success"
+		/usr/local/bin/mysql -uroot </usr/local/opnsense/cs/ac/db/init.sql
+	else
+		echo "ERROR:mysql server start fail"
+	fi
+}
+
+csac_stop()
+{
+    if [ -f /usr/local/opnsense/cs/tmp/run/lighty-webConfigurator-ac.pid ]; then
+        echo "stop csac process"
+        /bin/pkill -TERM -F /usr/local/opnsense/cs/tmp/run/lighty-webConfigurator-ac.pid
+    fi
+}
+
+load_rc_config $name
+run_rc_command $1
