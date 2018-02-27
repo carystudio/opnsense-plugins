@@ -46,25 +46,28 @@ csac_start()
 		echo "stop csac process"
 		/bin/pkill -TERM -F /usr/local/opnsense/cs/tmp/run/lighty-webConfigurator-ac.pid
 	fi
-	if [ -f /var/run/lighty-webConfigurator.pid ]; then
-		echo "stop web process"
-		/bin/pkill -TERM -F /var/run/lighty-webConfigurator.pid
-	fi
 	echo "start csac process"
 	/bin/cp -rf /usr/local/opnsense/cs/conf/lighty-webConfigurator-ac.conf /usr/local/opnsense/cs/tmp/etc/
 	/usr/local/sbin/lighttpd -f /usr/local/opnsense/cs/tmp/etc/lighty-webConfigurator-ac.conf
-	/usr/local/bin/mysqladmin -uroot ping >/dev/null
-	if [ $? -eq 0 ];then
-		/usr/local/bin/mysqld_safe &
+	/usr/local/bin/mysqladmin -uroot ping >&! /dev/null
+	if [ $? -ne 0 ];then
+		/usr/local/bin/mysqld_safe >/dev/null 2>&1 &
 		/bin/sleep 3
 	fi
 	
-	/usr/local/bin/mysqladmin -uroot ping >/dev/null
+	/usr/local/bin/mysqladmin -uroot ping >/dev/null 2>&1
 	if [ $? -eq 0 ];then
 		echo "mysql server start success"
 		/usr/local/bin/mysql -uroot </usr/local/opnsense/cs/ac/db/init.sql
 	else
-		echo "ERROR:mysql server start fail"
+		/bin/sleep 2
+		/usr/local/bin/mysqladmin -uroot ping >/dev/null 2>&1
+		if [ $? -eq 0 ];then
+			echo "mysql server start success"
+			/usr/local/bin/mysql -uroot </usr/local/opnsense/cs/ac/db/init.sql
+		else
+			echo "ERROR:mysql server start fail"
+		fi
 	fi
 }
 

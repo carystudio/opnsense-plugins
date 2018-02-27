@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.portal'),$t('menu.localaccount')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row v-show="edit == '1'">
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    {{ $t('localaccount.help_edit') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('localaccount.username')" prop="username">
+                        <Input v-model="formValidate.username" :maxlength="20" readonly></Input>
+                    </FormItem>
+                    <FormItem :label="$t('localaccount.password')" prop="password">
+                        <Input v-model="formValidate.password" :maxlength="16"></Input>
+                        <span>*{{$t('localaccount.pwd_note')}}</span>
+                    </FormItem>
+                    <FormItem :label="$t('localaccount.expiry_time')" prop="endtime">
+                        <Input v-model="formValidate.endtime" :maxlength="20"></Input>
+                        <span>*{{$t('localaccount.format')}}： yyyy-mm-dd HH:MM:ss</span>
+                    </FormItem>
+                    <FormItem :label="$t('localaccount.used_time')" prop="canlogin">
+                        <Input v-model="formValidate.canlogin" :maxlength="20"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('localaccount.duplicate_login')">
+                        <i-switch v-model="formValidate.relogin" size="large">
+                            <span slot="open">{{ $t('common.on') }}</span>
+                            <span slot="close">{{ $t('common.off') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('localaccount.save') }}</Button>
+                    </FormItem>
+                </Form>
+            </Card>
+            </Col>
+        </Row>
+        <Alert v-show="edit == '0'">
+            {{ $t('localaccount.help') }}
+        </Alert>
+        <Row v-show="edit == '0'">
+            <Col span="9">
+                <Input v-model="search">
+                    <Button slot="append" icon="ios-search" @click="searchByName()"></Button>
+                </Input>
+            </Col>
+        </Row>
+        <Row v-show="edit == '0'">
+            <Col class="cs-btn-del">
+                <Button size="small" @click="tableSelect(true)" type="error">{{ $t('localaccount.delete') }}</Button>
+            </Col>
+            <Col>
+                <Table border ref="tableSelect" :columns="localUserListColumns" :data="localUserListData"></Table>
+            </Col>
+        </Row>
+        <br>
+        <Row v-show="edit == '0'">
+            <Col align="center">
+            <a v-show="formValidate.pagenum > 1" @click="jumpPage('0')"> {{$t('localaccount.first')}} </a>
+            <a v-show="formValidate.pagenum > 1" @click="jumpPage('1')"> {{$t('localaccount.last')}} </a>
+            <a v-show="formValidate.pagenum < formValidate.pagecnt" @click="jumpPage('2')"> {{$t('localaccount.next')}} </a>
+            <a v-show="formValidate.pagenum < formValidate.pagecnt" @click="jumpPage('3')"> {{$t('localaccount.end')}} </a>
+            <span>{{$t('localaccount.page1')}} {{formValidate.pagenum}} {{$t('localaccount.page')}};</span>
+            <span>{{$t('localaccount.total')}} {{formValidate.pagecnt}} {{$t('localaccount.pages')}};</span>
+            <span>{{$t('localaccount.jump')}}
+                <Input v-model="formValidate.page" style="width: 40px"></Input>
+                {{$t('localaccount.page')}}
+            </span>
+            <Button type="primary" @click="jumpPage('4')"> {{$t('localaccount.confirm')}}</Button>
+            </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+
+                edit:'0',
+                search:'',
+                formValidate: {
+                    username:'',
+                    password:'',
+                    endtime:'',
+                    canlogin:'',
+                    relogin:false,
+                    page:'',
+                    pagenum:'1',
+                    pagecnt:'1'
+                },
+                localUserListData:[]
+            }
+        },
+        computed:{
+            localUserListColumns: function() {
+                var _this = this;
+                return [{
+                    type: 'selection',
+                    key: 'Username',
+                    width:'100',
+                    sortable: true
+                }, {
+                    title: 'ID',
+                    key: 'idx',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: this.$t('localaccount.username'),
+                    key: 'Username',
+                    align: 'center'/*,
+                     filters: [
+                     {
+                     label: 'Greater than 25',
+                     value: 1
+                     },
+                     {
+                     label: 'Less than 25',
+                     value: 2
+                     }
+                     ],
+                     filterMultiple: false,
+                     filterMethod (value, row) {
+                     if (value === 1) {
+                     return row.Username > 'test';
+                     } /!*else if (value === 2) {
+                     return row.age < 25;
+                     }*!/
+                     }*/
+                }, {
+                    title: _this.$t('localaccount.create_time'),
+                    key: 'CreateTime'
+                },{
+                    title: _this.$t('localaccount.expiry_time'),
+                    key: 'ExpireTime'
+                },{
+                    title: _this.$t('localaccount.used_time'),
+                    key: 'RemainTime',
+                    align: 'center'
+                },{
+                    title: _this.$t('localaccount.duplicate_login'),
+                    key: 'MutilLogins',
+                    align: 'center'
+                },{
+                    title: _this.$t('localaccount.operation'),
+                    key: 'idx',
+                    align: 'center',
+                    render: function(h, params) {
+                        return [
+                            h('Button', {
+                                props: {
+                                    type: 'info',
+                                    size: 'small'
+                                },
+                                style: {
+                                    marginRight: '5px'
+                                },
+                                on: {
+                                    click:function () {
+                                        console.log('------------编辑--------------');
+                                        _this.edit = '1';
+                                        _this.formValidate.username = params.row.Username;
+                                        _this.formValidate.password = '';
+                                        _this.formValidate.endtime = params.row.ExpireTime;
+                                        _this.formValidate.canlogin = params.row.RemainTime;
+                                        if('1' == params.row.MutilLoginsFalg){
+                                            _this.formValidate.relogin = true;
+                                        }else{
+                                            _this.formValidate.relogin = false;
+                                        }
+                                        console.log(params);
+                                    }
+                                }
+                            }, _this.$t('localaccount.edit')),
+                            h('Poptip',{
+                                props: {
+                                    confirm: true,
+                                    title: _this.$t('account.msg9'),
+                                    "ok-text":_this.$t('common.ok'),
+                                    "cancel-text":_this.$t('common.cancel')
+                                },
+                                on: {
+                                    "on-ok": function(){
+                                        console.log('-----------delete--------------');
+                                        var postData = {"action":"delPortalUser","data":{"Username":params.row.Username}};
+                                        uiPost.delPortalUser(postData,function(){
+                                            _this.$Message.success({content:_this.$t('account.msg11'),onClose:function(){
+                                                location.href = location.href;
+                                            }});
+                                        });
+                                    }
+                                }
+                            }, [
+                                h('Button', {
+                                    props: {
+                                        type: 'error',
+                                        size: 'small'
+                                    }
+                                }, _this.$t('localaccount.delete'))
+                            ])
+                        ]
+                    }
+                }];
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postData = {"action":"getPortalUsers", "data":{"pagenum":"1"}};
+            uiPost.getPortalUsers(postData,function(data) {
+                console.log('------------------------');
+                console.log(data);
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    _this.formValidate.pagenum = data.data[0].pagenum;
+                    _this.formValidate.pagecnt = data.data[0].pagecnt;
+                    _this.localUserListData = data.data[0].users;
+                    if (0 < _this.localUserListData.length) {
+                        for (var i = 0; i < _this.localUserListData.length; i++) {
+                            _this.localUserListData[i].idx = (i+1);
+                            if(_this.localUserListData[i].MutilLogins == 0){
+                                _this.localUserListData[i].MutilLogins = _this.$t('localaccount.no_repetition');
+                                _this.localUserListData[i].MutilLoginsFalg = '0';
+                            }else {
+                                _this.localUserListData[i].MutilLogins = _this.$t('localaccount.repetition');
+                                _this.localUserListData[i].MutilLoginsFalg = '1';
+                            }
+                        }
+                    }
+                }
+            });
+
+        },
+        methods:{
+            tableSelect:function(status){
+                var _this = this;
+                if (status) {
+                    var getSelection = this.$refs.tableSelect.getSelection();
+                    if (getSelection.length>0) {
+                        /*删除全部*/
+                        for(var i=0; i<getSelection.length; i++)
+                        {
+                            var postData = {"action":"delPortalUser","data":{"Username":getSelection[i].Username}};
+                            console.log(postData);
+                            uiPost.delPortalUser(postData,function(){
+                                _this.$Message.success({content:_this.$t('account.msg11'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            });
+                        }
+                    }else{
+                        this.$Message.error(this.$t('account.msg8'));
+                    }
+                }else{
+                    this.$refs.tableSelect.selectAll(status);
+                }
+            },
+            jumpPage:function (pageType) {
+                console.log(pageType);
+                var _this = this;
+                var page = {};
+                if(pageType ==0){page.pagenum = 1;}
+                if(pageType ==1){page.pagenum = parseInt(_this.formValidate.pagenum)-parseInt(1);}
+                if(pageType ==2){page.pagenum = parseInt(_this.formValidate.pagenum)+parseInt(1);}
+                if(pageType ==3){page.pagenum = _this.formValidate.pagecnt;}
+                if(pageType ==4){
+                    if(_this.formValidate.page != ""){
+                        page.pagenum = _this.formValidate.page;
+                    }else{
+                        _this.$Message.error(_this.$t('localaccount.msg1'));
+                        return false;
+                    }
+                    if(_this.formValidate.page <1 || _this.formValidate.page > _this.formValidate.pagecnt){
+                        _this.$Message.error(_this.$t('localaccount.msg2'));
+                        return false;
+                    }
+                }
+                var postData = {"action":"getPortalUsers", "data":page};
+                uiPost.getPortalUsers(postData,function(data){
+                    console.log(data);
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 == data.rescode) {
+                        _this.formValidate.pagenum = data.data[0].pagenum;
+                        _this.formValidate.pagecnt = data.data[0].pagecnt;
+                        _this.localUserListData = data.data[0].users;
+                        if (0 < _this.localUserListData.length) {
+                            for (var i = 0; i < _this.localUserListData.length; i++) {
+                                _this.localUserListData[i].idx = (i+1);
+                                if(_this.localUserListData[i].MutilLogins == 0){
+                                    _this.localUserListData[i].MutilLogins = _this.$t('localaccount.no_repetition');
+                                    _this.localUserListData[i].MutilLoginsFalg = '0';
+                                }else {
+                                    _this.localUserListData[i].MutilLogins = _this.$t('localaccount.repetition');
+                                    _this.localUserListData[i].MutilLoginsFalg = '1';
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+            submitStatus:function(){
+                var postVar = {};
+                if(true == this.formValidate.status){
+                    postVar.enable = "1";
+                }else{
+                    postVar.enable = "0";
+                }
+                uiPost.setssServer(postVar);
+            },
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.applyLoading = true;
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        var data = {};
+                        data.Username = _this.formValidate.username;
+                        data.Password = _this.formValidate.password;
+                        data.ExpireTime = _this.formValidate.endtime;
+                        data.RemainTime = _this.formValidate.canlogin;
+                        if(true == _this.formValidate.relogin){
+                            data.MutilLogins = "1";
+                        }else{
+                            data.MutilLogins = "0"
+                        }
+
+                        var postData = {"action":"updatePortalUser", "data":data};
+                        console.log(postData);
+                        uiPost.updatePortalUser(postData,function(data){
+                            console.log(data);
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success(_this.$t('localaccount.save_success'));
+                                location.href = location.href;
+                            } else {
+                                _this.$Message.error(_this.$t('localaccount.save_fail')+data.rescode);
+                            }
+                            _this.applyLoading = false;
+                        });
+                    } else {
+                        _this.applyLoading = false;
+                    }
+                })
+            },
+            searchByName:function () {
+                var _this = this;
+                console.log('---------searchByName-----------');
+                var postData = {"action":"getPortalUsers", "data":{}};
+                uiPost.getPortalUsers(postData,function(data) {
+                    console.log('------------------------');
+                    console.log(data);
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 == data.rescode) {
+                        var data = data.data[0].alluser;
+                        var tempUser = [];
+                        for (var i = 0; i < data.length; i++) {
+                            if(data[i].Username != _this.search){
+                                continue;
+                            }
+                            tempUser[0] = data[i];
+                            tempUser[0].idx = '1';
+                            if(tempUser[0].MutilLogins == 0){
+                                tempUser[0].MutilLogins = _this.$t('localaccount.no_repetition');
+                                tempUser[0].MutilLoginsFalg = '0';
+                            }else {
+                                tempUser[0].MutilLogins = _this.$t('localaccount.repetition');
+                                tempUser[0].MutilLoginsFalg = '1';
+                            }
+                            break;
+                        }
+                        if( tempUser.length <= 0 ){
+                            _this.$Message.error(_this.$t('localaccount.msg3'));
+                            return false;
+                        }
+                        _this.localUserListData = tempUser;
+                        console.log(_this.localUserListData);
+                    }else {
+                        _this.$Message.error(_this.$t('localaccount.msg3'));
+                    }
+                });
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

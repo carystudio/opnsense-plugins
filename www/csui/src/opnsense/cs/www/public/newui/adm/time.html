@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.adm'),$t('menu.time')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Alert>
+              <!-- <h3>设置</h3> -->
+              {{ $t('time.help') }}
+            </Alert>
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('time.currenttime')">
+                  <DatePicker type="datetime"  format="yyyy-MM-dd HH:mm:ss" :value="formValidate.date" @on-change="getDate"></DatePicker>
+                </FormItem>
+                <FormItem>
+                  <Button type="primary" @click="submitLocaltime" >{{ $t('time.manntpsyncwithhost') }}</Button>
+                </FormItem>
+              <!-- btn -->
+              <FormItem>
+                  <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('common.apply') }}</Button>
+              </FormItem>
+          </Form>
+          </Card>
+        </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+    template: "#main",
+    data: function() {
+        return {
+            globalConfig: globalConfig,
+            applyLoading: false,
+            checkbox: false,
+            formValidate: {
+                currentTime: '',
+                date:'',
+                tz: '',
+                ntpClientEnabled: ''
+            }
+        }
+    },
+    computed: {
+        ruleValidate: function(){
+            var _this = this;
+            return {
+                ntpServerIp1: [{
+                    validator: function(r, v, f) {
+                        var _s = cs.string(v);
+                        if (_s == 0) {
+                            f(_this.$t('time.msg1'));
+                        } else if (_s == 1) {
+                            f(_this.$t('time.msg4'));
+                        } else {
+                            f();
+                        }
+                    },
+                    trigger: 'blur'
+                }],
+                ntpServerIp2: [{
+                    validator: function(r, v, f) {
+                        var _s = cs.string(v);
+                        if (_s == 0) {
+                            f(_this.$t('time.msg2'));
+                        } else if (_s == 1) {
+                            f(_this.$t('time.msg4'));
+                        } else {
+                            f();
+                        }
+                    },
+                    trigger: 'blur'
+                }],
+                ntpServerIp3: [{
+                    validator: function(r, v, f) {
+                        var _s = cs.string(v);
+                        if (_s == 0) {
+                            f(_this.$t('time.msg3'));
+                        } else if (_s == 1) {
+                            f(_this.$t('time.msg4'));
+                        } else {
+                            f();
+                        }
+                    },
+                    trigger: 'blur'
+                }]
+            }
+        }
+    },
+    created: function() {
+        var _this = this;
+        var postData = {"action":"getGwTime"};
+        uiPost.getGwTime(postData,function(data) {
+            console.log(data);
+            if (9999 == data.rescode){
+                cs.loginOut();
+            }
+            if (0 == data.rescode) {
+                var time = data.data.Time;
+                _this.formValidate.date = time.substr(0,4) + '-' + time.substr(4,2) + '-' + time.substr(6,2) + ' ' + time.substr(8,2) + ':' + time.substr(10,2) + ':' + time.substr(12,2);
+            }
+            console.log(_this.formValidate.date);
+        });
+
+        /*uiPost.getNTPCfg(function(data) {
+            console.log(data);
+            var month=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            for(var j=0; j<12; j++){
+                if(data.currentTime.split(" ")[1] == month[j]){
+                    var time = j+1;
+                }
+            }
+            _this.formValidate.date = data.currentTime.split(" ")[5] +"-"+ time +"-"+ data.currentTime.split(" ")[2]+" "+ data.currentTime.split(" ")[3];
+            console.log(_this.formValidate.date);
+            _this.formValidate.ntpServerIp1 = data.ntpServerIp.split("*")[0];
+            _this.formValidate.ntpServerIp2 = data.ntpServerIp.split("*")[1];
+            _this.formValidate.ntpServerIp3 = data.ntpServerIp.split("*")[2];
+            _this.formValidate.tz = data.tz;
+            _this.formValidate.ntpEnabled = data.ntpClientEnabled=='1'?true:false;
+
+        });*/
+    },
+    methods: {
+        addZero:function(str){
+          if (str < 10) {
+              str = "0" + str;
+          }
+          return str;
+        },
+        handleSubmit: function(name) {
+            var _this = this;
+            console.log('---------'+_this.formValidate.date+'----------');
+            var dateTmp = _this.formValidate.date.replace(/\ /g,'');
+            dateTmp = dateTmp.replace(/\-/g,'');
+            dateTmp = dateTmp.replace(/\:/g,'');
+            console.log(dateTmp);
+            dateTmp = dateTmp.substr(0,12);
+            console.log(dateTmp);
+            var postVar = {"action":"setGwTime","data":{"Time":dateTmp}};
+            uiPost.setGwTime(postVar, function(data) {
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    _this.$Message.success('修改时间成功！');
+                    setTimeout(function(){
+                        location.href = location.href;
+                    },2000);
+                } else {
+                    _this.$Message.error('修改时间失败！'+data.rescode);
+                }
+            });
+
+            //_this.applyLoading = true;
+//            var temp;
+           /* if (0 == cs.string(this.formValidate.ntpServerIp1)) {
+                this.$Message.error(_this.$t('time.msg1'));
+                return false;
+            } else if (1 == cs.string(this.formValidate.ntpServerIp1)) {
+                this.$Message.error(_this.$t('time.msg4'));
+                return false;
+            } else {
+                tmp = this.formValidate.ntpServerIp1;
+            }
+            if (0 == cs.string(this.formValidate.ntpServerIp2)) {
+                this.$Message.error(_this.$t('time.msg2'));
+                return false;
+            } else if (1 == cs.string(this.formValidate.ntpServerIp2)) {
+                this.$Message.error(_this.$t('time.msg4'));
+                return false;
+            } else {
+                tmp += "*" + this.formValidate.ntpServerIp2;
+            }
+            if (0 == cs.string(this.formValidate.ntpServerIp3)) {
+                this.$Message.error(_this.$t('time.msg2'));
+                return false;
+            } else if (1 == cs.string(this.formValidate.ntpServerIp3)) {
+                this.$Message.error(_this.$t('time.msg4'));
+                return false;
+            } else {
+                tmp += "*" + this.formValidate.ntpServerIp3;
+            }*/
+            /*_this.$refs[name].validate(function(valid) {
+                console.log('-------------------');
+                if (valid) {
+                    console.log('-------------------');
+                    var postVar = {};
+					var ntpEnabled;
+					ntpEnabled = (_this.formValidate.ntpEnabled == true) ? '1' : '0' ;
+                    postVar.tz = _this.formValidate.tz;
+                    postVar.ntpClientEnabled = ntpEnabled;
+                    postVar.ntpServerIp = tmp;
+                    uiPost.setNTPCfg(postVar, function(data) {
+                        location.href = location.href;
+                        _this.applyLoading = false;
+                    });
+                }
+            })*/
+        },
+        getDate:function(val){
+          this.formValidate.date = val;
+        },
+        submitLocaltime: function() {
+          var myDate = new Date();
+          var year = myDate.getFullYear();
+          var month = this.addZero(myDate.getMonth() + 1);
+          var day = this.addZero(myDate.getDate());
+          var hour = this.addZero(myDate.getHours());
+          var minute = this.addZero(myDate.getMinutes());
+          var second = this.addZero(myDate.getSeconds());
+          var currentDate = year + "-" + month + "-" + day +" "+ hour + ":" + minute + ":" + second;
+          this.formValidate.date = currentDate;
+          var postVar = {};
+          postVar.host_time = this.formValidate.date;
+          /*uiPost.NTPSyncWithHost(postVar,function(){
+              location.href = location.href;
+          });*/
+        }
+    }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

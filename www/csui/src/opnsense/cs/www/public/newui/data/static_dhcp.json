@@ -1,0 +1,21 @@
+ [
+    {
+        "enable":"1",
+        "lanIp":"192.168.10.1",
+        "lanNetmask": "255.255.255.0"
+    },
+    {
+        "idx":"1",
+        "ip":"192.168.0.123",
+        "mac":"F4:28:54:00:37:66",
+        "comment":"",
+        "delRuleName":"delRule0"
+    },
+    {
+        "idx":"2",
+        "ip":"192.168.0.200",
+        "mac":"3C:97:0E:61:35:B9",
+        "comment":"",
+        "delRuleName":"delRule1"
+    }
+]

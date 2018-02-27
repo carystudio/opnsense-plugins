@@ -110,7 +110,7 @@ class Firewall extends Csbackend
             $rule['protocol'] = $data['Protocol'];
             $rule['comment'] = trim($data['comment']);
 
-            $infinfo = get_interface_info('lan');
+            $infinfo = Network::getInfStatus('lan');
             if($data['Ip'] == $infinfo['ipaddr']){
                 throw new AppException('');
             }

@@ -62,7 +62,7 @@ class Portal extends Csbackend
                     if ($bckresult == "OK") {
                         $status = "ok";
                     } else {
-                        $status = "error reloading captive portal";
+                        $status = "error reloading captive portal:".$bckresult;
                     }
                 } else {
                     $backend->configdRun("captiveportal stop");
@@ -391,7 +391,7 @@ class Portal extends Csbackend
             $res = self::reconfigureAction();
             filter_configure();
             if('ok'!=$res){
-                $result = '1150';
+                $result = '1150'.$res;
             }
         }catch(AppException $aex){
             $result = $aex->getMessage();

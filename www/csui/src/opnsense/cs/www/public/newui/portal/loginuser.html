@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.portal'),$t('menu.loginuser')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Alert>
+            {{ $t('loginuser.help') }}
+        </Alert>
+        <Row>
+            <Col class="cs-btn-del">
+            <Button size="small" @click="tableSelect(true)" type="error">{{$t('loginuser.offline')}}</Button>
+            </Col>
+            <Col>
+            <Table border ref="tableSelect" :columns="loginUserListColumns" :data="loginUserListData"></Table>
+            </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+
+                loginUserListData:[]
+            }
+        },
+        computed:{
+            loginUserListColumns: function() {
+                var _this = this;
+                return [{
+                    type: 'selection',
+                    key: 'Sessionid',
+                    width:'100',
+                    sortable: true
+                }, {
+                    title: 'ID',
+                    key: 'idx',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: _this.$t('loginuser.username'),
+                    key: 'Username',
+                    align: 'center'
+                }, {
+                    title: _this.$t('loginuser.ip_addr'),
+                    key: 'Ip',
+                    align: 'center'
+                },{
+                    title: 'MAC',
+                    key: 'Mac',
+                    align: 'center'
+                },{
+                    title: _this.$t('loginuser.up_byte'),
+                    key: 'UpBytes',
+                    align: 'center'
+                },{
+                    title: _this.$t('loginuser.down_byte'),
+                    key: 'DownBytes',
+                    align: 'center'
+                },{
+                    title: _this.$t('loginuser.last_online'),
+                    key: 'LastAccess',
+                    align: 'center'
+                },{
+                    title: _this.$t('loginuser.operation'),
+                    key: 'Sessionid',
+                    align: 'center',
+                    render: function(h, params) {
+                        return [
+                            h('Button', {
+                                props: {
+                                    type: 'error',
+                                    size: 'small'
+                                },
+                                on: {
+                                    click:function () {
+                                        console.log('------------下线--------------');
+                                        var data = {};
+                                        data.Sessionid = params.row.Sessionid;
+                                        var postData = {"action":"delPortalSession", "data":data};
+                                        uiPost.delPortalSession(postData,function(data) {
+                                            if (9999 == data.rescode){
+                                                cs.loginOut();
+                                            }
+                                            console.log(data);
+                                            if (0 == data.rescode) {
+                                                _this.$Message.success(_this.$t('loginuser.offline_success'));
+                                                location.href = location.href;
+                                            } else {
+                                                _this.$Message.error(_this.$t('loginuser.offline_fail')+data.rescode);
+                                            }
+                                        });
+                                        console.log(params);
+                                    }
+                                }
+                            }, _this.$t('loginuser.offline'))
+                        ]
+                    }
+                }];
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postData = {"action":"getPortalSessions", "data":{}};
+            uiPost.getPortalSessions(postData,function(data) {
+                console.log('------------------------');
+                console.log(data);
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    _this.loginUserListData = data.data;
+                    if (0 < _this.loginUserListData) {
+                        for (var i = 0; i < _this.loginUserListData.length; i++) {
+                            _this.loginUserListData[i].idx = (i+1);
+                        }
+                    }
+                }
+            });
+
+        },
+        methods:{
+            tableSelect:function(status){
+                var _this = this;
+                if (status) {
+                    var getSelection = this.$refs.tableSelect.getSelection();
+                    if (getSelection.length>0) {
+                        /*删除全部*/
+                        for(var i=0; i<getSelection.length; i++)
+                        {
+                            var data = {};
+                            data.Sessionid = getSelection[i].Sessionid;
+                            var postData = {"action":"delPortalSession", "data":data};
+                            uiPost.delPortalSession(postData,function(data) {
+                                if (9999 == data.rescode){
+                                    cs.loginOut();
+                                }
+//                                if (0 == data.rescode) {
+//                                    _this.$Message.success('下线成功！');
+//                                } else {
+//                                    _this.$Message.error('下线失败！'+data.rescode);
+//                                }
+                            });
+                        }
+                    }else{
+                        this.$Message.error(this.$t('loginuser.msg1'));
+                    }
+                }else{
+                    this.$refs.tableSelect.selectAll(status);
+                }
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

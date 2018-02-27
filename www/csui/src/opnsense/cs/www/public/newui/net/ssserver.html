@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.net'),$t('menu.ssserver')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Alert>
+              {{ $t('ss_server.help') }} 
+            </Alert>
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+              <FormItem :label="$t('ss_server.status')">
+                <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">
+                  <span slot="open">{{ $t('common.on') }}</span>
+                  <span slot="close">{{ $t('common.off') }}</span>
+                </i-switch>
+              </FormItem>
+              <Col v-show="formValidate.status" >
+                <FormItem :label="$t('ss_server.server')" prop="server">
+                    <Input v-model="formValidate.server"></Input>
+                </FormItem>
+                <FormItem :label="$t('ss_server.server_port')" prop="server_port">
+                    <Input v-model="formValidate.server_port" :maxlength="5"></Input>
+                    <span>(100-65535)</span>
+                </FormItem>
+                <FormItem :label="$t('ss_server.timeout')" prop="timeout">
+                    <Input v-model="formValidate.timeout"></Input>
+                </FormItem>
+                <FormItem :label="$t('ss_server.password')" prop="password">
+                    <Input v-model="formValidate.password"></Input>
+                </FormItem>
+                <FormItem :label="$t('ss_server.encrypt_method')">
+                    <Select v-model="formValidate.encrypt_method" >
+                        <Option value="aes-128-cfb">AEC-128-CFB</Option>
+                        <Option value="aes-192-cfb">AEC-192-CFB</Option>
+                        <Option value="aes-256-cfb">AEC-256-CFB</Option>
+                        <Option value="aes-128-ctr">AEC-128-CTR</Option>
+                        <Option value="aes-192-ctr">AEC-192-CTR</Option>
+                        <Option value="aes-256-ctr">AEC-256-CTR</Option>
+                        <Option value="aes-128-gcm">AEC-128-GCM</Option>
+                        <Option value="aes-192-gcm">AEC-192-GCM</Option>
+                        <Option value="aes-256-gcm">AEC-256-GCM</Option>
+                        <Option value="bf-cfb">BF-CFB</Option>
+                        <Option value="camellia-128-cfb">CAMELLIA-128-CFB</Option>
+                        <Option value="camellia-192-cfb">CAMELLIA-192-CFB</Option>
+                        <Option value="camellia-256-cfb">CAMELLIA-256-CFB</Option>
+                        <Option value="chacha20">CHACHA20</Option>
+                        <Option value="chacha20-ietf">CHACHA20-IETF</Option>
+                        <Option value="chacha20-ietf-poly1305">CHACHA20-IETF-POLY1305</Option>
+                        <Option value="xchacha20-ietf-poly1305">XCHACHA20-IETF-POLY1305</Option>
+                        <Option value="rc4-md5">RC4-MD5</Option>
+                        <Option value="salsa20">SALSA20</Option>
+                    </Select>
+                </FormItem>
+              <!-- btn -->
+              <FormItem>
+                  <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('common.apply') }}</Button>
+              </FormItem>
+            </Col>
+          </Form>
+          </Card>
+        </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      applyLoading:false,
+      formValidate: {
+          status: false,
+          server:'',
+          server_port:'',
+          timeout:'',
+          password:'',
+          encrypt_method:''
+      },
+      ruleValidate: {
+          server: [
+            { required: true, message: this.$t('ss_server.msg1',[this.$t('ss_server.server')]), trigger: 'blur' },
+            { validator:function(r, v, f) {
+              var _s = cs.ip(v);
+              if(_s != 99) {
+                f(_this.$t('ss_server.server')+_this.$t('ss_server["msg'+(_s+1)+'"]'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          server_port: [
+            { validator:function(r, v, f) {
+              var _s = cs.num_range(v,100,65535);
+              if(0 == _s) {
+                f(_this.$t('ss_server.msg6'));
+              }else if(1 == _s) {
+                f(_this.$t('ss_server.msg7'));
+              }else if(2 == _s) {
+                f(_this.$t('ss_server.msg8',[100,65535]));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          password: [
+            { validator:function(r, v, f) {
+              var _s = cs.string(v);
+              if (0 == _s) {
+                  f(_this.$t('ss_server.msg9'));
+              }
+              if (1 == _s) {
+                  f(_this.$t('ss_server.msg10'));
+              }
+              f();
+            },trigger: 'blur' }
+          ]
+      },
+    }
+  },
+  created:function() {
+    var _this = this;
+    uiPost.getssServer(function(data) {
+      _this.formValidate.status = data.enable == "1" ?true:false;
+      _this.formValidate.server = data.server;
+      _this.formValidate.server_port = data.serverPort;
+      _this.formValidate.timeout = data.timeout;
+      _this.formValidate.password = data.password;
+      _this.formValidate.encrypt_method = data.encryptMethod;
+    });
+  },
+  methods:{
+    submitStatus:function(){
+        var postVar = {};
+        if(true == this.formValidate.status){
+            postVar.enable = "1";
+        }else{
+            postVar.enable = "0";
+        }
+        uiPost.setssServer(postVar);
+    },
+    handleSubmit: function(name) {
+        var _this = this;
+        _this.applyLoading = true;
+        _this.$refs[name].validate(function(valid){
+            if (valid) {
+              var postVar = {};
+              postVar.enable = _this.formValidate.status?"1":"0";
+              postVar.server = _this.formValidate.server;
+              postVar.serverPort = _this.formValidate.server_port;
+              postVar.timeout = _this.formValidate.timeout;
+              postVar.password = _this.formValidate.password;
+              postVar.encryptMethod = _this.formValidate.encrypt_method;
+              uiPost.setssServer(postVar,function(data){
+                _this.$Message.success({content:'Success!',onClose:function(){
+                  _this.applyLoading = false;
+                }});
+                var percentTimer = setInterval(function(){
+                    clearInterval(percentTimer);
+                    location.href=location.href;
+                },cs.getTimer(10));
+              });
+            } else {
+              _this.applyLoading = false;
+            }
+        })
+    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

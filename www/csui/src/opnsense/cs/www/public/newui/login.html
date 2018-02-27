@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Login</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+    <style>
+        .main{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <div class="main" style="padding:200px 0;" @keyup.enter="handleSubmit('formInline')">
+        <Row>
+            <Col :xs="24" :sm="{span:6,offset:9}">
+            <h1>{{ $t("login.title") }}</h1>
+            <p>{{ $t("login.help",[local_href]) }}</p>
+            <p>&nbsp;</p>
+            <Form ref="formInline" :model="formInline" :rules="ruleInline" method="POST" action="/login/dologin">
+                <FormItem v-show="false">
+                    <Input type="text" v-model="newui" name="newui" ></Input>
+                </FormItem>
+                <FormItem prop="username">
+                    <Input type="text" v-model="formInline.username" name="username" >
+                    <span slot="prepend"> {{ $t("login.user") }} </span>
+                    </Input>
+                </FormItem>
+                <FormItem prop="password">
+                    <Input type="password" v-model="formInline.password" name="password">
+                    <span slot="prepend"> {{ $t("login.pass") }} </span>
+                    </Input>
+                </FormItem>
+                <FormItem>
+                    <Button long type="primary" @click="handleSubmit('formInline')">{{ $t("login.login_btn") }}</Button>
+                </FormItem>
+            </Form>
+            </Col>
+        </Row>
+        <slot name="footer"></slot>
+    </div>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig:globalConfig,
+                version:"v0.0.1bate",
+                newui:"new",
+                formInline: {
+                    username:'',
+                    password:''
+                },
+                loginUser:'',
+                loginPass:'',
+                msg:'',
+                ruleInline: {
+                    username: [
+                        { validator:function(r, v, f) {
+                            if(!v){
+                                f(_this.$t('login.user')+_this.$t('login.err_empty'));
+                            }
+                            /* if(v != _this.loginUser){
+                             f(_this.$t('login.user')+_this.$t('login.err_wrong'));
+                             }*/
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    password: [
+                        { validator:function(r, v, f) {
+                            if(!v){
+                                f(_this.$t('login.pass')+_this.$t('login.err_empty'));
+                            }
+                            /* if(v != _this.loginPass){
+                             f(_this.$t('login.pass')+_this.$t('login.err_wrong'));
+                             }*/
+                            f();
+                        },trigger: 'blur' }
+                    ]
+                }
+            }
+        },
+        computed: {
+            local_href:function() {
+                return location.host;
+            }
+        },
+        created:function() {
+            globalConfig.showMenu = false;
+            globalConfig.showSearch = false;
+            var _this = this;
+
+            console.log(_this.msg);
+            /* uiPost.getLoginCfg(function(data) {
+             _this.loginUser = data.loginUser;
+             _this.loginPass = data.loginPass;
+             });*/
+        },
+        methods:{
+            handleSubmit:function(name) {
+                var _this = this;
+                this.$refs[name].validate(function(valid){
+                    if (valid) {
+//                        _this.$refs.formInline.$el.submit();
+//                        var postData = {"username":_this.formInline.username,"password":_this.formInline.password,"newui":'new'};
+                        var postData = {};
+                        postData.username = _this.formInline.username;
+                        postData.password = _this.formInline.password;
+                        postData.newui = 'new';
+                        uiPost.doLogin(postData,function(data) {
+                            console.log(data);
+                            if('success' == data.result){
+                                _this.$Message.success({content:_this.$t('login.login_success'),onClose:function(){
+                                    location.href = '/newui/index.html';
+                                }});
+                            }else{
+                                _this.$Message.error(_this.$t('login.login_fail'));
+                            }
+                        });
+                    }
+                })
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+[
+{"enable": "1", "lanNetmask": "255.255.255.0", "lanIp": "192.168.0.1"},
+{"idx": "1", "ip": "192.168.0.100","proto": "TCP+UDP", "portRange": "123-3435","comment": "","delRuleName":"delRule0"}
+]

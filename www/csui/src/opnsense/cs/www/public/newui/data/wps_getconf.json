@@ -1,0 +1,9 @@
+{
+  "wifiOff":	0,
+  "wscEnabledFlag":	0,
+  "wscEnabled":	1,
+  "wscMode":	1,
+  "wscPinMode":	1,
+  "wscPin":	"21595684",
+  "success":true
+}

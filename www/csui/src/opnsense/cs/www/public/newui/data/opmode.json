@@ -1,0 +1,9 @@
+{
+    "operationMode":"1",
+    "wispInface":"0",
+    "wifiOff":"0",
+    "wifiOff5g":"0",
+    "wifiDualband":"1",
+    "OpModeSupport":"GW;BR;RPT",
+    "hardModel":""
+}

@@ -1,0 +1,8 @@
+{
+  "wanPingFilter":	1,
+  "l2tpPassThru":	1,
+  "pptpPassThru":	1,
+  "ipsecPassThru":	1,
+  "ipv6PassThru":	0
+  
+}

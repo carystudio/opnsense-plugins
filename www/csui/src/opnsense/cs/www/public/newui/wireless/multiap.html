@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Alert>
+              <!-- <h3>设置</h3> -->
+              {{ $t('multiap.help') }}
+            </Alert>
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('multiap.ssid')" prop="ssid">
+                    <Input v-model="formValidate.ssid" ></Input>
+                </FormItem>
+                <FormItem :label="$t('multiap.hidessid')" prop="status">
+                    <i-switch v-model="formValidate.status" size="large" >
+                        <span slot="open">{{ $t('common.enabled') }}</span>
+                        <span slot="close">{{ $t('common.disabled') }}</span>
+                    </i-switch>
+                </FormItem>
+                <FormItem :label="$t('multiap.security_mode')">
+                    <Select v-model="formValidate.authMode" >
+                        <Option value="NONE"> {{ $t('multiap.disable') }}</Option>
+                        <Option value="OPEN"> {{ $t('multiap.open_system') }}</Option>
+                        <Option value="SHARED"> {{ $t('multiap.shared_key') }}</Option>
+                        <Option value="WPAPSK"> WPA-PSK</Option>
+                        <Option value="WPA2PSK"> WPA2-PSK</Option>
+                        <Option value="WPAPSKWPA2PSK"> WPA/WPA2-PSK</Option>
+                    </Select>
+                </FormItem>
+                <Col v-if="formValidate.authMode !='NONE'" >
+                  <Col v-if="formValidate.authMode =='OPEN'|| formValidate.authMode =='SHARED'" >
+                  <FormItem :label="$t('multiap.encryp_type')">
+                      <Select v-model="formValidate.encrypType" >
+                          <Option value="WEP64"> WEP64</Option>
+                          <Option value="WEP128"> WEP128</Option>
+                      </Select>
+                  </FormItem>
+                  </Col>
+                  <Col v-if="formValidate.authMode =='WPAPSK'|| formValidate.authMode =='WPA2PSK'|| formValidate.authMode =='WPAPSKWPA2PSK'" >
+                  <FormItem :label="$t('multiap.encryp_type')">
+                      <Select v-model="formValidate.encrypType" >
+                          <Option value="TKIP">TKIP</Option>
+                          <Option value="AES"> AES</Option>
+                          <Option value="TKIPAES" v-show="formValidate.authMode =='WPA2PSK' || formValidate.authMode == 'WPAPSKWPA2PSK'">TKIP/AES</Option>
+                      </Select>
+                  </FormItem>
+                  </Col>
+                  <FormItem :label="$t('multiap.key_format')">
+                      <Select v-model="formValidate.keyFormat" >
+                          <Option value="0"> Hex</Option>
+                          <Option value="1"> ASCII</Option>
+                      </Select>
+                  </FormItem>
+                  <Col v-if="formValidate.authMode =='OPEN'|| formValidate.authMode =='SHARED'" >
+                  <FormItem :label="$t('multiap.password')">
+                      <Input v-model="formValidate.wepkey" :maxlength="10"v-if="formValidate.encrypType=='WEP64' && formValidate.keyFormat==0"></Input>
+                      <Input v-model="formValidate.wepkey" :maxlength="5"  v-else-if="formValidate.encrypType=='WEP64' && formValidate.keyFormat==1"></Input>
+                      <Input v-model="formValidate.wepkey"  :maxlength="26"v-else-if="formValidate.encrypType=='WEP128' && formValidate.keyFormat==0"></Input>
+                      <Input v-model="formValidate.wepkey" :maxlength="13"v-else="formValidate.encrypType=='WEP128' && formValidate.keyFormat==1"></Input>
+                  </FormItem>
+                  </Col>
+                  <Col v-if="formValidate.authMode =='WPAPSK'|| formValidate.authMode =='WPA2PSK'|| formValidate.authMode =='WPAPSKWPA2PSK'">
+                  <FormItem :label="$t('multiap.password')">
+                      <Input v-model="formValidate.wepkey"  :maxlength="64"v-if="formValidate.keyFormat==0"></Input>
+                      <Input v-model="formValidate.wepkey" :maxlength="63"v-else-if="formValidate.keyFormat==1"></Input>
+                  </FormItem>
+                  </Col> 
+
+                </Col>
+
+              <!-- btn -->
+              <FormItem>
+                  <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('multiap.add') }}</Button>
+              </FormItem>
+          </Form>
+          </Card>
+        </Col>
+        </Row>
+        <Row>
+          <Col class="cs-btn-del">
+                <Button size="small" @click="tableSelect(true)" type="error">{{ $t('multiap.delete') }}</Button>
+            </Col>
+            <Col >
+            <Table border ref="tableSelect" :columns="columns2" :data="data2"></Table>
+            </Col>
+        </Row>
+    </div>
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      applyLoading:false,
+      formValidate: {
+          ssid:'',
+          status:false,
+          authMode:'NONE',
+          encrypType:"",
+          keyFormat:'',
+          wepkey:'',
+          hssid:''
+      },
+      multiapData: [],
+      ruleValidate: {
+          ssid: [
+            { validator:function(r, v, f) {
+              var _s = cs.ssid(v);
+              if(_s != 99) {
+                f(_this.$t('multiap.ssid')+_this.$t('multiap["msg'+(_s+1)+'"]'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          wepkey: [
+            { validator:function(r, v, f) {
+            //var _s = cs.hex(v);
+              if (_this.formValidate.authMode =='OPEN'|| _this.formValidate.authMode =='SHARED'){
+                  if(_this.formValidate.keyFormat == 0)
+                  {
+                    if(_this.formValidate.encrypType== 'WEP64')
+                    {
+                      if(_this.formValidate.wepkey.length !=10 || 0==cs.hex(_this.formValidate.wepkey)) 
+                        
+                         _this.$Message.error(_this.$t('multiap.msg4'));
+                        return false;
+                    }else{
+                      if(_this.formValidate.wepkey.length !=26|| 0==cs.hex(_this.formValidate.wepkey) )
+                          _this.$Message.error(_this.$t('multiap.msg5'));
+                         return false;
+                    }
+                  }else{
+                    if(_this.formValidate.encrypType== 'WEP64')
+                      {
+                        if(_this.formValidate.wepkey.length !=5 || 0==cs.hex(_this.formValidate.wepkey))
+                         _this.$Message.error(_this.$t('multiap.msg6'));
+                        return false;
+                      }else{
+                        if(_this.formValidate.wepkey.length !=13 || 0==cs.hex(_this.formValidate.wepkey))
+                          _this.$Message.error(_this.$t('multiap.msg7'));
+                         return false;
+                            }
+                        }
+                }else if(_this.formValidate.authMode == 'WPAPSK' || _this.formValidate.authMode == 'WPA2PSK' || _this.formValidate.authMode == 'WPAPSKWPA2PSK'){
+                    if(_this.formValidate.keyFormat == 0){
+                  if(_this.formValidate.wpakey.length != 64 || 0 == cs.hex(_this.formValidate.wpakey)){
+                    _this.$Message.error(_this.$t('multiap.msg8'));
+                    return false;
+                  }
+                }else{
+                  if(_this.formValidate.wpakey.length<8 || _this.formValidate.wpakey.length>63 || 0 == cs.ascii(_this.formValidate.wpakey)){
+                    _this.$Message.error(_this.$t('multiap.msg9'));
+                    return false;
+                  }
+                }
+               }
+              },trigger: 'blur' }
+          ],
+      },
+      showModel:false,
+      columns2: [{
+            type: 'selection',
+            key: 'idx',
+            width: '100',
+            sortable: true
+            },
+            {
+                title: 'ID',
+                key: 'id',
+                sortable: true
+            },
+            {
+                title: this.$t('multiap.ssid'),
+                key: 'ssid',
+                sortable: true
+            },
+            {
+                title: this.$t('multiap.security_mode'),
+                key: 'security_mode',
+                sortable: true
+            },
+            {
+                title: this.$t('multiap.select'),
+                key: 'idx',
+                align: 'center',
+            render: function(h, params) {
+                return h('Poptip',{
+                    props: {
+                        confirm: true,
+                        title: _this.$t('multiap.msg13'),
+                        "ok-text":_this.$t('common.ok'),
+                        "cancel-text":_this.$t('common.cancel')
+                    },
+                    on: {
+                        "on-ok": function(){
+                            _this.deleteData(params);
+                        }
+                    }
+                }, [
+                    h('Button', {
+                        props: {
+                            type: 'error',
+                            size: 'small'
+                        },
+                    }, _this.$t('multiap.delete'))
+                ]);
+              }
+            }
+        ],
+    }
+  },
+  created:function() {
+      var _this = this;
+      var postVar = {};
+      postVar.wifiIdx = this.wifiIdx;
+      uiPost.getWiFiMultipleConfig(postVar,function(data) {
+            _this.formValidate.authMode = "NONE";
+            _this.wifiOff2 = data.wifiOff2;
+            _this.ssid2 = data.ssid2;
+            _this.wepkey2 = data.wepkey2;
+            _this.wpakey2 = data.wpakey2;
+            _this.wifiOff3 = data.wifiOff3;
+            _this.ssid3 = data.ssid3;
+            _this.wepkey3 = data.wepkey3;
+            _this.wpakey3 = data.wpakey3;
+            _this.hssid = data.hssid;
+            _this.authMode = data.authMode;
+            _this.encrypType = data.encrypType;
+            _this.keyFormat = data.keyFormat;
+     });
+  },
+  methods:{
+    handleSubmit: function(name) {
+        var _this = this;
+        _this.applyLoading = true;
+        _this.$refs[name].validate(function(valid){
+         if (valid) {
+            var postVar = {};
+            var add_flag = 0;//0:add,1:modify
+            var num_index;
+          postVar.wifiIdx = _this.wifiIdx;
+          var msg = _this.$t('multiap.countdown');
+          var time = 40;
+          uiPost.setWiFiMultipleConfig(postVar,function(data){
+            cs.countdown(msg,time,function(data){
+              uiPost.getWiFiMultipleConfig(function(data){
+                      _this.data = data;
+                      document.location = location.href;
+                    })
+                })
+               })
+              } else {
+              _this.applyLoading = false;
+            }
+        })
+    },
+    deleteData:function (obj) {
+        var _this = this;
+        var postVar = {};
+        postVar[obj.row.delRuleName] = obj.index;
+        uiPost.delWiFiMultipleConfig(postVar,function(){
+            _this.multiapData.splice(obj.index, 1);
+        });
+    },
+    tableSelect:function(status){
+        var _this = this;
+        if (status) {
+            var getSelection = this.$refs.tableSelect.getSelection();
+            if (getSelection.length>0) {
+                var postVar = {};
+                for(var i=0; i<getSelection.length; i++)
+                {
+                    postVar[getSelection[i].delRuleName] = i;
+                }
+                uiPost.delWiFiMultipleConfig(postVar,function(){
+                    _this.$Message.success({content:_this.$t('multiap.msg14'),onClose:function(){
+                        location.href = location.href;
+                    }});
+                    
+                });
+            }else{
+                this.$Message.error(this.$t('multiap.msg12'));
+            }
+        }else{
+            this.$refs.tableSelect.selectAll(status);
+        }
+    },
+    handleReset: function(name) {
+       // this.$refs[name].resetFields();
+    },
+    ok:function () {
+        // this.$Message.info('Clicked ok');
+    },
+    cancel:function () {
+        // this.$Message.info('Clicked cancel');
+    },
+    selectTable:function (value) {
+        // select value;
+        //console.log(value);
+        // this.showModel = false;
+        // this.$Message.info('name:'+value.name+',age:'+value.age);
+    },
+    show:function (index) {
+        this.$Modal.info({
+            title: 'User Info',
+            content: 'ID：'+ this.data2[index].id+'<br>macAddress：'+ this.data2[index].mac+'<br>Comment：'+  this.data2[index].comment
+        })
+    },
+    remove:function (index) {
+        this.data2.splice(index, 1);
+    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "ScheduleEn_wifi":	1,
+  "Schedule_wifi_num":	10,
+  "Schedule_wifi_rule0":	"1,1,1,0,3,19",
+  "Schedule_wifi_rule1":	"0,0,0,0,0,0",
+  "Schedule_wifi_rule2":	"0,0,0,0,0,0",
+  "Schedule_wifi_rule3":	"0,5,16,9,23,12",
+  "Schedule_wifi_rule4":	"0,0,0,0,0,0",
+  "Schedule_wifi_rule5":	"0,0,0,0,0,0",
+  "Schedule_wifi_rule6":	"0,0,0,0,0,0",
+  "Schedule_wifi_rule7":	"0,0,0,0,0,0",
+  "Schedule_wifi_rule8":	"0,0,0,0,0,0",
+  "Schedule_wifi_rule9":	"0,3,10,58,20,43"
+}

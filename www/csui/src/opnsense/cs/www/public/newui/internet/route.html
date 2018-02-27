@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.internet'),$t('menu.route')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    <!-- <h3>设置</h3> -->
+                    {{ $t('route.help') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <Col>
+                    <br>
+                    <FormItem :label="$t('route.interface')" prop="routeInterface">
+                        <Select v-model="formValidate.routeInterface" >
+                            <Option value="lan1">lan1</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('route.ip')" prop="routeIp">
+                        <Input v-model="formValidate.routeIp" ></Input>
+                    </FormItem>
+                    <FormItem :label="$t('route.mask')" prop="routeMask">
+                            <Input v-model="formValidate.routeMask" ></Input>
+                    </FormItem>
+                    <FormItem :label="$t('route.gateway')" prop="gateway">
+                        <Input v-model="formValidate.gateway" ></Input>
+                    </FormItem>
+                    <FormItem :label="$t('route.description')">
+                        <Input v-model="formValidate.description" ></Input>
+                    </FormItem>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('common.apply') }}</Button>
+                    </FormItem>
+                    </Col>
+                </Form>
+            </Card>
+            <br>
+            </Col>
+        </row>
+        <Row>
+            <Col>
+            <Table border ref="tableSelect" :columns="staticRouteColumns" :data="staticRouteData"></Table>
+            </Col>
+        </Row>
+    </div>
+    <Modal
+            v-model="showModel"
+            :title="$t('route.modal_title')"
+            @on-ok="ok"
+            @on-cancel="cancel">
+        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable"></Table>
+    </Modal>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            return {
+                globalConfig:globalConfig,
+                arpLoading:true,
+                formValidate: {
+                    routeInterface:'',
+                    routeIp:'',
+                    routeMask:'',
+                    gateway:'',
+                    description:''
+                },
+                lanIp: '',
+                lanNetmask: '',
+                showModel:false,
+                arpColumns: [
+                    {
+                        title: '#',
+                        key: 'idx',
+                        sortable:true
+                    },
+                    {
+                        title: 'IP',
+                        key: 'ip',
+                        sortable:true
+                    },
+                    {
+                        title: 'MAC',
+                        key: 'mac',
+                        sortable:true
+                    }
+                ],
+                arpData: [],
+                staticRouteData: []
+            }
+        },
+        computed:{
+            ruleValidate:function(){
+                var _this = this;
+                return {
+                    routeIp: [    //IP校验
+                        { validator:function(r, v, f) {
+                            var ret = cs.ip(v);
+                            if (ret == 0 || ret == 1 || ret == 2 || ret == 3 || ret == 4) {
+                                f(_this.$t('route.msg1'));
+                            }
+                            if(v == _this.lanIp){
+                                f(_this.$t('route.msg2'));
+                            }
+                            for(var i=0; i<_this.staticRouteData.length; i++) {
+                                if(
+                                        _this.formValidate.routeIp == _this.staticRouteData[i].Ip
+                                ) {
+                                    f(_this.$t('route.msg15'));
+                                }
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    routeMask: [    //子网掩码
+                        { validator:function(r, v, f) {
+                            var _s = cs.mask(v);
+                            if(0 == _s) {
+                                f(_this.$t('route.mask')+_this.$t('route.msg14'));
+                            }else if(1 == _s) {
+                                f(_this.$t('route.msg5'));
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    gateway: [  //网关
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if (_s == 0 || _s == 1 || _s == 2 || _s == 3 || _s == 4) {
+                                f(_this.$t('route.msg16'));
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ]
+                }
+            },
+            staticRouteColumns: function() {
+                var _this = this;
+                return [{
+                    title: 'ID',
+                    key: 'idx',
+                    sortable: true
+                }, {
+                    title: this.$t('route.interface'),
+                    key: 'Interface',
+                    sortable: true
+                },{
+                    title: this.$t('route.ip'),
+                    key: 'Ip',
+                    sortable: true
+                }, {
+                    title: this.$t('route.mask'),
+                    key: 'Netmask',
+                    sortable: true
+                },{
+                    title: this.$t('route.gateway'),
+                    key: 'Gateway',
+                    sortable: true
+                },{
+                    title: this.$t('route.description'),
+                    key: 'Descr',
+                    sortable: true
+                }, {
+                    title: this.$t('route.operation'),
+                    key: 'idx',
+                    align: 'center',
+                    render: function(h, params) {
+                        return h('Poptip',{
+                            props: {
+                                confirm: true,
+                                title: _this.$t('route.msg9'),
+                                "ok-text":_this.$t('common.ok'),
+                                "cancel-text":_this.$t('common.cancel')
+                            },
+                            on: {
+                                "on-ok": function(){
+                                    _this.deleteData(params);
+                                }
+                            }
+                        }, [
+                            h('Button', {
+                                props: {
+                                    type: 'error',
+                                    size: 'small'
+                                }
+                            }, _this.$t('route.delete'))
+                        ]);
+                    }
+                }];
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postData = {"action":"getStatusInfo"};
+            /*取接口类型*/
+            uiPost.getStatusInfo(postData,function(data) {
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    var interfaceData = data.data.interface;
+                    $.each(interfaceData,function(index, el) {
+                        if (el){
+                            if('LAN1' == index.toUpperCase()){
+                                _this.formValidate.routeInterface = index;
+                            }
+                        }
+                    });
+                }
+            });
+
+            /*取表数据*/
+            var data = {"action":"getStaticRoute", "data":{}};
+            uiPost.getStaticRoute(data,function(Data) {
+
+                if (9999 == Data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == Data.rescode) {
+                    _this.staticRouteData = Data.data;
+                    for(var i in _this.staticRouteData){
+                        _this.staticRouteData[i].idx = ''+( Number(i) + 1 );
+                    }
+                }
+            });
+        },
+        methods:{
+            handleSubmit: function(name) {
+                var _this = this;
+                this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        if (_this.staticRouteData.length) {
+                            for(var i=0; i<_this.staticRouteData.length; i++) {
+                                console.log(_this.staticRouteData);
+                                if(
+                                        _this.formValidate.routeIp == _this.staticRouteData[i].Ip
+                                ) {
+                                    _this.$Message.error(_this.$t('route.msg15'));
+                                    return false;
+                                }
+                            }
+                        }
+                        var data = {};
+                        data.Interface = _this.formValidate.routeInterface;
+                        data.Ip = _this.formValidate.routeIp;
+                        data.Netmask = _this.formValidate.routeMask;
+                        data.Gateway = _this.formValidate.gateway;
+                        data.Descr = _this.formValidate.description;
+                        var postData = {"action":"addStaticRoute", "data":data};
+                        console.log(postData);
+                        uiPost.addStaticRoute(postData,function(data){
+                            console.log('------------------------------');
+                            console.log(data);
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.error(_this.$t('route.add_success'));
+                                location.href = location.href;
+                            } else {
+                                _this.$Message.error(_this.$t('route.add_fail')+data.rescode);
+                            }
+                        });
+                    }
+                })
+            },
+            /*handleReset: function(name) {
+             this.$refs[name].resetFields();
+             },*/
+            showClientList:function () {
+                var _this = this;
+                this.showModel = true;
+                var postData = {"action":"getArpInfo", "data":{}};
+                uiPost.getArpInfo(postData,function(data) {
+                    _this.arpData = data.data;
+                    for(var i in _this.arpData){
+                        _this.arpData[i].idx = ''+( Number(i) + 1 );
+                    }
+
+                    _this.arpLoading = false;
+                });
+            },
+            ok:function () {
+            },
+            cancel:function () {
+            },
+            selectTable:function (obj) {
+                this.formValidate.routeIp = obj.ip;
+                this.formValidate.staticMac = obj.mac;
+            },
+            submitStatus:function(){
+                var postVar = {};
+                if(true == this.formValidate.status){
+                    postVar.enable = "1";
+                }else{
+                    postVar.enable = "0";
+                }
+                postVar.addEffect = "1";
+            },
+            deleteData:function (obj) {
+                var _this = this;
+                var data = {};
+                data.Interface = obj.row.Interface;
+                data.Ip = obj.row.Ip;
+                data.Netmask = obj.row.Netmask;
+
+                var postData = {"action":"delStaticRoute","data":data};
+                console.log('===============postData===============');
+                console.log(postData);
+                console.log('==================================');
+                /*删除单个*/
+                uiPost.delStaticRoute(postData,function(){
+                    _this.staticRouteData.splice(obj.index, 1);
+                });
+            },
+            tableSelect:function(status){
+                var _this = this;
+                if (status) {
+                    var getSelection = this.$refs.tableSelect.getSelection();
+                    if (getSelection.length>0) {
+                        var macData = [];
+                        for(var i=0; i<getSelection.length; i++)
+                        {
+                            macData[i] = getSelection[i].Mac;
+                        }
+                        console.log(macData);
+
+                        var postData = {"action":"delStaticDhcp","data":{"Mac":macData}};
+                        /*全选删除*/
+                        uiPost.delStaticDhcp(postData,function(){
+                            _this.$Message.success({content:_this.$t('route.msg11'),onClose:function(){
+                                location.href = location.href;
+                            }});
+                        });
+                    }else{
+                        this.$Message.error(this.$t('route.msg8'));
+                    }
+                }else{
+                    this.$refs.tableSelect.selectAll(status);
+                }
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

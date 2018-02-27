@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/ydui/ydui.rem.css">
+  <link rel="stylesheet" href="/newui/static/css/style.mobile.css">
+</head>
+<body>
+<div id="app"></div>
+<script type="text/x-template" id="main">
+<div class="main">
+<yd-cell-group>
+    <yd-cell-item>
+        <span slot="left">{{ $t('changepwd.user') }}：</span>
+        <yd-input slot="right" type="text" v-model="formValidate.origPass" required></yd-input>
+    </yd-cell-item>
+    <yd-cell-item>
+        <span slot="left">{{ $t('changepwd.orig_pass') }}：</span>
+        <yd-input slot="right" type="password" v-model="formValidate.newPass" required></yd-input>
+    </yd-cell-item>
+    <yd-cell-item>
+        <span slot="left">{{ $t('changepwd.new_pass') }}：</span>
+        <yd-input slot="right" type="password" v-model="formValidate.confirmPass" required></yd-input>
+    </yd-cell-item>
+    <yd-button-group>
+      <yd-button size="large" type="primary" @click.native="handleSubmit">{{ $t('common.apply') }}</yd-button>
+    </yd-button-group>
+</yd-cell-group>
+
+<!-- 不能删除 -->
+</div>
+</script>
+</body>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/ydui/ydui.rem.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      menu:mobileMenu,
+      formValidate: {
+          user: '',
+          origPass:'',
+          newPass:'',
+          confirmPass:''
+      },
+      Password:''
+    }
+  },
+  computed:{
+    
+  },
+  created:function(){
+    var _this = this;
+    uiPost.getPasswordCfg(function(data) {
+      _this.formValidate.user = data.admuser;
+      _this.Password = data.admpass;
+    });
+  },
+  methods:{
+    handleSubmit:function(){
+      var _this = this;
+      var _s = cs.string(this.formValidate.origPass);
+      if(_s == 0) {
+        this.$dialog.notify({mes:_this.$t('changepwd.msg1')});
+        return false;
+      }else if(_s == 1){
+        this.$dialog.notify({mes:_this.$t('changepwd.msg3')});
+        return false;
+      }else if(this.formValidate.origPass != _this.Password){
+        this.$dialog.notify({mes:_this.$t('changepwd.msg2')});
+        return false;
+      }
+      var _s = cs.string(this.formValidate.newPass);
+      if(_s == 0){
+        this.$dialog.notify({mes:_this.$t('changepwd.msg4')});
+        return false;
+      }else if(_s == 1){
+        this.$dialog.notify({mes:_this.$t('changepwd.msg5')});
+        return false;
+      }
+      if(_this.formValidate.confirmPass != _this.formValidate.newPass){
+        this.$dialog.notify({mes:_this.$t('changepwd.msg6')});
+        return false;
+      }
+      var postVar = {};
+      postVar.admuser = _this.formValidate.user
+      postVar.admpass = _this.formValidate.newPass;
+      uiPost.setPasswordCfg(postVar,function(data){
+        _this.$dialog.toast({
+            mes: _this.$t('changepwd.msg7'),
+            icon: 'success',
+            callback:function(){
+              location.href = location.href;
+            }
+        });
+      });
+    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.mobile.js"></script>
+</html>

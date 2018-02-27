@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.adm'),$t('menu.firmware')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    <!-- <h3>设置</h3> -->
+                    {{ $t('firmware.help') }}
+                </Alert>
+                <Form ref="formValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem label="当前固件版本">
+                        <!--<Button @click="cloudCheck">{{ $t('firmware.cloud_check_newversion') }}</Button>-->
+                        <span>{{ version }}</span>
+                    </FormItem>
+                    <FormItem label="当前固件编译时间">
+                        {{ buildTime }}
+                    </FormItem>
+                    <FormItem label="U盘固件的版本">
+                        <span>{{ fwVersion }}</span>
+                    </FormItem>
+                    <FormItem label="当前固件编译时间">
+                        {{ fwbuiltTime }}
+                    </FormItem>
+                    <FormItem>
+                        <span>{{ firmwareDescribe }}</span>
+                    </FormItem>
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit" :disabled="upgradeStatus">{{ upgradeDescribe }}</Button>
+                    </FormItem>
+                </Form>
+            </Card>
+            </Col>
+        </Row>
+    </div>
+    <div style="display: none;">{{update}}</div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig: globalConfig,
+                applyLoading: false,
+                result: 0,
+                updateWithConfig:false,
+
+                version:'',
+                buildTime:'',
+                fwVersion:'',
+                fwbuiltTime:'',
+                firmwareDescribe:'',
+                upgradeDescribe:'',
+                upgradeStatus:true,
+
+                newVersion: '',
+                hardModel: '',
+                flashSize: '',
+                cloudFw: '',
+                lanip: '',
+                percent: 0,
+                upload: {
+                    file: null,
+                    action: '',
+                    format:['web','bin'],
+                    data:{},
+                    maxSize: 4000
+                },
+                upgradeAction:"/cgi-bin/cstecgi.cgi?action=upload&upgrade",
+                setUpgradeFW:"0"
+            }
+        },
+        computed:{
+            update:function(){
+                var str = this.upgradeAction;
+                this.upload.action = this.updateWithConfig ?
+                        str += '&flag=1' :
+                        str += '&flag=0' ;
+                return this.updateWithConfig;
+            }
+        },
+        created: function() {
+            var _this = this;
+            _this.upgradeDescribe = '正在检测U盘固件信息...';
+            var postData = {"action":"getFirmwareInfo", "data":{}};
+            uiPost.getFirmwareInfo(postData,function(data) {
+                console.log(data);
+                _this.upgradeDescribe = '升级';
+                if (9999 == data.rescode) {
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    var fwData = data.data;
+                    if (fwData) {
+                        _this.version = fwData.Version;
+                        _this.buildTime = fwData.Build_date;
+                    }
+                    if (fwData.Fw_version == "") {
+                        _this.fwVersion = '无';
+                        _this.firmwareDescribe = '*现在没有可更新版本';
+                        _this.upgradeStatus = true;
+                    } else {
+                        _this.fwVersion = fwData.Fw_version;
+                        _this.firmwareDescribe = '*现在有可更新版本，可以进行升级';
+                        _this.upgradeStatus = false;
+                    }
+                    if (fwData.Fw_build_date == "") {
+                        _this.fwbuiltTime = '无';
+                    }else{
+                        _this.fwbuiltTime = fwData.Fw_build_date;
+                    }
+                }
+            });
+        },
+        methods: {
+            handleSubmit: function() {
+                var _this = this;
+                if(_this.fwVersion == ''){
+                    _this.$Message.error('固件版本错误');
+                    return false;
+                }
+                var version_num = {};
+                version_num.Fw_version = _this.fwVersion;
+                var postData = {"action": "upgradeFirmware", "data": version_num};
+                uiPost.upgradeFirmware(postData,function(data) {
+                    if (9999 == data.rescode) {
+                        cs.loginOut();
+                    }
+                    if (0 == data.rescode) {
+                        _this.$Modal.success({
+                            loading:true,
+                            render: function(h) {
+                                return h('div',[
+                                    _this.$t('common.loading'),
+                                    h('Progress',{
+                                        attrs:{ percent:_this.percent }
+
+                                    })
+                                ])
+                            }
+                        });
+                        var wtime = 120;
+                        var percentTimer = setInterval(function(){
+                            if (_this.percent>=100) {
+                                clearInterval(percentTimer);
+                                location.href='/login.html';
+                            }
+                            _this.percent++;
+                        },cs.getTimer(wtime));
+                    } else {
+                        _this.$Message.error('升级失败！' + data.rescode);
+                    }
+                });
+            },
+            cloudCheck:function() {
+                var _this=this;
+                uiPost.CloudSrvVersionCheck(function(data) {
+                    _this.newVersion = data.newVersion;
+                    if(data.cloudFwStatus == "New"){
+                        _this.result=1;
+                    }else if(data.cloudFwStatus == "UnNet"){
+                        _this.result=2;
+                    }else if(data.cloudFwStatus == "Update"){
+                        _this.result=3;
+                    }else if(data.cloudFwStatus == "Idle"){
+                        _this.result=4;
+                    }
+                });
+            },
+            cloudUpgrade:function(){
+                var _this = this;
+                var postVar = {};
+                postVar.Flags = "1";
+                if (this.setUpgradeFW == '1') {
+                    uiPost.setUpgradeFW(postVar);
+                }else{
+                    uiPost.CloudACMunualUpdate(postVar);
+                }
+                var lanip = location.host;
+                // if(data.upgradeStatus == "1"){
+                if(_this.hardModel=="04325"||_this.hardModel=="04336"){
+                    var wtime = 210;
+                }else{
+                    var wtime = 130;
+                }
+                _this.$Modal.success({
+                    loading:true,
+                    render: function(h) {
+                        return h('div',[
+                            _this.$t('firmware.upload'),
+                            h('Progress',{
+                                attrs:{ percent:_this.percent }
+                            })
+                        ])
+                    }
+                });
+                var percentTimer = setInterval(function(){
+                    if (_this.percent>=100) {
+                        clearInterval(percentTimer);
+                        location.href='http://'+lanip+'/login.html';
+                    }
+                    _this.percent++;
+                },cs.getTimer(wtime));
+                // }else{
+                //     if(eval(data.upgradeERR)!=""){
+                //         _this.$Message.error('firmware.title');
+                //     }
+                // }
+            },
+            handleUpload: function(file) {
+                this.upload.file = file;
+            },
+            exceededSize: function() {
+                this.$Message.error({content:this.$t('firmware.msg4',[cs.bytesToSize( (parseInt(this.upload.maxSize)*1000) )]),duration: 5});
+            },
+            formatError: function() {
+                this.$Message.error({content:this.$t('firmware.msg2',[this.upload.format.join('、')]),duration: 5});
+            },
+            uploadSuccess:function(){
+                var _this = this;
+                _this.$Modal.success({
+                    loading:true,
+                    render: function(h) {
+                        return h('div',[
+                            _this.$t('common.loading'),
+                            h('Progress',{
+                                attrs:{ percent:_this.percent }
+                            })
+                        ])
+                    }
+                });
+                var percentTimer = setInterval(function(){
+                    if (_this.percent>=100) {
+                        clearInterval(percentTimer);
+                        location.href='/login.html';
+                    }
+                    _this.percent++;
+                },cs.getTimer(120));
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

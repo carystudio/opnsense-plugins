@@ -1,0 +1,18 @@
+{	
+	"wifiIdx":"0",
+	"ssidIdx": "0",
+    "ssidNo":"1,2",
+	"wifiOff":"0",
+    "bssidNum":"1",
+    "multiApNum":"2",
+    "opMode":"1",
+    "ssidOff":"0",
+    "ssid":"mytest",
+    "vlanId":"0",
+    "hideSsid":0,
+    "encryption":"WPA2PSK",
+    "encrypType":"AES",
+    "keyType":"1",
+    "key":"12345678"
+
+}

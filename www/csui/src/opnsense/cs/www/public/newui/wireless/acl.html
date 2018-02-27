@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>    
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+	<link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<!-- main template -->
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+             <Alert>
+              <!-- <h3>设置</h3> -->
+              {{ $t('acl.help') }}
+             </Alert>
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('acl.auth_mode')">
+					 <RadioGroup v-model="formValidate.mode" type="button" @on-change="submitStatus">
+						<Radio :label="0">{{ $t('common.disabled') }}</Radio>
+					    <Radio :label="1">{{ $t('acl.white_list') }}</Radio>
+					    <Radio :label="2">{{ $t('acl.black_list') }}</Radio>
+					 </RadioGroup>
+                  <!--  <template>
+						<Select v-model="formValidate.mode" >
+							<Option v-for="item in auth_mode" :value="item.value" :key="item.value">{{ item.lable }}</Option>
+						</Select>
+					</template>-->
+                </FormItem>
+				<Col v-if="formValidate.mode != 0" >
+					{{ $t('acl.add_rule') }}
+					<hr>
+					<br>
+					<FormItem :label="$t('acl.mac')" prop="mac">
+						<Row>
+						   <Col span="19"><Input v-model="formValidate.mac" ></Input></Col>
+						   <Col span="4" offset="1"><Button long @click="showClientList">{{ $t('acl.scan') }}</Button></Col>
+						</Row>
+					</FormItem>
+					<FormItem>
+						<Button type="primary"  @click="handleSubmit('formValidate')">{{ $t('acl.add') }}</Button>
+					</FormItem>
+				</Col>
+            </Form>
+            </Card>
+            <br>
+        </Col>
+        </row>
+		<Row v-if="formValidate.mode != 0">
+		{{ $t('acl.acl_table') }}
+		<hr>
+            <Col class="cs-btn-del">
+                <Button size="small" @click="tableSelect(true)" type="error">{{ $t('ipf.delete') }}</Button>
+            </Col>
+            <Col >
+				<Table border ref="tableSelect" :columns="macfColumns" :data="macfData"></Table>
+            </Col>
+        </Row>
+    </div>
+	 <Modal
+        v-model="showModel"
+        :title="$t('macf.modal_title')"
+        @on-ok="ok"
+        @on-cancel="cancel">
+        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable">
+            <div slot="footer" style="display: none;"></div>
+        </Table>
+    </Modal>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<!-- /.main template -->
+
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+// 注册头文件
+var cs_main = {
+    template: '#main',
+    data:function() {
+		var _this = this;
+        return {
+            globalConfig:globalConfig,
+			applyLoading:false,
+			addMacfLoading:false,
+			arpLoading:true,
+			formValidate: {
+				mode:'',
+				mac:''
+			},
+			auth_mode:[
+				{
+					value:'0',
+					lable:_this.$t('common.disabled')
+				},{
+					value:"1",
+					lable:_this.$t('acl.white_list')
+				},{
+					value:"2",
+					lable:_this.$t('acl.black_list')
+				}
+			],
+			macfData:[],
+			arpData:[],
+			modeType:'',
+			showModel:false,
+			arpColumns: [
+				{
+					title: 'IP',
+					key: 'ip',
+					sortable:true
+				},
+				{
+					title: 'MAC',
+					key: 'mac',
+					sortable:true
+				}
+			]
+		}
+	},
+    computed:{
+		ruleValidate:function() {
+			var _this = this;
+			return {
+				mac: [
+					{ validator:function(r, v, f) {
+					  var _s = cs.mac(v);
+					  if(_s == 0) {
+						f(_this.$t('acl.mac')+_this.$t('acl.msg1'));
+					  }else if(_s == 1) {
+						f(_this.$t('acl.mac')+_this.$t('acl.msg2'));
+					  }else if(_s == 2) {
+						f(_this.$t('acl.mac')+_this.$t('acl.msg3'));
+					  }else if(_s == 3) {
+						f(_this.$t('acl.mac')+_this.$t('acl.msg4'));
+					  }else{
+						f();
+					  }
+					},trigger: 'blur' }
+				]
+			}
+		},
+		macfColumns: function() {
+			var _this = this;
+			return [{
+					type: 'selection',
+					key: 'idx',
+					width: '100',
+					sortable: true
+				},{
+					title: 'ID',
+					key: 'idx',
+					sortable: true
+				},{
+					title: this.$t('acl.mac'),
+					key: 'mac',
+					sortable: true,
+				},{
+					title:this.$t('acl.select'),
+					key: 'idx',
+					align: 'center',
+					render: function(h, params) {
+						return h('Poptip',{
+							props: {
+								confirm: true,
+								title: _this.$t('acl.msg8'),
+								"ok-text":_this.$t('common.ok'),
+								"cancel-text":_this.$t('common.cancel')
+							},
+							on: {
+									"on-ok": function(){
+									_this.deleteData(params);
+								}
+							}
+						}, [
+							h('Button', {
+								props: {
+									type: 'error',
+									size: 'small'
+								},
+							}, _this.$t('acl.delete'))
+						]);
+					}
+				}
+			]
+		}
+		
+    },
+	created:function() {
+		var _this = this;
+		var postVar = {};
+		postVar.wifiIdx = "1"; //2.4G
+		uiPost.getWiFiAclAddConfig(postVar,function(data){
+			_this.formValidate.mode = data.authMode;
+			_this.modeType = data.authMode;
+			var macList = data.authList.split(';');
+			if(Number(macList) != 0){
+				var num = 0, tem;
+				tem = '[';
+				for(var i=0;i<macList.length;i++){
+					num = i+1;
+					if(i == macList.length-1)
+						tem += '{"idx":"'+num+'",'+'"mac":"'+macList[i]+'"}';
+					else
+					tem += '{"idx":"'+num+'",'+'"mac":"'+macList[i]+'"},';					
+				}
+				tem += ']';
+				var arr = JSON.parse(tem);
+				_this.macfData = arr;
+			}
+		});
+	},
+    methods:{
+		handleSubmit:function(name){
+			var _this = this;
+			_this.addMacfLoading = true;
+			_this.$refs[name].validate(function(valid){
+				if (valid) {
+					if (_this.macfData.length) {
+						for(var i=0; i<_this.macfData.length; i++) {
+							if(_this.formValidate.mac.toUpperCase() == _this.macfData[i].mac.toUpperCase()) {
+								_this.$Message.error(_this.$t('acl.msg5'));
+								return false;
+							}
+						}
+					}
+					var postVar = {};
+					postVar.addEffect = "1";
+					postVar.wifiIdx = "1";  //2.4G
+					uiPost.setWiFiAclAddConfig(postVar,function(data){
+					//	 location.href = location.href;
+						_this.$Message.success('Success!');
+						_this.addMacfLoading = false;
+					});
+				}
+				else{
+					_this.$Message.error('Fail!');
+					_this.addMacfLoading = false;
+				}
+			})
+		},
+		selectTable:function (obj) {
+			this.formValidate.mac = obj.mac;
+		},
+		showClientList:function(){
+		  var _this = this;
+		  _this.showModel = true;
+		  uiPost.getWiFiIpMacTable(function(data){
+			if(data.length >= 2 ){
+				_this.arpData = data.slice(1);
+			}
+			  _this.arpLoading = false;
+		  });
+		},
+		ok:function () {
+		},
+		cancel:function () {
+		},
+		deleteData:function (obj) {
+			var _this = this;
+			var postVar = {};
+			postVar.wifiIdx = "1";
+			postVar[obj.row.DR0] = obj.index;
+			uiPost.setWiFiAclDeleteConfig(postVar,function(){
+				_this.macfData.splice(obj.index, 1);
+			});
+		},
+		tableSelect:function(status){
+			var _this = this;
+			if (status) {
+				var getSelection = this.$refs.tableSelect.getSelection();
+				if (getSelection.length>0) {
+					var postVar = {};
+					postVar.wifiIdx = "1";
+					for(var i=0; i<getSelection.length; i++)
+					{
+						postVar[getSelection[i].DR0] = i;
+					}
+					uiPost.setWiFiAclDeleteConfig(postVar,function(data){
+						_this.$Message.success({content:_this.$t('acl.msg9'),onClose:function(){
+							location.href = location.href;
+						}});
+					});
+				}else{
+					this.$Message.error(this.$t('acl.msg7'));
+				}
+			}else{
+				this.$refs.tableSelect.selectAll(status);
+			}
+		},
+		submitStatus:function(){
+			var postVar = {};
+			var _this = this;
+			postVar.addEffect = "0";
+			postVar.authMode = this.formValidate.mode;
+			if(this.formValidate.mode == 1){
+				this.$Modal.confirm({
+					title:'',
+					content:this.$t('acl.msg10'),
+					okText:this.$t('common.confirm'),
+					cancelText:this.$t('common.cancel'),
+					onOk:function(){
+						uiPost.setWiFiAclAddConfig(postVar);
+					},
+					onCancel:function(){
+						_this.formValidate.mode = _this.modeType;
+					}
+				});
+			}
+			else{
+				_this.modeType = this.formValidate.mode;
+				uiPost.setWiFiAclAddConfig(postVar);
+			}
+		}
+    }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

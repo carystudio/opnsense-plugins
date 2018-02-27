@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+             <Alert>
+              <!-- <h3>设置</h3> -->
+              {{ $t('advanced.help') }}
+             </Alert>
+              <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <Col>
+                <FormItem :label="$t('advanced.bg_protect_mode')">
+                   <Select v-model="formValidate.bgProtection" >
+                      <Option value="0">{{ $t('advanced.auto') }}</Option>
+                      <Option value="1">{{ $t('advanced.disabled') }}</Option>
+                   </Select>
+                </FormItem>
+                <FormItem :label="$t('advanced.beacon')" prop="beaconPeriod">
+                    <Input v-model="formValidate.beaconPeriod" :maxlength="3"></Input>
+                    <span>ms ({{ $t('advanced.range') }} 20 - 999,{{ $t('advanced.default')}} 100)</span>
+                </FormItem>
+                <FormItem :label="$t('advanced.data_beacon_rate')" prop="dtimPeriod">
+                    <Input v-model="formValidate.dtimPeriod" :maxlength="3"></Input>
+                    <span>ms ({{ $t('advanced.range') }} 1 - 255,{{ $t('advanced.default')}} 1)</span>
+                </FormItem>
+                <FormItem :label="$t('advanced.preamble')">
+                   <Select v-model="formValidate.txPreamble" >
+                      <Option value="0">{{ $t('advanced.long_preamble') }}</Option>
+                      <Option value="1">{{ $t('advanced.short_preamble') }}</Option>
+                   </Select>
+                </FormItem>
+                <FormItem :label="$t('advanced.fragment')" prop="fragThreshold">
+                    <Input v-model="formValidate.fragThreshold" :maxlength="4"></Input>
+                    <span>ms ({{ $t('advanced.range') }} 256 - 2346,{{ $t('advanced.default')}}  2346)</span>
+                </FormItem>
+                <FormItem :label="$t('advanced.rts')" prop="rtsThreshold">
+                    <Input v-model="formValidate.rtsThreshold" :maxlength="4"></Input>
+                    <span>ms ({{ $t('advanced.range') }} 1 - 2347,{{ $t('advanced.default')}}  2347)</span>
+                </FormItem>
+                <FormItem :label="$t('advanced.tx_power')">
+                   <Select v-model="formValidate.txPower" >
+                      <Option value="0"> 100% </Option>
+                      <Option value="1"> 75% </Option>
+                      <Option value="2"> 50% </Option>
+                      <Option value="3"> 35% </Option>
+                      <Option value="4"> 15% </Option>
+                   </Select>
+                </FormItem>
+                <FormItem :label="$t('advanced.ap_isolated')">
+                   <Select v-model="formValidate.noForwarding" >
+                      <Option value="0">{{ $t('advanced.disabled') }}</Option>
+                      <Option value="1">{{ $t('advanced.enabled') }}</Option>
+                   </Select>
+                </FormItem>
+                <FormItem :label="$t('advanced.coexistence_2040')">
+                   <Select v-model="formValidate.htBssCoexistence" >
+                      <Option value="0">{{ $t('advanced.disabled') }}</Option>
+                      <Option value="1">{{ $t('advanced.enabled') }}</Option>
+                   </Select>
+                </FormItem>
+                <FormItem :label="$t('advanced.wmm')">
+                   <Select v-model="formValidate.wmmCapable" >
+                      <Option value="0">{{ $t('advanced.disabled') }}</Option>
+                      <Option value="1">{{ $t('advanced.enabled') }}</Option>
+                   </Select>
+                </FormItem>
+                </Col>
+                <FormItem>
+                  <Button type="primary" :loading="applyLoading" @click="handleSubmit('formValidate')">{{ $t('common.apply') }}</Button>
+                </FormItem>
+                </Form>
+          </Card>
+        </Col>
+        </Row>
+    </div>
+       <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      applyLoading:false,
+      formValidate: {
+          bgProtection:'',
+          beaconPeriod:'',
+          dtimPeriod:'',
+          txPreamble:'',
+          fragThreshold:'',
+          rtsThreshold:'',
+          txPower:'',
+          noForwarding:'',
+          htBssCoexistence:'',
+          wmmCapable:''
+          
+    },
+   ruleValidate: {
+      beaconPeriod: [
+            { validator:function(r, v, f) {
+              var _s = cs.num_range(v,20,100);
+              if(0 == _s) {
+                f(_this.$t('advanced.beacon')+_this.$t('advanced.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('advanced.beacon')+_this.$t('advanced.msg2'));
+              }else if(2 == _s) {
+                f(_this.$t('advanced.msg_ruleValidate',[20,100]));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+      dtimPeriod: [
+            { validator:function(r, v, f) {
+              var _s = cs.num_range(v,1,255);
+              if(0 == _s) {
+               f(_this.$t('advanced.data_beacon_rate')+_this.$t('advanced.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('advanced.data_beacon_rate')+_this.$t('advanced.msg2'));
+              }else if(2 == _s) {
+                f(_this.$t('advanced.msg_data_beacon_rate',[1,255]));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+      fragThreshold: [
+            { validator:function(r, v, f) {
+              var _s = cs.num_range(v,256,2346);
+              if(0 == _s) {
+               f(_this.$t('advanced.fragment')+_this.$t('advanced.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('advanced.fragment')+_this.$t('advanced.msg2'));
+              }else if(2 == _s) {
+                f(_this.$t('advanced.msg_dtimPeriod',[256,2346]));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+      rtsThreshold: [
+            { validator:function(r, v, f) {
+              var _s = cs.num_range(v,1,2347);
+              if(0 == _s) {
+               f(_this.$t('advanced.rts')+_this.$t('advanced.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('advanced.rts')+_this.$t('advanced.msg2'));
+              }else if(2 == _s) {
+                f(_this.$t('advanced.msg_rts',[1,2347]));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],   
+    }
+  }
+},
+  created:function() {
+    var _this = this;
+    var postVar = {};
+     uiPost.getWiFiAdvancedConfig(function(data){
+       _this.formValidate.bgProtection = data.bgProtection;
+       _this.formValidate.beaconPeriod = data.beaconPeriod;
+       _this.formValidate.dtimPeriod = data.dtimPeriod;
+       _this.formValidate.txPreamble = data.txPreamble;
+       _this.formValidate.fragThreshold = data.fragThreshold;
+       _this.formValidate.rtsThreshold = data.rtsThreshold;
+       _this.formValidate.txPower = data.txPower;
+       _this.formValidate.noForwarding = data.noForwarding;
+       _this.formValidate.htBssCoexistence = data.htBssCoexistence;
+       _this.formValidate.wmmCapable = data.wmmCapable;
+     })
+  },
+  methods:{
+    handleSubmit: function(name) {
+        var _this = this;
+        this.applyLoading = true;
+        this.$refs[name].validate(function(valid){
+            if (valid) {
+               var postVar = {};
+              postVar.bgProtection = _this.formValidate.bgProtection;
+              postVar.beaconPeriod = _this.formValidate.beaconPeriod;
+              postVar.dtimPeriod = _this.formValidate.dtimPeriod;
+              postVar.txPreamble = _this.formValidate.txPreamble;
+              postVar.fragThreshold = _this.formValidate.fragThreshold;
+              postVar.rtsThreshold =_this.formValidate.rtsThreshold;
+              postVar.txPower = _this.formValidate.txPower;
+              postVar.noForwarding = _this.formValidate.noForwarding;
+              postVar.htBSSCoexistence = _this.formValidate.htBssCoexistence;
+              postVar.wmmCapable = _this.formValidate.wmmCapable;
+              postVar.wifiIdx = _this.wifiIdx;
+            uiPost.setWiFiAdvancedConfig(postVar,function(){
+                  _this.applyLoading = false;
+                  location.href = location.href;
+              });
+            } else {
+                _this.applyLoading = false;
+            }
+        })
+      }
+    }
+};
+
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

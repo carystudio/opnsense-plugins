@@ -1,0 +1,9 @@
+{
+	 "enabled":"1",
+	 "success":true,
+     "error":null,
+     "lan_ip":"192.168.0.1",
+     "wtime":"0",
+     "reserv":"reserv",
+	 "syslog":"Thu Jan  1 07:00:00 1970 kern.emerg kernel: "
+}

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<i-col class="cs-container" span="20" >
+    <slot name="breadcrumb"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row :gutter="16">
+            <i-col :xs=24 :md="{span:12}" >
+                <Card>
+                    <p slot="title">
+                        <Icon type="wifi"></Icon>
+                        2.4G
+                    </p>
+                    <Table stripe :show-header="false" :columns="columns2" :data="data2"></Table>
+                </Card>
+            </i-col><i-col :xs=24 :md="{span:12}" >
+                <Card>
+                    <p slot="title">
+                        <Icon type="wifi"></Icon>
+                        5G
+                    </p>
+                    <Table stripe :show-header="false" :columns="columns2" :data="data2"></Table>
+                </Card>
+            </i-col><i-col :xs=24 :md="{span:12}" >
+                <Card>
+                    <p slot="title">
+                        <Icon type="wifi"></Icon>
+                        ssid1
+                    </p>
+                    <Table stripe :show-header="false" :columns="columns2" :data="data2"></Table>
+                </Card>
+            </i-col><i-col :xs=24 :md="{span:12}" >
+                <Card>
+                    <p slot="title">
+                        <Icon type="wifi"></Icon>
+                        ssid2
+                    </p>
+                    <Table stripe :show-header="false" :columns="columns2" :data="data2"></Table>
+                </Card>
+            </i-col>
+        </row>
+        <br>
+        <row :gutter="16">
+            <i-col>
+                <p>无线客户端列表 (已连接客户端: 3)</p>
+                <Table stripe :columns="columns1" :data="data1"></Table>
+            </i-col>
+        </row>
+    </div>
+
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</i-col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    return {
+      globalConfig:globalConfig,
+      columns1: [
+            {
+                title: 'MAC地址',
+                key: 'mac'
+            },
+            {
+                title: '模式',
+                key: 'mode'
+            },
+            {
+                title: '频宽',
+                key: 'bandwidth'
+            },
+            {
+                title: '信号',
+                key: 'value',
+                render: function(h, params){
+                    return h('Progress', {
+                        attrs:{
+                            'percent': parseInt(params.row.value)
+                        }   
+                    })
+                }
+            }
+        ],
+        data1: [
+            {
+                mac: 'FC:64:BA:10:D0:55',
+                mode: '11ac',
+                bandwidth: '80M',
+                value: '45',
+            },
+            {
+                mac: 'FC:64:BA:10:D0:55',
+                mode: '11a',
+                bandwidth: '40M',
+                value: '30',
+            },
+            {
+                mac: 'FC:64:BA:10:D0:55',
+                mode: '11ac',
+                bandwidth: '80M',
+                value: '45',
+            },
+            {
+                mac: 'FC:64:BA:10:D0:55',
+                mode: '11a',
+                bandwidth: '40M',
+                value: '30',
+            },
+            {
+                mac: 'FC:64:BA:10:D0:55',
+                mode: '11ac',
+                bandwidth: '80M',
+                value: '45',
+            },
+            {
+                mac: 'FC:64:BA:10:D0:55',
+                mode: '11a',
+                bandwidth: '40M',
+                value: '30',
+            },
+            {
+                mac: 'FC:64:BA:10:D0:55',
+                mode: '11ac',
+                bandwidth: '80M',
+                value: '45',
+            },
+            {
+                mac: 'FC:64:BA:10:D0:55',
+                mode: '11a',
+                bandwidth: '40M',
+                value: '10',
+            },
+            {
+                mac: 'FC:64:BA:10:D0:55',
+                mode: '11ac',
+                bandwidth: '80M',
+                value: '90',
+            },
+            {
+                mac: 'FC:64:BA:10:D0:55',
+                mode: '11a',
+                bandwidth: '40M',
+                value: '60',
+            },
+        ],
+      columns2: [
+            {
+                title: 'wifi信息',
+                key: 'name'
+            },
+            {
+                title: '值',
+                key: 'value',
+            }
+        ],
+        data2: [{
+            name:"无线状态",
+            value:"已启用",
+        },{
+            name:"SSID",
+            value:"TOTOLINK_A3000RU_5G8888",
+        },{
+            name:"频段",
+            value:"802.11A/ N/ AC",
+        },{
+            name:"信道",
+            value:"161",
+        },{
+            name:"加密方式",
+            value:"WPA/WPA2-PSK",
+        },{
+            name:"MAC地址",
+            value:"F4:28:54:00:40:E2"
+        },{
+            name:"已连接客户端",
+            value:"3"
+        }],
+        value1: '1'
+    }
+  },
+  created:function() {
+
+  },
+  methods:{
+    
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

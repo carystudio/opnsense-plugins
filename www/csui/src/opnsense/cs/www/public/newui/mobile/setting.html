@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/ydui/ydui.rem.css">
+  <link rel="stylesheet" href="/newui/static/css/style.mobile.css">
+</head>
+<body>
+<div id="app"></div>
+<script type="text/x-template" id="main">
+<div class="main">
+<yd-cell-group>
+    <yd-cell-item>
+        <span slot="left">手机号：</span>
+        <input slot="right" type="number" placeholder="请输入手机号">
+    </yd-cell-item>
+    
+    <yd-cell-item arrow type="label">
+        <select slot="right">
+            <option value="">支付方式</option>
+            <option value="1">支付宝</option>
+            <option value="2">微信</option>
+            <option value="3">财付通</option>
+        </select>
+    </yd-cell-item>
+
+    <yd-cell-item>
+        <yd-textarea slot="right" placeholder="请输入您的银行卡卡号和密码" maxlength="100"></yd-textarea>
+    </yd-cell-item>
+    
+    <yd-cell-item arrow type="label">
+        <span slot="left">性别：</span>
+        <select slot="right">
+            <option value="">请选择性别</option>
+            <option value="1">男</option>
+            <option value="2">女</option>
+            <option value="3">未知</option>
+        </select>
+    </yd-cell-item>
+</yd-cell-group>
+
+<!-- 不能删除 -->
+<br>
+<slot name="footer"></slot>
+</div>
+</script>
+</body>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/ydui/ydui.rem.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      menu:mobileMenu,
+      selected:'status',
+      popupVisible:true
+    }
+  },
+  computed:{
+    
+  },
+  created:function(){
+    localStorage.setItem('cs_mobile_menu', 'setting');
+  },
+  methods:{
+    handleClick: function () {
+        this.$dialog.alert({mes: 'Hello World!'});
+    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.mobile.js"></script>
+</html>

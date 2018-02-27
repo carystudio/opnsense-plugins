@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/ydui/ydui.rem.css">
+  <link rel="stylesheet" href="/newui/static/css/style.mobile.css">
+</head>
+<body>
+<div id="app"></div>
+<script type="text/x-template" id="main">
+<div class="main">
+<yd-cell-group>
+  <yd-cell-item>
+        <span slot="left">{{ $t('reboot_schedule.state') }}：</span>
+        <yd-switch slot="right" v-model="formValidate.status" @click.native="submitStatus"></yd-switch>
+    </yd-cell-item>
+</yd-cell-group>
+<yd-cell-group v-if="this.formValidate.status == 1">
+    <yd-cell-item arrow type="label">
+        <span slot="left">{{ $t('reboot_schedule.week') }}：</span>
+        <select slot="right" v-model="formValidate.week">
+            <option value="0">{{ $t('reboot_schedule.all') }}</option>
+            <option value="7">{{ $t('reboot_schedule.sun') }}</option>
+            <option value="1">{{ $t('reboot_schedule.mon') }}</option>
+            <option value="2">{{ $t('reboot_schedule.tue') }}</option>
+            <option value="3">{{ $t('reboot_schedule.wed') }}</option>
+            <option value="4">{{ $t('reboot_schedule.thu') }}</option>
+            <option value="5">{{ $t('reboot_schedule.fri') }}</option>
+            <option value="6">{{ $t('reboot_schedule.sat') }}</option>
+        </select>
+    </yd-cell-item>
+    <yd-cell-item arrow  type="label">
+        <span slot="left">{{ $t('reboot_schedule.time') }}：</span>
+        <yd-datetime type="time" v-model="formValidate.time" slot="right"></yd-datetime>
+    </yd-cell-item>
+    <yd-button-group v-if="this.formValidate.status == 1">
+      <yd-button size="large" type="primary" @click.native="handleSubmit">{{ $t('common.apply') }}</yd-button>
+    </yd-button-group>
+    <br>
+</yd-cell-group>
+
+<!-- 不能删除 -->
+</div>
+</script>
+</body>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/ydui/ydui.rem.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      menu:mobileMenu,
+      formValidate: {
+          status: true,
+          week: '',
+          time:''
+      }
+    }
+  },
+  computed:{
+    
+  },
+  created:function(){
+    var _this = this;
+    uiPost.getRebootScheCfg(function(data) {
+      _this.formValidate.status = data.scheEn == 1 ? true : false;
+      _this.formValidate.time = data.scheHour+":"+data.scheMin;
+      _this.formValidate.week = data.scheWeek;
+      _this.ntpEnabled = data.ntpEnabled;
+    });
+  },
+  methods:{
+    handleSubmit:function(){
+      var _this = this;
+      var postVar = {};
+      if(_this.ntpEnabled == '1'){
+        var time = _this.formValidate.time.split(':');
+        postVar.scheWeek = _this.formValidate.week;
+        var hour = time[0].replace(/\b(0+)/gi,"");
+        var min = time[1].replace(/\b(0+)/gi,"");
+        if(hour == "") hour = "0";
+        if(min == "") min = "0";
+        postVar.scheHour = hour;
+        postVar.scheMin = min;
+        postVar.scheEn = _this.formValidate.status?"1":"0";
+        uiPost.setRebootScheCfg(postVar,function(data){
+            _this.$dialog.toast({
+                mes: _this.$t('changepwd.msg7'),
+                icon: 'success',
+                callback:function(){
+                  location.href = location.href;
+                }
+            });
+        });
+      }
+      else{
+        _this.$dialog.notify({mes:_this.$t('reboot_schedule.msg')});
+      }
+    },
+    submitStatus:function(){
+        var postVar = {};
+        if(true == this.formValidate.status){
+            postVar.scheEn = "1";
+        }else{
+            postVar.scheEn = "0";
+        }
+        uiPost.setRebootScheCfg(postVar);
+    },
+  }
+};
+</script>
+<script src="/newui/static/js/main.mobile.js"></script>
+</html>

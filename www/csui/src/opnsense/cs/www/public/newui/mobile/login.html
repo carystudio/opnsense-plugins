@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/ydui/ydui.rem.css">
+  <link rel="stylesheet" href="/newui/static/css/style.mobile.css">
+</head>
+<body>
+<div id="app"></div>
+<script type="text/x-template" id="main">
+<div class="main">
+<form ref="formInline" method="POST" action="/cgi-bin/cstecgi.cgi?action=login">
+<input type="hidden" name="username" :value="username" />
+<yd-cell-group style="margin-top:40%">
+    <yd-cell-item>
+        <div slot="left">{{ $t("login.pass") }}：</div>
+        <yd-input slot="right" v-model="password" name="password" required></yd-input>
+    </yd-cell-item>
+</yd-cell-group>
+<yd-button-group>
+    <yd-button size="large" @click.native="handleSubmit">{{ $t("login.login_btn") }}</yd-button>
+</yd-button-group>
+</form>
+<!-- 不能删除 -->
+<br>
+<br>
+<br>
+<slot name="footer"></slot>
+</div>
+</script>
+</body>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/ydui/ydui.rem.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      loginUser:"",
+      loginPass:"",
+      username:'admin',
+      password:"",
+    }
+  },
+  computed:{
+  },
+  created:function(){
+    this.globalConfig.m.showBottom = false;
+    var _this = this;
+    uiPost.getLoginCfg(function(data) {
+        _this.loginUser = data.loginUser;
+        _this.loginPass = data.loginPass;
+    });
+  },
+  methods:{
+    handleSubmit:function(name) {
+      if (this.password == '') {
+        this.$dialog.notify({
+            mes: this.$t('login.user')+this.$t('login.err_empty')
+        });
+        return false;
+      }
+      if (this.password != this.loginPass) {
+        this.$dialog.notify({
+            mes: this.$t('login.pass')+this.$t('login.err_wrong')
+        });
+        return false;
+      }
+      this.$refs.formInline.submit();
+    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.mobile.js"></script>
+</html>

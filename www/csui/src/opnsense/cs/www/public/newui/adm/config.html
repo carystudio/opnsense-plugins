@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.adm'),$t('menu.config')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    <!-- <h3>设置</h3> -->
+                    {{ $t('config.help') }}
+                </Alert>
+                <Form ref="formValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('config.save_config_file')">
+                        <Button @click="saveConfigFile" >{{ $t('config.save') }}</Button>
+                    </FormItem>
+                    <FormItem :label="$t('config.update_config_file')">
+                        <Upload
+                                ref="upload"
+                                :before-upload="handleUpload"
+                                :action="upload.action"
+                                :name="upload.name"
+                                :data="upload.data"
+                                :max-size="upload.maxSize"
+                                :on-exceeded-size="exceededSize"
+                                :format="upload.format"
+                                :on-format-error="formatError"
+                                :on-success="uploadSuccess"
+                        >
+                            <Button icon="ios-cloud-upload-outline">{{ $t('config.select_file')+' & '+$t('config.update')   }}</Button>
+                        </Upload>
+                    </FormItem>
+                    <!--<FormItem :label="$t('config.restore_factory_default')">
+                        <Poptip
+                                confirm
+                                :title="$t('config.msg4')"
+                                @on-ok="restoreOk">
+                            <Button>{{ $t('config.restore') }}</Button>
+                        </Poptip>
+                    </FormItem>-->
+                    <FormItem :label="$t('config.reboot_system')">
+                        <Poptip
+                                confirm
+                                :title="$t('config.msg5')"
+                                @on-ok="rebootOk">
+                            <Button>{{ $t('config.reboot') }}</Button>
+                        </Poptip>
+                    </FormItem>
+                </Form>
+            </Card>
+            </Col>
+        </Row>
+    </div>
+    <div style="display: none;">
+        <form ref="save" class="form-horizontal" method="post" :action="saveAction">
+            <Input name="action" value="backupConfig" ></Input>
+        </form>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig: globalConfig,
+                applyLoading: false,
+                operationMode: '',
+                meshEnabled: '',
+                percent: 0,
+                saveAction: '/webapi',
+                upload: {
+                    file: null,
+                    action: '/webapi',
+                    name:'filename',
+                    format:['dat'],
+                    data:{
+                        action:'restoreConfig'
+                    },
+                    maxSize: 4000
+                }
+            }
+        },
+        computed:{
+        },
+        created: function() {
+            var _this = this;
+            /*uiPost.SystemSettings(function(data){
+                _this.operationMode = data.operationMode;
+                _this.meshEnabled = data.meshEnabled;
+                if (data.exportAction != '') {
+                    _this.saveAction = data.exportAction;
+                }
+                if (data.importAction != '') {
+                    _this.upload.action = data.importAction;
+                }
+                if (data.maxSize!='') {
+                    _this.upload.maxSize = parseInt(data.maxSize);
+                }
+            })*/
+        },
+        methods: {
+            saveConfigFile:function() {
+                this.$refs.save.submit();
+            },
+            restoreOk:function() {
+                var _this = this;
+                uiPost.LoadDefSettings(function(data) {
+                    var time=data.wtime;
+                    var lan_ip=data.lan_ip;
+                    _this.$Modal.success({
+                        loading:true,
+                        render: function(h) {
+                            return h('div',[
+                                _this.$t('common.loading'),
+                                h('Progress',{
+                                    attrs:{ percent:_this.percent }
+                                })
+                            ])
+                        }
+                    });
+                    var percentTimer = setInterval(function(){
+                        if (_this.percent>=100) {
+                            clearInterval(percentTimer);
+                            location.href='http://'+lan_ip+'/login.html';
+                        }
+                        _this.percent++;
+                    },cs.getTimer(time));
+                })
+            },
+            rebootOk:function() {
+                var _this = this;
+                var postVar = {"action":"reboot"};
+                uiPost.sysReboot(postVar,function(data) {
+                    _this.$Modal.success({
+                        loading:true,
+                        render: function(h) {
+                            return h('div',[
+                                _this.$t('common.loading'),
+                                h('Progress',{
+                                    attrs:{ percent:_this.percent }
+                                })
+                            ])
+                        }
+                    });
+                    var percentTimer = setInterval(function(){
+                        if (_this.percent>=100) {
+                            clearInterval(percentTimer);
+                            location.href = location.href;
+                        }
+                        _this.percent++;
+                    },cs.getTimer(60));
+                })
+            },
+            handleUpload: function(file) {
+                this.upload.file = file;
+            },
+            exceededSize: function() {
+                this.$Message.error({content:this.$t('config.msg3',[cs.bytesToSize( (parseInt(this.upload.maxSize)*1000) )]),duration: 5});
+            },
+            formatError: function() {
+                this.$Message.error({content:this.$t('config.msg2',[this.upload.format.join('、')]),duration: 5});
+            },
+            uploadSuccess:function(){
+                var _this = this;
+                _this.$Modal.success({
+                    loading:true,
+                    render: function(h) {
+                        return h('div',[
+                            _this.$t('common.loading'),
+                            h('Progress',{
+                                attrs:{ percent:_this.percent }
+                            })
+                        ])
+                    }
+                });
+                var percentTimer = setInterval(function(){
+                    if (_this.percent>=100) {
+                        clearInterval(percentTimer);
+                        location.href='/login.html';
+                    }
+                    _this.percent++;
+                },cs.getTimer(60));
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

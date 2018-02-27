@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>    
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+	<link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<!-- main template -->
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+             <Alert>
+              <!-- <h3>设置</h3> -->
+              {{ $t('wireless_schedule.help') }}
+             </Alert>
+            <Form ref="formValidate" :model="formValidate"  :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('static_dhcp.state')">
+                    <i-switch v-model="formValidate.status" size="large" >
+                        <span slot="open">{{ $t('common.enabled') }}</span>
+                        <span slot="close">{{ $t('common.disabled') }}</span>
+                    </i-switch>
+                </FormItem>
+				<Col v-show="formValidate.status" >
+				{{ $t('ipf.add_rule') }}
+                <hr>
+					<br>
+					<Row>
+						<Col span="5">{{ $t('wireless_schedule.enable') }}</Col>
+						<Col span="4">{{ $t('wireless_schedule.week') }}</Col>
+						<Col span="3" align="center">&nbsp;</Col>
+                        <Col span="9">{{ $t('wireless_schedule.time') }}</Col>
+					</Row>
+					<br>
+					<Row v-for="temp in formValidate.num" :key="temp">
+						 <Col span="3">
+							<Checkbox v-model="formValidate.start[(temp-1)]">
+								<span v-if="formValidate.start[(temp-1)] == true">{{ $t('wireless_schedule.on') }}</span>
+								<span v-if="formValidate.start[(temp-1)] == false">{{ $t('wireless_schedule.off') }}</span>
+							</Checkbox>
+						 </Col>
+                        <Col span="6">
+
+							<template>
+								<Select v-model="formValidate.week[(temp-1)]" >
+									<Option v-for="item in weekList" :value="item.value" :key="item.value">{{ item.lable }}</Option>
+								</Select>
+							</template>
+						</Col>
+                        <Col span="3" align="center">&nbsp;</Col>
+                        <Col span="9">
+							<TimePicker confirm format="HH:mm" type="timerange" style="width:200px" :value="formValidate.time" @on-change="getTime($event,temp)"></TimePicker>
+						</Col>
+                    </Row>
+					<br>
+					<hr>
+					<FormItem>
+						  <Button type="primary" @click="ruleSubmit()" :loading="applyLoading">{{ $t('common.apply') }}</Button>
+					</FormItem>
+				</Col>
+            </Form>
+            </Card>
+            <br>
+        </Col>
+        </row>
+          
+    </div>
+
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    <span style="display: none;">{{ submitStatus }}</span>
+</Col>
+</script>
+<!-- /.main template -->
+
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+// 注册头文件
+var cs_main = {
+    template: '#main',
+    data:function() {
+		var _this = this;
+        return {
+            globalConfig:globalConfig,
+			arpLoading:true,
+			applyLoading:false,
+			formValidate: {
+				status:true,
+				week:[],
+				time:[],
+				start:[],
+				num:''
+			},
+			rule:[],
+			weekList:[
+				{
+					value:'0',
+					lable:'ALL'
+				},{
+					value:"7",
+					lable:"Sun"
+				},{
+					value:"1",
+					lable:"Mon"
+				},{
+					value:"2",
+					lable:"Tue"
+				},{
+					value:"3",
+					lable:"Wed"
+				},{
+					value:"4",
+					lable:"Thu"
+				},{
+					value:"5",
+					lable:"Fri"
+				},{
+					value:"6",
+					lable:"Sat"
+				}
+			]
+		}
+	},
+
+    computed:{
+		submitStatus:function(){
+			var postVar = {};
+			if(true == this.formValidate.status){
+				postVar.ScheduleEn_wifi = "1";
+			}else{
+				postVar.ScheduleEn_wifi = "0";
+			}
+			uiPost.setWiFiScheduleConfig(postVar);
+			return this.formValidate.status;
+		}
+		
+    },
+	created:function() {
+		var _this = this;
+		var i=0;
+		uiPost.getWiFiScheduleConfig(function(data){
+		console.log(data);
+			_this.formValidate.status = data.ScheduleEn_wifi == 1 ? true : false;
+			if(data.ScheduleEn_wifi == 1){
+				_this.formValidate.num = data.Schedule_wifi_num;
+				_this.rule[0] = data.Schedule_wifi_rule0;
+				_this.rule[1] = data.Schedule_wifi_rule1;
+				_this.rule[2] = data.Schedule_wifi_rule2;
+				_this.rule[3] = data.Schedule_wifi_rule3;
+				_this.rule[4] = data.Schedule_wifi_rule4;
+				_this.rule[5] = data.Schedule_wifi_rule5;
+				_this.rule[6] = data.Schedule_wifi_rule6;
+				_this.rule[7] = data.Schedule_wifi_rule7;
+				_this.rule[8] = data.Schedule_wifi_rule8;
+				_this.rule[9] = data.Schedule_wifi_rule9;
+				for(i=0;i<10;i++){
+					if(_this.rule[i].split(',')[0] == 1)
+						_this.formValidate.start[i] = true;
+					else
+						_this.formValidate.start[i] = false;
+					_this.formValidate.week[i] = _this.rule[i].split(',')[1];
+				}
+			}
+		});
+	},
+    methods:{
+		ruleSubmit:function(){
+			var _this = this;
+			var i=0;
+			var postVar = {};
+			
+			var time=[], ruletable_=[], ruletable=[]; 
+			for(i=0;i<6;i++)
+				ruletable[i]="";
+			for(i=0;i<10;i++){
+				if(_this.formValidate.start[i] == true)
+					ruletable[0] += "1"+",";
+				else
+					ruletable[0] += "0"+",";
+			}
+			for(i=0;i<10;i++){
+				ruletable[1] += _this.formValidate.week[i]+",";
+				if(_this.formValidate.time[i] != undefined){
+					time=_this.formValidate.time[i];
+					ruletable[2] += Number(time[0].split(':')[0])+",";
+					ruletable[3] += Number(time[0].split(':')[1])+",";
+					ruletable[4] += Number(time[1].split(':')[0])+",";
+					ruletable[5] += Number(time[1].split(':')[1])+",";
+				}
+				else{
+					ruletable[2] += "0"+",";
+					ruletable[3] += "0"+",";
+					ruletable[4] += "0"+",";
+					ruletable[5] += "0"+",";
+				}
+			}
+			for(i=0;i<10;i++){
+
+				postVar['enable'+i] = ruletable[0].split(',')[i];
+				postVar['week'+i] = ruletable[1].split(',')[i];
+				postVar['startHour'+i] = ruletable[2].split(',')[i];
+				postVar['startMinute'+i] = ruletable[3].split(',')[i];
+				postVar['endHour'+i] = ruletable[4].split(',')[i];
+				postVar['endMinute'+i] = ruletable[5].split(',')[i];
+			}
+
+			uiPost.setWiFiScheduleConfig(postVar,function(){
+            });
+			
+		},
+		getTime:function(value,index){console.log(value);
+			this.formValidate.time[index-1] = value;
+		}
+
+    }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

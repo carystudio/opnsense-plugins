@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+  <style>
+    .ivu-transfer-list {
+      width: 300px !important;
+    }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.firewall'),$t('menu.time_rule')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" >
+            <Card>
+              <Alert>
+                <b>{{ $t('time_rule.help') }}</b>:
+                <ul>
+                  <li>{{ $t('time_rule.help1') }}</li>
+                  <li>{{ $t('time_rule.help2') }}</li>
+                  <li>{{ $t('time_rule.help3') }}</li>
+                  <li>{{ $t('time_rule.help4') }}</li>
+                </ul>
+              </Alert>
+
+              <Transfer
+                :data="scheListData"
+                :titles="titles"
+                :target-keys="targetKeys"
+                :render-format="render"
+                :filterable="true"
+                @on-change="handleChange1"></Transfer>
+                <br>
+              <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="80" label-position="left">
+                <FormItem :label="$t('time_rule.week')" prop="week">
+                  <CheckboxGroup v-model="formValidate.week">
+                    <Checkbox :label="0">{{ $t('time_rule.mon') }}</Checkbox>
+                    <Checkbox :label="1">{{ $t('time_rule.tue') }}</Checkbox>
+                    <Checkbox :label="2">{{ $t('time_rule.wed') }}</Checkbox>
+                    <Checkbox :label="3">{{ $t('time_rule.thu') }}</Checkbox>
+                    <Checkbox :label="4">{{ $t('time_rule.fri') }}</Checkbox>
+                    <Checkbox :label="5">{{ $t('time_rule.sat') }}</Checkbox>
+                    <Checkbox :label="6">{{ $t('time_rule.sun') }}</Checkbox>
+                  </CheckboxGroup>
+                </FormItem>
+                <FormItem :label="$t('time_rule.time')" prop="time">
+                  <TimePicker type="timerange"
+                              format="HH:mm"
+                              :value="formValidate.time"
+                              @on-change="getTime"
+                              ></TimePicker>
+                  <span>(HH:mm)</span>
+                </FormItem>
+                <!-- btn -->
+                <FormItem>
+                    <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('time_rule.add') }}</Button>
+                </FormItem>
+              </Form>
+            </Card>
+            </Col>
+        </Row>
+        <br>
+        <Row>
+			<Col class="cs-btn-del">
+                <Button size="small" @click="tableSelect(true)" type="error">{{ $t('time_rule.delete') }}</Button>
+            </Col>
+            <Col>
+            <Table border ref="tableSelect" :columns="ruleColumns" :data="ruleData"></Table>
+            </Col>
+        </Row>
+    </div>
+
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+    template: "#main",
+    data: function() {
+        return {
+            globalConfig: globalConfig,
+            scheduleRulesListAdd: '',
+            targetKeys: [],
+            titles: [this.$t('time_rule.current_list'), this.$t('time_rule.choosed_list')],
+            formValidate: {
+                week: [],
+                time: []
+            },
+            ruleData: [],
+            scheListData: [],
+            
+        }
+    },
+    computed: {
+        ruleValidate: function(){
+            var _this = this;
+            return{
+                week: [{
+                    required: true,
+                    type: 'array',
+                    min: 1,
+                    message: _this.$t('time_rule.msg2'),
+                    trigger: 'change'
+                }, ],
+                time: [{
+                    required: true,
+                    type: 'array',
+                    min: 1,
+                    message: _this.$t('time_rule.msg3'),
+                    trigger: 'change'
+                }, ],
+            }
+        },
+        weekdaysStr:function(){
+            return {
+                'Mon': this.$t('time_rule.mon'),
+                'Tue': this.$t('time_rule.tue'),
+                'Wed': this.$t('time_rule.wed'),
+                'Thu': this.$t('time_rule.thu'),
+                'Fri': this.$t('time_rule.fri'),
+                'Sat': this.$t('time_rule.sat'),
+                'Sun': this.$t('time_rule.sun')
+            }
+        },
+        ruleColumns: function() {
+            var _this = this;
+            return [{
+                type: 'selection',
+                key: 'ip',
+                width: '100'
+            }, {
+                title: _this.$t('time_rule.ip'),
+                key: 'ip',
+                sortable: true,
+                render: function(h, params) {
+                    var tmp_ip = "";
+                    if (params.row.firewallMode == "MAC") {
+                        tmp_ip = "--";
+                    } else {
+                        tmp_ip = params.row.ip;
+                    }
+                    return h('div', tmp_ip);
+                }
+            }, {
+                title: _this.$t('time_rule.protocol'),
+                key: 'protocol',
+                sortable: true,
+                render: function(h, params) {
+                    var tmp_protocol = "";
+                    if (params.row.firewallMode == "MAC") {
+                        tmp_protocol = "--";
+                    } else {
+                        tmp_protocol = params.row.proto;
+                    }
+                    return h('div', tmp_protocol);
+                }
+            }, {
+                title: _this.$t('time_rule.port_range'),
+                key: 'portRange',
+                sortable: true,
+                render: function(h, params) {
+                    var tmp_portRange = "";
+                    if (params.row.firewallMode == "MAC") {
+                        tmp_portRange = "--";
+                    } else {
+                        tmp_portRange = params.row.portRange;
+                    }
+                    return h('div', tmp_portRange);
+                }
+            }, {
+                title: _this.$t('time_rule.mac'),
+                key: 'mac',
+                sortable: true,
+                render: function(h, params) {
+                    var tmp_mac = "";
+                    if (params.row.firewallMode == "MAC") {
+                        tmp_mac = params.row.mac;
+                    } else {
+                        tmp_mac = "--";
+                    }
+                    return h('div', tmp_mac);
+                }
+            }, {
+                title: _this.$t('time_rule.time'),
+                key: 'time',
+                sortable: true,
+                render: function(h, params) {
+                    var week = [];
+                    var weekArr = params.row.week.split(' ');
+                    for (var i = 0; i < weekArr.length; i++) {
+                        week.push(_this.weekdaysStr[weekArr[i]]);
+                    }
+                    var tmp_time = week.join(' ') + " " + params.row.time;
+                    return h('div', tmp_time);
+                }
+            }, {
+                title: _this.$t('time_rule.select'),
+                key: 'action',
+                width: 150,
+                align: 'center',
+                render: function(h, params) {
+                    return h('Poptip', {
+                        props: {
+                            confirm: true,
+                            title: _this.$t('time_rule.msg4'),
+                            "ok-text": _this.$t('common.ok'),
+                            "cancel-text": _this.$t('common.cancel')
+                        },
+                        on: {
+                            "on-ok": function() {
+                                _this.deleteData(params);
+                            }
+                        }
+                    }, [
+                        h('Button', {
+                            props: {
+                                type: 'error',
+                                size: 'small'
+                            },
+                        }, _this.$t('time_rule.delete'))
+                    ]);
+                }
+            }]
+        }
+    },
+    created: function() {
+        var _this = this;
+        uiPost.getScheduleRules(function(data) {
+            var item = "";
+            var temp = [],tempTable = [];
+            if (data.length > 0) {
+                for (var i = 0; i < data.length; i++) {
+                    temp[i] = {};
+                    temp[i].key = i;
+                    if (data[i].firewallMode == 'MAC') {
+                        temp[i].label = data[i].mac;
+                    } else {
+                        temp[i].label = data[i].ip + " " + data[i].proto + " " + data[i].portRange;
+                    }
+                    temp[i].obj = data[i];
+                    // table
+                    if (data[i].week != 'Mon Tue Wed Thu Fri Sat Sun' && data[i].time != '00:00-23:59') {
+                        tempTable.push(data[i]);
+                    }
+                }
+            }
+            _this.scheListData = temp;
+            _this.ruleData = tempTable;
+        })
+    },
+    methods: {
+        handleSubmit: function(name) {
+            var _this = this;
+            var postVar = {};
+            this.$refs[name].validate(function(valid) {
+                if (valid) {
+                    var week = _this.formValidate.week;
+                    var weeks = [0,0,0,0,0,0,0];
+                    var startTime = _this.formValidate.time[0];
+                    var endTime = _this.formValidate.time[1];
+                    var totalData = _this.scheListData;
+                    var selectIndex = _this.targetKeys;
+                    if (selectIndex.length <= 0) {
+                        _this.$Message.error(_this.$t('time_rule.msg8'));
+                        return false;
+                    }
+                    for (var i = 0; i < week.length; i++) {
+                        weeks[week[i]] = 1;
+                    }
+                    var postVar = {};
+                    postVar.action = "add";
+                    var listArr = [];
+                    for (var i = 0; i < selectIndex.length; i++) {
+                        listArr[i] = {};
+                        var currentOne = totalData[selectIndex[i]];
+                        listArr[i].week = weeks.join(',');
+                        listArr[i].time = startTime + '-' + endTime;
+                        listArr[i].delRuleName = currentOne.obj.delRuleName;
+                    }
+                    postVar.list = listArr;
+                    uiPost.setScheduleRules(postVar, function(data) {
+                        _this.$Message.success({
+                            content: _this.$t('time_rule.msg7'),
+                            onClose: function() {
+                                location.href = location.href;
+                            }
+                        });
+                    });
+                }
+            })
+        },
+        render: function(item) {
+            return item.label;
+        },
+        handleChange1: function(newTargetKeys, direction, moveKeys) {
+            this.targetKeys = newTargetKeys;
+        },
+        getTime: function(value) {
+            this.formValidate.time = value;
+        },
+        deleteData: function(obj) {
+            var _this = this;
+            var postVar = {};
+            postVar.action = "del";
+            var listArr = [{
+                "week": "1,1,1,1,1,1,1",
+                "time": "00:00-23:59",
+                "delRuleName": obj.row.delRuleName
+            }];
+            postVar.list = listArr;
+            uiPost.setScheduleRules(postVar, function() {
+                _this.ruleData.splice(obj.index, 1);
+            });
+        },
+        tableSelect: function(status) {
+            var _this = this;
+            if (status) {
+                var getSelection = this.$refs.tableSelect.getSelection();
+                if (getSelection.length > 0) {
+                    var postVar = {};
+                    postVar.action = "del";
+                    var listArr = [];
+                    for (var i = 0; i < getSelection.length; i++) {
+                        listArr[i].week = "1,1,1,1,1,1,1";
+                        listArr[i].time = "00:00-23:59";
+                        listArr[i].delRuleName = getSelection[i].delRuleName;
+                    }
+                    postVar.list = listArr;
+                    uiPost.setScheduleRules(postVar, function() {
+                        _this.$Message.success({
+                            content: _this.$t('time_rule.msg6'),
+                            onClose: function() {
+                                location.href = location.href;
+                            }
+                        });
+                    });
+                } else {
+                    this.$Message.error(this.$t('time_rule.msg4'));
+                }
+            }
+        }
+    }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

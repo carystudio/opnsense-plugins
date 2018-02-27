@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.central')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Alert>
+             {{ $t('central.help') }}
+            </Alert>
+            <Row>
+              <Col>
+                <Button type="primary" :loading="apscanLoading" @click="apscanClick">{{ $t('central.apscan') }}</Button>
+                <Button type="primary" @click="setinfoClick">{{ $t('central.setinfo') }}</Button>
+                <Button type="primary" @click="letctlClick">{{ $t('central.letctl') }}</Button>
+                <Button type="primary" @click="rebootClick">{{ $t('central.reboot') }}</Button>
+                <Button type="primary" @click="timingRebootClick">{{ $t('central.timing_reboot') }}</Button>
+                <Button type="primary" @click="restoreClick">{{ $t('central.restore') }}</Button>
+                <Tooltip trigger="hover" placement="top" :disabled="!usbState">
+                  <Button type="primary" @click="uploadClick" :disabled="usbState">{{ $t('central.upload') }}</Button>
+                  <div slot="content" style="white-space: normal;"> {{ $t('central.tip1') }} </div>
+                </Tooltip>
+                <Button type="primary" @click="firmwareClick">{{ $t('central.firmware') }}</Button>
+              </Col>
+              <br>
+              <Col>
+                <Table border ref="central" :columns="centralColumns" :data="centralData" @on-selection-change="centralTable"></Table>
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+        </Row>
+    </div>
+    <Modal
+        v-model="setinfo"
+        :title="$t('central.setinfo')"
+        :closable="false"
+        :mask-closable="false"
+        >
+        <Form ref="formSetinfo" :model="formSetinfo" :label-width="120" :rules="ruleSetinfo" label-position="left">
+          <FormItem :label="$t('central.apname')" prop="apname" v-if="multipleHide">
+              <Input v-model="formSetinfo.apname" ></Input>
+          </FormItem>
+          <FormItem :label="$t('central.authpwd')" prop="authpwd">
+              <Input v-model="formSetinfo.authpwd" ></Input>
+          </FormItem>
+          <FormItem :label="$t('central.change_passwd')">
+              <Input v-model="formSetinfo.changePasswd" ></Input>
+          </FormItem>
+          <FormItem :label="$t('central.ipaddr')" prop="ipaddr" v-if="multipleHide">
+              <Input v-model="formSetinfo.ipaddr" ></Input>
+          </FormItem>
+          <FormItem :label="$t('central.default_gateway')" prop="gateway">
+              <Input v-model="formSetinfo.gateway" ></Input>
+          </FormItem>
+          <FormItem label="DNS" prop="dns">
+              <Input v-model="formSetinfo.dns" ></Input>
+          </FormItem>
+          <FormItem :label="$t('central.ssid',['2.4G'])" prop="ssid2">
+              <Input v-model="formSetinfo.ssid2" ></Input>
+          </FormItem>
+          <FormItem :label="$t('central.security',['2.4G'])" prop="security2">
+              <Input v-model="formSetinfo.security2" :disabled="formSetinfo.securityMode2==0" >
+                <Select v-model="formSetinfo.securityMode2" slot="prepend" style="width: 80px">
+                    <Option value="0">{{ $t('central.none_security') }}</Option>
+                    <Option value="1">{{ $t('central.security_psk') }}</Option>
+                </Select>
+              </Input>
+          </FormItem>
+          <FormItem :label="$t('central.channels',['2.4G'])" prop="channel2">
+              <Select v-model="formSetinfo.channel2">
+                  <Option value="-1">{{ $t('central.unmodify') }}</Option>
+                  <Option value="0">{{ $t('central.auto_select') }}</Option>
+                  <Option v-for="i in 13" :key="i" :value="i">{{ i }}</Option>
+              </Select>
+          </FormItem>
+          <FormItem :label="$t('central.tx_powers',['2.4G'])" prop="tx_power2">
+              <Select v-model="formSetinfo.tx_power2">
+                  <Option v-for="i in txPower" :key="i" :value="i">{{ i!='-1'?i+'%':$t('central.unmodify') }}</Option>
+              </Select>
+          </FormItem>
+          <div v-if="formSetinfo.ssid5 != ''">
+          <FormItem :label="$t('central.ssid',['5G'])" prop="ssid5">
+              <Input v-model="formSetinfo.ssid5" ></Input>
+          </FormItem>
+          <FormItem :label="$t('central.security',['5G'])" prop="security5">
+              <Input v-model="formSetinfo.security5" :disabled="formSetinfo.securityMode5==0" >
+                <Select v-model="formSetinfo.securityMode5" slot="prepend" style="width: 80px">
+                    <Option value="0">{{ $t('central.none_security') }}</Option>
+                    <Option value="1">{{ $t('central.security_psk') }}</Option>
+                </Select>
+              </Input>
+          </FormItem>
+          <FormItem :label="$t('central.channels',['5G'])" prop="channel5">
+              <Select v-model="formSetinfo.channel5">
+                  <Option value="-1">{{ $t('central.unmodify') }}</Option>
+                  <Option value="0">{{ $t('central.auto_select') }}</Option>
+                  <Option v-for="i in 13" :key="i" :value="i">{{ i }}</Option>
+              </Select>
+          </FormItem>
+          <FormItem :label="$t('central.tx_powers',['5G'])" prop="tx_power5">
+            <Select v-model="formSetinfo.tx_power5">
+                  <Option v-for="i in txPower" :key="i" :value="i">{{ i!='-1'?i+'%':$t('central.unmodify') }}</Option>
+              </Select>
+          </FormItem>
+          </div>
+        </Form>
+        <div slot="footer">
+          <Button type="text" @click="setinfo=false">{{ $t('common.cancel') }}</Button>
+          <Button type="primary" @click="setinfoOk">{{ $t('common.apply') }}</Button>
+        </div>
+    </Modal>
+    <Modal
+        v-model="letctl"
+        :title="$t('central.letctl')"
+        >
+        <Alert>
+        {{ $t('central.ledctl_tip') }}
+        </Alert>
+        <Form :label-width="120" label-position="left">
+          <FormItem :label="$t('central.authpwd')">
+              <Input v-model="letctlAuthpwd" ></Input>
+          </FormItem>
+          <FormItem>
+            <Button type="primary" @click="letctlOk(2)">{{ $t('central.open') }}</Button>
+            <Button type="primary" @click="letctlOk(1)">{{ $t('central.finish') }}</Button>
+          </FormItem>
+        </Form>
+         <div slot="footer">
+        </div>
+    </Modal>
+    <Modal
+        v-model="reboot"
+        :title="$t('central.reboot')"
+        >
+        <Form :label-width="120" label-position="left">
+          <FormItem :label="$t('central.authpwd')">
+              <Input v-model="letctlAuthpwd" ></Input>
+          </FormItem>
+          <FormItem>
+            <Button type="primary" @click="rebootOk">{{ $t('central.reboot_btn') }}</Button>
+          </FormItem>
+        </Form>
+         <div slot="footer">
+        </div>
+    </Modal>
+    <Modal
+        v-model="timingReboot"
+        :title="$t('central.timing_reboot')"
+        >
+        <Form :label-width="120" label-position="left">
+          <FormItem :label="$t('central.authpwd')">
+              <Input v-model="letctlAuthpwd" ></Input>
+          </FormItem>
+          <FormItem :label="$t('central.timing_reboot')">
+            <Select v-model="timingRebootSelect">
+                <Option value="-1">{{ $t('central.unmodify') }}</Option>
+                <Option value="0">{{ $t('central.disable') }}</Option>
+                <Option value="3">3</Option>
+                <Option value="4">4</Option>
+                <Option value="5">5</Option>
+                <Option value="6">6</Option>
+            </Select>
+          </FormItem>
+          <FormItem>
+            <Button type="primary" @click="timingRebootOk">{{ $t('common.apply') }}</Button>
+          </FormItem>
+        </Form>
+         <div slot="footer">
+        </div>
+    </Modal>
+    <Modal
+        v-model="restore"
+        :title="$t('central.restore')"
+        >
+        <Form :label-width="120" label-position="left">
+          <FormItem :label="$t('central.authpwd')">
+              <Input v-model="letctlAuthpwd" ></Input>
+          </FormItem>
+          <FormItem>
+            <Button type="primary" @click="restoreOk">{{ $t('central.restore') }}</Button>
+          </FormItem>
+        </Form>
+         <div slot="footer">
+        </div>
+    </Modal>
+    <Modal
+        v-model="uploads"
+        :title="$t('central.upload')"
+        >
+        <Form :label-width="120" label-position="left">
+          <FormItem :label="$t('central.fwfile')">
+                <!-- :max-size="upload.maxSize" -->
+            <Upload
+                ref="upload"
+                :before-upload="handleUpload"
+                :action="upload.action"
+                :data="upload.data"
+                :on-exceeded-size="exceededSize"
+                :format="upload.format"
+                :on-format-error="formatError"
+                :on-success="uploadSuccess"
+            >
+              <Button icon="ios-cloud-upload-outline">{{ $t('central.select_file')+' & '+$t('central.file_upload')   }}</Button>
+            </Upload>
+          </FormItem>
+        </Form>
+         <div slot="footer">
+        </div>
+    </Modal>
+    <Modal
+        v-model="firmware"
+        :title="$t('central.firmware')"
+        >
+        <Form :label-width="120" label-position="left">
+          <FormItem :label="$t('central.authpwd')">
+              <Input v-model="letctlAuthpwd" ></Input>
+          </FormItem>
+          <FormItem>
+            <Button type="primary" @click="firmwareOk">{{ $t('central.firmware') }}</Button>
+          </FormItem>
+        </Form>
+         <div slot="footer">
+        </div>
+    </Modal>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+    template: "#main",
+    data: function() {
+        var _this = this;
+        return {
+            globalConfig: globalConfig,
+            applyLoading: false,
+            apscanLoading: false,
+            multipleHide: true,
+            centralData: [],
+            usbState:false,
+            setinfo:false,
+            letctl:false,
+            reboot: false,
+            timingReboot: false,
+            restore: false,
+            uploads: false,
+            firmware: false,
+            txPower:[-1,15,35,50,75,100],
+            selectData:[],
+            formSetinfo: {
+              apname: '',
+              authpwd: 'admin',
+              changePasswd: '',
+              ipaddr: '',
+              gateway: '',
+              dns: '',
+              ssid2: '',
+              security2: '',
+              securityMode2: '',
+              channel2: '-1',
+              tx_power2: -1,
+              ssid5: '',
+              security5: '',
+              securityMode5: '',
+              channel5: '-1',
+              tx_power5: -1,
+              other:[],
+            },
+            ruleSetinfo: {
+                apname: [{ validator: function(r, v, f) {
+                      if (v == '') {
+                        _this.$Message.error(_this.$t('central.msg4'));
+                        f('sdfs');
+                      }
+                      if (v.length>32) {
+                        _this.$Message.error(_this.$t('central.msg5'));
+                        f('max length');
+                      }
+                      f();
+                    },
+                    trigger: 'blur'
+                }],
+                authpwd: [{ validator: function(r, v, f) {
+                      if (v == '') {
+                        _this.$Message.error(_this.$t('central.msg2'));
+                        f('sdfs');
+                      }
+                      f();
+                    },
+                    trigger: 'blur'
+                }],
+            },
+            letctlAuthpwd:'admin',
+            timingRebootSelect:'',
+            upload: {
+              file: null,
+              action: '/cgi-bin/uploadFile.cgi',
+              format:[],
+              data:{},
+              maxSize: 1024
+            },
+            percent: 0
+        }
+    },
+    computed: {
+        centralColumns: function() {
+            var _this = this;
+            return [{
+                type: 'expand',
+                width: 30,
+                render: function(h, params) {
+                  var tmp_channel = 0; // 信道
+                  if (params.row.channel5g == "") {
+                      if (parseInt(params.row.channel2g) == 0) {
+                          tmp_channel = _this.$t('central.auto');
+                      } else {
+                          tmp_channel = params.row.channel2g;
+                      }
+                  } else {
+                      if (parseInt(params.row.channel2g) == 0) {
+                          tmp_channel = _this.$t('central.auto');
+                      } else {
+                          tmp_channel = params.row.channel2g;
+                      }
+                      if (parseInt(params.row.channel5g) == 0) {
+                          tmp_channel += "/" + _this.$t('central.auto');
+                      } else {
+                          tmp_channel += "/" + tmpJson.channel5g;
+                      }
+                  }
+                  var _g5 = params.row.ssid5g==''?'none':'block';
+
+                  return h('Row',[
+                    h('Col',{props:{span:8}},[h('p','ID:' + params.row.id )]),
+                    h('Col',{props:{span:8}},[h('p',_this.$t('central.channel') +':'+ tmp_channel )]),
+                    h('Col',{props:{span:8}},[h('p',_this.$t('central.device_info') +':'+ params.row.fmVersion + params.row.svn )]),
+                    h('Col',{props:{span:24}},[h('br')]),
+                    h('Col',{props:{span:8}},[h('p',_this.$t('central.ssid',['2.4G']) +':'+ params.row.ssid2g)]),
+                    h('Col',{props:{span:8}},[h('p',_this.$t('central.security',['2.4G']) +':'+ params.row.wlanKey2g)]),
+                    h('Col',{style:{display:_g5},props:{span:24}},[h('br')]),
+                    h('Col',{style:{display:_g5},props:{span:8}},[h('p',_this.$t('central.ssid',['5G']) +':'+ params.row.ssid5g)]),
+                    h('Col',{style:{display:_g5},props:{span:8}},[h('p',_this.$t('central.security',['5G']) +':'+ params.row.wlanKey5g)])
+                  ]);
+                }
+            },{
+                type: 'selection',
+                key: 'id',
+                width: "60"
+            }, {
+                title: this.$t('central.apname'),
+                key: 'name',
+                sortable: true,
+                render: function(h, params) {
+                    var name = _this.$t('central.unknown');
+                    if (params.row.name != '') {
+                        name = params.row.name;
+                    }
+                    return h('div', name);
+                }
+            }, {
+                title: this.$t('central.ipaddr'),
+                key: 'ipaddr',
+                sortable: true,
+                render: function(h, params) {
+                    return h('a', {
+                        attrs: {
+                            href: 'http://' + params.row.ipaddr,
+                            target: '_blank'
+                        },
+                        domProps: {
+                            innerHTML: params.row.ipaddr
+                        }
+                    });
+                }
+            }, {
+                title: this.$t('central.macaddr'),
+                key: 'apMac',
+                sortable: true
+            }, {
+                title: this.$t('central.clientconn'),
+                key: 'staNum2g',
+                sortable: true,
+                render: function(h, params) {
+                    if (params.row.staNum5g != "") {
+                        var tmp_num = params.row.staNum2g + "/" + params.row.staNum5g;
+                    } else {
+                        var tmp_num = params.row.staNum2g;
+                    }
+                    return h('div', tmp_num);
+                }
+            }, {
+                title: this.$t('central.device_info'),
+                key: 'softModel',
+                sortable: true,
+            }, {
+                title: this.$t('central.device_status'),
+                key: 'onlieStatus',
+                sortable: true,
+                render: function(h, params) {
+                    var channel = '';
+                    return h('div', params.row.onlieStatus == 1 ? _this.$t('central.user_online') : _this.$t('central.user_outline'));
+                }
+            }];
+        }
+    },
+    created: function() {
+      var _this = this;
+      this.init();
+       uiPost.getUsbState(function(data){
+          _this.usbState = data.usbState != 1 ? true : false; 
+        });
+    },
+    methods: {
+        init: function() {
+            var _this = this;
+            uiPost.acScanAp(function(){
+              var postVar = {};
+              postVar.central = true; // test code by Yexk
+              postVar.SqlCmd = 'select f.id,f.apMac,f.status,f.onlieStatus,f.ledCtlStatus,f.apType,f.csid,f.fmVersion,f.svn,f.softModel,f.schdReboot,f.ipaddr,f.mask,f.gateway,f.dns1,f.dns2,f.ssid2g,f.wlanKey2g,f.channel2g,f.staNum2g,f.txPower2g,f.ssid5g,f.wlanKey5g,f.channel5g,f.staNum5g,f.txPower5g,f.protocol,f.sameNetwork,o.password,o.name,w.fwSvn,w.fwUrl,w.fwMd5  from (BASICINFO f LEFT JOIN OTHERINFO o on f.apMac=o.mac ) LEFT JOIN FWINFO w on f.csid = w.fwCsid';
+              uiPost.testSQLite(postVar, function(data) {
+                  _this.centralData = data;
+                  _this.apscanLoading = false;
+              });
+            });
+        },
+        apscanClick: function(){
+          this.apscanLoading = true;
+          this.init();
+        },
+        setinfoClick: function(){
+          var temp = this.selectData;
+          if (temp.length <= 0) {
+            this.$Message.error(this.$t('central.msg1'));
+            return false;
+          }
+          if (temp.length == 1) {
+            this.formSetinfo.apname    = temp[0].name;
+            this.formSetinfo.ipaddr    = temp[0].ipaddr;
+            this.formSetinfo.gateway   = temp[0].gateway;
+            this.formSetinfo.dns       = temp[0].dns1;
+            this.formSetinfo.ssid2     = temp[0].ssid2g;
+            this.formSetinfo.security2 = temp[0].wlanKey2g;
+            this.formSetinfo.channel2  = temp[0].channel2g;
+            this.formSetinfo.tx_power2 = temp[0].txPower2g;
+            this.formSetinfo.ssid5     = temp[0].ssid5g;
+            this.formSetinfo.security5 = temp[0].wlanKey5g;
+            this.formSetinfo.channel5  = temp[0].channel5g;
+            this.formSetinfo.tx_power5 = temp[0].txPower5g;
+            this.formSetinfo.other     = temp[0];
+            this.multipleHide = true;
+          }else{
+            this.multipleHide = false;
+            for(var i in this.formSetinfo)
+            {
+              this.formSetinfo[i] = '';
+            }
+            this.formSetinfo.ssid5 = ' ';
+          }
+          this.setinfo = true;
+        },
+        centralTable: function(selection){
+          this.selectData = selection;
+        },
+        setinfoOk: function(){
+          var _this = this;
+          var postVar = {};
+          var postData = { Action: "QuickSetting" };
+          postData.AuthPassword = this.formSetinfo.authpwd;
+          if (this.formSetinfo.changePasswd != "") {
+            postData.ModifyPassword = this.formSetinfo.changePasswd;
+          }
+          postData.Ipaddr = this.formSetinfo.ipaddr;
+          postData.Gateway = this.formSetinfo.gateway;
+          postData.Dns1 = this.formSetinfo.dns;
+          postData.Ssid2g = this.formSetinfo.ssid2;
+          postData.WlanKey2g = this.formSetinfo.security2;
+          postData.Channel2g = this.formSetinfo.channel2;
+          postData.TxPower2g = this.formSetinfo.tx_power2;
+          postData.Ssid5g = this.formSetinfo.ssid5;
+          postData.WlanKey5g = this.formSetinfo.security5;
+          postData.Channel5g = this.formSetinfo.channel5;
+          postData.TxPower5g = this.formSetinfo.tx_power5;
+          postData.APName = this.formSetinfo.apname;
+
+          postVar.APMACLIST = [];
+          postVar.APIPLIST = [];
+          postVar.NETLIST = [];
+          var selectData = this.selectData;
+          for(var i=0; i<selectData.length; i++)
+          {
+            postVar.APMACLIST.push(selectData[i].apMac);
+            postVar.APIPLIST.push(selectData[i].ipaddr);
+            postVar.NETLIST.push(selectData[i].sameNetwork);
+          }
+
+          postVar.Action = "QuickSetting";
+          postVar.postData = postData;
+
+          this.$refs.formSetinfo.validate(function(valid){
+            if (valid) {
+              uiPost.QuickSetting(postVar,function(data){
+                // _this.$Modal.remove();
+                // location.href = location.href;
+                _this.$Message.success(_this.$t('central.set_success'));
+                _this.setinfo = false;
+              });
+            }
+          });
+        },
+        letctlClick: function(){
+          var temp = this.selectData;
+          if (temp.length <= 0) {
+            this.$Message.error(this.$t('central.msg1'));
+            return false;
+          }
+          this.letctl = true;
+        },
+        letctlOk: function(index){
+          var _this = this;
+          if (this.letctlAuthpwd == '') {
+            this.$Message.error(this.$t('central.msg2'));
+            return false;
+          }
+
+          var postVar ={"topicurl":"setting/QuickSetting"};
+          postVar.AuthPassword = this.letctlAuthpwd;
+          postVar.Ledstate = index + '';
+          postVar.Action = 'setledState';
+
+          postVar.APMACLIST = [];
+          postVar.APIPLIST = [];
+          var selectData = this.selectData;
+          for(var i=0; i<selectData.length; i++)
+          {
+            postVar.APMACLIST.push(selectData[i].apMac);
+            postVar.APIPLIST.push(selectData[i].ipaddr);
+          }
+
+          uiPost.QuickSetting(postVar,function(){
+            // location.href = location.href;
+            _this.$Message.success(_this.$t('central.set_success'));
+            _this.letctl = false;
+          });
+        },
+        rebootClick: function(){
+          var temp = this.selectData;
+          if (temp.length <= 0) {
+            this.$Message.error(this.$t('central.msg1'));
+            return false;
+          }
+          this.reboot = true;
+        },
+        rebootOk: function(index){
+          var _this = this;
+          if (this.letctlAuthpwd == '') {
+            this.$Message.error(this.$t('central.msg2'));
+            return false;
+          }
+
+          var postVar ={"topicurl":"setting/QuickSetting"};
+          postVar.AuthPassword = this.letctlAuthpwd;
+          postVar.Action = 'RebootSystem';
+
+          postVar.APMACLIST = [];
+          postVar.APIPLIST = [];
+          var selectData = this.selectData;
+          for(var i=0; i<selectData.length; i++)
+          {
+            postVar.APMACLIST.push(selectData[i].apMac);
+            postVar.APIPLIST.push(selectData[i].ipaddr);
+          }
+
+          uiPost.QuickSetting(postVar,function(){
+            // location.href = location.href;
+            _this.$Message.success(_this.$t('central.set_success'));
+            _this.reboot = false;
+          });
+        },
+        timingRebootClick: function(){
+          var temp = this.selectData;
+          if (temp.length <= 0) {
+            this.$Message.error(this.$t('central.msg1'));
+            return false;
+          }
+          this.timingReboot = true;
+        },
+        timingRebootOk: function(){
+          var _this = this;
+          if (this.letctlAuthpwd == '') {
+            this.$Message.error(this.$t('central.msg2'));
+            return false;
+          }
+          if (this.timingRebootSelect == '-1') {
+            this.$Message.error(this.$t('central.msg3'));
+            return false;
+          }
+
+          var postVar ={"topicurl":"setting/QuickSetting"};
+          var postData = {"Action" : "QuickSetting"};
+          postData.AuthPassword = this.letctlAuthpwd;
+          postData.SchdReboot = this.timingRebootSelect;
+
+
+          postVar.Action = 'QuickSetting';
+          
+          postVar.APMACLIST = [];
+          postVar.APIPLIST = [];
+          postVar.NETLIST = [];
+          var selectData = this.selectData;
+          for(var i=0; i<selectData.length; i++)
+          {
+            postVar.APMACLIST.push(selectData[i].apMac);
+            postVar.APIPLIST.push(selectData[i].ipaddr);
+            postVar.NETLIST.push(selectData[i].sameNetwork);
+          }
+
+          postVar.postData = postData;
+
+          uiPost.QuickSetting(postVar,function(){
+            // location.href = location.href;
+            _this.$Message.success(_this.$t('central.set_success'));
+            _this.timingReboot = false;
+          });
+        },
+        restoreClick: function(){
+          var temp = this.selectData;
+          if (temp.length <= 0) {
+            this.$Message.error(this.$t('central.msg1'));
+            return false;
+          }
+          this.restore = true;
+        },
+        restoreOk: function(){
+          var _this = this;
+          if (this.letctlAuthpwd == '') {
+            this.$Message.error(this.$t('central.msg2'));
+            return false;
+          }
+
+          var postVar ={"topicurl":"setting/QuickSetting"};
+          postVar.AuthPassword = this.letctlAuthpwd;
+          postVar.Action = 'LoadDefSettings';
+
+          postVar.APMACLIST = [];
+          postVar.APIPLIST = [];
+          var selectData = this.selectData;
+          for(var i=0; i<selectData.length; i++)
+          {
+            postVar.APMACLIST.push(selectData[i].apMac);
+            postVar.APIPLIST.push(selectData[i].ipaddr);
+          }
+
+          uiPost.QuickSetting(postVar,function(){
+            // location.href = location.href;
+            _this.$Message.success(_this.$t('central.set_success'));
+            _this.restore = false;
+          });
+        },
+        uploadClick: function(){
+          this.uploads = true;
+        },
+        firmwareClick: function(){
+          var temp = this.selectData;
+          if (temp.length <= 0) {
+            this.$Message.error(this.$t('central.msg1'));
+            return false;
+          }
+          this.firmware = true;
+        },
+        firmwareOk: function(){
+          if (this.letctlAuthpwd == '') {
+            this.$Message.error(this.$t('central.msg2'));
+            return false;
+          }
+
+          var postVar ={"topicurl":"setting/QuickSetting"};
+          postVar.AuthPassword = this.letctlAuthpwd;
+          postVar.Action = 'RemoteUpgradeFW';
+          postVar.Port = '80';
+          postVar.ProxyEnabled = '0';
+
+          postVar.APMACLIST = [];
+          postVar.APIPLIST = [];
+          postVar.URLLIST = [];
+          postVar.MD5LIST = [];
+          var selectData = this.selectData;
+          for(var i=0; i<selectData.length; i++)
+          {
+            postVar.APMACLIST.push(selectData[i].apMac);
+            postVar.APIPLIST.push(selectData[i].ipaddr);
+            postVar.URLLIST.push(selectData[i].fwUrl);
+            postVar.MD5LIST.push(selectData[i].fwMd5);
+          }
+
+          uiPost.QuickSetting(postVar,function(){
+            // location.href = location.href;
+            this.firmware = false;
+          });
+        },
+        handleUpload: function(file) {
+          this.upload.file = file;
+        },
+        exceededSize: function() {
+          this.$Message.error({content:this.$t('config.msg3'),duration: 5});
+        },
+        formatError: function() {
+          this.$Message.error({content:this.$t('config.msg2',[this.upload.format.join('、')]),duration: 5});
+        },
+        uploadSuccess:function(){
+          
+        }
+    }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

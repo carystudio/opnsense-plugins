@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.firewall'),$t('menu.macf')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Col>
+                <Alert>
+                    {{ $t('macf.help') }}
+                </Alert>
+            </Col>
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('macf.title')">
+                    <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">
+                        <span slot="open">{{ $t('common.enabled') }}</span>
+                        <span slot="close">{{ $t('common.disabled') }}</span>
+                    </i-switch>
+                </FormItem>
+                <Col v-show="formValidate.status" >
+                {{ $t('macf.add_rule') }}
+                <hr>
+                <br>
+                <FormItem :label="$t('macf.mac')" prop="mac">
+                    <Row>
+                        <Col span="19"><Input v-model="formValidate.mac" ></Input></Col>
+                        <Col span="4" offset="1"><Button long @click="showClientList">{{ $t('macf.scan') }}</Button></Col>
+                    </Row>
+                </FormItem>
+                <FormItem :label="$t('macf.comment')" prop="comment">
+                    <Input v-model="formValidate.comment" ></Input>
+                </FormItem>
+                <!-- btn -->
+                <FormItem>
+                      <Button type="primary" :loading="addMacfLoading" @click="handleSubmit('formValidate')">{{ $t('macf.add') }}</Button>
+                </FormItem>
+                </Col>
+            </Form>
+            </Card>
+            <br>
+        </Col>
+        </row>
+        <Row  v-show="formValidate.status" >
+            <Col class="cs-btn-del">
+                <Button size="small" @click="tableSelect(true)" type="error">{{ $t('macf.delete') }}</Button>
+            </Col>
+            <Col>
+            <Table border ref="tableSelect" :columns="macfColumns" :data="macfData"></Table>
+            </Col>
+        </Row>
+    </div>
+    <Modal
+        v-model="showModel"
+        :title="$t('macf.modal_title')"
+        @on-ok="ok"
+        @on-cancel="cancel">
+        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable">
+            <div slot="footer" style="display: none;"></div>
+        </Table>
+    </Modal>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    return {
+      globalConfig:globalConfig,
+      arpLoading:true,
+      addMacfLoading:false,
+      formValidate: {
+          status:false,
+          mac:'',
+          comment:''
+      },
+      mac:'',
+      showModel:false,
+        showModel:false,
+        arpColumns: [
+            {
+                title: '#',
+                key: 'idx',
+                sortable:true
+            },
+            {
+                title: 'IP',
+                key: 'ip',
+                sortable:true
+            },
+            {
+                title: 'MAC',
+                key: 'mac',
+                sortable:true
+            }
+        ],
+        arpData: [],
+        macfData: []
+    }
+  },
+  computed:{
+    ruleValidate: function(){
+      var _this = this;
+      return{
+          mac: [
+            { validator:function(r, v, f) {
+              var _s = cs.mac(v);
+              if(_s == 0) {
+                f(_this.$t('macf.mac')+_this.$t('macf.msg1'));
+              }else if(_s == 1) {
+                f(_this.$t('macf.mac')+_this.$t('macf.msg2'));
+              }else if(_s == 2) {
+                f(_this.$t('macf.mac')+_this.$t('macf.msg3'));
+              }else if(_s == 3) {
+                f(_this.$t('macf.mac')+_this.$t('macf.msg4'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          comment: [
+            { validator:function(r, v, f) {
+              var _s = cs.string(v);
+              if(_s == 1) {
+                f(_this.$t('macf.msg5'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ]
+      }
+    },
+    macfColumns: function() {
+        var _this = this;
+        return [{
+            type: 'selection',
+            key: 'idx',
+            width: '100',
+            sortable: true
+        }, {
+            title: 'ID',
+            key: 'idx',
+            sortable: true
+        }, {
+            title: this.$t('macf.mac'),
+            key: 'mac',
+            sortable: true
+        }, {
+            title: this.$t('macf.comment'),
+            key: 'comment',
+            sortable: true
+        }, {
+            title: this.$t('macf.select'),
+            key: 'idx',
+            align: 'center',
+            render: function(h, params) {
+                return h('Poptip',{
+                    props: {
+                        confirm: true,
+                        title: _this.$t('macf.msg9'),
+                        "ok-text":_this.$t('common.ok'),
+                        "cancel-text":_this.$t('common.cancel')
+                    },
+                    on: {
+                        "on-ok": function(){
+                            _this.deleteData(params);
+                        }
+                    }
+                }, [
+                    h('Button', {
+                        props: {
+                            type: 'error',
+                            size: 'small'
+                        },
+                    }, _this.$t('macf.delete'))
+                ]);
+            }
+        }];
+        }
+    },
+  created:function() {
+    var _this = this;
+    uiPost.getMacFilterRules(function(data){
+        _this.formValidate.status = data[0].enable == 1 ?true :false; 
+        var rule_num = data.length;
+        if(rule_num >= 2){
+            _this.macfData = data.slice(1);
+        }      
+    })
+  },
+  methods:{
+    handleSubmit: function(name) {
+        var _this = this;
+        _this.addMacfLoading = true;
+        _this.$refs[name].validate(function(valid){
+            if (valid) {
+                if (_this.macfData.length) {
+                    for(var i=0; i<_this.macfData.length; i++) {
+                        if(_this.formValidate.mac.toUpperCase() == _this.macfData[i].mac.toUpperCase()) {
+                            _this.$Message.error(_this.$t('macf.msg6'));
+                            return false;
+                        }
+                    }
+                }
+                var postVar = {};
+                postVar.macAddress = _this.formValidate.mac;
+                postVar.comment = _this.formValidate.comment;
+                postVar.addEffect = "0";
+                uiPost.setMacFilterRules(postVar,function(data){
+                    location.href = location.href;
+                    _this.addMacfLoading = false;
+                });
+            }else{
+                _this.addMacfLoading = false;
+            }
+        })
+    },
+    submitStatus:function(){
+        var postVar = {};
+        if(true == this.formValidate.status){
+            postVar.enable = "1";
+        }else{
+            postVar.enable = "0";
+        }
+        postVar.addEffect = "1";
+        uiPost.setMacFilterRules(postVar);
+    },
+    showClientList:function(){
+      var _this = this;
+      _this.showModel = true;
+      uiPost.getArpTable(function(data){
+          _this.arpData = data.slice(1);
+          _this.arpLoading = false;
+      });
+    },
+    ok:function () {
+        this.formValidate.mac = this.mac;
+    },
+    cancel:function () {
+    },
+    selectTable:function (obj) {
+        this.mac = obj.mac;
+    },
+    deleteData:function (obj) {
+        var _this = this;
+        var postVar = {};
+        postVar[obj.row.delRuleName] = obj.index;
+        uiPost.delMacFilterRules(postVar,function(){
+            _this.macfData.splice(obj.index, 1);
+        });
+    },
+    tableSelect:function(status){
+        var _this = this;
+        if (status) {
+            var getSelection = this.$refs.tableSelect.getSelection();
+            if (getSelection.length>0) {
+                var postVar = {};
+                for(var i=0; i<getSelection.length; i++)
+                {
+                    postVar[getSelection[i].delRuleName] = i;
+                }
+                uiPost.delMacFilterRules(postVar,function(){
+                    _this.$Message.success({content:_this.$t('macf.msg10'),onClose:function(){
+                        location.href = location.href;
+                    }});
+                    
+                });
+            }else{
+                this.$Message.error(this.$t('macf.msg8'));
+            }
+        }else{
+            this.$refs.tableSelect.selectAll(status);
+        }
+    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

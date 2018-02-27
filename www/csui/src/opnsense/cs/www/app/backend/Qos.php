@@ -123,7 +123,30 @@ class Qos extends Csbackend
     private static function initQos(){
         global $config;
 
-        $config['OPNsense']['TrafficShaper']['pipes']['pipe'] = array();
+        if(!is_array($config['OPNsense'])){
+            $config['OPNsense']=array();
+        }
+        if(!is_array($config['OPNsense']['TrafficShaper'])){
+            $config['OPNsense']['TrafficShaper'] = array();
+        }
+        if(!is_array($config['OPNsense']['TrafficShaper']['pipes'])){
+            $config['OPNsense']['TrafficShaper']['pipes'] = array();
+        }
+        if(!is_array($config['OPNsense']['TrafficShaper']['pipes']['pipe'])){
+            $config['OPNsense']['TrafficShaper']['pipes']['pipe'] = array();
+        }
+        if(!is_array($config['OPNsense']['TrafficShaper']['queues'])){
+            $config['OPNsense']['TrafficShaper']['queues'] = array();
+        }
+        if(!is_array($config['OPNsense']['TrafficShaper']['queues']['queue'])){
+            $config['OPNsense']['TrafficShaper']['queues']['queue'] = array();
+        }
+        if(!is_array($config['OPNsense']['TrafficShaper']['rules'])){
+            $config['OPNsense']['TrafficShaper']['rules'] = array();
+        }
+        if(!is_array($config['OPNsense']['TrafficShaper']['rules']['rule'])){
+            $config['OPNsense']['TrafficShaper']['rules']['rule'] = array();
+        }
         $pipe = array();
         $pipe['@attributes'] = Array('uuid' => '67973a6f-739a-415b-b0c3-48f52b078896');
         $pipe['number'] = '10000';

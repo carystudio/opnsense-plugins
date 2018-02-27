@@ -1,0 +1,33 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "recurseDepth": 10,
+    "source": {
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "templates": {
+        "cleverLinks"     : false,  
+        "monospaceLinks"  : false,  
+        "default"         : {  
+            "outputSourceFiles" : true  
+        },  
+        "systemName"      : "Carystudio UI",  
+        "copyright"       : "Carystudio UI Copyright © 2017",  
+        "navType"         : "vertical",  
+        "theme"           : "cerulean",  
+        "linenums"        : true,  
+        "collapseSymbols" : false,  
+        "search"          : false,  
+        "inverseNav"      : false  
+    },
+    "opts": {
+        "template": "./node_modules/ink-docstrap/template", 
+        "readme": "README.md",
+        "encoding": "utf8",
+        "destination": "./doc/",
+        "tutorials" : "./tutorials",
+        "recurse": true
+    }
+}

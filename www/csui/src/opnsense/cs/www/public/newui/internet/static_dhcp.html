@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.internet'),$t('menu.static_dhcp')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    <!-- <h3>设置</h3> -->
+                    {{ $t('static_dhcp.help') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <!--<FormItem :label="$t('static_dhcp.state')">-->
+                    <!--<i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">-->
+                    <!--<span slot="open">{{ $t('common.enabled') }}</span>-->
+                    <!--<span slot="close">{{ $t('common.disabled') }}</span>-->
+                    <!--</i-switch>-->
+                    <!--</FormItem>-->
+                    <!-- <br>-->
+                    <Col>
+                    <!--{{ $t('static_dhcp.add_rule') }}
+                    <hr>-->
+                    <br>
+                    <FormItem :label="$t('static_dhcp.ip')" prop="staticIp">
+                        <Input v-model="formValidate.staticIp" ></Input>
+                    </FormItem>
+                    <FormItem :label="$t('static_dhcp.mac')" prop="staticMac">
+                        <Row>
+                            <Col span="19"><Input v-model="formValidate.staticMac" ></Input></Col>
+                            <Col span="4" offset="1"><Button long @click="showClientList">{{ $t('static_dhcp.scan') }}</Button></Col>
+                        </Row>
+                    </FormItem>
+                    <FormItem :label="$t('static_dhcp.description')">
+                        <Input v-model="formValidate.description" ></Input>
+                    </FormItem>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('static_dhcp.add') }}</Button>
+                    </FormItem>
+                    </Col>
+                </Form>
+            </Card>
+            <br>
+            </Col>
+        </row>
+        <Row>
+            <Col class="cs-btn-del">
+            <Button size="small" @click="tableSelect(true)" type="error">{{ $t('static_dhcp.delete') }}</Button>
+            </Col>
+            <Col>
+            <Table border ref="tableSelect" :columns="staticDhcpColumns" :data="staticDhcpData"></Table>
+            </Col>
+        </Row>
+    </div>
+    <Modal
+            v-model="showModel"
+            :title="$t('static_dhcp.modal_title')"
+            @on-ok="ok"
+            @on-cancel="cancel">
+        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable"></Table>
+    </Modal>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            return {
+                globalConfig:globalConfig,
+                arpLoading:true,
+//                ruleData:{},
+                formValidate: {
+                    staticIp:'',
+                    staticMac:'',
+                    description:''
+                },
+                lanIp: '',
+                lanNetmask: '',
+                showModel:false,
+                arpColumns: [
+                    {
+                        title: '#',
+                        key: 'idx',
+                        sortable:true
+                    },
+                    {
+                        title: 'IP',
+                        key: 'ip',
+                        sortable:true
+                    },
+                    {
+                        title: 'MAC',
+                        key: 'mac',
+                        sortable:true
+                    }
+                ],
+                arpData: [],
+                staticDhcpData: []
+            }
+        },
+        computed:{
+            ruleValidate:function(){
+                var _this = this;
+                return {
+                    staticIp: [
+                        { validator:function(r, v, f) {
+                            var ret = cs.ip(v);
+                            if (ret == 0 || ret == 1 || ret == 2 || ret == 3 || ret == 4) {
+                                f(_this.$t('static_dhcp.msg1'));
+                            }
+                            if(v == _this.lanIp){
+                                f(_this.$t('static_dhcp.msg2'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    staticMac: [
+                        { validator:function(r, v, f) {
+                            var ret = cs.mac(v);
+                            if(ret == 0 || ret == 1){
+                                f(_this.$t('static_dhcp.msg3'));
+                            }else if (ret == 2) {
+                                f(_this.$t('static_dhcp.msg4'));
+                            }else if (ret == 3) {
+                                f(_this.$t('static_dhcp.msg5'));
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ]
+                }
+            },
+            staticDhcpColumns: function() {
+                var _this = this;
+                return [{
+                    type: 'selection',
+                    key: 'Mac',
+                    width:'100',
+                    sortable: true
+                }, {
+                    title: 'ID',
+                    key: 'idx',
+                    sortable: true
+                }, {
+                    title: this.$t('static_dhcp.ip'),
+                    key: 'Ip',
+                    sortable: true
+                }, {
+                    title: this.$t('static_dhcp.mac'),
+                    key: 'Mac',
+                    sortable: true
+                },{
+                    title: this.$t('static_dhcp.description'),
+                    key: 'Descr',
+                    sortable: true
+                }, {
+                    title: this.$t('static_dhcp.operation'),
+                    key: 'idx',
+                    align: 'center',
+                    render: function(h, params) {
+                        return h('Poptip',{
+                            props: {
+                                confirm: true,
+                                title: _this.$t('static_dhcp.msg9'),
+                                "ok-text":_this.$t('common.ok'),
+                                "cancel-text":_this.$t('common.cancel')
+                            },
+                            on: {
+                                "on-ok": function(){
+                                    _this.deleteData(params);
+                                }
+                            }
+                        }, [
+                            h('Button', {
+                                props: {
+                                    type: 'error',
+                                    size: 'small'
+                                }
+                            }, _this.$t('static_dhcp.delete'))
+                        ]);
+                    }
+                }];
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postData = {"action":"getStaticDhcp", "data":{}};
+            uiPost.getStaticDhcp(postData,function(data) {
+                console.log(data);
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    _this.staticDhcpData = data.data;
+                    for(var i in _this.staticDhcpData){
+                        _this.staticDhcpData[i].idx = ''+( Number(i) + 1 );
+                        console.log(_this.staticDhcpData);
+                    }
+                }
+            });
+        },
+        methods:{
+            handleSubmit: function(name) {
+                var _this = this;
+                this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        console.log(_this.staticDhcpData);
+                        if (_this.staticDhcpData.length) {
+                            for(var i=0; i<_this.staticDhcpData.length; i++) {
+                                if(
+                                        _this.formValidate.staticMac.toUpperCase() == _this.staticDhcpData[i].Mac.toUpperCase() ||
+                                        _this.formValidate.staticIp == _this.staticDhcpData[i].Ip
+                                ) {
+                                    _this.$Message.error(_this.$t('static_dhcp.msg6'));
+                                    return false;
+                                }
+                            }
+                        }
+                        var data = {};
+                        data.Ip = _this.formValidate.staticIp;
+                        data.Mac = _this.formValidate.staticMac;
+                        data.Descr = _this.formValidate.description;
+                        var postData = {"action":"addStaticDhcp", "data":data};
+                        uiPost.addStaticDhcp(postData,function(data){
+                            location.href = location.href;
+                        });
+                    }
+                })
+            },
+            /*handleReset: function(name) {
+             this.$refs[name].resetFields();
+             },*/
+            showClientList:function () {
+                var _this = this;
+                this.showModel = true;
+                var postData = {"action":"getArpInfo", "data":{}};
+                uiPost.getArpInfo(postData,function(data) {
+                    _this.arpData = data.data;
+                    for(var i in _this.arpData){
+                        _this.arpData[i].idx = ''+( Number(i) + 1 );
+                    }
+                    console.log( _this.arpData);
+
+
+                    _this.arpLoading = false;
+                });
+            },
+            ok:function () {
+            },
+            cancel:function () {
+            },
+            selectTable:function (obj) {
+                this.formValidate.staticIp = obj.ip;
+                this.formValidate.staticMac = obj.mac;
+            },
+            submitStatus:function(){
+                var postVar = {};
+                if(true == this.formValidate.status){
+                    postVar.enable = "1";
+                }else{
+                    postVar.enable = "0";
+                }
+                postVar.addEffect = "1";
+            },
+            deleteData:function (obj) {
+                var _this = this;
+                var macData = [];
+                macData[0] = obj.row.Mac;
+                var postData = {"action":"delStaticDhcp","data":{"Mac":macData}};
+                console.log(postData);
+                /*删除单个*/
+                uiPost.delStaticDhcp(postData,function(){
+                    _this.staticDhcpData.splice(obj.index, 1);
+                });
+            },
+            tableSelect:function(status){
+                var _this = this;
+                if (status) {
+                    var getSelection = this.$refs.tableSelect.getSelection();
+                    if (getSelection.length>0) {
+                        var macData = [];
+                        for(var i=0; i<getSelection.length; i++)
+                        {
+                            macData[i] = getSelection[i].Mac;
+                        }
+                        console.log(macData);
+
+                        var postData = {"action":"delStaticDhcp","data":{"Mac":macData}};
+                        /*全选删除*/
+                        uiPost.delStaticDhcp(postData,function(){
+                            _this.$Message.success({content:_this.$t('static_dhcp.msg11'),onClose:function(){
+                                location.href = location.href;
+                            }});
+                        });
+                    }else{
+                        this.$Message.error(this.$t('static_dhcp.msg8'));
+                    }
+                }else{
+                    this.$refs.tableSelect.selectAll(status);
+                }
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

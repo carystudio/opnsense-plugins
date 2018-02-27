@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.firewall'),$t('menu.qos')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" >
+            <Card>
+                <Alert>
+                    <!-- <h3>设置</h3> -->
+                    {{ $t('qos.help') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('qos.state')">
+                        <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">
+                            <span slot="open">{{ $t('common.enabled') }}</span>
+                            <span slot="close">{{ $t('common.disabled') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <div v-show="formValidate.status">
+                        <FormItem :label="$t('qos.limitType')">
+                            <RadioGroup v-model="formValidate.limitType" type="button">
+                                <Radio label="1">{{ $t('qos.intelligent') }}</Radio>
+                                <Radio label="2">{{ $t('qos.custom') }}</Radio>
+                            </RadioGroup>
+                        </FormItem>
+                        <div v-show="formValidate.limitType == '1'">
+                            <FormItem :label="$t('qos.totalUplinkSpeed')" prop="totalUplinkSpeed">
+                                <Input v-model="formValidate.totalUplinkSpeed" :maxlength="6">
+                                <span slot="append"> (KBytes) </span>
+                                </Input>
+                                (100-125000KBytes)
+                            </FormItem>
+                            <FormItem :label="$t('qos.totalDownlinkSpeed')" prop="totalDownlinkSpeed">
+                                <Input v-model="formValidate.totalDownlinkSpeed" :maxlength="6">
+                                <span slot="append"> (KBytes) </span>
+                                </Input>
+                                (100-125000KBytes)
+                            </FormItem>
+                        </div>
+                        <div v-show="formValidate.limitType == '2'">
+                            <FormItem :label="$t('qos.singleUplinkSpeed')" prop="singleUplinkSpeed">
+                                <Input v-model="formValidate.singleUplinkSpeed" :maxlength="6">
+                                <span slot="append"> (KBytes) </span>
+                                </Input>
+                                (100-125000KBytes)
+                            </FormItem>
+                            <FormItem :label="$t('qos.singleDownlinkSpeed')" prop="singleDownlinkSpeed">
+                                <Input v-model="formValidate.singleDownlinkSpeed" :maxlength="6">
+                                <span slot="append"> (KBytes) </span>
+                                </Input>
+                                (100-125000KBytes)
+                            </FormItem>
+                        </div>
+                        <!-- btn -->
+                        <FormItem>
+                            <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('qos.apply') }}</Button>
+                        </FormItem>
+                    </div>
+                </Form>
+            </Card>
+            <br>
+            </Col>
+        </row>
+
+    </div>
+
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            return {
+                globalConfig:globalConfig,
+                arpLoading:true,
+                isLoading:true,
+
+                submitFlag:false,
+                formValidate: {
+                    status:false,
+                    limitType:'1',
+                    totalUplinkSpeed:'',
+                    totalDownlinkSpeed:'',
+                    singleUplinkSpeed:'',
+                    singleDownlinkSpeed:''
+                },
+                lanIp:'',
+                lanNetmask:'',
+                arpData: [],
+                qosLists: []
+            }
+        },
+        computed:{
+            ruleValidate: function(){
+                var _this = this;
+                if(true == _this.submitFlag){
+                    _this.submitFlag = false;
+                    if('1' == _this.formValidate.limitType){
+                        return{
+                            totalUplinkSpeed:[
+                                { validator:function(r, v, f) {
+                                    var ret = cs.num_range(v,100,125000);
+                                    if (0 == ret) {
+                                        f(_this.$t('qos.msg1'));
+                                    } else if (1 == ret) {
+                                        f(_this.$t('qos.msg3'));
+                                    } else if (2 == ret) {
+                                        f(_this.$t('qos.msg5')+'(100-125000)');
+                                    }else{
+                                        f();
+                                    }
+                                },trigger: 'blur' }
+                            ],
+                            totalDownlinkSpeed:[
+                                { validator:function(r, v, f) {
+                                    var ret = cs.num_range(v,100,125000);
+                                    if (0 == ret) {
+                                        f(_this.$t('qos.msg2'));
+                                    } else if (1 == ret) {
+                                        f(_this.$t('qos.msg4'));
+                                    } else if (2 == ret) {
+                                        f(_this.$t('qos.msg6')+'(100-125000)');
+                                    }else{
+                                        f();
+                                    }
+                                },trigger: 'blur' }
+                            ]
+                        }
+                    }else{
+                        return{
+                            singleUplinkSpeed:[
+                                { validator:function(r, v, f) {
+                                    var ret = cs.num_range(v,100,125000);
+                                    if (0 == ret) {
+                                        f(_this.$t('qos.msg28'));
+                                    } else if (1 == ret) {
+                                        f(_this.$t('qos.msg30'));
+                                    } else if (2 == ret) {
+                                        f(_this.$t('qos.msg32')+'(100-125000)');
+                                    }else{
+                                        f();
+                                    }
+                                },trigger: 'blur' }
+                            ],
+                            singleDownlinkSpeed:[
+                                { validator:function(r, v, f) {
+                                    var ret = cs.num_range(v,100,125000);
+                                    if (0 == ret) {
+                                        f(_this.$t('qos.msg29'));
+                                    } else if (1 == ret) {
+                                        f(_this.$t('qos.msg31'));
+                                    } else if (2 == ret) {
+                                        f(_this.$t('qos.msg33')+'(100-125000)');
+                                    }else{
+                                        f();
+                                    }
+                                },trigger: 'blur' }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postData = {"action":"getQosStatus","data":{}};
+            uiPost.getQosStatus(postData,function(data){
+                console.log(data);
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    if('0' == data.data.Type){
+                        _this.formValidate.status = false;
+                    }else{
+                        _this.formValidate.status = true;
+                        _this.formValidate.limitType = data.data.Type;
+                        if('1' == data.data.Type){
+                            _this.formValidate.totalUplinkSpeed = data.data.Up;
+                            _this.formValidate.totalDownlinkSpeed = data.data.Down;
+                        }else{
+                            _this.formValidate.singleUplinkSpeed = data.data.Up;
+                            _this.formValidate.singleDownlinkSpeed = data.data.Down;
+                        }
+                    }
+                }
+            });
+        },
+        methods: {
+            init:function(){
+                var _this = this;
+                _this.isLoading = true;
+                uiPost.getIpQosRules(function(data){
+                    var rule_num = data.length;
+                    _this.isLoading = false;
+                    if (rule_num >= 2){
+                        _this.qosLists = data.slice(1);
+                    }
+                })
+            },
+            submitStatus:function(){
+                if(false == this.formValidate.status){
+                    var postData = {"action":"setQos","data":{"Type":"0"}};
+                    console.log(postData);
+                    uiPost.setQos(postData);
+                }
+            },
+            handleSubmit: function (name) {
+                var _this = this;
+                _this.submitFlag = true;
+                this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        var data = {};
+                        if('1' == _this.formValidate.limitType){
+                            data.Type = '1';
+                            data.Up = _this.formValidate.totalUplinkSpeed;
+                            data.Down = _this.formValidate.totalDownlinkSpeed;
+                        }else{
+                            data.Type = '2';
+                            data.Up = _this.formValidate.singleUplinkSpeed;
+                            data.Down = _this.formValidate.singleDownlinkSpeed;
+                        }
+
+                        var upRet = cs.num_range(data.Up,100,125000);
+                        var downRet = cs.num_range(data.Down,100,125000);
+                        if(0 == upRet || 1 == upRet || 2 == upRet || 0 == downRet || 1 == downRet || 2 == downRet){
+                            return false;
+                        }
+                        var postData = {"action":"setQos","data":{"Type":data}};
+                        console.log(postData);
+                        uiPost.setQos(postData,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:'Success!',onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            } else {
+                                _this.$Message.success('Fail! '+ data.rescode);
+                            }
+                        });
+                    }
+                })
+            },
+            showClientList:function () {
+                var _this = this;
+                this.showModel = true;
+                uiPost.getArpTable(function(data) {
+                    _this.arpData = data.slice(1);
+                    _this.arpLoading = false;
+                });
+            },
+            ok:function () {
+            },
+            cancel:function () {
+            },
+            selectTable:function (obj) {
+                this.formValidate2.ipStart = obj.ip;
+                this.formValidate2.ipEnd = obj.ip;
+            },
+            deleteData:function (obj) {
+                var _this = this;
+                var postVar = {};
+                postVar[obj.row.delRuleName] = obj.index;
+                uiPost.delIpQosRules(postVar,function(){
+                    _this.qosLists.splice(obj.index, 1);
+                });
+            },
+            tableSelect:function(status){
+                var _this = this;
+                if (status) {
+                    var getSelection = this.$refs.tableSelect.getSelection();
+                    if (getSelection.length>0) {
+                        var postVar = {};
+                        for(var i=0; i<getSelection.length; i++)
+                        {
+                            postVar[getSelection[i].delRuleName] = i;
+                        }
+                        uiPost.delIpQosRules(postVar,function(){
+                            _this.$Message.success({content:_this.$t('qos.msg27'),onClose:function(){
+                                location.href = location.href;
+                            }});
+                        });
+                    }else{
+                        this.$Message.error(this.$t('qos.msg25'));
+                    }
+                }else{
+                    this.$refs.tableSelect.selectAll(status);
+                }
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+	"loginIp":		"192.168.0.1",
+	"loginUser":	"admin",
+	"loginPass":	"admin",
+	"loginFlag":	0
+}

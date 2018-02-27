@@ -1,0 +1,11 @@
+{
+  "wscConfigured":	"1",
+  "wscSsid":	"TOTOLINK_A3000RU_5G8888",
+  "wscAuthMode":	"WPA2-PSK",
+  "wscEncrypType":	"AES",
+  "wscKeyIdx":	"1",
+  "wscKey":	"",
+  "wscStatus":	"Start WSC Process",
+  "wscResult":	"0",
+  "wscStatusIdx":	"0"
+}

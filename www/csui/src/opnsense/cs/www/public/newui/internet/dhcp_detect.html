@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>    
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+	<link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<!-- main template -->
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.internet'),$t('menu.dhcp_detect')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+        <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+             <Alert>
+              <!-- <h3>设置</h3> -->
+              {{ $t('dhcp_detect.help') }}
+             </Alert>
+            <Form ref="formValidate" :model="formValidate"  :label-width="globalConfig.labelWith" label-position="left">
+                <br>
+				<Row>
+					<Col>
+					<Table border :columns="columns" :data="dhcpdata"></Table>
+					</Col>
+				</Row>
+				<br>
+				<FormItem>
+					<Button type="primary" @click="refresh()" :loading="applyLoading">{{ $t('dhcp_detect.refresh') }}</Button>
+				</FormItem>
+            </Form>
+            </Card>
+            <br>
+        </Col>
+        </row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<!-- /.main template -->
+
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+// 注册头文件
+var cs_main = {
+    template: '#main',
+    data:function() {
+		var _this = this;
+        return {
+            globalConfig:globalConfig,
+			arpLoading:true,
+			applyLoading:false,
+			formValidate: {
+
+			},
+			columns:[
+				{
+					title: this.$t('dhcp_detect.ip'),
+					key: 'ip'
+				},{
+					title: this.$t('dhcp_detect.mac'),
+					key: 'mac'
+				}
+			],
+			dhcpdata:[]
+		}
+	},
+    computed:{
+    },
+	created:function() {
+		var _this = this;
+		var i=0;
+		uiPost.getDhcpSliList(function(data){
+			_this.dhcpdata = data;
+		});
+	},
+    methods:{
+		refresh:function(){
+			var _this = this;
+			this.applyLoading = true;
+			uiPost.getDhcpSliList(function(data){
+				_this.dhcpdata = data;
+				_this.applyLoading = false;
+            });
+			
+		},
+    }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

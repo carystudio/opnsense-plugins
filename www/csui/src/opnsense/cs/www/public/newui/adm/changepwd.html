@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.adm'),$t('menu.changepwd')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    {{ $t('changepwd.help') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('changepwd.user')" v-if="false">
+                        <Input v-model="formValidate.user" :maxlength="32"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('changepwd.orig_pass')" prop="origPass">
+                        <Input v-model="formValidate.origPass" :maxlength="32"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('changepwd.new_pass')" prop="newPass">
+                        <Input v-model="formValidate.newPass" :maxlength="32"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('changepwd.confirm_pass')" prop="confirmPass">
+                        <Input v-model="formValidate.confirmPass" :maxlength="32"></Input>
+                    </FormItem>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('common.apply') }}</Button>
+                    </FormItem>
+                </Form>
+            </Card>
+            </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+                formValidate: {
+                    user: '',
+                    origPass:'',
+                    newPass:'',
+                    confirmPass:''
+                }
+            }
+        },
+        computed:{
+            ruleValidate: function(){
+                var _this = this;
+                return {
+                    origPass: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if(_s == 0) {
+                                f(_this.$t('changepwd.msg1'));
+                            }else if(_s == 1){
+                                f(_this.$t('changepwd.msg3'));
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    newPass: [
+                        { validator:function(r, v, f){
+                            var _s = cs.string(v);
+                            if(_s == 0){
+                                f(_this.$t('changepwd.msg4'));
+                            }else if(_s == 1){
+                                f(_this.$t('changepwd.msg5'));
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    confirmPass: [
+                        { validator:function(r, v, f){
+                            if(v != _this.formValidate.newPass){
+                                f(_this.$t('changepwd.msg6'));
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ]
+                }
+            }
+        },
+       /* created:function() {
+            var _this = this;
+            uiPost.getPasswordCfg(function(data) {
+                _this.formValidate.user = data.admuser;
+                _this.Password = data.admpass;
+            });
+        },*/
+        methods:{
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.applyLoading = true;
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        var data = {};
+                        data.NewPassword = _this.formValidate.newPass;
+                        data.OldPassword = _this.formValidate.origPass;
+                        var postVar ={"action":"changePassword","data":data};
+                        console.log(postVar);
+                        uiPost.changePassword(postVar,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success(_this.$t('changepwd.success'));
+                            } else {
+                                _this.$Message.error(_this.$t('changepwd.fail')+data.rescode);
+                            }
+                            /*var lan_ip = data.lan_ip;
+                            _this.$Message.success({content:'Success!',onClose:function(){
+                                _this.applyLoading = false;
+                            }});
+                            var percentTimer = setInterval(function(){
+                                clearInterval(percentTimer);
+                                location.href='http://'+lan_ip+'/login.html';
+                            },cs.getTimer(10));*/
+                        });
+                    } else {
+                        _this.applyLoading = false;
+                    }
+                })
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

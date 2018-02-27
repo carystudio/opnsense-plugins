@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.firewall'),$t('menu.firewall')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Col>
+                <Alert>
+                  {{ $t('firewall.help') }}
+                </Alert>
+            </Col>
+            <Form ref="formValidate" :model="formValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('firewall.title')">
+                    <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">
+                        <span slot="open">{{ $t('firewall.whitelist') }}</span>
+                        <span slot="close">{{ $t('firewall.blacklist') }}</span>
+                    </i-switch>
+                </FormItem>
+            </Form>
+            </Card>
+            <br>
+        </Col>
+        </row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      formValidate: {
+          status:false
+      }
+    }
+  },
+  created:function() {
+    var _this = this;
+    uiPost.getFirewallType(function(data) {
+      _this.formValidate.status = data.firewallType == 0 ?true :false;
+    });
+  },
+  computed:{
+  },
+  methods:{
+    submitStatus:function(){
+        var postVar = {};
+        if(true == this.formValidate.status){
+            postVar.firewallType = "0";
+        }else{
+            postVar.firewallType = "1";
+        }
+        uiPost.setFirewallType(postVar);
+    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

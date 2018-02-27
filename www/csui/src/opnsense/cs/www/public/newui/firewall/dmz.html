@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.firewall'),$t('menu.dmz')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Col>
+                <Alert>
+                  {{ $t('dmz.help') }}
+                </Alert>
+            </Col>
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('dmz.title')">
+                    <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus" >
+                        <span slot="open">{{ $t('common.enabled') }}</span>
+                        <span slot="close">{{ $t('common.disabled') }}</span>
+                    </i-switch>
+                </FormItem>
+                <Col v-show="formValidate.status" >
+                <FormItem :label="$t('dmz.ip')" prop="ip">
+                    <Input v-model="formValidate.ip" ></Input>
+                </FormItem>
+                <FormItem>
+                  <Checkbox v-model="checkLocalIp" @on-change="checkbox">{{ $t('dmz.local_ip')+this.stationIp }}</Checkbox>
+                </FormItem>
+                <!-- btn -->
+                <FormItem>
+                      <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('dmz.apply') }}</Button>
+                </FormItem>
+                </Col>
+            </Form>
+            </Card>
+            <br>
+        </Col>
+        </row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    return {
+      globalConfig:globalConfig,
+      checkLocalIp:false,
+      lanIp:'',
+      lanNetmask:'',
+      stationIP:'',
+      formValidate: {
+          status:false,
+          ip:''
+      }
+    }
+  },
+  computed:{
+      ruleValidate: function(){
+        var _this = this;
+        return{
+          ip: [
+            { required: true, message: this.$t('dmz.msg1',[this.$t('dmz.ip')]), trigger: 'blur' },
+            { validator:function(r, v, f) {
+              var _s = cs.ip(v);
+              if(_s != 99) {
+                f(_this.$t('ipf.ip')+_this.$t('ipf["msg'+(_s+1)+'"]'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ]
+        }
+      }
+  },
+  created:function() {
+    var _this = this;
+    uiPost.getDMZCfg(function(data) {
+        _this.formValidate.status = data.dmzEnabled == 1 ?true :false;
+        _this.formValidate.ip = data.dmzAddress;
+        _this.dmzAddress = data.dmzAddress;
+        _this.lanIp = data.lanIp;
+        _this.lanNetmask = data.lanNetmask;
+        _this.stationIp = data.stationIp;
+    });
+  },
+  methods:{
+    checkbox: function(){
+      if(this.checkLocalIp == true){
+        this.formValidate.ip = this.stationIp;
+      }else{
+        this.formValidate.ip = this.dmzAddress;
+      }
+    },
+    submitStatus:function(){
+      var postVar = {};
+      if(true == this.formValidate.status){
+          postVar.dmzEnabled = "1";
+      }else{
+          postVar.dmzEnabled = "0";
+      }
+      uiPost.setDMZCfg(postVar);
+    },
+    handleSubmit: function(name) {
+        var _this = this;
+        if(_this.formValidate.ip == _this.lanIp){
+            this.$Message.error(this.$t('dmz.msg7'));
+            return false;
+        }
+        if(0 == cs.ip_subnet(_this.formValidate.ip,_this.lanNetmask,_this.lanIp)){
+            _this.$Message.error(this.$t('dmz.msg6'));
+            return false;
+        }
+        _this.$refs[name].validate(function(valid){
+            if (valid) {
+                var postVar = {};
+                postVar.dmzEnabled = _this.formValidate.status?'1':'0';
+                postVar.dmzAddress = _this.formValidate.ip;
+                uiPost.setDMZCfg(postVar,function(data){
+                    location.href = location.href;
+                });
+            }
+        })
+    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

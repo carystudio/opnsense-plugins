@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>    
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+	<link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+
+<!-- main template -->
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+             <Alert>
+              <!-- <h3>设置</h3> -->
+              {{ $t('syslog.help') }}
+             </Alert>
+            <Form ref="formValidate" :model="formValidate"  :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('static_dhcp.state')">
+                    <i-switch v-model="formValidate.status" size="large" >
+                        <span slot="open">{{ $t('common.enabled') }}</span>
+                        <span slot="close">{{ $t('common.disabled') }}</span>
+                    </i-switch>
+                </FormItem>
+            </Form>
+            </Card>
+            <br>
+        </Col>
+        </row>
+		
+        <Row v-show="formValidate.status" >
+            <Col>
+                <Button @click="submittype(true)" type="error">{{ $t('syslog.clear') }}</Button>
+                <Button @click="submittype(false)" >{{ $t('syslog.refresh') }}</Button>
+            </Col>
+			
+        </Row>
+		<br>
+		<Row v-show="formValidate.status" >
+            <Col>
+                <textarea  cols="200" rows="10" v-model="formValidate.syslog" readonly></textarea>
+            </Col>
+        </Row>
+    </div>
+
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    <span style="display: none;">{{ submitStatus }}</span>
+</Col>
+</script>
+<!-- /.main template -->
+
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+// 注册头文件
+var cs_main = {
+    template: '#main',
+    data:function() {
+		var _this = this;
+        return {
+            globalConfig:globalConfig,
+			arpLoading:true,
+			formValidate: {
+				status:true,
+				syslog:''
+			}
+		}
+	},
+	created:function() {
+		var _this = this;
+		uiPost.getSyslogCfg(function(data){
+			_this.formValidate.status = data.enabled == 1 ? true : false;
+			if(_this.formValidate.status == true)
+			{
+				uiPost.showSyslog(function(data1){
+					_this.formValidate.syslog = data1.syslog;
+				});
+			}
+		});
+	},
+    computed:{
+		submitStatus:function(){
+			var postVar = {};
+			if(true == this.formValidate.status){
+				postVar.enabled = "1";
+			}else{
+				postVar.enabled = "0";
+			}
+			uiPost.setSyslogCfg(postVar);
+			return this.formValidate.status;
+		},
+    },
+    methods:{
+			submittype:function(status){
+			var _this = this;
+			if (status) {
+				uiPost.clearSyslog(function(data){
+					uiPost.showSyslog(function(data1){
+						_this.formValidate.syslog = data1.syslog;
+					});
+				});
+			}else{
+				uiPost.showSyslog(function(data){
+					_this.formValidate.syslog = data.syslog;
+				});
+			}
+		}
+    }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

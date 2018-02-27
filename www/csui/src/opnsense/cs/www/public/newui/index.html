@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+<!-- main start -->
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20">
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.index')]"></slot>
+    <div class="cs-content">
+        <Row>
+            <Col  :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" >
+                <Alert>
+                  {{ $t('index.help') }}
+                </Alert>
+            </Col>
+        </Row>
+        <Row :gutter="26">
+            <!-- content start -->
+            <Col  :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" >
+              <!--  <Card>
+                    <p slot="title"> 
+                        <Icon type="information-circled"></Icon>
+                        {{ $t('index.sys_info') }}
+                    </p>
+                    <Table stripe :show-header="false" :columns="systemColumns" :loading="loading1" :data="systemData"></Table>
+                </Card>
+                <br>-->
+            <!-- === -->
+            <div class="ivu-tabs ivu-tabs-card cs-tabs">
+                <div class="ivu-tabs-bar">
+                    <div class="ivu-tabs-nav-container">
+                        <div class="ivu-tabs-nav-wrap" style="position: relative;">
+                            <span class="ivu-tabs-nav-prev ivu-tabs-nav-scroll-disabled"><i class="ivu-icon ivu-icon-chevron-left"></i></span>  <span class="ivu-tabs-nav-next ivu-tabs-nav-scroll-disabled"><i class="ivu-icon ivu-icon-chevron-right"></i></span>
+                            <div class="ivu-tabs-nav-scroll">
+                                <div class="nav-text ivu-tabs-nav">
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':1==showCurrentTabs}" @click="tabsSwitch(1)">
+                                        {{ $t('index.sys_info') }}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':2==showCurrentTabs}" @click="tabsSwitch(2)">
+                                        {{ $t('index.wan_info') }}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':4==showCurrentTabs}" @click="tabsSwitch(4)">
+                                        {{ $t('index.lan_info') }}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':5==showCurrentTabs}" @click="tabsSwitch(5)">
+                                        {{ $t('index.statistics') }}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':3==showCurrentTabs}" @click="tabsSwitch(3)">
+                                        {{ $t('index.link_info') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ivu-tabs-content ivu-tabs-content-animated">
+                    <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 1">
+                        <Table stripe :show-header="false" :columns="systemColumns" :loading="loading1" :data="systemData"></Table>
+                    </div>
+
+                    <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 2">
+                        <Row>
+                            <RadioGroup v-model="wanTab" type="button">
+                                <Radio v-for="(item,idx) in interface" v-if="item.interface == 'WAN'" :label="idx">{{ $t('index.wan_info') }}{{idx}}</Radio>
+                            </RadioGroup>
+                        </Row>
+                        <br>
+                        <Row>
+                            <div v-for="(item,idx) in interface">
+                                <Table v-if="wanTab == idx" stripe :show-header="false" :columns="wanColumns[idx]" :loading="loading1" :data="wanData[idx]"></Table>
+                            </div>
+                        </Row>
+                    </div>
+                    <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 4">
+                        <Row>
+                        <RadioGroup v-model="lanTab" type="button">
+                            <Radio v-for="(item,idx) in interface" :label="idx" v-if="item.interface == 'LAN'">{{ $t('index.lan_info') }}{{idx}}</Radio>
+                        </RadioGroup>
+                        </Row>
+                        <br>
+                        <Row>
+                            <div v-for="(item,idx) in interface">
+                                <Table v-if="lanTab == idx" stripe :show-header="false" :columns="lanColumns[idx]" :loading="loading1" :data="lanData[idx]"></Table>
+                            </div>
+                        </Row>
+                    </div>
+
+                    <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 5">
+                        <Table stripe :show-header="false" :columns="statisticsColumns" :loading="loading1" :data="statisticsData"></Table>
+                    </div>
+
+                    <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 3">
+                        <RadioGroup v-model="tab" type="button">
+                            <Radio v-for="item in extInfo" :label="item.idx">{{ $t('realtime.net_info') }}{{item.idx}}</Radio>
+                            <Radio label="0">{{ $t('realtime.net_lan_info') }}</Radio>
+                        </RadioGroup>
+                        <Row>
+                            <div v-for="item in extInfo">
+                                <Col v-show="tab != 0 && item.idx == tab">
+                                <div :id="item.idName" style="width: 763px;height: 450px;"></div>
+                                <Row class="cs-table" >
+                                    <Col span="6" class="right">{{ $t('realtime.type') }}:</Col>
+                                    <Col span="6">{{ loadChartsData.type }}</Col>
+                                    <Col span="6" class="right">{{ $t('realtime.status') }}:</Col>
+                                    <Col span="6">{{ loadChartsData.status }}</Col>
+                                </Row>
+                                <Row class="cs-table">
+                                    <Col span="6" class="right">{{ $t('realtime.ip') }}:</Col>
+                                    <Col span="6">{{ loadChartsData.ip }}</Col>
+                                    <Col span="6" class="right">{{ $t('realtime.gate') }}:</Col>
+                                    <Col span="6">{{ loadChartsData.gateway }}</Col>
+                                </Row>
+                                <Row class="cs-table">
+                                    <Col span="6" class="right">{{ $t('realtime.up') }}:</Col>
+                                    <Col span="6">{{ loadChartsData.up }}</Col>
+                                    <Col span="6" class="right">{{ $t('realtime.down') }}:</Col>
+                                    <Col span="6">{{ loadChartsData.down }}</Col>
+                                </Row>
+                                </Col>
+                            </div>
+                            <Col v-show="tab == 0">
+                            <div id="links_charts" style="width: 100%;height: 450px;"></div>
+                            <Table border ref="tableSelect" :columns="linksChartsColumns" :data="linksChartsData.connections"></Table>
+                            </Col>
+                        </Row>
+                    </div>
+                </div>
+            </div>
+            </Col>
+            <!-- content end -->
+        </Row>
+    </div>
+    <Modal
+            v-model="showModel"
+            :title="$t('realtime.analysis')"
+            :okText="$t('common.ok')"
+            :cancelText="$t('common.cancel')"
+            :width="700"
+    >
+        <Table :columns="analysisColumns" :data="analysisData" >
+        </Table>
+    </Modal>
+    <div style="display: none;">{{ tabs }}</div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<!-- main end -->
+
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/plugin/echarts.min.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    // current code
+    var cs_main = {
+        template: '#main',
+        data: function() {
+            var _this = this;
+            return {
+                menu: menu,
+                globalConfig: globalConfig,
+                loading1: false,
+
+                showCurrentTabs: 1,
+                wanTab:"wan1",
+                lanTab:"lan1",
+                tab:1,
+                timestamp: 3000,
+                loadChartsData: {
+                    type: '',
+                    status: '',
+                    ip: '',
+                    gateway: '',
+                    up: '',
+                    down: ''
+                },
+                linksChartsData: {
+                    connections: []
+                },
+                timer: {},
+                timerNum: 0,
+                start: false,
+                showModel: false,
+                analysisData: [],
+
+                interface: {},
+                extInfo:[],
+                system:{
+                    FirmwareVersion:"",
+                    ReleaseDate:"",
+                    Uptime:""
+                }
+            }
+        },
+        computed: {
+            systemColumns: function() {
+                var _this = this;
+                return [{
+                    title: 'title',
+                    key: 'name'
+                }, {
+                    title: 'value',
+                    key: 'value',
+                    render: function(h, params) {
+                        if (params.row.name == _this.$t('index.up_time')) {
+                            var day = Math.floor(_this.system.Uptime /(24*60*60));     //天
+                            var hour = Math.floor(( _this.system.Uptime - (day*24*60*60) ) / (60*60));     //时
+                            var min =  Math.floor(( _this.system.Uptime - (day*24*60*60) - hour*(60*60) ) / 60 );     //分
+                            var sec =  Math.floor(_this.system.Uptime - day*24*60*60 - hour*60*60 - min*60 );  //秒
+                            params.row.value = day + ' ' + _this.$t('index.day')  + ' ' + hour + ' ' + _this.$t('index.hour') + ' ' + min + ' ' + _this.$t('index.min') + ' ' + sec + ' ' + _this.$t('index.sec');
+                            return h('div', params.row.value);
+                        }
+                        if (params.row.name == _this.$t('index.website')) {
+                            params.row.value = 'www.carystudio.com';
+                            return h('a',{attrs:{href:"http://"+params.row.value}},params.row.value);
+                        }
+                        if (params.row.name == _this.$t('index.version')) {
+                            params.row.value = 'CSG2000P ' +  _this.system.FirmwareVersion;
+                            return h('div', params.row.value);
+                        }
+                        if (params.row.name == _this.$t('index.build_time')) {
+                            var builtTime = _this.system.ReleaseDate+"";
+                            params.row.value = builtTime.substring(0,4)+'-'+builtTime.substring(4,6)+'-'+builtTime.substring(6,8);
+                            return h('div', params.row.value);
+                        }
+                    }
+                }]
+            },
+            systemData: function() {
+                return [{
+                    name: this.$t('index.up_time'),
+                    value: ''
+                }, {
+                    name: this.$t('index.website'),
+                    value: 'www.carystudio.com'
+                }, {
+                    name: this.$t('index.version'),
+                    value: ''
+                }, {
+                    name: this.$t('index.build_time'),
+                    value: ''
+                }]
+            },
+            wanColumns: function() {
+                var _this = this;
+                var temp = this.interface;
+                var dataObj = {};
+
+                for (var i in temp) {
+                    if(i.substring(0,3) == "wan"){
+                        var _t = temp[i];
+                        dataObj[i] = [
+                            {
+                                title: 'title',
+                                key: 'name'
+                            }, {
+                            title: 'value',
+                            key: 'value',
+                            render: function(h, params) {
+                                var idx = params.row.index;
+                                if (params.row.name == _this.$t('index.wan_status')) {
+                                    params.row.value = ("up" == temp[idx].Status.status && "0.0.0.0" != temp[idx].Status.ipaddr && temp[idx].Status.ipaddr) ? _this.$t('index.connected'):_this.$t('index.unconnected');
+                                    return h('div', params.row.value);
+                                }
+
+                                if (params.row.name == _this.$t('index.wan_modal')) {
+                                    if('static' == temp[idx].Protocol){
+                                        params.row.value = _this.$t('index.static_ip') + ' ' + _this.$t('index.connect');
+                                    }else if('pppoe' == temp[idx].Protocol){
+                                        params.row.value = _this.$t('index.pppoe') + ' ' + _this.$t('index.connect');
+                                    }else if('dhcp' == temp[idx].Protocol){
+                                        params.row.value = _this.$t('index.dhcp') + ' ' + _this.$t('index.connect');
+                                    }
+                                    return h('div', params.row.value);
+                                }
+
+                                if (params.row.name == _this.$t('index.ip')) {
+                                    params.row.value = temp[idx].Status.ipaddr;
+                                    return h('div', params.row.value);
+                                }
+
+                                if (params.row.name == _this.$t('index.mask')) {
+                                    return h('div', temp[idx].Status.subnet);
+                                }
+
+                                if (params.row.name == _this.$t('index.gateway')) {
+                                    params.row.value = temp[idx].Status.gateway;
+                                    if(!temp[idx].Status.gateway){
+                                        params.row.value = '0.0.0.0';
+                                    }
+                                    return h('div', params.row.value);
+                                }
+
+                                if (params.row.name == _this.$t('index.dns_server')) {
+                                    return h('div', temp[idx].Dns);
+                                }
+
+                                if (params.row.name == _this.$t('index.mac_address')) {
+                                    return h('div', temp[idx].Status.macaddr);
+                                }
+                            }
+                        }];
+                    }
+                }
+                return dataObj;
+            },
+            wanData: function() {
+                var temp = this.interface;
+                var dataObj = {};
+                for (var i in temp) {
+                    if (i.substring(0, 3) == "wan") {
+                        dataObj[i] = [
+                            {
+                                name: this.$t('index.wan_status'),
+                                index: i,
+                                value: ""
+                            }, {
+                                name: this.$t('index.wan_modal'),
+                                index: i,
+                                value: ""
+                            }, {
+                                name: this.$t('index.ip'),
+                                index: i,
+                                value: ""
+                            }, {
+                                name: this.$t('index.mask'),
+                                index: i,
+                                value: ""
+                            }, {
+                                name: this.$t('index.gateway'),
+                                index: i,
+                                value: ""
+                            }, {
+                                name: this.$t('index.dns_server'),
+                                index: i,
+                                value: ""
+                            }, {
+                                name: this.$t('index.mac_address'),
+                                index: i,
+                                value: ""
+                            }
+                        ]
+                    }
+                }
+                return dataObj;
+            },
+            lanColumns: function() {
+                var _this = this;
+                var temp = this.interface;
+                var dataObj = {};
+                for (var i in temp) {
+                    dataObj[i] = [{
+                        title: 'title',
+                        key: 'name'
+                    }, {
+                        title: 'value',
+                        key: 'value',
+                        render: function(h, params) {
+                            var idx = params.row.index;
+                            var _t = temp[idx];
+                            if (params.row.name == _this.$t('index.ip')) {
+                                return h('div', _t.Status.ipaddr);
+                            }
+                            if (params.row.name == _this.$t('index.mask')) {
+                                return h('div', _t.Netmask);
+                            }
+                            if (params.row.name == _this.$t('index.dhcp_server')) {
+                                params.row.value = (1==_t.DhcpSvrEnable)?_this.$t('index.enabled'):_this.$t('index.disabled');
+                                return h('div', params.row.value);
+                            }
+                            if (params.row.name == _this.$t('index.mac_address')) {
+                                return h('div', _t.Status.macaddr);
+                            }
+                        }
+                    }];
+                }
+                return dataObj;
+            },
+            lanData: function() {
+                var temp = this.interface;
+                var dataObj = {};
+                for (var i in temp) {
+                    if (i.substring(0, 3) == "lan") {
+                        dataObj[i] = [
+                            {
+                                name: this.$t('index.ip'),
+                                index: i,
+                                value: ""
+                            }, {
+                                name: this.$t('index.mask'),
+                                index: i,
+                                value: ""
+                            }, {
+                                name: this.$t('index.dhcp_server'),
+                                index: i,
+                                value: ""
+                            }, {
+                                name: this.$t('index.mac_address'),
+                                index: i,
+                                value: ""
+                            }]
+                    }
+                }
+                return dataObj;
+            },
+            statisticsColumns: function() {
+                var _this = this;
+                return [{
+                    title: 'title',
+                    key: 'name'
+                }, {
+                    title: 'value1',
+                    key: 'value1',
+                    render: function(h, params) {
+                        if (params.row.name == "") {
+                            params.row.value1 = _this.$t('index.rx_packets');
+                            return h('div', params.row.value1);
+                        }
+                        if (params.row.name == "WAN") {
+                            params.row.value1 = _this.wanTx;
+                            return h('div', params.row.value1);
+                        }
+                        if (params.row.name == "LAN") {
+                            params.row.value1 = _this.lanTx;
+                            return h('div', params.row.value1);
+                        }
+                    }
+                }, {
+                    title: 'value2',
+                    key: 'value2',
+                    render: function(h, params) {
+                        if (params.row.name == "") {
+                            params.row.value2 = _this.$t('index.tx_packets');
+                            return h('div', params.row.value2);
+                        }
+                        if (params.row.name == "WAN") {
+                            params.row.value2 = _this.wanRx;
+                            return h('div', params.row.value2);
+                        }
+                        if (params.row.name == "LAN") {
+                            params.row.value2 = _this.lanRx;
+                            return h('div', params.row.value2);
+                        }
+                    }
+                }]
+            },
+            statisticsData: function() {
+                var temp = this.interface;
+                var dataObj = [];
+                dataObj = '{ "name": "","value1": "","value2": ""}';
+                for(var i in temp){
+                    if(i.substring(0,3) == "lan" || i.substring(0,3) == "wan"){
+                        dataObj += ',{ "name": "'+ i +'","value1": "","value2": ""}';
+                    }
+                }
+                dataObj = '['+dataObj+']';
+                dataObj = JSON.parse(dataObj);
+
+                return dataObj;
+            },
+            tabs: function() {
+                var _this = this;
+                if (this.start || this.timerNum == 2) {
+                    this.timerNum = 0;
+                    for (var _i in this.timer) {
+                        this.timerNum++;
+                        clearInterval(this.timer[_i]);
+                    }
+                    if (this.showCurrentTabs == 3 && this.tab != 0) {
+                        this.timer.loadChartsTimer = setInterval(function() {
+                            _this.functionLoadCharts();
+                        }, this.timestamp);
+                    } else if (this.showCurrentTabs == 3 && this.tab == 0) {
+                        this.timer.linksChartsTimer = setInterval(function() {
+                            _this.functionLinksCharts();
+                        }, this.timestamp);
+                    }
+                }
+                return this.tab;
+            },
+            linksChartsColumns: function() {
+                var _this = this;
+                return [{
+                    title: this.$t('realtime.source'),
+                    key: 'src',
+                    sortable: true
+                }, {
+                    title: this.$t('realtime.count_downloads'),
+                    key: 'count_download',
+                    sortable: true,
+                    render: function(h, params) {
+                        return h('span', cs.bytesToSize(parseInt(params.row.count_download)));
+                    }
+                }, {
+                    title: this.$t('realtime.count_upload'),
+                    key: 'count_upload',
+                    sortable: true,
+                    render: function(h, params) {
+                        return h('span', cs.bytesToSize(parseInt(params.row.count_upload)));
+                    }
+                }, {
+                    title: this.$t('realtime.download_speed'),
+                    key: 'download',
+                    sortable: true,
+                    render: function(h, params) {
+                        return h('span', params.row.download + ' KB/s');
+                    }
+                }, {
+                    title: this.$t('realtime.upload_speed'),
+                    key: 'upload',
+                    sortable: true,
+                    render: function(h, params) {
+                        return h('span', params.row.upload + ' KB/s');
+                    }
+                }, {
+                    title: this.$t('realtime.links_conut'),
+                    key: 'connect_count',
+                    sortable: true,
+                    render: function(h, params) {
+                        return h('a', {
+                            attrs: {
+                                href: 'javascript:;'
+                            },
+                            on: {
+                                click: function() {
+                                    _this.showLinksModel(params);
+                                }
+                            },
+                            domProps: {
+                                innerHTML: params.row.connect_count + ' ( ' + _this.$t('realtime.see') + ' )'
+                            }
+                        });
+                    }
+                }];
+            },
+            analysisColumns: function() {
+                return [{
+                    title: this.$t('realtime.protocol'),
+                    key: 'protocol',
+                    width: '60',
+                    sortable: true
+                }, {
+                    title: this.$t('realtime.address'),
+                    key: 'src',
+                    sortable: true,
+                    render: function(h, params) {
+                        return h('span', params.row.src + ':' + params.row.sport);
+                    }
+                }, {
+                    title: this.$t('realtime.interface'),
+                    key: 'net',
+                    width: '80',
+                    sortable: true
+                }, {
+                    title: this.$t('realtime.target_address'),
+                    key: 'dst',
+                    sortable: true,
+                    render: function(h, params) {
+                        return h('span', params.row.dst + ':' + params.row.dport);
+                    }
+                }, {
+                    title: this.$t('realtime.connection_time'),
+                    key: 'time',
+                    sortable: true
+                }]
+            }
+        },
+        created: function() {
+            var _this = this;
+
+            var postData = {"action":"getStatusInfo", "data":{}};
+            uiPost.getStatusInfo(postData,function(data) {
+                console.log(data);
+                if (9999 == data.rescode){
+                   cs.loginOut();
+                }
+                if (0 == data.rescode)
+                {
+                    _this.system = data.data.system;
+                    _this.interface = data.data.interface;
+                    var idx = 0;
+                    for(var i in _this.interface){
+                        var _wan = '';
+                        var _lan = '';
+                        if(i.substring(0,3) == "lan"){
+                            _this.interface[i].interface = 'LAN';
+                        }
+                        if(i.substring(0,3) == "wan"){
+                            _this.interface[i].interface = 'WAN';
+                            _this.extInfo[idx] = _this.interface[i];
+                            _this.extInfo[idx].idx = idx+1;
+                            _this.extInfo[idx].idName = "load_charts"+(idx+1);
+                            idx++;
+                        }
+                    }
+                    console.log(_this.extInfo);
+                }
+            });
+
+        },
+        watch: {
+            wanTab: function () {
+                var _this = this;
+                console.log(_this.wanTab);
+            },
+            lanTab: function () {
+                var _this = this;
+                console.log(_this.lanTab);
+            },
+            tab:function () {
+                var _this = this;
+                console.log(_this.tab);
+                _this.functionLoadCharts();
+            }
+        },
+        updated: function() {
+            var _this = this;
+            if (this.showCurrentTabs == 3 && this.tab != 0 && !this.timer.loadChartsTimer) {
+                this.start = true;
+                this.loadCharts();
+            } else if (this.showCurrentTabs == 3 && this.tab == 0 && !this.timer.linksChartsTimer) {
+                this.start = true;
+                _this.linksCharts();
+            } else {
+                this.start = false;
+            }
+        },
+        methods: {
+            tabsSwitch: function(index) {
+                this.showCurrentTabs = index;
+            },
+            loadCharts: function() {
+                var _this = this;
+                console.log('-----------------loadCharts-----------------');
+                console.log(this.loadChartsData);
+                console.log('-----------------loadCharts END-----------------');
+
+                for(var x in _this.extInfo) {
+                    var idName = [];
+                    idName[x] = "load_charts" + (Number(x) + 1);
+
+                    this.loadChartsData[x] = {};
+
+                    this.loadChartsData[x].load_x = new Array(50);
+                    this.loadChartsData[x].load_y = new Array(50);
+                    this.loadChartsData[x].load_y1 = new Array(50);
+                    this.loadChartsData[x].load_x_i = 0;
+                    for (var i = 0; i < this.loadChartsData[x].load_x.length; i++) {
+                        this.loadChartsData[x].load_x[i] = '';
+                        this.loadChartsData[x].load_y[i] = 0;
+                        this.loadChartsData[x].load_y1[i] = 0;
+                    }
+                    this.loadChartsData[x].load_charts_option = {
+                        animation: false,
+                        xAxis: [{
+                            type: 'category',
+                            data: this.loadChartsData[x].load_x
+                        }],
+                        yAxis: [{
+                            type: 'value',
+                            min: 0,
+                            name: "KB/s"
+                        }],
+                        legend: {
+                            type: "plain",
+                            data: [this.$t('realtime.up'), this.$t('realtime.down')]
+                        },
+                        series: [{
+                            name: this.$t('realtime.up'),
+                            type: 'line',
+                            stack: '1',
+                            symbol: 'none',
+                            smooth: true,
+                            itemStyle: {
+                                normal: {
+                                    width: 1,
+                                    color: '#C23531'
+                                }
+                            },
+                            areaStyle: {
+                                normal: {
+                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                        offset: 0,
+                                        color: '#C23531'
+                                    }, {
+                                        offset: 1,
+                                        color: '#fff'
+                                    }])
+                                }
+                            },
+                            data: this.loadChartsData[x].load_y
+                        }, {
+                            name: this.$t('realtime.down'),
+                            type: 'line',
+                            stack: '2',
+                            symbol: 'none',
+                            smooth: true,
+                            itemStyle: {
+                                normal: {
+                                    width: 1,
+                                    color: '#2F4554'
+                                }
+                            },
+                            areaStyle: {
+                                normal: {
+                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                        offset: 0,
+                                        color: '#2F4554'
+                                    }, {
+                                        offset: 1,
+                                        color: '#fff'
+                                    }])
+                                }
+                            },
+                            data: this.loadChartsData[x].load_y1
+                        }],
+                        tooltip: {
+                            trigger: 'axis',
+                            axisPointer: {
+                                type: 'cross',
+                                label: {
+                                    backgroundColor: '#6a7985'
+                                }
+                            }
+                        }
+                    };
+                    console.log(_this.extInfo);
+
+                    this.loadChartsData[x].load_charts = document.getElementById("load_charts" + (Number(x)+1));
+                    this.loadChartsData[x].e_load_charts = echarts.init(this.loadChartsData[x].load_charts);
+                    this.loadChartsData[x].e_load_charts.setOption(this.loadChartsData[x].load_charts_option);
+                }
+
+
+                this.timer.loadChartsTimer = setInterval(function() {
+                    _this.functionLoadCharts();
+                }, this.timestamp);
+            },
+            functionLoadCharts: function() {
+                var _this = this;
+                uiPost.getNetInfo(function(data) {
+                    if(_this.tab != 0){
+                        data = data[_this.extInfo[_this.tab-1].Nic];
+                    }else{
+                        data = data[_this.extInfo[0].Nic];
+                        return;
+                    }
+                    console.log(data);
+                    var type = data.type;
+                    var status = data.status;
+                    _this.loadChartsData[_this.tab-1].load_x.shift();
+                    _this.loadChartsData[_this.tab-1].load_y.shift();
+                    _this.loadChartsData[_this.tab-1].load_y1.shift();
+                    _this.loadChartsData[_this.tab-1].load_x.push(_this.formatDate('mm:ss', data.timestamp));
+                    _this.loadChartsData[_this.tab-1].load_y.push(data.up);
+                    _this.loadChartsData[_this.tab-1].load_y1.push(data.down);
+                    _this.loadChartsData[_this.tab-1].e_load_charts.setOption({
+                        xAxis: [{
+                            data: _this.loadChartsData[_this.tab-1].load_x
+                        }],
+                        series: [{
+                            data: _this.loadChartsData[_this.tab-1].load_y
+                        }, {
+                            data: _this.loadChartsData[_this.tab-1].load_y1
+                        }]
+                    });
+                    // 其他显示
+                    _this.loadChartsData.type = (type == 1 ? "DHCP" : type == 2 ? _this.$t('realtime.staticip') : "PPPoE");
+                    _this.loadChartsData.status = (status == 1 ? _this.$t('realtime.succ') : _this.$t('realtime.fail'));
+                    _this.loadChartsData.ip = (data.ip);
+                    _this.loadChartsData.gateway = (data.gateway);
+                    _this.loadChartsData.up = (data.up + ' KB/s');
+                    _this.loadChartsData.down = (data.down + ' KB/s');
+                });
+            },
+            linksCharts: function() {
+                var _this = this;
+                this.linksChartsData.links_x = new Array(100);
+                this.linksChartsData.links_y = new Array(100);
+                this.linksChartsData.links_y1 = new Array(100);
+                this.linksChartsData.connections = [];
+                this.linksChartsData.links_x_i = 0;
+                for (var i = 0; i < this.linksChartsData.links_x.length; i++) {
+                    this.linksChartsData.links_x[i] = 0;
+                    this.linksChartsData.links_y[i] = 0;
+                    this.linksChartsData.links_y1[i] = 0;
+                }
+                this.linksChartsData.links_charts_option = {
+                    xAxis: [{
+                        show: false,
+                        type: 'category',
+                        data: this.linksChartsData.links_x
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        min: 0
+                    }],
+                    legend: {
+                        type: "plain",
+                        data: ['TCP', 'UDP']
+                    },
+                    series: [{
+                        name: "TCP",
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'none',
+                        itemStyle: {
+                            normal: {
+                                width: 1,
+                                color: '#0095C5'
+                            }
+                        },
+                        stack: 'a',
+                        areaStyle: {
+                            normal: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: '#0095C5'
+                                }, {
+                                    offset: 1,
+                                    color: '#fff'
+                                }])
+                            }
+                        },
+                        data: this.linksChartsData.links_y
+                    }, {
+                        name: "UDP",
+                        type: 'line',
+                        smooth: true,
+                        stack: 'a1',
+                        symbol: 'none',
+                        itemStyle: {
+                            normal: {
+                                width: 1,
+                                color: '#F5AE10'
+                            }
+                        },
+                        areaStyle: {
+                            normal: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: '#F5AE10'
+                                }, {
+                                    offset: 1,
+                                    color: '#fff'
+                                }])
+                            }
+                        },
+                        data: this.linksChartsData.links_y1
+                    }],
+                    animation: false
+                };
+                this.linksChartsData.links_charts = document.getElementById("links_charts");
+                this.linksChartsData.e_links_charts = echarts.init(this.linksChartsData.links_charts);
+                this.linksChartsData.e_links_charts.setOption(this.linksChartsData.links_charts_option);
+                this.timer.linksChartsTimer = setInterval(function() {
+                    _this.functionLinksCharts();
+                }, this.timestamp);
+            },
+            functionLinksCharts: function() {
+                var _this = this;
+                uiPost.getLinksData(function(data) {
+                    _this.linksChartsData.links_x.shift();
+                    _this.linksChartsData.links_y.shift();
+                    _this.linksChartsData.links_y1.shift();
+                    _this.linksChartsData.links_x.push(_this.linksChartsData.links_x_i++);
+                    _this.linksChartsData.links_y.push(data.statistics.tcp);
+                    _this.linksChartsData.links_y1.push(data.statistics.udp);
+                    _this.linksChartsData.e_links_charts.setOption({
+                        xAxis: [{
+                            data: _this.linksChartsData.links_x
+                        }],
+                        series: [{
+                            data: _this.linksChartsData.links_y
+                        }, {
+                            data: _this.linksChartsData.links_y1
+                        }]
+                    });
+                    _this.linksChartsData.connections = data.connections;
+                });
+            },
+            showLinksModel: function(params) {
+                this.showModel = true;
+                this.analysisData = params.row.data;
+            },
+            formatDate: function(fmt, timestamp) {
+                var date = new Date(Number(timestamp * 1000));
+                var o = {
+                    "M+": date.getMonth() + 1, //月份
+                    "d+": date.getDate(), //日
+                    "h+": date.getHours(), //小时
+                    "m+": date.getMinutes(), //分
+                    "s+": date.getSeconds(), //秒
+                    "q+": Math.floor((date.getMonth() + 3) / 3), //季度
+                    "S": date.getMilliseconds() //毫秒
+                };
+                if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+                for (var k in o)
+                    if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                return fmt;
+            }
+        }
+    };
+</script>
+<script src="static/js/main.js"></script>
+</body>
+</html>

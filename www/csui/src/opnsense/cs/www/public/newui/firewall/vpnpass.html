@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.firewall'),$t('menu.vpnpass')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Col>
+                <Alert>
+                    {{ $t('vpnpass.help') }}
+                </Alert>
+            </Col>
+            <Form ref="formValidate" :model="formValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('vpnpass.ping_wan')">
+                    <i-switch v-model="formValidate.wanPingFilter" size="large" >
+                        <span slot="open">{{ $t('common.on') }}</span>
+                        <span slot="close">{{ $t('common.off') }}</span>
+                    </i-switch>
+                </FormItem>
+                <FormItem :label="$t('vpnpass.l2tppt')">
+                    <i-switch v-model="formValidate.l2tpPassThru" size="large" >
+                        <span slot="open">{{ $t('common.on') }}</span>
+                        <span slot="close">{{ $t('common.off') }}</span>
+                    </i-switch>
+                </FormItem>
+                <FormItem :label="$t('vpnpass.pptppt')">
+                    <i-switch v-model="formValidate.pptpPassThru" size="large" >
+                        <span slot="open">{{ $t('common.on') }}</span>
+                        <span slot="close">{{ $t('common.off') }}</span>
+                    </i-switch>
+                </FormItem>
+                <FormItem :label="$t('vpnpass.ipsecpt')">
+                    <i-switch v-model="formValidate.ipsecPassThru" size="large" >
+                        <span slot="open">{{ $t('common.on') }}</span>
+                        <span slot="close">{{ $t('common.off') }}</span>
+                    </i-switch>
+                </FormItem>
+                <!-- btn -->
+                <FormItem>
+                      <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('vpnpass.apply') }}</Button>
+                </FormItem>
+            </Form>
+            </Card>
+            <br>
+        </Col>
+        </row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      formValidate: {
+          wanPingFilter:false,
+          l2tpPassThru:false,
+          pptpPassThru:false,
+          ipsecPassThru:false,
+      }
+    }
+  },
+  created:function() {
+    var _this = this;
+    uiPost.getVpnPassCfg(function(data){
+        _this.formValidate.wanPingFilter = data.wanPingFilter == 1 ?true :false;
+        _this.formValidate.l2tpPassThru = data.l2tpPassThru == 1 ?true :false;
+        _this.formValidate.pptpPassThru = data.pptpPassThru == 1 ?true :false;
+        _this.formValidate.ipsecPassThru = data.ipsecPassThru == 1 ?true :false;
+    });
+  },
+  methods:{
+    handleSubmit: function(name) {
+        var _this = this;
+        var postVar = {};
+        postVar.wanPingFilter = _this.formValidate.wanPingFilter == true ?"1" :"0";
+        postVar.l2tpPassThru = _this.formValidate.l2tpPassThru == true ?"1" :"0";
+        postVar.pptpPassThru = _this.formValidate.pptpPassThru == true ?"1" :"0";
+        postVar.ipsecPassThru = _this.formValidate.ipsecPassThru == true ?"1" :"0";
+        uiPost.setVpnPassCfg(postVar,function(data){
+            location.href = location.href;
+        });
+    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

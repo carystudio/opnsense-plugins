@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+             <Alert>
+              <!-- <h3>设置</h3> -->
+              {{ $t('upnp.help') }}
+             </Alert>
+			<Form ref="formValidate" :model="formValidate" :label-width="globalConfig.labelWith" label-position="left">
+				<FormItem :label="$t('upnp.title')">
+				 <i-switch v-model="formValidate.status" size="large" >
+                    <span slot="open">{{ $t('common.enabled') }}</span>
+                    <span slot="close">{{ $t('common.disabled') }}</span>
+                 </i-switch>
+				</FormItem>
+			</Form>
+		  </Card>
+		 </Col>
+		</row>
+		<Row  v-show="formValidate.status" >
+		 <Col>
+			<Button @click="subminRefresh" >{{ $t('upnp.refresh') }}</Button>
+		 </Col>
+		  <br>
+		  <Col>
+			<Table border  :columns="upnpColumns"></Table>
+		  </Col>
+		</Row>
+	</div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+	<span style="display: none;">{{ submitStatus }}</span>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      applyLoading:false,
+      formValidate: {
+          status:false,
+          protocol:'ALL',
+		      external_port:'',
+		      ip:'',
+		      internal_port:'',
+		      comment:''
+      }
+    }
+  },
+  computed:{
+    submitStatus:function(){
+        var postVar = {};
+        if(true == this.formValidate.status){
+            postVar.enable = "1";
+        }else{
+            postVar.enable = "0";
+        }
+        postVar.addEffect = "1";
+        uiPost.setMiniUPnPConfig(postVar);
+        return this.formValidate.status;
+    },
+    upnpColumns: function() {
+        var _this = this;
+        return [{
+            type: 'selection',
+            key: 'idx',
+            sortable: true
+        }, {
+            title: 'ID',
+            key: 'idx',
+            sortable: true
+        }, {
+            title: this.$t('upnp.protocol'),
+            key: 'protocol',
+            sortable: true
+        }, {
+            title: this.$t('upnp.external_port'),
+            key: 'external_port',
+            sortable: true
+        }, {
+            title: this.$t('upnp.ip'),
+            key: 'ip',
+            sortable: true
+        },{
+            title: this.$t('upnp.internal_port'),
+            key: 'internal_port',
+            sortable: true
+        },{
+            title: this.$t('upnp.status'),
+            key: 'status',
+            sortable: true
+        },{
+            title: this.$t('upnp.comment'),
+            key: 'comment',
+            sortable: true
+        }];
+        }
+    },
+  created:function() {
+    var _this = this;
+    uiPost.getMiniUPnPConfig(function(data){
+        _this.formValidate.status = data.enable == 1 ?true :false; 
+        var rule_num = data.length;
+        if(rule_num >= 2){
+            _this.upnpData = data.slice(1);
+        }      
+    })
+  },
+  methods:{
+	subminRefresh:function(){
+            setTimeout("location.href=location.href","2000");
+	    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

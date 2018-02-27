@@ -1,0 +1,29 @@
+[
+	{
+		"enable":"1",
+		"manualUpSpeed":"99999",
+		"manualDwSpeed":"99999",
+		"gigaBitBt":"1",
+		"wanGigabitBt":"1",
+		"lanIp":"192.168.0.1",
+		"lanNetmask":"255.255.255.0"
+	},
+	{
+		"idx":"1",
+		"ip":"192.168.0.100",
+		"upBandwidth":"10000",
+		"dwBandwidth":"10000",
+		"comment":"",
+	    "limitMode":"0",
+		"delRuleName":"delRule0"
+	},
+	{
+	   "idx":"2",
+	   "ip":"192.168.0.222",
+	   "upBandwidth":"11111",
+	   "dwBandwidth":"22222",
+	   "comment":"",
+	   "limitMode":"1",
+	   "delRuleName":"delRule1"
+	}
+]

@@ -98,25 +98,35 @@ class L2tp extends Csbackend
 
     }
 
+    private static function confInit(){
+        global $config;
+
+        if(!isset($config['l2tp']) || !is_array($config['l2tp'])){
+            $config['l2tp'] = array();
+        }
+    }
+
     public static function getStatus(){
         global $config;
 
         $l2tpStatus = array('Enable'=>'0');
-        if(!isset($config['l2tp'])) {
-            return $l2tpStatus;
-        }
+        self::confInit();
+
         $l2tp = $config['l2tp'];
-        if('server'==$l2tp['mode']){
+        if(isset($l2tp['mode']) && 'server'==$l2tp['mode']){
             $l2tpStatus['Enable'] = '1';
         }
-        $l2tpStatus['LocalIp'] = $l2tp['localip'];
-        $l2tpStatus['ClientIpStart'] = $l2tp['remoteip'];
-        $l2tpStatus['ClientIpEnd'] = long2ip(ip2long($l2tp['remoteip']) + $l2tp['n_l2tp_units'] - 1);
+        $l2tpStatus['LocalIp'] = isset($l2tp['localip'])?$l2tp['localip']:'';
+        $l2tpStatus['ClientIpStart'] = isset($l2tp['remoteip'])?$l2tp['remoteip']:'';
+        if(isset($l2tp['remoteip']) && isset($l2tp['n_l2tp_units'])){
+            $l2tpStatus['ClientIpEnd'] = long2ip(ip2long($l2tp['remoteip']) + $l2tp['n_l2tp_units'] - 1);
+        }else{
+            $l2tpStatus['ClientIpEnd'] = '';
+        }
         $l2tpStatus['Dns1'] = isset($l2tp['dns1'])?$l2tp['dns1']:'';
         $l2tpStatus['Dns2'] = isset($l2tp['dns2'])?$l2tp['dns2']:'';
         $l2tpStatus['Wins'] = isset($l2tp['wins'])?$l2tp['wins']:'';
-        $l2tpStatus['AuthType'] = $l2tp['paporchap'];
-
+        $l2tpStatus['AuthType'] = isset($l2tp['paporchap'])?$l2tp['paporchap']:'chap';
 
         return $l2tpStatus;
     }
@@ -125,6 +135,7 @@ class L2tp extends Csbackend
         global $config;
         $result = 0;
         try {
+            self::confInit();
             foreach ($data as $var=>$val){
                 $data[$var] = trim($val);
             }

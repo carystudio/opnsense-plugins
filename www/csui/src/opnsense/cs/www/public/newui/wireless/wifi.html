@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<i-col class="cs-container" span="20" >
+    <slot name="breadcrumb"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Alert>
+              <!-- <h3>设置</h3> -->
+              {{ $t('wifi.help') }}
+            </Alert>
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+              <FormItem :label="$t('wifi.title')">
+                  <i-switch v-model="formValidate.status" size="large" >
+                      <span slot="open">{{ $t('common.enabled') }}</span>
+                      <span slot="close">{{ $t('common.disabled') }}</span>
+                  </i-switch>
+              </FormItem>
+              <Col v-show="formValidate.status" >
+                <FormItem :label="$t('wifi.ssid')" prop="ssid">
+                    <Input v-model="formValidate.ssid" ></Input>
+                </FormItem>
+                <FormItem :label="$t('wifi.band')" prop="band">
+                   <Select v-model="formValidate.band">
+                      <Option value="1">2.4 GHz (B)</Option>
+                      <Option value="4">2.4 GHz (G)</Option>
+                      <Option value="6">2.4 GHz (N)</Option>
+                      <Option value="9">2.4 GHz (B+G+N)</Option>
+                    </Select>
+                </FormItem>
+                <FormItem :label="$t('wifi.broadcast')" prop="status">
+                    <i-switch v-model="formValidate.broadcast" size="large" >
+                        <span slot="open">{{ $t('common.enabled') }}</span>
+                        <span slot="close">{{ $t('common.disabled') }}</span>
+                    </i-switch>
+                </FormItem>
+                <FormItem :label="$t('wifi.channel')" prop="channel">
+                  <Select v-model="formValidate.channel">
+                    <Option value="1">1</Option>
+                    <Option value="2">2</Option>
+                  </Select>
+                </FormItem>
+                <FormItem :label="$t('wifi.bandwidth')" prop="bandWidth">
+                  <Select v-model="formValidate.bandWidth">
+                    <Option value="0">20MHz</Option>
+                    <Option value="3">40MHz</Option>
+                    <Option value="2">80MHz</Option>
+                  </Select>
+                </FormItem>
+                <FormItem :label="$t('wifi.security')">
+                    <Select v-model="formValidate.authMode" >
+                        <Option value="NONE"> {{ $t('wifi.none') }}</Option>
+                        <Option value="OPEN"> {{ $t('wifi.open') }}</Option>
+                        <Option value="SHARED"> {{ $t('wifi.shared') }}</Option>
+                        <Option value="WPAPSK"> WPA-PSK</Option>
+                        <Option value="WPA2PSK"> WPA2-PSK</Option>
+                        <Option value="WPAPSKWPA2PSK"> WPA/WPA2-PSK</Option>
+                    </Select>
+                </FormItem>
+                <Col v-if="formValidate.authMode !='NONE'" >
+                  <Col v-if="formValidate.authMode =='OPEN'|| formValidate.authMode =='SHARED'" >
+                  <FormItem :label="$t('wifi.encryp_type')">
+                      <Select v-model="formValidate.encrypType" >
+                          <Option value="WEP64"> WEP64</Option>
+                          <Option value="WEP128"> WEP128</Option>
+                      </Select>
+                  </FormItem>
+                  </Col>
+                  <Col v-if="formValidate.authMode =='WPAPSK'|| formValidate.authMode =='WPA2PSK'|| formValidate.authMode =='WPAPSKWPA2PSK'" >
+                  <FormItem :label="$t('wifi.encryp_type')">
+                      <Select v-model="formValidate.encrypType" >
+                          <Option value="TKIP">TKIP</Option>
+                          <Option value="AES"> AES</Option>
+                          <Option value="TKIPAES" v-show="formValidate.authMode =='WPA2PSK' || formValidate.authMode == 'WPAPSKWPA2PSK'">TKIP/AES</Option>
+                      </Select>
+                  </FormItem>
+                  </Col>
+                  <FormItem :label="$t('wifi.key_format')">
+                      <Select v-model="formValidate.keyFormat" >
+                          <Option value="0"> Hex</Option>
+                          <Option value="1"> ASCII</Option>
+                      </Select>
+                  </FormItem>
+                  <Col v-if="formValidate.authMode =='OPEN'|| formValidate.authMode =='SHARED'" >
+                  <FormItem :label="$t('wifi.password')">
+                      <Input v-model="formValidate.wepkey" :maxlength="10" v-if="formValidate.encrypType=='WEP64' && formValidate.keyFormat==0"></Input>
+                      <Input v-model="formValidate.wepkey" :maxlength="5"  v-else-if="formValidate.encrypType=='WEP64' && formValidate.keyFormat==1"></Input>
+                      <Input v-model="formValidate.wepkey"  :maxlength="26" v-else-if="formValidate.encrypType=='WEP128' && formValidate.keyFormat==0"></Input>
+                      <Input v-model="formValidate.wepkey" :maxlength="13" v-else="formValidate.encrypType=='WEP128' && formValidate.keyFormat==1"></Input>
+                  </FormItem>
+                  </Col>
+                  <Col v-if="formValidate.authMode =='WPAPSK'|| formValidate.authMode =='WPA2PSK'|| formValidate.authMode =='WPAPSKWPA2PSK'">
+                  <FormItem :label="$t('wifi.password')">
+                      <Input v-model="formValidate.wepkey"  :maxlength="64" v-if="formValidate.keyFormat==0"></Input>
+                      <Input v-model="formValidate.wepkey" :maxlength="63" v-else-if="formValidate.keyFormat==1"></Input>
+                  </FormItem>
+                  </Col> 
+                </Col>
+              <!-- btn -->
+              <FormItem>
+                  <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('wifi.apply') }}</Button>
+              </FormItem>
+            </Col>
+          </Form>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      applyLoading:false,
+      formValidate: {
+          ssid:'',
+          status:false,
+          authMode:'NONE',
+          encrypType:'',
+          keyFormat:'',
+          wepkey:''
+      },
+      ruleValidate: {
+           ssid: [
+            { required: true, message: this.$t('wifi.msg1',[this.$t('wifi.ssid')]), trigger: 'blur' },
+            { validator:function(r, v, f) {
+              var _s = cs.ssid(v);
+              if(_s != 99) {
+                f(_this.$t('wifi.ssid')+_this.$t('wifi["msg'+(_s+1)+'"]'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          wepkey: [
+            { required: true, message: this.$t('wifi.msg1',[this.$t('wifi.password')]), trigger: 'blur' },
+            { validator:function(r, v, f) {
+            //var _s = cs.hex(v);
+              if (_this.formValidate.authMode =='OPEN'|| _this.formValidate.authMode =='SHARED')
+                {
+                  if(_this.formValidate.keyFormat == 0)
+                  {
+                    if(_this.formValidate.encrypType== 'WEP64')
+                    {
+                      if(_this.formValidate.wepkey.length !=10 || 0==cs.hex(_this.formValidate.wepkey)) 
+                        
+                          f(_this.$t('wifi.msg4'));
+                      
+                    }else{
+                      if(_this.formValidate.wepkey.length !=26|| 0==cs.hex(_this.formValidate.wepkey) )
+                          f(_this.$t('wifi.msg5'));
+                    }
+                  }else{
+                    if(_this.formValidate.encrypType== 'WEP64')
+                      {
+                        if(_this.formValidate.wepkey.length !=5 || 0==cs.hex(_this.formValidate.wepkey))
+                          f(_this.$t('wifi.msg6'));
+                      }else{
+                        if(_this.formValidate.wepkey.length !=13 || 0==cs.hex(_this.formValidate.wepkey))
+                          f(_this.$t('wifi.msg7'));
+                      }
+                  }
+                }
+              },trigger: 'blur' }  
+          ],    
+      },
+      showModel:false,
+    }
+  },
+  created:function() {
+    var _this = this;
+    uiPost.getWiFiBasicConfig(function(data) {
+      _this.formValidate.authMode = "NONE";
+      _this.enable = data.wifiOff;
+      _this.wifiDualband = data.wifiDualband;
+      _this.RegDomain = data.regDomain;
+      _this.formValidate.encrypType = data.encrypType;
+      _this.formValidate.keyFormat = data.keyFormat;
+      _this.formValidate.wepkey = data.wepkey;
+      _this.formValidate.wpakey = data.wpakey;
+      _this.formValidate.bandWidth = data.bw;
+      _this.apcliEnable = data.apcliEnable;
+      _this.channelDfs = data.channelDfs;
+      _this.wifiSchEnabled = data.wifiSchEnabled;
+      _this.countryBt = data.countryBt;
+      _this.hardModel = data.hardModel;
+      _this.csid = data.csid;
+      _this.meshEnable = data.meshEnable;
+      _this.meshAction = data.meshAction;
+      _this.wifiSchRule = data.wifiSchRule;
+      _this.formValidate.ssid = data.ssid;
+      _this.hssid = data.hssid;
+      _this.formValidate.channel = data.channel;
+      _this.formValidate.countryStr = data.countryStr;
+      _this.formValidate.band = data.band;
+      _this.apacBt = data.apacBt;
+    });
+  },
+  methods:{
+    handleSubmit: function(name) {
+        var _this = this;
+        this.applyLoading = true;
+        this.$refs[name].validate(function(valid){
+            if (valid) {
+            var postVar = {};
+              postVar.wifiOff = _this.enable;
+              postVar.ssid = _this.formSetinfo.ssid;
+              postVar.band = _this.formSetinfo.band;
+              postVar.channel = _this.formSetinfo.channel;
+              postVar.hssid = _this.hssid;
+              postVar.authMode = _this.formSetinfo.authMode;
+              postVar.encrypType = _this.formSetinfo.encrypType;
+              postVar.keyFormat = _this.formSetinfo.keyFormat;
+              postVar.wepkey = _this.formSetinfo.wepkey;
+              postVar.wpakey = _this.formSetinfo.wpakey;
+              postVar.bw = _this.data.bandWidth;
+              postVar.countryStr = _this.formSetinfo.countryStr;
+              postVar.addEffect = "0";
+              postVar.wifiIdx = _this.wifiIdx;
+            uiPost.setWiFiBasicConfig(_this.formValidate,function(){
+                _this.$Message.success({content:'Success!',onClose:function(){
+                  _this.applyLoading = false;
+                }});
+              });
+            } else {
+              _this.applyLoading = false;
+            }
+        })
+    },
+    handleReset: function(name) {
+        this.$refs[name].resetFields();
+    },
+    ok:function () {
+        // this.$Message.info('Clicked ok');
+    },
+    cancel:function () {
+        // this.$Message.info('Clicked cancel');
+    },
+    selectTable:function (value) {
+        // select value;
+        console.log(value);
+        // this.showModel = false;
+        // this.$Message.info('name:'+value.name+',age:'+value.age);
+    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

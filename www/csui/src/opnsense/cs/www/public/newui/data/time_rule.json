@@ -1,0 +1,18 @@
+[
+  {
+    "firewallMode": "IPPORT",
+    "ip": "192.168.0.2",
+    "proto": "TCP+UDP",
+    "portRange": "3456-4456",
+    "week": "Tue Wed",
+    "time": "5:15-6:54",
+    "delRuleName": "1,0"
+  },
+  {
+    "firewallMode": "MAC",
+    "mac": "00:E0:4C:07:04:0C",
+    "week": "Tue",
+    "time": "12:12-12:34",
+    "delRuleName": "2,0"
+  }
+]

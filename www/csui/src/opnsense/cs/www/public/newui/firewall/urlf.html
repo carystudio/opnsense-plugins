@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.firewall'),$t('menu.urlf')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Col>
+                <Alert>
+                    {{ $t('urlf.help') }}
+                </Alert>
+            </Col>
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('urlf.title')">
+                    <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">
+                        <span slot="open">{{ $t('common.enabled') }}</span>
+                        <span slot="close">{{ $t('common.disabled') }}</span>
+                    </i-switch>
+                </FormItem>
+                <Col v-show="formValidate.status" >
+                {{ $t('urlf.add_rule') }}
+                <hr>
+                <br>
+                <FormItem :label="$t('urlf.url_keyword')" prop="url">
+                    <Input v-model="formValidate.url" ></Input>
+                </FormItem>
+                <!-- btn -->
+                <FormItem>
+                      <Button type="primary" :loading="addUrlfLoading" @click="handleSubmit('formValidate')">{{ $t('urlf.add') }}</Button>
+                </FormItem>
+                </Col>
+            </Form>
+            </Card>
+            <br>
+        </Col>
+        </Row>
+        <Row v-show="formValidate.status" >
+            <Col class="cs-btn-del">
+                <Button size="small" @click="tableSelect(true)" type="error">{{ $t('urlf.delete') }}</Button>
+            </Col>
+            <Col>
+            <Table border ref="tableSelect" :columns="urlfColumns" :data="urlfData"></Table>
+            </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      addUrlfLoading:false,
+      formValidate: {
+          status:false,
+          url:''
+      },
+      urlfData: []
+    }
+  },
+  computed:{
+    ruleValidate: function(){
+      var _this = this;
+      return{
+          url: [
+            { validator:function(r, v, f){
+                var _s = cs.string(v);
+                if(_s == 0){
+                    f(_this.$t('urlf.msg1'));
+                }else if(_s == 1){
+                    f(_this.$t('urlf.msg2'));
+                }else{
+                    f();
+                }
+              },trigger: 'blur'}
+          ]
+      }
+    },
+    urlfColumns: function() {
+        var _this = this;
+        return [{
+            type: 'selection',
+            key: 'idx',
+            width: '100',
+            sortable: true
+        }, {
+            title: 'ID',
+            key: 'idx',
+            sortable: true
+        }, {
+            title: this.$t('urlf.url_keyword'),
+            key: 'url',
+            sortable: true
+        }, {
+            title: this.$t('urlf.select'),
+            key: 'idx',
+            align: 'center',
+            render: function(h, params) {
+                return h('Poptip',{
+                    props: {
+                        confirm: true,
+                        title: _this.$t('urlf.msg6'),
+                        "ok-text":_this.$t('common.ok'),
+                        "cancel-text":_this.$t('common.cancel')
+                    },
+                    on: {
+                        "on-ok": function(){
+                            _this.deleteData(params);
+                        }
+                    }
+                }, [
+                    h('Button', {
+                        props: {
+                            type: 'error',
+                            size: 'small'
+                        },
+                    }, _this.$t('urlf.delete'))
+                ]);
+            }
+        }];
+        }
+    },
+  created:function() {
+    var _this = this;
+    uiPost.getUrlFilterRules(function(data){
+        _this.formValidate.status = data[0].enable == 1 ?true :false;
+        var rule_num = data.length;
+        if(rule_num >= 2){
+            _this.urlfData = data.slice(1);
+        }
+    })
+  },
+  methods:{
+    handleSubmit: function(name) {
+        var _this = this;
+        _this.addUrlfLoading = true;
+        _this.$refs[name].validate(function(valid){
+            if (valid) {
+                if(_this.urlfData.length){
+                     for(var i=0; i<_this.urlfData.length; i++){
+                        if(_this.formValidate.url.toUpperCase() == _this.urlfData[i].url.toUpperCase()){
+                            _this.$Message.error(_this.$t('urlf.msg3'));
+                            return false;
+                        }
+                    }
+                }
+                var postVar = {};
+                postVar.url = _this.formValidate.url;
+                postVar.addEffect = "0";
+                uiPost.setUrlFilterRules(postVar,function(data){
+                    location.href = location.href;
+                    _this.addUrlfLoading = false;
+                });
+            }else{
+                _this.addUrlfLoading = false;
+            }
+        })
+    },
+    /*handleReset: function(name) {
+        this.$refs[name].resetFields();
+    },*/
+    submitStatus:function(){
+        var postVar = {};
+        if(true == this.formValidate.status){
+            postVar.enable = "1";
+        }else{
+            postVar.enable = "0";
+        }
+        postVar.addEffect = "1";
+        uiPost.setUrlFilterRules(postVar);
+    },
+    deleteData:function (obj) {
+        var _this = this;
+        var postVar = {};
+        postVar[obj.row.delRuleName] = obj.index;
+        uiPost.delUrlFilterRules(postVar,function(){
+            _this.urlfData.splice(obj.index, 1);
+        });
+    },
+    tableSelect:function(status){
+        var _this = this;
+        if (status) {
+            var getSelection = this.$refs.tableSelect.getSelection();
+            if (getSelection.length>0) {
+                var postVar = {};
+                for(var i=0; i<getSelection.length; i++)
+                {
+                    postVar[getSelection[i].delRuleName] = i;
+                }
+                uiPost.delUrlFilterRules(postVar,function(){
+                    _this.$Message.success({content:_this.$t('urlf.msg7'),onClose:function(){
+                        location.href = location.href;
+                    }});
+                    
+                });
+            }else{
+                this.$Message.error(this.$t('urlf.msg5'));
+            }
+        }else{
+            this.$refs.tableSelect.selectAll(status);
+        }
+    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

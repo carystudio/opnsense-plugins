@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.server'),$t('menu.account')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    {{ $t('account.help') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('account.auth_type')">
+                        <Select v-model="formValidate.serverMode" >
+                            <!--<Option value="1">PPPOE</Option>-->
+                            <Option value="2">PPTP</Option>
+                            <Option value="3">L2TP</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('account.account')" prop="username">
+                        <Input v-model="formValidate.username"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('account.password')" prop="password">
+                        <Input v-model="formValidate.password"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('account.specifyIp')" prop="ipAddr">
+                        <Input v-model="formValidate.ipAddr"></Input>
+                    </FormItem>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('account.add') }}</Button>
+                    </FormItem>
+                </Form>
+            </Card>
+            <br>
+            </Col>
+        </Row>
+        <Row>
+            <Col class="cs-btn-del">
+            <Button size="small" @click="tableSelect(true)" type="error">{{ $t('account.delete') }}</Button>
+            </Col>
+            <Col>
+            <Table border ref="tableSelect" :columns="accountListColumns" :data="accountListData"></Table>
+            </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+                formValidate: {
+                    serverMode:'2',
+                    username:'',
+                    password:'',
+                    ipAddr:''
+                },
+                accountListData:[],
+                pptpData:[],
+                l2tpData:[]
+            }
+        },
+        computed:{
+            ruleValidate:function(){
+                var _this = this;
+                return {
+                    username: [
+                        { validator:function(r, v, f) {
+                            if('' != _this.formValidate.ipAddr){
+                                var ret = cs.string(v);
+                                if (ret == 0) {
+                                    f('用户名不能为空');
+                                }else if(ret == 1){
+                                    f('用户名无效，包含了无效的字符');
+                                }else{
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    password: [
+                        { validator:function(r, v, f) {
+                            if('' != _this.formValidate.ipAddr){
+                                var ret = cs.string(v);
+                                if (ret == 0) {
+                                    f('密码不能为空');
+                                }else if(ret == 1){
+                                    f('密码无效，包含了无效的字符');
+                                }else{
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    ipAddr: [
+                        { validator:function(r, v, f) {
+                            if('' != _this.formValidate.ipAddr){
+                                var ret = cs.ip(v);
+                                if (ret == 0 || ret == 1 || ret == 2 || ret == 3 || ret == 4) {
+                                    f('IP地址无效');
+                                }
+                                f();
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ]
+                }
+            },
+            accountListColumns: function() {
+                var _this = this;
+                return [{
+                    type: 'selection',
+                    key: 'Username',
+                    width:'100',
+                    sortable: true
+                }, {
+                    title: 'ID',
+                    key: 'idx',
+                    sortable: true
+                }, {
+                    title: this.$t('account.account_type'),
+                    key: 'accountMode',
+                    sortable: true
+                }, {
+                    title: this.$t('account.account'),
+                    key: 'Username',
+                    sortable: true
+                },{
+                    title: this.$t('account.password'),
+                    key: 'Password',
+                    sortable: true
+                },{
+                    title: this.$t('account.specifyIp'),
+                    key: 'Ip',
+                    sortable: true
+                }, {
+                    title: this.$t('account.operation'),
+                    key: 'idx',
+                    align: 'center',
+                    render: function(h, params) {
+                        return h('Poptip',{
+                            props: {
+                                confirm: true,
+                                title: _this.$t('account.msg9'),
+                                "ok-text":_this.$t('common.ok'),
+                                "cancel-text":_this.$t('common.cancel')
+                            },
+                            on: {
+                                "on-ok": function(){
+                                    var data = {};
+                                    var postData = {};
+                                    data.Username = params.row.Username;
+                                    if("PPTP" == params.row.accountMode){
+                                        postData = {"action":"delPptpdUser", "data":data};
+                                    }else{
+                                        postData = {"action":"delL2tpUser", "data":data};
+                                    }
+                                    uiPost.delLocalServerUsers(postData,function(data) {
+                                        if (9999 == data.rescode){
+                                            cs.loginOut();
+                                        }
+                                        if (0 != data.rescode) {
+                                            _this.$Message.error('删除失败！'+data.rescode);
+                                        }else{
+                                            _this.$Message.error('删除成功！');
+                                            location.href = location.href;
+                                        }
+                                    });
+                                }
+                            }
+                        }, [
+                            h('Button', {
+                                props: {
+                                    type: 'error',
+                                    size: 'small'
+                                }
+                            }, _this.$t('account.delete'))
+                        ]);
+                    }
+                }];
+            }
+        },
+        created:function() {
+            var _this = this;
+            /*获取PPTP用户配置信息*/
+            var postPptpData = {"action":"getPptpdUsers","data":{}};
+            uiPost.getPptpdUsers(postPptpData,function(data) {
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    _this.pptpData = data.data;
+                    console.log(_this.pptpData );
+
+                    /*获取L2TP用户配置信息*/
+                    var postL2tpData = {"action":"getL2tpUsers","data":{}};
+                    uiPost.getL2tpUsers(postL2tpData,function(data) {
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        if (0 == data.rescode) {
+                            _this.l2tpData = data.data;
+                            console.log(_this.l2tpData);
+
+                            //PPTP为空
+                            if(_this.pptpData.length<=0){
+                                console.log('------------accountListData = L2TP------------');
+                                _this.accountListData = _this.l2tpData;
+                                for(var i=0;i<_this.accountListData.length;i++){
+                                    _this.accountListData[i].idx = i+1;
+                                    _this.accountListData[i].accountMode = 'L2TP';
+                                }
+                            }
+                            //L2TP为空
+                            if(_this.l2tpData.length<=0){
+                                console.log('------------accountListData = PPTP------------');
+                                _this.accountListData = _this.pptpData;
+                                for(var i=0;i<_this.accountListData.length;i++){
+                                    _this.accountListData[i].idx = i+1;
+                                    _this.accountListData[i].accountMode = 'PPTP';
+                                }
+                            }
+                            //两种都存在
+                            var tempData = [];
+                            if((_this.l2tpData.length) > 0 && (_this.pptpData.length) > 0){
+                                console.log('---------accountListData = both -----------');
+                                var count = _this.l2tpData.length + _this.pptpData.length;
+                                for(var i=0;i< count;i++){
+                                    console.log(i);
+                                    if(i < _this.pptpData.length){
+                                        tempData[i] = _this.pptpData[i];
+                                        tempData[i].accountMode = "PPTP";
+                                        tempData[i].idx = (i+1);
+                                    }else{
+                                        tempData[i] = _this.l2tpData[(i-_this.pptpData.length)];
+                                        tempData[i].accountMode = "L2TP";
+                                        tempData[i].idx = (i+1);
+                                    }
+                                }
+                                _this.accountListData = tempData;
+                            }
+                        }
+                    });
+                }
+            });
+        },
+        methods:{
+            tableSelect:function(status){
+                var _this = this;
+                if (status) {
+                    var getSelection = this.$refs.tableSelect.getSelection();
+                    if (getSelection.length>0) {
+                        var macData = [];
+                        for(var i=0; i<getSelection.length; i++)
+                        {
+//                            macData[i] = getSelection[i].Username;
+                            var data = {};
+                            var postData = {};
+                            data.Username = getSelection[i].Username;
+                            if("PPTP" == getSelection[i].accountMode){
+                                postData = {"action":"delPptpdUser", "data":data};
+                            }else{
+                                postData = {"action":"delL2tpUser", "data":data};
+                            }
+                            uiPost.delLocalServerUsers(postData,function(data) {
+                                if (9999 == data.rescode){
+                                    cs.loginOut();
+                                }
+                                if (0 != data.rescode) {
+                                     _this.$Message.error('删除失败！'+data.rescode);
+                                 }else{
+                                 _this.$Message.success('删除成功！');
+                                     location.href = location.href;
+                                 }
+                            });
+                        }
+
+//                        var postData = {"action":"delStaticDhcp","data":{"Mac":macData}};
+//                        /*全选删除*/
+//                        uiPost.delStaticDhcp(postData,function(){
+//                            _this.$Message.success({content:_this.$t('account.msg11'),onClose:function(){
+//                                location.href = location.href;
+//                            }});
+//                        });
+                    }else{
+                        this.$Message.error(this.$t('account.msg8'));
+                    }
+                }else{
+                    this.$refs.tableSelect.selectAll(status);
+                }
+            },
+            submitStatus:function(){
+                var postVar = {};
+                if(true == this.formValidate.status){
+                    postVar.enable = "1";
+                }else{
+                    postVar.enable = "0";
+                }
+                uiPost.setssServer(postVar);
+            },
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.applyLoading = true;
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        var postData = {};
+                        var postVar = {};
+                        postVar['Username'] = _this.formValidate.username;
+                        postVar['Password'] = _this.formValidate.password;
+                        postVar['Ip'] = _this.formValidate.ipAddr;
+                        if(_this.formValidate.serverMode == '2'){
+                            postData = {"action":"addPptpdUser", "data":postVar};
+                        }
+                        if(_this.formValidate.serverMode == '3'){
+                            postData = {"action":"addL2tpUser", "data":postVar};
+                        }
+                        uiPost.addlocalServerUser(postData,function(data){
+                            _this.$Message.success({content:'Success!',onClose:function(){
+                                _this.applyLoading = false;
+                            }});
+                            var percentTimer = setInterval(function(){
+                                clearInterval(percentTimer);
+                                location.href=location.href;
+                            },cs.getTimer(10));
+                        });
+                    } else {
+                        _this.applyLoading = false;
+                    }
+                })
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

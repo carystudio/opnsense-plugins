@@ -1,0 +1,133 @@
+@charset "UTF-8";
+.layout{
+    border: 1px solid #d7dde4;
+    position: relative;
+    background: #f5f7f9;
+    border-radius: 5px;
+    height: 100%;
+    /*overflow: hidden;*/
+}
+.layout-logo{
+    text-transform: uppercase;
+    float: left;
+    padding-left: 20px;
+    color: #fff;
+    font-size: 28px;
+}
+.layout-nav{
+    /*width: 520px;*/
+    /*margin: 0 auto;*/
+    float: right;
+    margin-right: 20px;
+}
+
+.layout .cs-main{
+    background:#f5f7f9
+}
+
+.layout-footer-center{
+    text-align: center;
+    padding: 24px 50px;
+    color: #495060;
+    font-size: 14px;
+}
+
+.cs-container{
+    padding: 0 24px 24px;
+}
+.cs-content{
+    padding: 24px;
+    min-height: 280px;
+    background: #fff;
+}
+.cs-progress-text-span{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    text-align: center;
+}
+
+/* i-circle */
+.cs-circle-custom{}
+.cs-circle-custom h1{
+    color: #3f414d;
+    font-size: 28px;
+    font-weight: normal;
+}
+.cs-circle-custom p{
+    color: #657180;
+    font-size: 14px;
+    margin: 10px 0 15px;
+}
+.cs-circle-custom span{
+    display: block;
+    padding-top: 15px;
+    color: #657180;
+    font-size: 14px;
+}
+.cs-circle-custom span:before{
+    content: '';
+    display: block;
+    width: 50px;
+    height: 1px;
+    margin: 0 auto;
+    background: #e0e3e6;
+    position: relative;
+    top: -15px;
+}
+.cs-circle-custom span i{
+    font-style: normal;
+    color: #3f414d;
+}
+
+.menu-qrcode-text{
+    padding: 10px;
+    color:#000;
+    font-size: 12px;
+}
+.cs-btn-del {
+    z-index: 1;
+    top: 33px;
+    left: 45px;
+}
+
+.ivu-modal-body .ivu-modal-confirm .ivu-modal-confirm-footer button{
+    display: none;
+}
+
+.ivu-upload-list .ivu-upload-list-file span{
+    word-wrap: break-word;
+}
+
+/* I don't know why, but I can use this to solve the problem */
+.ivu-menu-horizontal{line-height: 58px;}
+.demo-spin-icon-load{
+    animation: ani-demo-spin 1s linear infinite;
+}
+.ivu-form-item-required .ivu-form-item-label:before{
+    display: none;
+}
+.ivu-switch-inner{
+    width: 55%;
+    text-align: center;
+}
+.ivu-switch-large{
+    width: 80px;
+}
+.ivu-switch-large.ivu-switch-checked:after{
+    left: 57px;
+}
+/* .ivu-col .ivu-input-wrapper,
+.ivu-col .ivu-select{
+    width: 50%;
+}
+.ivu-col .ivu-date-picker .ivu-date-picker-editor{
+    width: 100%;
+} */
+.ivu-select-dropdown.ivu-auto-complete .ivu-select-dropdown-list{
+    height: 300px;
+}
+.ivu-modal-body .ivu-form-item{
+    margin-bottom: 4px;
+}

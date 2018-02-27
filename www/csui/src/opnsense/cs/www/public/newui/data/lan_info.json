@@ -1,0 +1,13 @@
+{
+  "dhcpLease":  "300",
+  "lanIp":	"192.168.0.5",
+  "lanNetmask":	"255.255.255.0",
+  "dhcpStart":	"192.168.0.6",
+  "dhcpEnd":	"192.168.0.254",
+  "br0Ip":	"192.168.0.5",
+  "br0Netmask":	"255.255.255.0",
+  "OperationMode":	0,
+  "dhcpEnabled":	1,
+  "wanIP":	"192.168.1.4",
+  "LanguageType":	"vn"
+}

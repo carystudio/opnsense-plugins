@@ -127,6 +127,9 @@ class Pptpd extends Csbackend
         global $config;
         $result = 0;
         try {
+            if(!isset($config['pptpd']) || !is_array($config['pptpd'])){
+                $config['pptpd'] = array();
+            }
             foreach ($data as $var=>$val){
                 $data[$var] = trim($val);
             }
@@ -208,6 +211,11 @@ class Pptpd extends Csbackend
         global $config;
         $result = 0;
         try {
+            if(!isset($config['pptpd']) || !is_array($config['pptpd'])){
+                $config['pptpd'] = array();
+            }else if(!isset($config['pptpd']['user']) || !is_array($config['pptpd']['user'])){
+                $config['pptpd']['user'] = array();
+            }
             foreach ($data as $var=>$val){
                 $data[$var] = trim($val);
             }

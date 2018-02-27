@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.internet'),$t('menu.wan')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+             <Alert>
+              <!-- <h3>设置</h3> -->
+              {{ $t('wan.help') }}
+             </Alert>
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+
+
+
+                <FormItem :label="$t('wan.wanport')">
+                    <RadioGroup v-model="switchWanPort" type="button">
+                        <Radio v-for="(item,idx) in interface" :label="item.Interface">{{item.Interface}}</Radio>
+                    </RadioGroup>
+                    <Button v-if="showAddBtnFlag == '1'" type="ghost" icon="plus-round" @click="addWanBtn()"></Button>
+                </FormItem>
+                <FormItem :label="$t('wan.network_binding')">
+                    <Row>
+                        <Col span="14"><Input v-if="switchWanPort != 'add'" v-model="netCardDinding" readonly></Input></Col>
+                        <Col span="14" v-if="switchWanPort != 'wan1' && switchWanPort == 'add'">
+                            <Select v-model="netSelCardDinding" >
+                                <Option v-for="(item,idx) in availableNic" :value="idx">{{idx}} | {{ item.mac }}</Option>
+                            </Select>
+                        </Col>
+                        <Col span="9" offset="1">
+                        <ButtonGroup v-if="switchWanPort != 'wan1'">
+                            <Button v-if="switchWanPort != 'add'" @click="delWanBtn()" :disabled="delWanBtnEn">{{$t('wan.delete')}}</Button>
+                            <Button v-if="switchWanPort == 'add'" @click="bingWanBtn()" :disabled="bingWanBtnEn">{{$t('wan.binding')}}</Button>
+                        </ButtonGroup>
+                        </Col>
+                    </Row>
+                </FormItem>
+
+              <div v-if="addWanFlag != '1'">
+                  <FormItem :label="$t('wan.wanmode')">
+                     <RadioGroup v-model="formValidate.wanMode" type="button">
+                      <Radio :label="0">{{ $t('wan.static_ip') }}</Radio>
+                      <Radio :label="1">DHCP</Radio>
+                      <Radio :label="3">PPPoE</Radio>
+                      <template v-if="this.l2tpBt == 1 && this.pptpBt == 1 && this.operationMode != 2">
+                      <Radio :label="4">PPTP</Radio>
+                      <Radio :label="6">L2TP</Radio>
+                      </template>
+                    </RadioGroup>
+                  </FormItem>
+                  <Col v-if="formValidate.wanMode == '0'">
+                    <FormItem :label="$t('wan.ip')" prop="staticIp">
+                        <Input v-model="formValidate.staticIp" ></Input>
+                    </FormItem>
+                    <FormItem :label="$t('wan.mask')" prop="staticMask">
+                        <Input v-model="formValidate.staticMask" ></Input>
+                    </FormItem>
+                    <FormItem :label="$t('wan.gateway')" prop="staticGw">
+                        <Input v-model="formValidate.staticGw" ></Input>
+                    </FormItem>
+                    <FormItem label="MTU" prop="staticMtu">
+                      <Input v-model.number="formValidate.staticMtu" :maxlength="4"></Input>
+                      <span>(576~1500)</span>
+                    </FormItem>
+                  </Col>
+
+                  <FormItem label="MTU" v-if="formValidate.wanMode == '1'" :maxlength="4" prop="dhcpMtu">
+                    <Input v-model="formValidate.dhcpMtu" ></Input>
+                    <span>(576~1500)</span>
+                  </FormItem>
+
+                  <Col v-if="formValidate.wanMode == '3'">
+                    <FormItem :label="$t('wan.user')" prop="pppoeUser">
+                        <Input v-model="formValidate.pppoeUser" ></Input>
+                    </FormItem>
+                    <FormItem :label="$t('wan.pass')" prop="pppoePass">
+                        <Input v-model="formValidate.pppoePass" ></Input>
+                    </FormItem>
+                    <FormItem label="MTU" prop="pppoeMtu">
+                        <Input v-model="formValidate.pppoeMtu" :maxlength="4" ></Input>
+                        <span>(546-1492)</span>
+                    </FormItem>
+                  </Col>
+                  <FormItem :label="$t('wan.dns_server')">
+                      <Input v-model="formValidate.dnsServer" ></Input>
+                  </FormItem>
+                  <FormItem :label="$t('wan.monitor_ip')">
+                      <Input v-model="formValidate.monitorIp" ></Input>
+                  </FormItem>
+                  <FormItem :label="$t('wan.priority')">
+                      <Select v-model="formValidate.tier" >
+                          <Option value="1">1</Option>
+                          <Option value="2">2</Option>
+                          <Option value="3">3</Option>
+                          <Option value="4">4</Option>
+                      </Select>
+                      {{$t('wan.priorty_note')}}
+                  </FormItem>
+                  <FormItem :label="$t('wan.weight')">
+                      <Select v-model="formValidate.weight" >
+                          <Option value="1">1</Option>
+                          <Option value="2">2</Option>
+                          <Option value="3">3</Option>
+                          <Option value="4">4</Option>
+                      </Select>
+                      {{$t('wan.weight_note')}}
+                  </FormItem>
+                  <!-- btn -->
+                  <FormItem>
+                      <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('common.apply') }}</Button>
+                  </FormItem>
+
+
+              </div>
+
+            </Form>
+            </Card>
+        </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      percent:0,
+      macCloneEnabled:'',
+      operationMode:'',
+      wanAutoDetectBt:'',
+      pppoeSpecBt:'',
+      lanIp:'',
+      l2tpBt:'',
+      pptpBt:'',
+
+
+        netCardDinding:'',
+        netSelCardDinding:'',
+        switchWanPort:'wan1',
+        addWanFlag:'0',
+        showAddBtnFlag:'0',
+        bingWanBtnEnable:0,
+        delWanBtnEnable:0,
+        availableNic:{},
+        interface:{
+
+        },
+      formValidate: {
+          staticIp:'',
+          staticMask:'',
+          staticGw:'',
+          staticMtu:1492,
+          pppoeMtu:'',
+          pppoeUser:'',
+          pppoePass:'',
+          dnsServer:'',
+          dhcpMtu:'',
+          tier:'',
+          weight:'',
+          wanMode:'0',
+          monitorIp:''
+      },
+      ruleValidate: {
+          staticIp: [
+              { validator:function(r, v, f) {
+                var _s = cs.ip(v);
+                if(0 == _s) {
+                  f(_this.$t('wan.ip')+_this.$t('wan.msg1'));
+                }else if(1 == _s) {
+                  f(_this.$t('wan.ip')+_this.$t('wan.msg20'));
+                }else if(2 == _s) {
+                  f(_this.$t('wan.ip')+_this.$t('wan.msg2'));
+                }else if(3 == _s) {
+                  f(_this.$t('wan.ip')+_this.$t('wan.msg3'));
+                }else if(4 == _s) {
+                  f(_this.$t('wan.ip')+_this.$t('wan.msg4'));
+                }else{
+                  f();
+                }
+              },trigger: 'blur' }
+          ],
+          staticMask: [
+              { validator:function(r, v, f) {
+                var _s = cs.mask(v);
+                if(0 == _s) {
+                  f(_this.$t('wan.mask')+_this.$t('wan.msg1'));
+                }else if(1 == _s) {
+                  f(_this.$t('wan.msg5'));
+                }else{
+                  f();
+                }
+              },trigger: 'blur' }
+          ],
+          staticGw: [
+              { validator:function(r, v, f) {
+                var _s = cs.ip(v);
+                if(0 == _s) {
+                  f(_this.$t('wan.gateway')+_this.$t('wan.msg1'));
+                }else if(1 == _s) {
+                  f(_this.$t('wan.gateway')+_this.$t('wan.msg20'));
+                }else if(2 == _s) {
+                  f(_this.$t('wan.gateway')+_this.$t('wan.msg2'));
+                }else if(3 == _s) {
+                  f(_this.$t('wan.gateway')+_this.$t('wan.msg3'));
+                }else if(4 == _s) {
+                  f(_this.$t('wan.gateway')+_this.$t('wan.msg4'));
+                }else{
+                  if(
+                       _this.formValidate.staticGw.split('.')[0] != _this.formValidate.staticIp.split('.')[0]
+                    || _this.formValidate.staticGw.split('.')[1] != _this.formValidate.staticIp.split('.')[1]
+                    || _this.formValidate.staticGw.split('.')[2] != _this.formValidate.staticIp.split('.')[2]
+                  ){
+                    f(_this.$t('wan.msg6'));
+                  }
+                  if(_this.formValidate.staticGw == _this.formValidate.staticIp){
+                    f(_this.$t('wan.msg7'));
+                  }
+                  f();
+                }
+              },trigger: 'blur' }
+          ],
+          staticMtu: [
+              { validator:function(r, v, f) {
+                var _s = cs.num_range(v,576,1500);
+                if(0 == _s) {
+                  f(_this.$t('wan.msg8'));
+                }else if(1 == _s) {
+                  f(_this.$t('wan.msg9'));
+                }else if(2 == _s) {
+                  f(_this.$t('wan.msg_mtu',[576,1500]));
+                }else{
+                  f();
+                }
+              },trigger: 'blur' }
+          ],
+          dhcpMtu: [
+            { validator:function(r, v, f) {
+              var _s = cs.num_range(v,576,1500);
+              if(0 == _s) {
+                f(_this.$t('wan.msg8'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg9'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.msg_mtu',[576,1500]));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          pppoeUser: [
+            { validator:function(r, v, f) {
+              var _s = cs.string(v);
+              if(0 == _s) {
+                f(_this.$t('wan.msg12'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg13'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          pppoePass: [
+            { validator:function(r, v, f) {
+              var _s = cs.string(v);
+              if(0 == _s) {
+                f(_this.$t('wan.msg14'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg15'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          pppoeMtu: [
+            { validator:function(r, v, f) {
+              var _s = cs.num_range(v,576,1492);
+              if(0 == _s) {
+                f(_this.$t('wan.msg8'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg9'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.msg_mtu',[576,1492]));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          pptpUser: [
+            { validator:function(r, v, f) {
+              var _s = cs.string(v);
+              if(0 == _s) {
+                f(_this.$t('wan.msg12'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg13'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          pptpPass: [
+            { validator:function(r, v, f) {
+              var _s = cs.string(v);
+              if(0 == _s) {
+                f(_this.$t('wan.msg14'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg15'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          pptpIp: [
+            { validator:function(r, v, f) {
+              var _s = cs.ip(v);
+              if(0 == _s) {
+                f(_this.$t('wan.ip')+_this.$t('wan.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.ip')+_this.$t('wan.msg20'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.ip')+_this.$t('wan.msg2'));
+              }else if(3 == _s) {
+                f(_this.$t('wan.ip')+_this.$t('wan.msg3'));
+              }else if(4 == _s) {
+                f(_this.$t('wan.ip')+_this.$t('wan.msg4'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          pptpMask: [
+            { validator:function(r, v, f) {
+              var _s = cs.mask(v);
+              if(0 == _s) {
+                f(_this.$t('wan.mask')+_this.$t('wan.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg5'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          pptpGw: [
+            { validator:function(r, v, f) {
+              var _s = cs.ip(v);
+              if(0 == _s) {
+                f(_this.$t('wan.gateway')+_this.$t('wan.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.gateway')+_this.$t('wan.msg20'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.gateway')+_this.$t('wan.msg2'));
+              }else if(3 == _s) {
+                f(_this.$t('wan.gateway')+_this.$t('wan.msg3'));
+              }else if(4 == _s) {
+                f(_this.$t('wan.gateway')+_this.$t('wan.msg4'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          pptpServerIp: [
+            { validator:function(r, v, f) {
+              var _s = cs.ip(v);
+              if(0 == _s) {
+                f(_this.$t('wan.server_ip')+_this.$t('wan.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.server_ip')+_this.$t('wan.msg20'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.server_ip')+_this.$t('wan.msg2'));
+              }else if(3 == _s) {
+                f(_this.$t('wan.server_ip')+_this.$t('wan.msg3'));
+              }else if(4 == _s) {
+                f(_this.$t('wan.server_ip')+_this.$t('wan.msg4'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          pptpMtu: [
+            { validator:function(r, v, f) {
+              var _s = cs.num_range(v,576,1492);
+              if(0 == _s) {
+                f(_this.$t('wan.msg8'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg9'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.msg_mtu',[576,1492]));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          l2tpUser: [
+            { validator:function(r, v, f) {
+              var _s = cs.string(v);
+              if(0 == _s) {
+                f(_this.$t('wan.msg12'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg13'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          l2tpPass: [
+            { validator:function(r, v, f) {
+              var _s = cs.string(v);
+              if(0 == _s) {
+                f(_this.$t('wan.msg14'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg15'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          l2tpIp: [
+            { validator:function(r, v, f) {
+              var _s = cs.ip(v);
+              if(0 == _s) {
+                f(_this.$t('wan.ip')+_this.$t('wan.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.ip')+_this.$t('wan.msg20'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.ip')+_this.$t('wan.msg2'));
+              }else if(3 == _s) {
+                f(_this.$t('wan.ip')+_this.$t('wan.msg3'));
+              }else if(4 == _s) {
+                f(_this.$t('wan.ip')+_this.$t('wan.msg4'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          l2tpMask: [
+            { validator:function(r, v, f) {
+              var _s = cs.mask(v);
+              if(0 == _s) {
+                f(_this.$t('wan.mask')+_this.$t('wan.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg5'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          l2tpGw: [
+            { validator:function(r, v, f) {
+              var _s = cs.ip(v);
+              if(0 == _s) {
+                f(_this.$t('wan.gateway')+_this.$t('wan.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.gateway')+_this.$t('wan.msg20'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.gateway')+_this.$t('wan.msg2'));
+              }else if(3 == _s) {
+                f(_this.$t('wan.gateway')+_this.$t('wan.msg3'));
+              }else if(4 == _s) {
+                f(_this.$t('wan.gateway')+_this.$t('wan.msg4'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          l2tpServerIp: [
+            { validator:function(r, v, f) {
+              var _s = cs.ip(v);
+              if(0 == _s) {
+                f(_this.$t('wan.server_ip')+_this.$t('wan.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.server_ip')+_this.$t('wan.msg20'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.server_ip')+_this.$t('wan.msg2'));
+              }else if(3 == _s) {
+                f(_this.$t('wan.server_ip')+_this.$t('wan.msg3'));
+              }else if(4 == _s) {
+                f(_this.$t('wan.server_ip')+_this.$t('wan.msg4'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          l2tpMtu: [
+            { validator:function(r, v, f) {
+              var _s = cs.num_range(v,576,1492);
+              if(0 == _s) {
+                f(_this.$t('wan.msg8'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg9'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.msg_mtu',[576,1492]));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          priDns: [
+            { validator:function(r, v, f) {
+              var _s = cs.ip(v);
+              if(0 == _s) {
+                f(_this.$t('wan.pri_dns')+_this.$t('wan.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.pri_dns')+_this.$t('wan.msg20'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.pri_dns')+_this.$t('wan.msg2'));
+              }else if(3 == _s) {
+                f(_this.$t('wan.pri_dns')+_this.$t('wan.msg3'));
+              }else if(4 == _s) {
+                f(_this.$t('wan.pri_dns')+_this.$t('wan.msg4'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          secDns: [
+            { validator:function(r, v, f) {
+              var _s = cs.ip(v);
+              if(0 == _s) {
+                f(_this.$t('wan.sec_dns')+_this.$t('wan.msg1'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.sec_dns')+_this.$t('wan.msg20'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.sec_dns')+_this.$t('wan.msg2'));
+              }else if(3 == _s) {
+                f(_this.$t('wan.sec_dns')+_this.$t('wan.msg3'));
+              }else if(4 == _s) {
+                f(_this.$t('wan.sec_dns')+_this.$t('wan.msg4'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ],
+          mac: [
+            { validator:function(r, v, f) {
+              var _s = cs.mac(v);
+              if(0 == _s) {
+                f(_this.$t('wan.msg19'));
+              }else if(1 == _s) {
+                f(_this.$t('wan.msg16'));
+              }else if(2 == _s) {
+                f(_this.$t('wan.msg17'));
+              }else if(3 == _s) {
+                f(_this.$t('wan.msg18'));
+              }else{
+                f();
+              }
+            },trigger: 'blur' }
+          ]
+      }
+    }
+  },
+  computed:{
+      bingWanBtnEn:function () {
+          console.log('----bingWanBtnEn----'+(this.bingWanBtnEnable == 1)+'---------');
+          return this.bingWanBtnEnable == 1;
+      },
+      delWanBtnEn:function () {
+          console.log('----delWanBtnEn----'+(this.delWanBtnEnable == 1)+'---------');
+          return this.delWanBtnEnable == 1;
+      },
+    cloneMacBtn:function(){
+      return this.macCloneEnabled == 1;
+    },
+    defaultMacBtn:function(){
+      return this.macCloneEnabled == 0;
+    }
+  },
+  created:function() {
+    var _this = this;
+    this.$Spin.show();  //加载动画
+
+      var postData = {"action":"getWanInfo", "data":{}};
+      uiPost.getWanInfo(postData,function(data) {
+          console.log(data);
+          if (9999 == data.rescode){
+              cs.loginOut();
+          }
+          if (0 == data['rescode']) {
+              _this.interface = data.data.Interfaces;
+              _this.availableNic = data.data.AvailableNic;
+              if(_this.availableNic.length != 0){
+                  _this.showAddBtnFlag = '1';   //添加按钮多WAN标志位
+              }else{
+                  _this.showAddBtnFlag = '0';
+              }
+              if(_this.interface.length != 0){
+                  /*初始化，显示wan1信息*/
+                  _this.switchWanPort =  _this.interface[0].Interface;
+                  //绑定网卡
+                  for(var i in _this.interface){
+                      if(_this.interface[i].Interface == _this.switchWanPort){
+                          if(_this.interface[i].Status.if == "pppoe0"){
+                              _this.netCardDinding = _this.interface[i].Nic;
+                          }else{
+                              _this.netCardDinding = _this.interface[i].Nic+" | "+_this.interface[i].Status.macaddr;
+                          }
+                      }
+                  }
+
+                  _this.formValidate.dnsServer = _this.interface[0].Dns;
+                  _this.formValidate.tier = _this.interface[0].Tier;
+                  _this.formValidate.weight = _this.interface[0].Weight;
+
+                  if ('dhcp' == _this.interface[0].Protocol && "" != _this.interface[0].Protocol) {
+                      _this.formValidate.wanMode = '1';
+                      _this.formValidate.dhcpMtu = _this.interface[0].Mtu;
+                  }else if ('pppoe' == _this.interface[0].Protocol && "" != _this.interface[0].Protocol) {
+                      _this.formValidate.wanMode = '3';
+                      _this.formValidate.pppoeMtu = _this.interface[0].Mtu;
+                      _this.formValidate.pppoeUser = _this.interface[0].Username;
+                      _this.formValidate.pppoePass = _this.interface[0].Password;
+                  }else if ('static' == _this.interface[0].Protocol && "" != _this.interface[0].Protocol){
+                      _this.formValidate.wanMode = '0';
+                      _this.formValidate.staticIp = _this.interface[0].Ip;
+                      _this.formValidate.staticMask = _this.interface[0].Netmask;
+                      _this.formValidate.staticGw = _this.interface[0].Gateway;
+                      _this.formValidate.staticMtu = _this.interface[0].Mtu;
+                  }else{
+                      _this.formValidate.wanMode = '1';
+                  }
+
+                  if(_this.interface[0].Monitor != ""){
+                      _this.formValidate.monitorIp = _this.interface[0].Monitor;
+                  }
+                  _this.$Spin.hide();   //关闭加载动画
+                    console.log('-------------------------'+_this.formValidate.wanMode+'-------------------------');
+              }
+          }
+      });
+
+    },
+    watch:{
+        switchWanPort:function () {
+            var _this = this;
+            if(_this.switchWanPort != 'add'){
+                _this.addWanFlag = '0';
+            }
+
+            for(var i in _this.interface){
+                if(_this.interface[i].Interface == _this.switchWanPort){
+                    console.log(_this.interface[i].Interface);
+                    if(_this.interface[i].Status.if == "pppoe0"){
+                        _this.netCardDinding = _this.interface[i].Nic;
+                    }else{
+                        _this.netCardDinding = _this.interface[i].Nic+" | "+_this.interface[i].Status.macaddr;
+                    }
+
+                    _this.formValidate.dnsServer = _this.interface[i].Dns;
+                    _this.formValidate.tier = _this.interface[i].Tier;
+                    _this.formValidate.weight = _this.interface[i].Weight;
+
+                    if ('dhcp' == _this.interface[i].Protocol && "" != _this.interface[i].Protocol) {
+                        _this.formValidate.wanMode = '1';
+                        _this.formValidate.dhcpMtu = _this.interface[i].Mtu;
+                    }else if ('pppoe' == _this.interface[i].Protocol && "" != _this.interface[i].Protocol) {
+                        _this.formValidate.wanMode = '3';
+                        _this.formValidate.pppoeMtu = _this.interface[i].Mtu;
+                        _this.formValidate.pppoeUser = _this.interface[i].Username;
+                        _this.formValidate.pppoePass = _this.interface[i].Password;
+                    }else if ('static' == _this.interface[i].Protocol && "" != _this.interface[i].Protocol){
+                        _this.formValidate.wanMode = '0';
+                        _this.formValidate.staticIp = _this.interface[i].Ip;
+                        _this.formValidate.staticMask = _this.interface[i].Netmask;
+                        _this.formValidate.staticGw = _this.interface[i].Gateway;
+                        _this.formValidate.staticMtu = _this.interface[i].Mtu;
+                    }else{
+                        _this.formValidate.wanMode = '1';
+                    }
+
+                    if(_this.interface[i].Monitor != ""){
+                        _this.formValidate.monitorIp = _this.interface[i].Monitor;
+                    }
+
+                }
+            }
+
+
+        }
+    },
+    methods:{
+        handleSubmit: function(name) {
+            var _this = this;
+            this.$refs[name].validate(function(valid){
+                if (valid) {
+                    var postVar = {};
+                    postVar.Interface = _this.switchWanPort;
+                    postVar.Tier = _this.formValidate.tier;
+                    postVar.Weight = _this.formValidate.weight;
+                    postVar.Nic = $.trim(_this.netCardDinding.split('|')[0]);
+
+                    if (0 == _this.formValidate.wanMode) {
+                        postVar.Protocol = 'static';
+                        postVar.Ip = _this.formValidate.staticIp;
+                        postVar.Netmask = _this.formValidate.staticMask;
+                        postVar.Gateway = _this.formValidate.staticGw;
+                        postVar.Mtu = _this.formValidate.staticMtu;
+                    }else if (1 == _this.formValidate.wanMode) {
+                        postVar.Protocol = 'dhcp';
+                        postVar.Mtu = _this.formValidate.dhcpMtu;
+                    }else if (3 == _this.formValidate.wanMode) {
+                        postVar.Protocol = 'pppoe';
+                        postVar.Username = _this.formValidate.pppoeUser;
+                        postVar.Password = _this.formValidate.pppoePass;
+                        postVar.Mtu = _this.formValidate.pppoeMtu;
+                    }
+                    postVar.Monitor = _this.formValidate.monitorIp;
+                    postVar.Dns = _this.formValidate.dnsServer;
+
+                    var postData = {"action":"setWanInfo", "data":postVar};
+                    uiPost.setWanInfo(postData,function(data) {
+                        var time = 30;
+                        _this.$Modal.success({
+                            loading:true,
+                            render: function(h) {
+                                return h('div',[
+                                    _this.$t('common.loading'),
+                                    h('Progress',{
+                                        attrs:{ percent:_this.percent }
+                                    })
+                                ])
+                            }
+                        });
+                        var percentTimer = setInterval(function(){
+                            if (_this.percent>=100) {
+                                clearInterval(percentTimer);
+                                location.href = location.href;
+                            }
+                            _this.percent++;
+                        },cs.getTimer(time));
+                    });
+                }
+            })
+        },
+        delWanBtn:function () {
+            var _this = this;
+            if(_this.switchWanPort != 'wan1'){
+                _this.delWanBtnEnable = 1;
+                for(var i in _this.interface) {
+                    if (_this.interface[i].Interface == _this.switchWanPort) {
+                        var data ={};
+                        data.Interface = _this.interface[i].Interface;
+                        data.Nic = _this.interface[i].Nic;
+                        var postVar = {"action":"delInterfaceBind","data":data};
+                        uiPost.delInterfaceBind(postVar,function(data) {
+                            location.href = location.href;
+                        });
+                    }
+                }
+            }
+        },
+        addWanBtn:function () {
+            var _this = this;
+            _this.addWanFlag = '1';
+            _this.switchWanPort = 'add';
+            for(var i in _this.availableNic){
+                _this.netSelCardDinding = i;
+            }
+        },
+        bingWanBtn:function () {
+            var _this = this;
+            var data ={};
+            data.Interface = "wan";
+            data.Nic = _this.netSelCardDinding;
+            var postVar = {"action":"setInterfaceBind", "data":data};
+            _this.bingWanBtnEnable = 1;
+            uiPost.setInterfaceBind(postVar,function(data) {
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    location.href = location.href;
+                }else{
+                    alert('绑定失败！'+data_msg_json[data.rescode]);
+                }
+            });
+        },
+        handleReset: function(name) {
+            this.$refs[name].resetFields();
+        },
+        show:function () {
+            this.$Spin.show();
+        },
+        next:function() {
+            if (this.current == 3) {
+                this.current = 0;
+            } else {
+                this.current += 1;
+            }
+        },
+        changeMac:function(val){
+            var _this = this;
+            if(1 == val){
+                this.macCloneEnabled = 1;
+                uiPost.getStationMacByIp(function(data){
+                    _this.formValidate.mac = data.stationMac;
+                })
+            }else{
+                this.macCloneEnabled = 0;
+                this.formValidate.mac = this.formValidate.wanDefMac;
+            }
+        },
+        pppConnectClick:function(val){
+            var _this = this;
+            var postVar = {};
+            postVar.wanMode = this.formValidate.wanMode;
+            postVar.pppoeUser = this.formValidate.pppoeUser;
+            postVar.pppoePass = this.formValidate.pppoePass;
+            postVar.pppoeSpecType = this.formValidate.pppoeSpec;
+            postVar.pppoeMtu = this.formValidate.pppoeMtu;
+            postVar.pppoeOpMode = this.formValidate.pppoeOpMode;
+            postVar.pppoeTime = this.formValidate.pppoeTime;
+            postVar.macCloneEnabled = this.macCloneEnabled;
+            postVar.macCloneMac = this.formValidate.mac;
+            if(parseInt(val) == 0){
+                postVar.pppConnect = "1";
+            }else if(parseInt(val) == 1){
+                postVar.pppDisconnect = "1";
+            }
+            postVar.dnsMode = this.formValidate.dnsMode;
+            if(postVar.dnsMode == 1){
+                postVar.priDns = this.formValidate.priDns;
+                if(this.formValidate.secDns != ""){
+                    postVar.secDns = this.formValidate.secDns;
+                }else{
+                    postVar.secDns = "";
+                }
+            }
+            uiPost.setWanConfig(postVar,function(data) {
+                var time = 30;
+                _this.$Modal.success({
+                    loading:true,
+                    render: function(h) {
+                        return h('div',[
+                            _this.$t('common.loading'),
+                            h('Progress',{
+                                attrs:{ percent:_this.percent }
+                            })
+                        ])
+                    }
+                });
+                var percentTimer = setInterval(function(){
+                    if (_this.percent>=100) {
+                        clearInterval(percentTimer);
+                        location.href = location.href;
+                    }
+                    _this.percent++;
+                },cs.getTimer(time));
+            });
+        }
+    }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.opmode')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Alert>
+              <!-- <h3>设置</h3> -->
+              {{ $t('opmode.help') }}
+            </Alert>
+            <Row>
+              <Col>
+              <Form :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('opmode.title')">
+                  <RadioGroup v-model="operationMode" type="button">
+                    <Radio label="0" v-if="opmode.GW" >{{ $t('opmode.gateway_mode') }}</Radio>
+                    <Radio label="1" v-if="opmode.BR" >{{ $t('opmode.bridge_mode') }}</Radio>
+                    <Radio label="2" v-if="opmode.RPT" >{{ $t('opmode.repeater_mode') }}</Radio>
+                    <Radio label="3" v-if="opmode.WISP" >{{ $t('opmode.wisp_mode') }}</Radio>
+                    <Radio label="4" v-if="opmode.CLI" >xxx模式</Radio>
+                    <Radio label="5" v-if="opmode.MESH" >qqq模式</Radio>
+                    
+                  </RadioGroup>
+                </FormItem>
+                <FormItem  v-if="operationMode == 0 || operationMode == 1">
+                  <Card >
+                  {{ msg }}
+                  </Card>
+                </FormItem>
+                <br>
+                <Steps :current="currentSelect" v-if="operationMode == 2 || operationMode == 3">
+                    <Step :title="$t('opmode.title')" :content="msg"></Step>
+                    <Step :title="$t('opmode.extend_ap')" :content="$t('opmode.aplist_help')"></Step>
+                    <Step :title="$t('common.apply')" :content="$t('opmode.aplist_help1')"></Step>
+                </Steps>
+                <br>
+                <FormItem v-if="operationMode == 0 || operationMode == 1">
+                  <Button type="primary" @click="handleSubmit" :loading="applyLoading">{{ $t('common.apply') }}</Button>
+                </FormItem>
+              </Form>
+              </Col>
+              <Col v-if="operationMode == 2 || operationMode == 3" >
+              
+              <ButtonGroup v-if="currentSelect == 1">
+                  <Button @click="scan2" >{{ $t('opmode.scan') }} 2.4G</Button>
+                  <Button @click="scan5" >{{ $t('opmode.scan') }} 5G</Button>
+              </ButtonGroup>
+              <Table :loading="tableLoading" v-if="currentSelect == 1" highlight-row border height="520" :columns="aplistColumns" :data="aplist" @on-current-change="selectTable"></Table>
+              
+              <Form v-if="currentSelect == 2" ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('opmode.ssid')">
+                    <Input disabled v-model="formValidate.ssid" ></Input>
+                </FormItem>
+                <FormItem :label="$t('opmode.mac')">
+                    <Input disabled v-model="formValidate.bssid" ></Input>
+                </FormItem>
+                <FormItem :label="$t('opmode.security_mode')">
+                    <Select disabled v-model="formValidate.encrypt" >
+                        <Option value="NONE">{{ $t('opmode.disable') }}</Option>
+                        <Option value="OPEN">WEP-{{ $t('opmode.open_system') }}</Option>
+                        <Option value="SHARED">WEP-{{ $t('opmode.shared_key') }}</Option>
+                        <Option value="WPAPSK">WPA-PSK</Option>
+                        <Option value="WPA2PSK">WPA2-PSK</Option>
+                        <Option value="WPAPSKWPA2PSK">WPA/WPA2-PSK</Option>
+                    </Select>
+                </FormItem>
+                <FormItem :label="$t('opmode.key_format')">
+                    <Select disabled v-model="formValidate.cipher" >
+                        <Option value="WEP64">WEP64</Option>
+                        <Option value="WEP128">WEP128</Option>
+                        <Option value="TKIP">TKIP</Option>
+                        <Option value="AES">AES</Option>
+                        <Option value="TKIPAES">TKIP/AES</Option>
+                    </Select>
+                </FormItem>
+                <FormItem v-if="formValidate.encrypt!='NONE'" :label="$t('opmode.password')" prop="password">
+                    <Input v-model="formValidate.password" ></Input>
+                </FormItem>
+              </Form>
+              <br>
+              <Form :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem>
+                  <Button v-if="currentSelect" @click="handleBack">{{ $t('opmode.back') }}</Button>
+                  <Button v-if="currentSelect != 2" type="primary" @click="handleNext">{{ $t('opmode.next') }}</Button>
+                  <Button v-if="currentSelect == 2" type="primary" @click="handleSubmit">{{ $t('opmode.connect') }}</Button>
+                </FormItem>
+              </Form>
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+    template: "#main",
+    data: function() {
+        return {
+            globalConfig: globalConfig,
+            applyLoading: false,
+            tableLoading: false,
+            operationMode: "0",
+            currentSelect: 0,
+            percent: 0,
+            OpModeSupport:'',
+            selectData:null,
+            formValidate: {
+              channel:'',
+              ssid:'',
+              bssid:'',
+              cipher:'',
+              signal:'',
+              band:'',
+              password:''
+            },
+            aplist: []
+        }
+    },
+    computed: {
+      ruleValidate: function(){
+        var _this = this;
+        return {
+          password: [
+            { validator:function(r, v, f) {
+              if (!v || v.length < 8) {
+                f(_this.$t('opmode.msg1'));
+              }
+              if (1 == cs.string(v)) {
+                f(_this.$t('opmode.msg2'));
+              }
+              f();
+            },trigger: 'blur' }
+          ],
+        }
+      },
+        aplistColumns: function(){
+          return [{
+              title: this.$t('opmode.channel'),
+              key: 'channel',
+              sortable: true
+          }, {
+              title: this.$t('opmode.ssid'),
+              key: 'ssid',
+              sortable: true
+          }, {
+              title: this.$t('opmode.mac'),
+              key: 'bssid',
+              sortable: true
+          }, {
+              title: this.$t('opmode.security_mode'),
+              key: 'encrypt',
+              sortable: true
+          }, {
+              title: this.$t('opmode.signal'),
+              key: 'signal',
+              sortable: true
+          }, {
+              title: this.$t('opmode.mode'),
+              key: 'band',
+              sortable: true
+          }];
+        },
+        msg: function() {
+            this.currentSelect = 0;
+            this.selectData = null;
+            switch (this.operationMode) {
+                case "0":
+                    return this.$t('opmode.gateway_mode_msg');
+                    break;
+                case "1":
+                    return this.$t('opmode.bridge_mode_msg');
+                    break;
+                case "2":
+                    return this.$t('opmode.repeater_mode_msg');
+                    break;
+                case "3":
+                    return this.$t('opmode.wisp_mode_msg');
+                    break;
+            }
+        },
+        opmode:function(){
+          var temp = this.OpModeSupport.split(";");
+          var obj = {};
+          for (var i=0; i<temp.length; i++) {
+              obj[temp[i]] = true;
+          }
+          return obj;
+        }
+    },
+    created: function() {
+      var _this = this;
+      uiPost.getOpMode(function(data) {
+        _this.operationMode = data.operationMode;
+        _this.OpModeSupport = data.OpModeSupport;
+      })
+    },
+    methods: {
+        handleSubmit: function() {
+          var postVar = {};
+          var _this = this;
+          var time = 20;
+          postVar.operationMode=this.operationMode;
+          if (this.operationMode == 1 || this.operationMode == 0) {
+            // 网关模式 and 桥模式
+            uiPost.setOpMode(postVar,function(data) {
+              _this.$Modal.success({
+                loading:true,
+                render: function(h) {
+                  return h('div',[
+                    _this.$t('common.loading'),
+                    h('Progress',{
+                      attrs:{ percent:_this.percent }
+                    })
+                  ])
+                },
+              });
+              var percentTimer = setInterval(function(){
+                if (_this.percent>=100) {
+                  clearInterval(percentTimer);
+                  location.href = location.href;
+                }
+                _this.percent++;
+              },cs.getTimer(time));
+            });
+          }else{
+            // other
+            time=30;
+            postVar.apcliChannel=this.formValidate.channel;
+            postVar.apcliSsid=this.formValidate.ssid;
+            postVar.apcliBssid=this.formValidate.bssid;
+            postVar.apcliAuthMode=this.formValidate.encrypt;
+            postVar.apcliEncrypType=this.formValidate.cipher;
+            postVar.apcliKey=this.formValidate.password;
+            if(this.formValidate.channel < 15){
+                postVar.wifiIdx="1";
+            }else{
+                postVar.wifiIdx="0";
+            }
+            this.$refs['formValidate'].validate(function(valid){
+              if (valid) {
+                uiPost.setWiFiRepeaterConfig(postVar,function(data) {
+                  _this.$Modal.success({
+                    loading:true,
+                    render: function(h) {
+                      return h('div',[
+                        _this.$t('common.loading'),
+                        h('Progress',{
+                          attrs:{ percent:_this.percent }
+                        })
+                      ])
+                    },
+                  });
+                  var percentTimer = setInterval(function(){
+                    if (_this.percent>=100) {
+                      clearInterval(percentTimer);
+                      location.href = location.href;
+                    }
+                    _this.percent++;
+                  },cs.getTimer(time));
+                });
+              }
+            });
+          }
+
+        },
+        handleNext: function() {
+            if (this.currentSelect == 1 && !this.selectData) {
+               this.$Message.error(this.$t('opmode.select_ap'))
+               return false;
+            }
+            this.currentSelect++;
+        },
+        handleBack: function() {
+            this.currentSelect--;
+        },
+        selectTable: function(val) {
+            this.selectData = val;
+            for(var i in val)
+            {
+              this.formValidate[i] = val[i];
+            }
+        },
+        getAPlist:function(postVar){
+          var _this = this;
+          this.tableLoading = true;
+          uiPost.getWiFiApcliScan(postVar,function(data){
+            _this.tableLoading = false;
+            _this.aplist = data;
+          })
+        },
+        scan2:function() {
+            var postVar = {};
+            postVar.wifiIdx="1";   //2.4G
+            this.getAPlist(postVar);
+        },
+        scan5:function() {
+          var postVar = {};
+          postVar.wifiIdx="0";   //5G
+          this.getAPlist(postVar);
+        },
+    }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

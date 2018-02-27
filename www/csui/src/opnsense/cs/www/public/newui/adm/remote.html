@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.adm'),$t('menu.remote')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Col>
+                <Alert>
+                    {{ $t('remote.help') }}
+                </Alert>
+                </Col>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('remote.remote_web')">
+                        <i-switch v-model="formValidate.webStatus" size="large">
+                            <span slot="open">{{ $t('remote.enabled') }}</span>
+                            <span slot="close">{{ $t('remote.disabled') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <Col v-show="formValidate.webStatus" >
+                    <FormItem :label="$t('remote.port')" prop="webPort">
+                        <Input v-model="formValidate.webPort" :maxlength="5"></Input>
+                        <span>80—65535</span>
+                    </FormItem>
+                    </Col>
+                    <FormItem :label="$t('remote.remote_ssh')">
+                        <i-switch v-model="formValidate.sshStatus" size="large">
+                            <span slot="open">{{ $t('remote.enabled') }}</span>
+                            <span slot="close">{{ $t('remote.disabled') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <Col v-show="formValidate.sshStatus" >
+                    <FormItem :label="$t('remote.port')" prop="sshPort">
+                        <Input v-model="formValidate.sshPort" :maxlength="5"></Input>
+                        <span>1—65535</span>
+                    </FormItem>
+                    </Col>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('remote.apply') }}</Button>
+                    </FormItem>
+
+                </Form>
+            </Card>
+            <br>
+            </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+                formValidate: {
+                    webStatus:false,
+                    webPort:'',
+                    sshStatus:false,
+                    sshPort:''
+                },
+                csid: ''
+            }
+        },
+        computed:{
+            ruleValidate: function(){
+                var _this = this;
+                return {
+                    webPort: [
+                        { validator:function(r, v, f){
+                            console.log('--------------webPort---------------');
+                            console.log(_this.formValidate.webStatus);
+                            if(true == _this.formValidate.webStatus) {
+                                var _s = cs.num_range(v, 80, 65535);
+                                if (_s == 0) {
+                                    f('WEB' + _this.$t('remote.msg1'));
+                                } else if (_s == 1 || _s == 2) {
+                                    f('WEB' + _this.$t('remote.msg2'));
+                                } else {
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur'}
+                    ],
+                    sshPort: [
+                        { validator:function(r, v, f){
+                            console.log('--------------sshStatus---------------');
+                            console.log(_this.formValidate.sshStatus);
+                            if(true == _this.formValidate.sshStatus) {
+                                var _s = cs.num_range(v, 1, 65535);
+                                if (_s == 0) {
+                                    f('SSH' + _this.$t('remote.msg1'));
+                                } else if (_s == 1 || _s == 2) {
+                                    f('SSH' + _this.$t('remote.msg3'));
+                                } else {
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur'}
+                    ]
+                }
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postData = {"action":"getRemoteAccess"};
+            uiPost.getRemoteAccess(postData,function(data) {
+                console.log(data);
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    if(data.data.Web !=0){
+                        _this.formValidate.webStatus = true;
+                        _this.formValidate.webPort = data.data.Web;
+                    }
+                    if (data.data.Ssh !=0){
+                        _this.formValidate.sshStatus = true;
+                        _this.formValidate.sshPort = data.data.Ssh;
+                    }
+                }
+            });
+        },
+        methods:{
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        console.log('----------handleSubmit-----------');
+                        var data = {};
+                        if(true == _this.formValidate.webStatus){
+                            data['Web'] = _this.formValidate.webPort;
+                        }else{
+                            data['Web'] = "";
+                        }
+                        if (true == _this.formValidate.sshStatus){
+                            data['Ssh'] = _this.formValidate.sshPort;
+                        }else{
+                            data['Ssh'] = "";
+                        }
+                        var postVar ={"action":"setRemoteAccess","data":{"Web":data['Web'],"Ssh":data['Ssh']}};
+                        uiPost.setRemoteAccess(postVar,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success(_this.$t('remote.success'));
+                                location.href = location.href;
+                            } else {
+                                _this.$Message.error(_this.$t('remote.fail')+data.rescode);
+                            }
+                        });
+                       /* var postVar = {};
+                        postVar.port = _this.formValidate.port;
+                        postVar.csid = _this.csid;
+                        postVar.remoteEnabled = _this.formValidate.status?"1":"0";
+                        uiPost.setRemoteCfg(postVar,function(data){
+                            location.href = location.href;
+                        });*/
+                    }
+                })
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

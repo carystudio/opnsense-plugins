@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.portal'),$t('menu.addaccounts')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    {{ $t('addaccounts.help') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('addaccounts.username')" prop="username">
+                        <Input v-model="formValidate.username" :maxlength="20"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('addaccounts.password')" prop="password">
+                        <Input v-model="formValidate.password" :maxlength="16"></Input>
+                        <span>*{{$t('addaccounts.pwd_note')}}</span>
+                    </FormItem>
+                    <FormItem :label="$t('addaccounts.expiry_time')" prop="endtime">
+                        <Input v-model="formValidate.endtime" :maxlength="20"></Input>
+                        <span>*{{$t('addaccounts.format')}}： yyyy-mm-dd HH:MM:ss</span>
+                    </FormItem>
+                    <FormItem :label="$t('addaccounts.used_time')" prop="canlogin">
+                        <Input v-model="formValidate.canlogin" :maxlength="20"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('addaccounts.duplicate_login')">
+                        <i-switch v-model="formValidate.relogin" size="large">
+                            <span slot="open">{{ $t('common.on') }}</span>
+                            <span slot="close">{{ $t('common.off') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('common.apply') }}</Button>
+                    </FormItem>
+                </Form>
+            </Card>
+            </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+
+                formValidate: {
+                    username:'',
+                    password:'',
+                    endtime:'',
+                    canlogin:'',
+                    relogin: false
+                },
+                ruleValidate: {
+                    username:[
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if (0 == _s) {
+//                                f("用户名不能为空");
+                                f(_this.$t('addaccounts.username')+_this.$t('addaccounts.msg1'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    password:[
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if (0 == _s) {
+//                                f('密码不能为空');
+                                f(_this.$t('addaccounts.password')+_this.$t('addaccounts.msg1'));
+                            }
+                            if(v.length < 6 ){
+                                f(_this.$t('addaccounts.pwd_note'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    endtime:[
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if (0 == _s) {
+                                f(_this.$t('addaccounts.msg2'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ]
+                }
+            }
+        },
+        created:function() {
+            var _this = this;
+
+            var d = new Date();
+            var vYear = d.getFullYear();
+            var vMon = d.getMonth() + 1;
+            var vDay = d.getDate();
+            var h = d.getHours();
+            var m = d.getMinutes();
+            var se = d.getSeconds();
+            var s = vYear+"-"+(vMon<10 ? "0" + vMon : vMon)+"-"+(vDay<10 ? "0"+ vDay : vDay)+" "+(h<10 ? "0"+ h : h)+":"+(m<10 ? "0" + m : m)+":"+(se<10 ? "0" +se : se);
+
+            _this.formValidate.endtime = s;
+        },
+        methods:{
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.applyLoading = true;
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        var data = {};
+                        data.Username = _this.formValidate.username;
+                        data.Password = _this.formValidate.password;
+                        data.ExpireTime = _this.formValidate.endtime;
+                        data.RemainTime = _this.formValidate.canlogin;
+                        if(true == _this.formValidate.relogin){
+                            data.MutilLogins = "1";
+                        }else{
+                            data.MutilLogins = "0"
+                        }
+
+                        var postData = {"action":"addPortalUser", "data":data};
+                        console.log(postData);
+                        uiPost.addPortalUser(postData,function(data){
+                            console.log(data);
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success(_this.$t('addaccounts.add_success'));
+                                location.href = location.href;
+                            } else {
+                                _this.$Message.error(_this.$t('addaccounts.add_fail')+ data.rescode);
+                            }
+                            _this.applyLoading = false;
+                        });
+                    } else {
+                        _this.applyLoading = false;
+                    }
+                })
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

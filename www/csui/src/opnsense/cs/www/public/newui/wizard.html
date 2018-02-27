@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>wizard</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+  <style>
+    .main{
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<div class="main" style="padding:200px 0;">
+  <Row>
+      <i-col span="24">
+        <h1>wizard</h1>
+        <p>v0.0.1bate</p>
+        <p>&nbsp;</p>
+        <Form ref="formInline" :model="formInline" :rules="ruleInline" onsubmit="return false">
+            <form-item prop="password">
+                <Input type="text" v-model="formInline.password" >
+                    <span slot="prepend"> {{ $t("login.password") }} </span>
+                </Input>
+            </form-item>
+            <form-item>
+                <i-button long type="primary" @click="handleSubmit('formInline')">{{ $t("login.login") }}</i-button>
+            </form-item>
+        </Form>
+      </i-col>
+  </Row>
+  <slot name="footer"></slot>
+</div>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    return {
+      formInline: {
+          password: ''
+      },
+      ruleInline: {
+          password: [
+              { required: true, message: this.$t('login.msg_pass_fill'), trigger: 'blur' },
+              { type: 'string', min: 5, message: this.$t('login.msg_pass_size',[5]), trigger: 'blur' }
+          ]
+      }
+    }
+  },
+  created:function() {
+    globalConfig.showMenu = false;
+    globalConfig.showSearch = false;
+  },
+  methods:{
+     handleSubmit:function(name) {
+          this.$refs[name].validate((valid) => {
+              if (valid) {
+                  this.$Message.loading({content:this.$t('login.login')+this.$tc('login.state',1),onClose:function(){
+                    location.href = 'index.html';
+                  }});
+              } else {
+                  this.$Message.error(this.$t('login.login')+this.$tc('login.state',2));
+              }
+          })
+      }
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

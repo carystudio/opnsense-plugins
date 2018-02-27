@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.portal'),$t('menu.portal')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    {{ $t('portal.help') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('portal.status')">
+                        <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">
+                            <span slot="open">{{ $t('common.on') }}</span>
+                            <span slot="close">{{ $t('common.off') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <Col v-show="formValidate.status" >
+                    <FormItem :label="$t('portal.server_type')" prop="Type">
+                        <Select v-model="formValidate.Type" >
+                            <Option value="local">{{$t('portal.local')}}</Option>
+                            <Option value="server">{{$t('portal.cloud')}}</Option>
+                        </Select>
+                    </FormItem>
+                    <div v-show="formValidate.Type == 'local'">
+                        <FormItem :label="$t('portal.idle_timeout')" prop="IdleTimeout">
+                            <Input v-model="formValidate.IdleTimeout">
+                            <span slot="append"> ({{$t('portal.min')}}) </span>
+                            </Input>
+                        </FormItem>
+                        <FormItem :label="$t('portal.session_timeout')" prop="SessionTimeout">
+                            <Input v-model="formValidate.SessionTimeout">
+                            <span slot="append"> ({{$t('portal.min')}}) </span>
+                            </Input>
+                        </FormItem>
+                        <FormItem :label="$t('portal.allowed_ip')" prop="AllowedIp">
+                            <Input v-model="formValidate.AllowedIp"></Input>
+                            <span>{{$t('portal.ip_note')}}</span>
+                        </FormItem>
+                        <FormItem :label="$t('portal.allowed_mac')" prop="AllowedMac">
+                            <Input v-model="formValidate.AllowedMac"></Input>
+                            <span>{{$t('portal.mac_note')}}</span>
+                        </FormItem>
+                        {{$t('portal.wechat_login')}}
+                        <hr>
+                        <br>
+                        <FormItem label="appId" prop="appId">
+                            <Input v-model="formValidate.appId" :maxlength="40"></Input>
+                        </FormItem>
+                        <FormItem label="shopId" prop="shopId">
+                            <Input v-model="formValidate.shopId" :maxlength="40"></Input>
+                        </FormItem>
+                        <FormItem label="ssid" prop="ssid">
+                            <Input v-model="formValidate.ssid" :maxlength="40"></Input>
+                        </FormItem>
+                        <FormItem label="secretkey" prop="secretkey">
+                            <Input v-model="formValidate.secretkey" :maxlength="40"></Input>
+                        </FormItem>
+                        <FormItem :label="$t('portal.attention')" prop="attention">
+                            <Select v-model="formValidate.attention" >
+                                <Option value="0">{{$t('portal.force')}}</Option>
+                                <Option value="1">{{$t('portal.no_coercion')}}</Option>
+                            </Select>
+                        </FormItem>
+                        <hr>
+                        <br>
+                        <FormItem :label="$t('portal.login_page')" prop="LoginPageStatus">
+                            <Select v-model="formValidate.LoginPageStatus" >
+                                <Option value="0">{{$t('portal.default')}}</Option>
+                                <Option value="1">{{$t('portal.custom')}}</Option>
+                            </Select>
+                        </FormItem>
+                        <div v-show="formValidate.LoginPageStatus == '0'">
+                            <FormItem :label="$t('portal.download_page')">
+                                <a href="/portalapi/loginpagedl">{{$t('portal.download')}}</a>
+                            </FormItem>
+                        </div>
+                        <div v-show="formValidate.LoginPageStatus == '1'">
+                            <FormItem :label="$t('portal.upload_page')">
+                                <Upload
+                                        ref="upload"
+                                        :before-upload="handleUpload"
+                                        :action="upload.action"
+                                        :data="upload.data"
+                                        name="loginPage"
+                                        :format="upload.format"
+                                        :on-format-error="formatError"
+                                        :on-success="uploadSuccess"
+                                >
+                                    <Button icon="ios-cloud-upload-outline">{{$t('portal.upload')}}</Button>
+                                </Upload>
+                            </FormItem>
+                        </div>
+                    </div>
+                    <div v-show="formValidate.Type == 'server'">
+                        <FormItem :label="$t('portal.mcode')" prop="Mcode">
+                            <Input v-model="formValidate.Mcode" readonly></Input>
+                        </FormItem>
+                        <FormItem :label="$t('portal.hot_id')" prop="GatewayId">
+                            <Input v-model="formValidate.GatewayId" :maxlength="30"></Input>
+                        </FormItem>
+                    </div>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('common.apply') }}</Button>
+                    </FormItem>
+                    </Col>
+                </Form>
+            </Card>
+            </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+
+                submitFalg:'0',
+                upload: {
+                    file: null,
+                    action: '/webapi',
+                    format:['zip'],
+                    data:{
+                        action:'setPortalStatusUp'
+                    }
+                },
+                formValidate: {
+                    status: false,
+                    Type:'server',
+                    IdleTimeout:'',
+                    SessionTimeout:'',
+                    AllowedIp:'',
+                    AllowedMac:'',
+                    appId:'',
+                    shopId:'',
+                    ssid:'',
+                    secretkey:'',
+                    attention:'',
+                    LoginPageStatus:'',
+                    Mcode:'',
+                    GatewayId:''
+                }
+            }
+        },
+        computed:{
+            ruleValidate: function(){
+                var _this = this;
+                console.log(_this.submitFalg);
+                if(true == _this.formValidate.status){
+                    if('local' == _this.formValidate.Type && '1' == _this.submitFalg){
+                        return{
+                            AllowedIp: [
+                                { validator:function(r, v, f) {
+                                    if('' != v){
+                                        var ipArr = v.split(',');
+                                        for(var i = 0; i < ipArr.length;i++){
+                                            var ret = cs.ip(ipArr[i]);
+                                            if (ret == 0 || ret == 1 || ret == 2 || ret == 3 || ret == 4) {
+                                                f(ipArr[i]+': ' + _this.$t('portal.ip_invalid'));
+                                            }
+                                        }
+                                    }
+                                    f();
+                                },trigger: 'blur' }
+                            ],
+                            AllowedMac: [
+                                { validator:function(r, v, f) {
+                                    if('' != v){
+                                        var macArr = v.split(',');
+                                        for(var i = 0; i < macArr.length;i++){
+                                            var ret = cs.mac(macArr[i]);
+                                            if (ret != 99) {
+                                                f(macArr[i]+': ' + _this.$t('portal.mac_invalid'));
+                                            }
+                                        }
+                                    }
+                                    f();
+                                },trigger: 'blur' }
+                            ],
+                            appId: [
+                                { validator:function(r, v, f) {
+                                    if('' == v){
+                                        f('appId'+_this.$t('portal.msg11'));
+                                    }
+                                    f();
+                                },trigger: 'blur' }
+                            ],
+                            shopId: [
+                                { validator:function(r, v, f) {
+                                    if('' == v){
+                                        f('shopId'+_this.$t('portal.msg11'));
+                                    }
+                                    f();
+                                },trigger: 'blur' }
+                            ],
+                            ssid: [
+                                { validator:function(r, v, f) {
+                                    if('' == v){
+                                        f('ssid');
+                                    }
+                                    f();
+                                },trigger: 'blur' }
+                            ],
+                            secretkey: [
+                                { validator:function(r, v, f) {
+                                    if('' == v){
+                                        f('secretkey'+_this.$t('portal.msg11'));
+                                    }
+                                    f();
+                                },trigger: 'blur' }
+                            ]
+                        }
+                    }else if('server' == _this.formValidate.Type && '1' == _this.submitFalg){
+                        return{
+                            GatewayId: [
+                                { validator:function(r, v, f) {
+                                    if('' == v){
+                                        f(this.$t('portal.hot_id')+_this.$t('portal.msg11'));
+                                    }
+                                    f();
+                                },trigger: 'blur' }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postData = {"action":"getPortalStatus"};
+            uiPost.getPortalStatus(postData,function(data) {
+
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    if('1' == data.data.Enable){
+                        _this.formValidate.status = true;
+                    }else{
+                        _this.formValidate.status = false;
+                    }
+
+                    _this.formValidate.Type = data.data.Type;
+                    _this.formValidate.Mcode = data.data.Mcode;
+
+                    if("server" == _this.formValidate.Type){
+                        _this.formValidate.GatewayId = data.data.GatewayId;
+                        _this.formValidate.LoginPageStatus = data.data.LoginPageStatus;
+                    }else{
+                        _this.formValidate.AllowedIp = data.data.AllowedIp;
+                        _this.formValidate.AllowedMac = data.data.AllowedMac;
+                        _this.formValidate.IdleTimeout = data.data.IdleTimeout;
+                        _this.formValidate.LoginPageStatus = data.data.LoginPageStatus;
+                        _this.formValidate.SessionTimeout = data.data.SessionTimeout;
+                        _this.formValidate.appId = data.data.appId;
+                        if('yes' == data.data.attention){
+                            _this.formValidate.attention = '0';
+                        }else{
+                            _this.formValidate.attention = '1';
+                        }
+                        _this.formValidate.secretkey = data.data.secretkey;
+                        _this.formValidate.shopId = data.data.shop_id;
+                        _this.formValidate.ssid = data.data.ssid;
+                    }
+
+                }else {
+                    _this.$Message.error(data.rescode);
+                }
+            });
+        },
+        methods:{
+            submitStatus:function(){
+                if(false == this.formValidate.status){
+                    var postVar = {"action":"setPortalStatus","data":{"Enable":"0"}};
+                    uiPost.setPortalStatus(postVar);
+                }
+            },
+            handleUpload: function(file) {
+                this.upload.file = file;
+            },
+            /*exceededSize: function() {
+                this.$Message.error({content:this.$t('firmware.msg4',[cs.bytesToSize( (parseInt(this.upload.maxSize)*1000) )]),duration: 5});
+            },*/
+            formatError: function() {
+                this.$Message.error({content:this.$t('firmware.msg2',[this.upload.format.join('、')]),duration: 5});
+            },
+            uploadSuccess:function(){
+                var _this = this;
+//                _this.$Modal.success({
+//                    loading:true,
+//                    render: function(h) {
+//                        return h('div',[
+//                            _this.$t('common.loading'),
+//                            h('Progress',{
+//                                attrs:{ percent:_this.percent }
+//                            })
+//                        ])
+//                    }
+//                });
+//                var percentTimer = setInterval(function(){
+//                    if (_this.percent>=100) {
+//                        clearInterval(percentTimer);
+////                        location.href='/login.html';
+//                    }
+//                    _this.percent++;
+//                },cs.getTimer(120));
+            },
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.applyLoading = true;
+                _this.submitFalg = '1';
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+
+                        var data ={};
+                        data.Enable = '1';
+                        data.Type = _this.formValidate.Type;
+
+                        if('local' == _this.formValidate.Type){
+                            data.IdleTimeout = _this.formValidate.IdleTimeout;
+                            data.SessionTimeout = _this.formValidate.SessionTimeout;
+                            if('' != _this.formValidate.AllowedIp){
+                                var ipArr = _this.formValidate.AllowedIp.split(',');
+                                for(var i = 0; i < ipArr.length;i++){
+                                    var ret = cs.ip(ipArr[i]);
+                                    if (ret == 0 || ret == 1 || ret == 2 || ret == 3 || ret == 4) {
+                                        _this.$Message.error(ipArr[i]+': ' + _this.$t('portal.ip_invalid'));
+                                        return false;
+                                    }
+                                }
+                            }
+                            data.AllowedIp = _this.formValidate.AllowedIp;
+                            if('' != _this.formValidate.AllowedMac){
+                                var macArr = _this.formValidate.AllowedMac.split(',');
+                                for(var i = 0; i < macArr.length;i++){
+                                    var ret = cs.mac(macArr[i]);
+                                    if (ret != 99) {
+                                        _this.$Message.error(macArr[i]+': ' + _this.$t('portal.mac_invalid'));
+                                        return false;
+                                    }
+                                }
+                            }
+                            data.AllowedMac = _this.formValidate.AllowedMac;
+                            data.LoginPageStatus = _this.formValidate.LoginPageStatus;
+                            if('' == _this.formValidate.appId){
+                                _this.$Message.error('appId'+_this.$t('portal.msg11'));
+                                return false;
+                            }
+                            data.appId = _this.formValidate.appId;
+                            if('' == _this.formValidate.shopId){
+                                _this.$Message.error('shopId'+_this.$t('portal.msg11'));
+                                return false;
+                            }
+                            data.shop_id = _this.formValidate.shopId;
+                            if('' == _this.formValidate.ssid){
+                                _this.$Message.error('ssid'+_this.$t('portal.msg11'));
+                                return false;
+                            }
+                            data.ssid = _this.formValidate.ssid;
+                            if('' == _this.formValidate.secretkey){
+                                _this.$Message.error('secretkey'+_this.$t('portal.msg11'));
+                                return false;
+                            }
+                            data.secretkey = _this.formValidate.secretkey;
+                            data.attention = _this.formValidate.attention;
+                        }else{
+                            if('' == _this.formValidate.GatewayId){
+                                _this.$Message.error(_this.$t('portal.hot_id')+_this.$t('portal.msg11'));
+                                return false;
+                            }
+                            data.GatewayId = _this.formValidate.GatewayId;
+                        }
+
+                        var postData = {"action":"setPortalStatus","data":data};
+                        console.log(postData);
+                        uiPost.setPortalStatus(postData,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success(_this.$t('portal.success'));
+                                location.href = location.href;
+                            } else {
+                                _this.$Message.error(_this.$t('portal.fail')+data.rescode);
+                            }
+                            _this.applyLoading = false;
+                        });
+                    } else {
+                        _this.applyLoading = false;
+                    }
+                })
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

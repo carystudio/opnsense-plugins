@@ -1,0 +1,7 @@
+{
+  "dmzEnabled":	"1",
+  "dmzAddress":	"192.168.0.12",
+  "lanIp":	"192.168.0.1",
+  "lanNetmask":	"255.255.255.0",
+  "stationIp":	"192.168.0.100"
+}

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+  <style>
+    .cs-table{
+      border-bottom: 1px solid #ccc;
+      padding:5px;
+    }
+    .cs-table .right {
+      text-align: right;
+      padding-right: 10px;
+      font-weight: 600; 
+    }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.index'),$t('menu.realtime')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+               <RadioGroup v-model="tab" type="button">
+                  <Radio label="0">{{ $t('realtime.net_info') }}</Radio>
+                  <Radio label="1">{{ $t('realtime.link') }}</Radio>
+              </RadioGroup>
+                <Row>
+                  <Col v-show="tab == 0">
+                      <div id="load_charts" style="width: 100%;height: 450px;"></div>
+
+                      <Row class="cs-table" >
+                        <Col span="6" class="right">{{ $t('realtime.type') }}:</Col>
+                        <Col span="6">{{ loadChartsData.type }}</Col>
+                        <Col span="6" class="right">{{ $t('realtime.status') }}:</Col>
+                        <Col span="6">{{ loadChartsData.status }}</Col>
+                      </Row>
+                      <Row class="cs-table">
+                        <Col span="6" class="right">{{ $t('realtime.ip') }}:</Col>
+                        <Col span="6">{{ loadChartsData.ip }}</Col>
+                        <Col span="6" class="right">{{ $t('realtime.gate') }}:</Col>
+                        <Col span="6">{{ loadChartsData.gateway }}</Col>
+                      </Row>
+                      <Row class="cs-table">
+                        <Col span="6" class="right">{{ $t('realtime.up') }}:</Col>
+                        <Col span="6">{{ loadChartsData.up }}</Col>
+                        <Col span="6" class="right">{{ $t('realtime.down') }}:</Col>
+                        <Col span="6">{{ loadChartsData.down }}</Col>
+                      </Row>
+                  </Col>
+                  <Col v-show="tab == 1">
+                      <div id="links_charts" style="width: 100%;height: 450px;"></div>
+                      <Table border ref="tableSelect" :columns="linksChartsColumns" :data="linksChartsData.connections"></Table>
+                  </Col>
+                </Row>
+            </Card>
+          </Col>
+        </Row>
+    </div>
+    <Modal
+        v-model="showModel"
+        :title="$t('realtime.analysis')"
+        :okText="$t('common.ok')"
+        :cancelText="$t('common.cancel')"
+        :width="700"
+        >
+        <Table :columns="analysisColumns" :data="analysisData" >
+        </Table>
+    </Modal>
+    <div style="display: none;">{{ tabs }}</div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/plugin/echarts.min.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+
+var timer = {};
+var timestamp = 1000;
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      applyLoading:false,
+      tab:'0',
+      timestamp:1000,
+      loadChartsData:{
+        type:'',
+        status:'',
+        ip:'',
+        gateway:'',
+        up:'',
+        down:''
+      },
+      linksChartsData:{
+        connections:[]
+      },
+      timer:{},
+      timerNum:0,
+      start:false,
+      showModel:false,
+      analysisData: []
+    }
+  },
+  computed:{
+    tabs:function(){
+      var _this = this;
+      if (this.start || this.timerNum == 2) {
+        this.timerNum = 0;
+        for(var _i in this.timer)
+        {
+          this.timerNum++;
+          clearInterval(this.timer[_i]);
+        }
+        if (this.tab == 0) {
+          this.timer.loadChartsTimer = setInterval(function(){
+            _this.functionLoadCharts();
+          },this.timestamp);
+        }else if (this.tab == 1) {
+          this.timer.linksChartsTimer = setInterval(function(){
+            _this.functionLinksCharts();
+          },this.timestamp);
+        }
+      }
+      return this.tab;
+    },
+    linksChartsColumns:function(){
+      var _this = this;
+      return [{
+          title: this.$t('realtime.source'),
+          key: 'src',
+          sortable: true
+      }, {
+          title: this.$t('realtime.count_downloads'),
+          key: 'count_download',
+          sortable: true,
+          render: function(h, params){
+            return h('span',cs.bytesToSize(parseInt(params.row.count_download)*1000*1000));
+          }
+      }, {
+          title: this.$t('realtime.count_upload'),
+          key: 'count_upload',
+          sortable: true,
+          render: function(h, params){
+            return h('span',cs.bytesToSize(parseInt(params.row.count_upload)*1000*1000));
+          }
+      },  {
+          title: this.$t('realtime.download_speed'),
+          key: 'download',
+          sortable: true,
+          render: function(h, params){
+            return h('span',params.row.download+' KB/s');
+          }
+      },  {
+          title: this.$t('realtime.upload_speed'),
+          key: 'upload',
+          sortable: true,
+          render: function(h, params){
+            return h('span',params.row.upload+' KB/s');
+          }
+      }, {
+          title: this.$t('realtime.links_conut'),
+          key: 'connect_count',
+          sortable: true,
+          render: function(h, params) {
+            return h('a', {
+                attrs: {
+                    href: 'javascript:;',
+                },
+                on:{
+                  click:function(){
+                    _this.showLinksModel(params);
+                  }
+                },
+                domProps: {
+                    innerHTML: params.row.connect_count + ' ( '+ _this.$t('realtime.see') +' )'
+                }
+            });
+          }
+      }];
+    },
+    analysisColumns:function(){
+      return [{
+          title: this.$t('realtime.protocol'),
+          key: 'protocol',
+          width:'60',
+          sortable: true
+      }, {
+          title: this.$t('realtime.address'),
+          key: 'src',
+          sortable: true,
+          render: function(h, params){
+            return h('span',params.row.src+':'+params.row.sport);
+          }
+      }, {
+          title: this.$t('realtime.interface'),
+          key: 'net',
+          width:'80',
+          sortable: true
+      }, {
+          title: this.$t('realtime.target_address'),
+          key: 'dst',
+          sortable: true,
+          render: function(h, params){
+            return h('span',params.row.dst+':'+params.row.dport);
+          }
+      }, {
+          title: this.$t('realtime.connection_time'),
+          key: 'time',
+          sortable: true
+      }]
+    }
+  },
+  created:function() {
+    // uiPost.getPasswordCfg(function(data) {
+    //   _this.formValidate.user = data.admuser;
+    //   _this.Password = data.admpass;
+    // });
+  },
+  updated:function(){
+    if (this.tab == 0 && !this.timer.loadChartsTimer) {
+      this.start = true;
+      this.loadCharts();
+    }else if(this.tab == 1 && !this.timer.linksChartsTimer) {
+      this.start = true;
+      this.linksCharts();
+    }else{
+      this.start = false;
+    }
+  },
+  methods:{
+    loadCharts: function(){
+        var _this = this;
+        this.loadChartsData.load_x = new Array(50);
+        this.loadChartsData.load_y = new Array(50);
+        this.loadChartsData.load_y1 = new Array(50);
+        this.loadChartsData.load_x_i = 0;
+        for (var i = 0; i < this.loadChartsData.load_x.length; i++) {
+            this.loadChartsData.load_x[i] = '';
+            this.loadChartsData.load_y[i] = 0;
+            this.loadChartsData.load_y1[i] = 0;
+        }
+        this.loadChartsData.load_charts_option = {
+            animation:false,
+            xAxis : [{type : 'category', data:this.loadChartsData.load_x }],
+            yAxis : [{type : 'value', min:0,name:"KB/s" }],
+            legend:{type:"plain",data:[this.$t('realtime.up'),this.$t('realtime.down')]},
+            series : [
+                {name:this.$t('realtime.up'), type:'line', stack: '1', symbol:'none', smooth: true, itemStyle: {normal: {width:1, color: '#C23531'} }, areaStyle: {normal: {color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{offset: 0, color: '#C23531'}, {offset: 1, color: '#fff'}]) } }, data:this.loadChartsData.load_y },
+                {name:this.$t('realtime.down'), type:'line', stack: '2', symbol:'none', smooth: true,itemStyle: {normal: {width:1, color: '#2F4554'} }, areaStyle: {normal: {color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{offset: 0, color: '#2F4554'}, {offset: 1, color: '#fff'}]) } }, data:this.loadChartsData.load_y1 },
+            ],
+            tooltip : {trigger: 'axis', axisPointer: {type: 'cross', label: {backgroundColor: '#6a7985'} } }
+        };
+        this.loadChartsData.load_charts = document.getElementById("load_charts");
+        this.loadChartsData.e_load_charts = echarts.init(this.loadChartsData.load_charts);
+        this.loadChartsData.e_load_charts.setOption(this.loadChartsData.load_charts_option);
+
+        this.timer.loadChartsTimer = setInterval(function(){
+          _this.functionLoadCharts();
+        },this.timestamp);
+    },
+    functionLoadCharts:function(){
+      var _this = this;
+      uiPost.getNetInfo(function(data){
+          var type = data.type;
+          var status = data.status;
+          _this.loadChartsData.load_x.shift();
+          _this.loadChartsData.load_y.shift();
+          _this.loadChartsData.load_y1.shift();
+          _this.loadChartsData.load_x.push(_this.formatDate('mm:ss',data.timestamp));
+          _this.loadChartsData.load_y.push(data.up);
+          _this.loadChartsData.load_y1.push(data.down);
+          _this.loadChartsData.e_load_charts.setOption({xAxis:[{data:_this.loadChartsData.load_x}],series:[{data:_this.loadChartsData.load_y},{data:_this.loadChartsData.load_y1}]});
+          // 其他显示
+          _this.loadChartsData.type = (type==1?"DHCP":type==2? _this.$t('realtime.staticip') :"PPPoE");
+          _this.loadChartsData.status = (status ==1 ? _this.$t('realtime.succ') : _this.$t('realtime.fail') );
+          _this.loadChartsData.ip = (data.ip);
+          _this.loadChartsData.gateway = (data.gateway);
+          _this.loadChartsData.up = (data.up +' KB/s');
+          _this.loadChartsData.down = (data.down +' KB/s');
+      });
+    },
+    linksCharts: function(){
+      var _this = this;
+      this.linksChartsData.links_x = new Array(100); 
+      this.linksChartsData.links_y = new Array(100); 
+      this.linksChartsData.links_y1 = new Array(100);
+      this.linksChartsData.connections = [];
+      this.linksChartsData.links_x_i = 0;
+      for (var i = 0; i < this.linksChartsData.links_x.length; i++) {
+          this.linksChartsData.links_x[i] = 0;
+          this.linksChartsData.links_y[i] = 0;
+          this.linksChartsData.links_y1[i] = 0;
+      }
+      this.linksChartsData.links_charts_option = {
+          xAxis : [{show:false, type : 'category', data:this.linksChartsData.links_x } ],
+          yAxis : [{type : 'value', min:0 } ], 
+          legend:{type:"plain", data: ['TCP','UDP']},
+          series : [
+              {name:"TCP", type:'line',smooth: true, symbol: 'none', itemStyle: {normal: {width:1, color: '#0095C5'} }, stack: 'a', areaStyle: {normal: {color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{offset: 0, color: '#0095C5'}, {offset: 1, color: '#fff'}]) } }, data:this.linksChartsData.links_y },
+              {name:"UDP", type:'line',smooth:true, stack: 'a1', symbol: 'none', itemStyle: {normal: {width:1, color: '#F5AE10'} }, areaStyle: {normal: {color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{offset: 0, color: '#F5AE10'}, {offset: 1, color: '#fff'}]) } }, data:this.linksChartsData.links_y1 }
+          ],
+          animation:false
+      };
+      this.linksChartsData.links_charts = document.getElementById("links_charts");
+      this.linksChartsData.e_links_charts = echarts.init(this.linksChartsData.links_charts);
+      this.linksChartsData.e_links_charts.setOption(this.linksChartsData.links_charts_option);
+      this.timer.linksChartsTimer = setInterval(function(){
+          _this.functionLinksCharts();
+        },this.timestamp);
+    },
+    functionLinksCharts:function(){
+      var _this = this;
+      uiPost.getLinksData(function(data){
+        _this.linksChartsData.links_x.shift();
+        _this.linksChartsData.links_y.shift();
+        _this.linksChartsData.links_y1.shift();
+        _this.linksChartsData.links_x.push(_this.linksChartsData.links_x_i++);
+        _this.linksChartsData.links_y.push(data.statistics.tcp);
+        _this.linksChartsData.links_y1.push(data.statistics.udp);
+        _this.linksChartsData.e_links_charts.setOption({xAxis:[{data:_this.linksChartsData.links_x}],series:[{data:_this.linksChartsData.links_y},{data:_this.linksChartsData.links_y1}]});
+        _this.linksChartsData.connections = data.connections;
+      });
+    },
+    showLinksModel:function(params){
+      this.showModel = true;
+      this.analysisData = params.row.data;
+    },
+    formatDate: function(fmt,timestamp) {
+        var date = new Date(Number(timestamp*1000));
+        var o = {
+            "M+": date.getMonth() + 1, //月份 
+            "d+": date.getDate(), //日 
+            "h+": date.getHours(), //小时 
+            "m+": date.getMinutes(), //分 
+            "s+": date.getSeconds(), //秒 
+            "q+": Math.floor((date.getMonth() + 3) / 3), //季度 
+            "S": date.getMilliseconds() //毫秒 
+        };
+        if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

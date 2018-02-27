@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.firewall'),$t('menu.dnsfwd')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Col>
+                <Alert>
+                    {{ $t('dnsfwd.help') }}
+                </Alert>
+                </Col>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('dnsfwd.title')">
+                        <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">
+                            <span slot="open">{{ $t('common.enabled') }}</span>
+                            <span slot="close">{{ $t('common.disabled') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <Col v-show="formValidate.status" >
+                    {{ $t('dnsfwd.add_rule') }}
+                    <hr>
+                    <br>
+                    <FormItem :label="$t('dnsfwd.domain')" prop="domain">
+                        <Input v-model="formValidate.domain"></Input>
+                        <span>{{ $t('dnsfwd.example') }}</span>
+                    </FormItem>
+                    <FormItem :label="$t('dnsfwd.ip')" prop="ip">
+                        <Row>
+                            <!--<Col span="19">--><Input v-model="formValidate.ip" ></Input><!--</Col>-->
+                            <!-- <Col span="4" offset="1"><Button long @click="showClientList">{{ $t('dnsfwd.scan') }}</Button></Col>-->
+                        </Row>
+                    </FormItem>
+                    <FormItem :label="$t('dnsfwd.comment')" prop="comment">
+                        <Input v-model="formValidate.comment" ></Input>
+                    </FormItem>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" :loading="addDnsfwdLoading" @click="handleSubmit('formValidate')">{{ $t('dnsfwd.add') }}</Button>
+                    </FormItem>
+                    </Col>
+                </Form>
+            </Card>
+            <br>
+            </Col>
+        </row>
+        <Row  v-show="formValidate.status" >
+            <!--<Col class="cs-btn-del">
+                <Button size="small" @click="tableSelect(true)" type="error">{{ $t('static_dhcp.delete') }}</Button>
+            </Col>-->
+            <Col>
+            <Table border ref="tableSelect" :columns="dnsfwdColumns" :data="dnsfwdData"></Table>
+            </Col>
+        </Row>
+    </div>
+    <Modal
+            v-model="showModel"
+            :title="$t('dnsfwd.modal_title')"
+            @on-ok="ok"
+            @on-cancel="cancel">
+        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable">
+            <div slot="footer" style="display: none;"></div>
+        </Table>
+    </Modal>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            return {
+                globalConfig:globalConfig,
+                arpLoading:true,
+                addDnsfwdLoading:false,
+                formValidate: {
+                    status:false,
+                    domain:'',
+                    ip:'',
+                    comment:''
+                },
+                ip:'',
+                lanIp: '',
+                lanNetmask: '',
+                showModel:false,
+                arpColumns: [
+                    {
+                        title: '#',
+                        key: 'idx',
+                        sortable:true
+                    },
+                    {
+                        title: 'IP',
+                        key: 'ip',
+                        sortable:true
+                    },
+                    {
+                        title: 'MAC',
+                        key: 'mac',
+                        sortable:true
+                    }
+                ],
+                arpData: [],
+                dnsfwdData: []
+            }
+        },
+        computed:{
+            ruleValidate: function(){
+                var _this = this;
+                return{
+                    domain: [
+                        { validator:function(r, v, f){
+                            var _s = cs.domain(v);
+                            console.log('--------------------'+_s+'-------------------------');
+                            if(_s == 0){
+//                      f(_this.$t('dnsfwd.msg10'));
+                                f(_this.$t('dnsfwd.msg14'));
+                            }else if(_s == 1) {
+                                f(_this.$t('dnsfwd.msg15'));
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur'}
+                    ],
+                    ip: [
+                        { validator:function(r, v, f) {
+                            var ret = cs.ip(v);
+                            if (ret == 0) {
+                                f(_this.$t('dnsfwd.msg16'));
+                            }
+                            if ( ret == 1 || ret == 2 || ret == 3 || ret == 4) {
+                                f(_this.$t('dnsfwd.msg17'));
+                            }
+                            /*if(v == _this.lanIp){
+                                f(_this.$t('dnsfwd.msg2'));
+                            }
+                            if(0 == cs.ip_subnet(v,_this.lanNetmask,_this.lanIp)){
+                                f(_this.$t('dnsfwd.msg3'));
+                            }*/
+                            f();
+                        },trigger: 'blur' }
+                    ]/*,
+                     comment: [
+                     { validator:function(r, v, f){
+                     var _s = cs.string(v);
+                     if(_s == 1){
+                     f(_this.$t('dnsfwd.msg10'));
+                     }else{
+                     f();
+                     }
+                     },trigger: 'blur'}
+                     ]*/
+                }
+            },
+            dnsfwdColumns: function() {
+                var _this = this;
+                return [/*{
+                 type: 'selection',
+                 key: 'idx',
+                 width: '100',
+                 sortable: true
+                 },*/ {
+                    title: 'ID',
+                    key: 'idx',
+                    sortable: true
+                }, {
+                    title: this.$t('dnsfwd.domain'),
+                    key: 'Domain',
+                    sortable: true
+                }, {
+                    title: this.$t('dnsfwd.ip'),
+                    key: 'Ip',
+                    sortable: true
+                }, {
+                    title: this.$t('dnsfwd.comment'),
+                    key: 'Descr',
+                    sortable: true
+                }, {
+                    title: this.$t('dnsfwd.operation'),
+                    key: 'idx',
+                    align: 'center',
+                    render: function(h, params) {
+                        return h('Poptip',{
+                            props: {
+                                confirm: true,
+                                title: _this.$t('dnsfwd.msg12'),
+                                "ok-text":_this.$t('common.ok'),
+                                "cancel-text":_this.$t('common.cancel')
+                            },
+                            on: {
+                                "on-ok": function(){
+                                    _this.deleteData(params);
+                                }
+                            }
+                        }, [
+                            h('Button', {
+                                props: {
+                                    type: 'error',
+                                    size: 'small'
+                                }
+                            }, _this.$t('dnsfwd.delete'))
+                        ]);
+                    }
+                }];
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postData = {"action":"getDnsForwardStatus"};
+            uiPost.getDnsForwardStatus(postData,function(data){
+                console.log('-------------------getDnsForwardStatus-------------------');
+                console.log(data);
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    if('1' == data.data.Enable){
+                        _this.formValidate.status = true;
+                    }else {
+                        _this.formValidate.status = false
+                    }
+
+                    _this.dnsfwdData = data.data.Overwrites;
+                    for(var i in _this.dnsfwdData){
+                        _this.dnsfwdData[i].idx = Number(i) + 1;
+                    }
+
+                }
+            });
+        },
+        methods:{
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.addDnsfwdLoading = true;
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        if(_this.dnsfwdData.length){
+                            for(var i=0; i<_this.dnsfwdData.length; i++){
+                                if(
+                                        _this.formValidate.domain == _this.dnsfwdData[i].Domain &&
+                                        _this.formValidate.ip == _this.dnsfwdData[i].Ip
+                                ){
+                                    _this.$Message.error(_this.$t('dnsfwd.msg8'));
+                                    _this.addDnsfwdLoading = false;
+                                    return false;
+                                }
+                            }
+                        }
+
+                        var data = {};
+                        data.Ip = _this.formValidate.ip;
+                        data.Domain = _this.formValidate.domain;
+                        data.Descr = _this.formValidate.comment;
+                        var postData = {"action":"addDnsOverwrite","data":data};
+
+                        uiPost.addDnsOverwrite(postData,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success(_this.$t('dnsfwd.msg18'));
+                                location.href = location.href;
+                            } else {
+                                _this.$Message.error(_this.$t('dnsfwd.msg19')+data.rescode);
+                            }
+                            _this.addDnsfwdLoading = false;
+                        });
+                    }else{
+                        _this.addDnsfwdLoading = false;
+                    }
+                })
+            },
+            showClientList:function () {
+                var _this = this;
+                this.showModel = true;
+                uiPost.getArpTable(function(data) {
+                    _this.arpData = data.slice(1);
+                    _this.arpLoading = false;
+                });
+            },
+            ok:function () {
+                this.formValidate.ip = this.ip;
+                //this.$Message.info('Clicked ok');
+            },
+            cancel:function () {
+                //this.$Message.info('Clicked cancel');
+            },
+            submitStatus:function(){
+                var _this = this;
+                var postData = {};
+                if(true == this.formValidate.status){
+                    postData = {"action":"setDnsForwardStatus","data":{"Enable":"1"}};
+                }else{
+                    postData = {"action":"setDnsForwardStatus","data":{"Enable":"0"}};
+                }
+
+                uiPost.setDnsForwardStatus(postData,function (data) {
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 == data.rescode) {
+                        _this.$Message.success(_this.$t('dnsfwd.msg20'));
+                    } else {
+                        _this.$Message.error(_this.$t('dnsfwd.msg21')+data.rescode);
+                    }
+                });
+            },
+            selectTable:function (obj) {
+                this.ip = obj.ip;
+            },
+            deleteData:function (obj) {
+                var _this = this;
+                var data = {};
+                data.Domain = obj.row.Domain;
+                var postData = {"action":"delDnsOverwrite","data":data};
+                uiPost.delDnsOverwrite(postData,function(){
+                    _this.dnsfwdData.splice(obj.index, 1);
+                });
+               /* var postVar = {};
+                postVar[obj.row.delRuleName] = obj.index;
+                uiPost.delPortForwardRules(postVar,function(){
+                    _this.dnsfwdData.splice(obj.index, 1);
+                });*/
+            },
+            tableSelect:function(status){
+                var _this = this;
+                if (status) {
+                    var getSelection = this.$refs.tableSelect.getSelection();
+                    if (getSelection.length>0) {
+                        var postVar = {};
+                        for(var i=0; i<getSelection.length; i++)
+                        {
+                            postVar[getSelection[i].delRuleName] = i;
+                        }
+                        uiPost.delPortForwardRules(postVar,function(){
+                            _this.$Message.success({content:_this.$t('dnsfwd.msg13'),onClose:function(){
+                                location.href = location.href;
+                            }});
+
+                        });
+                    }else{
+                        this.$Message.error(this.$t('dnsfwd.msg11'));
+                    }
+                }else{
+                    this.$refs.tableSelect.selectAll(status);
+                }
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

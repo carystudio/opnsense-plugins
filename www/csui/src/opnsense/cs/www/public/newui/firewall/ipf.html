@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.firewall'),$t('menu.ipf')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    {{ $t('ipf.help') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <!-- <FormItem :label="$t('ipf.title')">
+                         <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">
+                             <span slot="open">{{ $t('common.enabled') }}</span>
+                             <span slot="close">{{ $t('common.disabled') }}</span>
+                         </i-switch>
+                     </FormItem>
+                     <Col v-show="formValidate.status" >
+                     {{ $t('ipf.add_rule') }}
+                     <hr>-->
+                    <br>
+                    <FormItem :label="$t('ipf.type')" prop="filterType">
+                        <Select v-model="formValidate.filterType" >
+                            <!--<Option value="1">WAN</Option>-->
+                            <Option value="2">LAN1</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipf.ip')" prop="ip">
+                        <Row>
+                            <Col span="19"><Input v-model="formValidate.ip" ></Input></Col>
+                            <Col span="4" offset="1"><Button long @click="showClientList">{{ $t('ipf.scan') }}</Button></Col>
+                        </Row>
+                    </FormItem>
+                    <FormItem :label="$t('ipf.protocol')">
+                        <i-select v-model="formValidate.protocol">
+                            <Option value="ALL">TCP/UDP</Option>
+                            <Option value="TCP">TCP</Option>
+                            <Option value="UDP">UDP</Option>
+                        </i-select>
+                    </FormItem>
+                    <FormItem :label="$t('ipf.port_range')">
+                        <Row>
+                            <Col span="9"><FormItem prop="dFromPort"><Input :maxlength="5" v-model="formValidate.dFromPort" ></Input></FormItem></Col>
+                            <Col span="2" align="center">--</Col>
+                            <Col span="9"><FormItem prop="dToPort"><Input :maxlength="5" v-model="formValidate.dToPort" ></Input></FormItem></Col>
+                            <span>(1-65535)</span>
+                        </Row>
+                    </FormItem>
+                    <FormItem :label="$t('ipf.comment')" prop="comment">
+                        <Input v-model="formValidate.comment"></Input>
+                    </FormItem>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" :loading="addIpfLoading" @click="handleSubmit('formValidate')">{{ $t('ipf.add') }}</Button>
+                    </FormItem>
+                    <!--</Col>-->
+                </Form>
+            </Card>
+            <br>
+            </Col>
+        </row>
+        <Row>
+            <Col class="cs-btn-del">
+            <Button size="small" @click="tableSelect(true)" type="error">{{ $t('ipf.delete') }}</Button>
+            </Col>
+            <Col>
+            <Table border ref="tableSelect" :columns="ipfColumns" :data="ipfData"></Table>
+            </Col>
+        </Row>
+    </div>
+    <Modal
+            v-model="showModel"
+            :title="$t('ipf.modal_title')"
+            @on-ok="ok"
+            @on-cancel="cancel">
+        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable"></Table>
+    </Modal>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            return {
+                globalConfig:globalConfig,
+                arpLoading:true,
+                addIpfLoading:false,
+                formValidate: {
+//          status:false,
+                    filterType:'2',
+                    ip:'',
+                    protocol:'ALL',
+                    dFromPort:'',
+                    dToPort:'',
+                    comment:''
+                },
+                ip:'',
+                lanIp: '',
+                lanNetmask: '',
+                showModel:false,
+                arpColumns: [
+                    {
+                        title: '#',
+                        key: 'idx',
+                        sortable:true
+                    },
+                    {
+                        title: 'IP',
+                        key: 'ip',
+                        sortable:true
+                    },
+                    {
+                        title: 'MAC',
+                        key: 'mac',
+                        sortable:true
+                    }
+                ],
+                arpData: [],
+                ipfData: []
+            }
+        },
+        computed:{
+            ruleValidate: function(){
+                var _this = this;
+                return{
+                    ip: [
+                        { validator:function(r, v, f) {
+                            var ret = cs.ip(v);
+                            if (ret == 0) {
+                                f(_this.$t('ipf.msg15'));
+                            }else if( ret == 1 || ret == 2 || ret == 3 || ret == 4){
+                                f(_this.$t('ipf.msg14'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    dFromPort: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.port(v);
+                            if(_s == 0) {
+                                f(_this.$t('ipf.msg4'));
+                            }else if(_s == 1 || _s == 2) {
+                                f(_this.$t('ipf.msg5'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    dToPort: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.port(v);
+                            if(_s == 1 || _s == 2) {
+                                f(_this.$t('ipf.msg6'));
+                            }
+                            if(v != ""){
+                                if(Number(_this.formValidate.dFromPort) > v){
+                                    f(_this.$t('ipf.msg7'));
+                                    return false;
+                                }
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    comment: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if(_s == 1) {
+                                f(_this.$t('ipf.msg9'));
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ]
+                }
+            },
+            ipfColumns: function() {
+                var _this = this;
+                return [{
+                    type: 'selection',
+                    key: 'Id',
+                    width: '100',
+                    sortable: true
+                }, {
+                    title: 'ID',
+                    key: 'idx',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: this.$t('ipf.type'),
+                    key: 'portType',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: this.$t('ipf.ip'),
+                    key: 'Ip',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: this.$t('ipf.protocol'),
+                    key: 'Protocol',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: this.$t('ipf.port_range'),
+                    key: 'portRange',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: this.$t('ipf.comment'),
+                    key: 'Descr',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: this.$t('ipf.operation'),
+                    key: 'Id',
+                    align: 'center',
+                    render: function(h, params) {
+                        return h('Poptip',{
+                            props: {
+                                confirm: true,
+                                title: _this.$t('ipf.msg12'),
+                                "ok-text":_this.$t('common.ok'),
+                                "cancel-text":_this.$t('common.cancel')
+                            },
+                            on: {
+                                "on-ok": function(){
+                                    _this.deleteData(params);
+                                }
+                            }
+                        }, [
+                            h('Button', {
+                                props: {
+                                    type: 'error',
+                                    size: 'small'
+                                }
+                            }, _this.$t('ipf.delete'))
+                        ]);
+                    }
+                }];
+            }
+        },
+        created:function(){
+            var _this = this;
+            var postData = {"action":"getFilterStatus"};
+            uiPost.getFilterStatus(postData,function(data) {
+                console.log(data);
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    var filtertype = {"1":"WAN","2":"LAN1"};
+                    _this.ipfData = data.data;
+                    for(var i in _this.ipfData){
+                        _this.ipfData[i].portType = filtertype[_this.ipfData[i].Type];
+                        _this.ipfData[i].idx = Number(i) + 1;
+                        _this.ipfData[i].portRange = _this.ipfData[i].PortStart + '-' + _this.ipfData[i].PortEnd;
+                    }
+                    console.log(_this.ipfData);
+                }
+            });
+        },
+        methods:{
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.addIpfLoading = true;
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        if(_this.ipfData.length) {
+                            for(var i=0; i<_this.ipfData.length; i++){
+                                var temp = _this.ipfData[i].portRange.split('-');
+                                if(_this.formValidate.ip == _this.ipfData[i].ip){
+                                    if(_this.formValidate.dToPort != ""){
+                                        if(
+                                                _this.formValidate.dFromPort == Number(temp[0]) ||
+                                                _this.formValidate.dToPort == Number(temp[1]) ||
+                                                _this.formValidate.dToPort == Number(temp[0]) ||
+                                                _this.formValidate.dFromPort == Number(temp[1])
+                                        ){
+                                            _this.$Message.error(_this.$t('ipf.msg8'));
+                                            return false;
+                                        }
+                                        if(_this.formValidate.dFromPort < Number(temp[0]) &&
+                                                _this.formValidate.dToPort > Number(temp[1])){
+                                            _this.$Message.error(_this.$t('ipf.msg8'));
+                                            return false;
+                                        }
+                                        if(_this.formValidate.dFromPort > Number(temp[0]) &&
+                                                _this.formValidate.dFromPort < Number(temp[1])){
+                                            _this.$Message.error(_this.$t('ipf.msg8'));
+                                            return false;
+                                        }
+                                    }else{
+                                        if(_this.formValidate.dFromPort == Number(temp[0]) || _this.formValidate.dFromPort == Number(temp[1])){
+                                            _this.$Message.error(_this.$t('ipf.msg8'));
+                                            return false;
+                                        }
+                                        if(_this.formValidate.dFromPort > Number(temp[0]) && _this.formValidate.dFromPort < Number(temp[1])){
+                                            _this.$Message.error(_this.$t('ipf.msg8'));
+                                            return false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        var data = {};
+                        data.Type = _this.formValidate.filterType;
+                        if('UDP' == _this.formValidate.protocol){
+                            data.Protocol = 'udp';
+                        }else if('TCP' == _this.formValidate.protocol){
+                            data.Protocol = 'tcp';
+                        }else{
+                            data.Protocol = 'tcp/udp';
+                        }
+                        data.Ip = _this.formValidate.ip;
+                        data.PortStart = _this.formValidate.dFromPort;
+                        data.PortEnd =  _this.formValidate.dToPort;
+                        data.comment = _this.formValidate.comment;
+
+                       var postVar = {"action":"addFilter", "data":data};
+
+                        uiPost.addFilter(postVar,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            _this.addIpfLoading = false;
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('ipf.msg17'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            } else {
+                                _this.$Message.error(_this.$t('ipf.msg18')+data.rescode);
+                            }
+                        });
+                    }else{
+                        _this.addIpfLoading = false;
+                    }
+                })
+            },
+            showClientList:function(){
+                var _this = this;
+                _this.showModel = true;
+                var postData = {"action":"getArpInfo", "data":{}};
+                uiPost.getArpInfo(postData,function(data) {
+                    _this.arpData = data.data;
+                    for(var i in _this.arpData){
+                        _this.arpData[i].idx = ''+( Number(i) + 1 );
+                    }
+                    console.log( _this.arpData);
+
+
+                    _this.arpLoading = false;
+                });
+            },
+            ok:function () {
+                this.formValidate.ip = this.ip;
+                //this.$Message.info('Clicked ok');
+            },
+            cancel:function () {
+                //this.$Message.info('Clicked cancel');
+            },
+            submitStatus:function(){
+                var postVar = {};
+                if(true == this.formValidate.status){
+                    postVar.enable = "1";
+                }else{
+                    postVar.enable = "0";
+                }
+                postVar.addEffect = "1";
+                uiPost.setIpPortFilterRules(postVar);
+            },
+            selectTable:function (obj) {
+                this.ip = obj.ip;
+            },
+            deleteData:function (obj) {
+                var _this = this;
+                var data = [];
+                data[0] = obj.row.Id;
+                var postVar = {"action":"delFilter", "data":{"Id":data}};
+                uiPost.delFilter(postVar,function(){
+                    _this.$Message.success({content:_this.$t('ipf.msg13'),onClose:function(){
+                        _this.ipfData.splice(obj.index, 1);
+                    }});
+                });
+            },
+            tableSelect:function(status){
+                var _this = this;
+                if (status) {
+                    var getSelection = this.$refs.tableSelect.getSelection();
+                    if (getSelection.length>0) {
+                        var data = [];
+                        for(var i=0; i<getSelection.length; i++)
+                        {
+                            data[i] = getSelection[i].Id;
+                        }
+                        var postVar = {"action":"delFilter", "data":{"Id":data}};
+                        uiPost.delFilter(postVar,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('ipf.msg13'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            } else {
+                                alert(_this.$t('ipf.msg16')+data.rescode);
+                            }
+                        });
+                    }else{
+                        this.$Message.error(this.$t('ipf.msg11'));
+                    }
+                }else{
+                    this.$refs.tableSelect.selectAll(status);
+                }
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

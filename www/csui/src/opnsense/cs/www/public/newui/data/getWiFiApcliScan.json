@@ -1,0 +1,20 @@
+[
+  {
+    "ssid": "a1",
+    "bssid": "F4:11:22:33:44:44",
+    "channel": "11",
+    "encrypt": "NONE",
+    "cipher": "",
+    "band": "B",
+    "signal": "78"
+  },
+  {
+    "ssid": "a2",
+    "bssid": "F4:22:22:33:44:44",
+    "channel": "6",
+    "encrypt": "WPA2PSK",
+    "cipher": "AES",
+    "band": "B/G/N",
+    "signal": "88"
+  }
+]

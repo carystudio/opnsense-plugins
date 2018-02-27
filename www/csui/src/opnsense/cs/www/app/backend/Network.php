@@ -3,10 +3,12 @@ require_once('rrd.inc');
 require_once('filter.inc');
 require_once("services.inc");
 require_once("config.inc");
+require_once("auth.inc");
 require_once("system.inc");
 require_once ('util.inc');
 require_once("interfaces.inc");
 require_once("gwlb.inc");
+
 
 use \OPNsense\Core\Backend;
 
@@ -64,12 +66,21 @@ class Network extends Csbackend
     private static $infInfo = array();
     private static $infStatus = false;
     
-    private static function getInfStatus(){
+    public static function getInfStatus($inf=false){
     	if(!self::$infStatus){
     		self::$infStatus = get_interfaces_info();
     	}
-    	
-    	return self::$infStatus;
+
+        if(false == $inf){
+            return self::$infStatus;
+        }else{
+            if(isset(self::$infStatus[$inf])){
+                return self::$infStatus[$inf];
+            }else{
+                return false;
+            }
+        }
+
     }
 
     private static function applyGatewayConfig(){
@@ -267,9 +278,9 @@ class Network extends Csbackend
 
                 }
 
-								$infStatus = self::getInfStatus();
-								if(is_array($infStatus) && isset($infStatus[$inf])){
-                		$interfaceInfo['Status'] = $infStatus[$inf];
+								$infStatus = self::getInfStatus($inf);
+								if(false != $infStatus){
+                		$interfaceInfo['Status'] = $infStatus;
                 }else{
                 		$interfaceInfo['Status'] = array();;
                 }
@@ -425,7 +436,10 @@ class Network extends Csbackend
                     }
                 }
             }
-            $config['OPNsense']['captiveportal']['zones']['zone']['enabled']='0';
+            if(isset($config['OPNsense']['captiveportal']['zones']['zone'])){
+                $config['OPNsense']['captiveportal']['zones']['zone']['enabled']='0';
+            }
+
 
             write_config();
 
@@ -439,7 +453,7 @@ class Network extends Csbackend
 
             setup_gateways_monitor();
             filter_configure();
-            enable_rrd_graphing();
+            //enable_rrd_graphing();
             if($dnsmasq_restart){
                 system_resolvconf_generate();
                 dnsmasq_configure_do();
@@ -695,7 +709,7 @@ class Network extends Csbackend
     private static function setWanPpp($waninfo, $nic=false, $username=false, $password=false){
         global $config;
 
-        if(!isset($config['ppps'])){
+        if(!isset($config['ppps']) || !is_array($config['ppps'])){
             $config['ppps'] = array('ppp'=>array());
         }else if(!isset($config['ppps']['ppp']) || !is_array($config['ppps']['ppp'])){
             $config['ppps']['ppp'] = array();
@@ -986,7 +1000,7 @@ class Network extends Csbackend
             system_routing_configure();
             filter_configure();
             setup_gateways_monitor();
-            enable_rrd_graphing();
+            //enable_rrd_graphing();
 
             system_resolvconf_generate();
             self::applyGatewayConfig();

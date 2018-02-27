@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.ac'),$t('menu.database')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Alert>
+              <!-- <h3>设置</h3> -->
+              {{ $t('database.help') }}
+            </Alert>
+            <Form ref="formValidate" :label-width="globalConfig.labelWith" label-position="left" method="post" id="ExportApCfgSettings" name="ExportApCfgSettings" action="/cgi-bin/ExportSqlSettings.sh">
+                <FormItem :label="$t('database.database_backups')">     <!--数据备份-->
+                    <Button type="button" @click="backup">{{ $t('database.backups') }}</Button>
+                </FormItem>
+            </Form>
+            <Form ref="formValidate" :label-width="globalConfig.labelWith" label-position="left">
+              <FormItem :label="$t('database.save_database_file')">     <!--保存数据库文件-->
+                  <Button @click="saveDatabaseFile" >{{ $t('database.save') }}</Button>
+              </FormItem>
+              <FormItem :label="$t('database.update_database_file')">       <!--更新数据库文件-->
+                <Upload
+                    ref="upload"
+                    :before-upload="handleUpload"
+                    :action="upload.action"
+
+                    :max-size="upload.maxSize"
+                    :on-exceeded-size="exceededSize"
+                    :format="upload.format"
+                    :on-format-error="formatError"
+                    :on-success="uploadSuccess"
+                >
+                  <Button icon="ios-cloud-upload-outline">{{ $t('database.select_file')+' & '+$t('database.update')   }}</Button>
+                </Upload>
+              </FormItem>
+              <FormItem :label="$t('database.restore_factory_default')">    <!--数据库恢复出厂设置-->
+                 <Poptip
+                    confirm
+                    :title="$t('database.msg4')"
+                    @on-ok="restoreOk">
+                    <Button>{{ $t('database.restore') }}</Button>
+                </Poptip>
+              </FormItem>
+          </Form>
+          </Card>
+        </Col>
+        </Row>
+    </div>
+    <div style="display: none;">
+        <form ref="save" class="form-horizontal" method="post" :action="saveAction">
+        </form>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig: globalConfig,
+      applyLoading: false,
+      operationMode: '',
+      meshEnabled: '',
+      percent: 0,
+      saveAction: '/cgi-bin/cstecgi.cgi?action=save&setting',
+      upload: {
+        file: null,
+        action: '/cgi-bin/cstecgi.cgi',
+        format:['gz'],
+        data:{
+            /*action:'upload',
+            topicurl:'setting/UploadSqlConfig'*/
+        },
+        maxSize: 4096,
+      }
+    }
+  },
+  computed:{
+  },
+  created: function() {
+      var _this = this;
+        uiPost.SystemSettings(function(data){
+            _this.operationMode = data.operationMode;
+            _this.meshEnabled = data.meshEnabled;
+            if (data.exportAction != '') {
+              _this.saveAction = data.exportAction;
+            }
+            if (data.importAction != '') {
+              _this.upload.action = data.importAction;
+            }
+            if (data.maxSize!='') {
+              _this.upload.maxSize = parseInt(data.maxSize);
+            }
+        })
+  },
+  methods: {
+      saveDatabaseFile:function() {
+          var _this = this;
+          uiPost.SaveAcConfig(function (data) {     //保存数据库文件
+              _this.$Message.success({content:'Success!',onClose:function(){
+              }});
+          })
+      },
+      backup:function() {
+          var _this = this;
+          uiPost.SaveAcConfig(function(data) {        //数据库备份
+              $("#ExportApCfgSettings").submit();
+          })
+      },
+      restoreOk:function() {        //恢复出厂设置
+        var _this = this;
+        uiPost.AcRestore(function(data) {
+            var time=data.wtime;
+            var lan_ip=data.lan_ip;
+            _this.$Modal.success({
+              loading:true,
+              render: function(h) {
+                return h('div',[
+                  _this.$t('common.loading'),
+                  h('Progress',{
+                    attrs:{ percent:_this.percent }
+                  })
+                ])
+              },
+            });
+            var percentTimer = setInterval(function(){
+              if (_this.percent>=100) {
+                clearInterval(percentTimer);
+                location.href='http://'+lan_ip+'/login.html';
+              }
+              _this.percent++;
+            },cs.getTimer(time));
+        })
+      },
+
+      handleUpload: function(file) {
+        this.upload.file = file;
+      },
+      exceededSize: function() {
+        this.$Message.error({content:this.$t('database.msg3',[cs.bytesToSize( (parseInt(this.upload.maxSize)*1000) )]),duration: 5});
+      },
+      formatError: function() {
+        this.$Message.error({content:this.$t('database.msg2',[this.upload.format.join('、')]),duration: 5});
+      },
+      uploadSuccess:function(data){
+         /* this.$Message.success({content:'Success!',onClose:function(){
+          }});*/
+        var _this = this;
+        var percentTimer = null;
+        if (data.settingERR == "1") {
+          _this.$Modal.success({
+            loading:true,
+            render: function(h) {
+              return h('div',[
+                _this.$t('common.loading'),
+                h('Progress',{
+                  attrs:{ percent:_this.percent }
+                })
+              ])
+            },
+          });
+          percentTimer = setInterval(function(){
+            if (_this.percent>=100) {
+              clearInterval(percentTimer);
+              location.href='/login.html';
+            }
+            _this.percent++;
+          },cs.getTimer(120));
+        } else {
+          if(data.settingERR != ""){
+              clearInterval(percentTimer);
+              _this.$Modal.remove();  
+              _this.$Message.error({
+                duration: 5,
+                content: _this.$t('config["'+data.settingERR+'"]')
+              });
+            }
+        }
+      }
+  }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

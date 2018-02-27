@@ -108,6 +108,17 @@ class System extends Csbackend
         exit(0);
     }
 
+    private static function initRebootSched(){
+        global $config;
+
+        if(!isset($config['OPNsense']['cron']) || !is_array($config['OPNsense']['cron'])){
+            $config['OPNsense']['cron']= array();
+        }
+        if(!isset($config['OPNsense']['cron']['jobs']) || !is_array($config['OPNsense']['cron']['jobs'])){
+            $config['OPNsense']['cron']['jobs'] = array();
+        }
+    }
+
     public static function getRebootSched(){
         global $config;
 
@@ -147,6 +158,7 @@ class System extends Csbackend
         $result = 0;
         try{
             $enable = false;
+            self::initRebootSched();
             if(isset($data['Enable']) && '1'==$data['Enable']){
                 $enable = true;
                 $min = isset($data['TimeMin'])&&strlen($data['TimeMin'])>0?intval($data['TimeMin']):'*';

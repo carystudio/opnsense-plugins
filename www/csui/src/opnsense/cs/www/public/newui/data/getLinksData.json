@@ -1,0 +1,66 @@
+{
+  "connections": [
+    {
+      "protocol": "TCP",
+      "src": "192.168.10.18",
+      "count_download": "11",
+      "count_upload": "10",
+      "download": "123",
+      "upload": "150",
+      "connect_count": "20",
+      "data": [
+        {
+          "net": "WAN1",
+          "dport": "80",
+          "dst": "192.168.0.253",
+          "protocol": "tcp",
+          "sport": "3210",
+          "src": "192.168.0.2",
+          "time": "2017-12-19 15:50:21"
+        },
+        {
+          "net": "WAN1",
+          "dport": "80",
+          "dst": "192.168.0.253",
+          "protocol": "tcp",
+          "sport": "3210",
+          "src": "192.168.0.2",
+          "time": "2017-12-19 15:50:21"
+        }
+      ]
+    },
+    {
+      "protocol": "TCP",
+      "src": "192.168.10.18",
+      "count_download": "11",
+      "count_upload": "10",
+      "download": "123",
+      "upload": "150",
+      "connect_count": "20",
+      "data": [
+        {
+          "net": "WAN1",
+          "dport": "80",
+          "dst": "192.168.0.253",
+          "protocol": "tcp",
+          "sport": "3210",
+          "src": "192.168.0.2",
+          "time": "2017-12-19 15:50:21"
+        },
+        {
+          "net": "WAN1",
+          "dport": "80",
+          "dst": "192.168.0.253",
+          "protocol": "tcp",
+          "sport": "3210",
+          "src": "192.168.0.2",
+          "time": "2017-12-19 15:50:21"
+        }
+      ]
+    }
+  ],
+  "statistics": {
+    "tcp": "45",
+    "udp": "46"
+  }
+}

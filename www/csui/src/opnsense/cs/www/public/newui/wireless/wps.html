@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Col>
+                <Alert>
+                    {{ $t('wps.help') }}
+                </Alert>
+            </Col>
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <FormItem :label="$t('wps.on_off')">
+                    <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">
+                        <span slot="open">{{ $t('wps.on') }}</span>
+                        <span slot="close">{{ $t('wps.off') }}</span>
+                    </i-switch>
+                </FormItem>
+                <Col v-show="formValidate.status" >
+                <FormItem :label="$t('wps.wps_state')" >
+                    <span>{{this.wpsStateFlag}}
+						<Icon type="load-c" class="demo-spin-icon-load" style="font-size:20px;color:red;" v-if="load == 1"></Icon>
+					</span>
+                </FormItem>
+                <FormItem :label="$t('wps.pin_code')" >
+                    <span class="lh34" >{{this.wscPin}}</span>
+                </FormItem>
+                <FormItem :label="$t('wps.pbcpin_mode')" prop="wscMode">
+                    <RadioGroup v-model="formValidate.wscMode">
+                        <Radio label="2" >PBC</Radio>
+                        <Radio label="1" >PIN</Radio>
+                    </RadioGroup>
+                </FormItem>
+                <Col v-if="formValidate.wscMode == 1" >
+					<FormItem prop="wscPinMode">
+                        <RadioGroup v-model="formValidate.wscPinMode">
+                            <Radio label="2">{{ $t('wps.pin_registrant') }}</Radio>
+                            <Radio label="1">{{ $t('wps.pin_reg_agency') }}</Radio>
+						</RadioGroup>
+					</FormItem>
+                    <FormItem v-if="formValidate.wscPinMode == 1" prop="pin">
+                        <Input v-model="formValidate.pin" :maxlength="8"></Input>
+                    </FormItem>
+                </Col>
+                <!-- btn -->
+                <FormItem>
+                  <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('wps.apply') }}</Button>
+                </FormItem>
+                </Col>
+            </Form>
+            </Card>
+            <br>
+        </Col>
+        </row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    var _this = this;
+    return {
+      globalConfig:globalConfig,
+      formValidate:{
+        status:false,
+        wscMode: '',
+        wscPinMode: '',
+        pin:''
+      },
+	  wscPin:'',
+	  wpsStateFlag:'',
+	  stopFlag:null,
+	  wscEnabledFlag:'',
+	  wpsState:'',
+	  load:0
+      }
+    },
+	computed:{
+		ruleValidate:function() {
+		var _this = this;
+        return {
+			wscMode:[
+				{ validator:function(r, v, f) {f()}, trigger: 'change' }
+			],
+			wscPinMode:[
+				{ validator:function(r, v, f) {f()}, trigger: 'change' }
+			],
+			pin:[
+				{ validator:function(r, v, f) {
+					var _s = cs.num(v);
+					  if(0 == _s) {
+						f(_this.$t('wps.wps_pin')+_this.$t('wps.msg1'));
+					  }else if(1 == _s) {
+						f(_this.$t('wps.wps_pin')+_this.$t('wps.msg2'));
+					  }
+					var accum = 0;
+					accum += 3 * (parseInt(_this.formValidate.pin / 10000000) % 10);
+					accum += 1 * (parseInt(_this.formValidate.pin / 1000000) % 10);
+					accum += 3 * (parseInt(_this.formValidate.pin / 100000) % 10);
+					accum += 1 * (parseInt(_this.formValidate.pin / 10000) % 10);
+					accum += 3 * (parseInt(_this.formValidate.pin / 1000) % 10);
+					accum += 1 * (parseInt(_this.formValidate.pin / 100) % 10);
+					accum += 3 * (parseInt(_this.formValidate.pin / 10) % 10);
+					accum += 1 * (parseInt(_this.formValidate.pin / 1) % 10);
+					if((accum % 10) != 0){
+						f(_this.$t('wps.msg3'));
+					}
+					f()
+				},trigger: 'blur' }
+			  ]
+		    }
+        }
+	},
+	watch:{
+        wpsState:function() {
+			var _this = this;
+            if(1 == this.wpsState){
+                this.stopFlag = window.setInterval(function()
+                {
+                    _this.reset_form();
+                }, 5000);
+            }else{
+                this.wpsState = 0;
+				clearInterval(this.stopFlag);
+            }
+        }
+    },
+    created:function() {
+		var _this = this;
+		var postVar = {};
+		postVar.wifiIdx = "1";  //2.4G
+		uiPost.getWiFiWpsSetupConfig(postVar,function(data) {
+			_this.formValidate.status = data.wscEnabled == 1 ? true : false;
+			_this.formValidate.wscMode = data.wscMode;
+			_this.formValidate.wscPinMode = data.wscPinMode;
+			_this.wscPin = data.wscPin;
+			if(data.wscEnabledFlag == 0)
+				_this.wpsStateFlag = _this.$t('wps.no_used');
+			else
+				_this.wpsState = 1;
+		});
+    },
+    methods:{
+		handleSubmit:function(name) {
+			var _this = this;
+			_this.$refs[name].validate(function(valid){
+				if (valid) {
+					var postVar = {};
+					postVar.wifiIdx = "1";
+					postVar.wscMode = _this.formValidate.wscMode;
+					if(_this.formValidate.wscMode == 1){
+						postVar.wscPinMode = _this.formValidate.wscPinMode;
+						if(_this.formValidate.wscPinMode == 1){
+							postVar.pin = _this.formValidate.pin;
+						}
+					}
+					uiPost.setWiFiWpsConfig(postVar,function(data) {
+						if(true == data.success){
+							_this.wpsState = 1;
+						}else{
+							_this.wpsState = 0;
+							_this.wpsStateFlag = _this.$t('wps.no_used');
+						}
+						_this.$Message.success('Success!');
+						_this.$Notice.open({
+							title: 'Notification title',
+							desc: "正在WPS"
+						  })
+					});
+				} else {
+					_this.$Message.error('Fail!');
+				}
+			})
+		},
+		submitStatus:function(){
+			var _this = this;
+			var postVar = {};
+			postVar.wifiIdx = "1";
+			postVar.wscEnabled = _this.formValidate.status == true ? 1 : 0;
+			uiPost.setWiFiWpsSetupConfig(postVar,function(data){
+
+			});
+		},
+		reset_form:function() {
+			var _this = this;
+			var postVar = {};
+			postVar['wifiIdx'] = "1";
+			uiPost.getWiFiWpsConfig(postVar,function(data) {
+				var wscResult = data.wscResult;
+				var wscStatus = data.wscStatus;
+				if("-1" == wscResult){
+					_this.wpsStateFlag = _this.$t('wps.wps_fail');
+					clearInterval(_this.stopFlag);
+				}else if("0" == wscResult) {
+					if (wscStatus == "Not used"){
+						_this.wpsStateFlag = _this.$t('wps.no_used');
+						clearInterval(_this.stopFlag);
+					}else if (wscStatus == "Idle"){
+						_this.wpsStateFlag = _this.$t('wps.idle');
+					}else if (wscStatus == "Start WSC Process" || WscStatus == "Send M2"){
+						_this.wpsStateFlag = _this.$t('wps.start_wps_process');
+					}else if (wscStatus == "WSC Fail"){
+						_this.wpsStateFlag = _this.$t('wps.wps_fail');
+						clearInterval(_this.stopFlag);
+					}else{
+						_this.wpsStateFlag = _this.$t('wps.start_wps_process');
+					}
+					if(wscStatus == "Start WSC Process" || WscStatus == "Send M2"){
+						_this.load = 1;
+					}else{
+						_this.load = 0;
+					}
+				}else if(1 == wscResult){
+					_this.wpsStateFlag = _this.$t('wps.wps_success');
+					_this.load = 0;
+					clearInterval(_this.stopFlag);
+				}
+			});
+		}
+	}
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>
