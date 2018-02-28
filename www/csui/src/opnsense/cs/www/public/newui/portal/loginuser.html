@@ -116,7 +116,7 @@
                                                 _this.$Message.success(_this.$t('loginuser.offline_success'));
                                                 location.href = location.href;
                                             } else {
-                                                _this.$Message.error(_this.$t('loginuser.offline_fail')+data.rescode);
+                                                _this.$Message.error(_this.$t('loginuser.offline_fail')+_this.$t('errorcode.'+data.rescode));
                                             }
                                         });
                                         console.log(params);
@@ -164,11 +164,11 @@
                                 if (9999 == data.rescode){
                                     cs.loginOut();
                                 }
-//                                if (0 == data.rescode) {
-//                                    _this.$Message.success('下线成功！');
-//                                } else {
-//                                    _this.$Message.error('下线失败！'+data.rescode);
-//                                }
+                                if (0 == data.rescode) {
+                                    _this.$Message.success('下线成功！');
+                                } else {
+                                    _this.$Message.error('下线失败！'+_this.$t('errorcode.'+data.rescode));
+                                }
                             });
                         }
                     }else{

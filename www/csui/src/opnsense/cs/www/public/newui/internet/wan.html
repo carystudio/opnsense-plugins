@@ -734,27 +734,26 @@ var cs_main = {
                     postVar.Dns = _this.formValidate.dnsServer;
 
                     var postData = {"action":"setWanInfo", "data":postVar};
-                    uiPost.setWanInfo(postData,function(data) {
-                        var time = 30;
-                        _this.$Modal.success({
-                            loading:true,
-                            render: function(h) {
-                                return h('div',[
-                                    _this.$t('common.loading'),
-                                    h('Progress',{
-                                        attrs:{ percent:_this.percent }
-                                    })
-                                ])
-                            }
-                        });
-                        var percentTimer = setInterval(function(){
-                            if (_this.percent>=100) {
-                                clearInterval(percentTimer);
-                                location.href = location.href;
-                            }
-                            _this.percent++;
-                        },cs.getTimer(time));
+                    uiPost.setWanInfo(postData);
+                    var time = 30;
+                    _this.$Modal.success({
+                        loading:true,
+                        render: function(h) {
+                            return h('div',[
+                                _this.$t('common.loading'),
+                                h('Progress',{
+                                    attrs:{ percent:_this.percent }
+                                })
+                            ])
+                        }
                     });
+                    var percentTimer = setInterval(function(){
+                        if (_this.percent>=100) {
+                            clearInterval(percentTimer);
+                            location.href = location.href;
+                        }
+                        _this.percent++;
+                    },cs.getTimer(time));
                 }
             })
         },
@@ -797,7 +796,7 @@ var cs_main = {
                 if (0 == data.rescode) {
                     location.href = location.href;
                 }else{
-                    alert('绑定失败！'+data_msg_json[data.rescode]);
+                    alert('绑定失败！'+_this.$t('errorcode.'+data.rescode));
                 }
             });
         },

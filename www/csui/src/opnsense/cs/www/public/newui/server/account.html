@@ -194,7 +194,7 @@
                                             cs.loginOut();
                                         }
                                         if (0 != data.rescode) {
-                                            _this.$Message.error('删除失败！'+data.rescode);
+                                            _this.$Message.error('删除失败！'+_this.$t('errorcode.'+data.rescode));
                                         }else{
                                             _this.$Message.error('删除成功！');
                                             location.href = location.href;
@@ -301,7 +301,7 @@
                                     cs.loginOut();
                                 }
                                 if (0 != data.rescode) {
-                                     _this.$Message.error('删除失败！'+data.rescode);
+                                     _this.$Message.error('删除失败！'+_this.$t('errorcode.'+data.rescode));
                                  }else{
                                  _this.$Message.success('删除成功！');
                                      location.href = location.href;

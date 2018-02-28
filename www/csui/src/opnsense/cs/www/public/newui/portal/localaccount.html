@@ -368,7 +368,7 @@
                                 _this.$Message.success(_this.$t('localaccount.save_success'));
                                 location.href = location.href;
                             } else {
-                                _this.$Message.error(_this.$t('localaccount.save_fail')+data.rescode);
+                                _this.$Message.error(_this.$t('localaccount.save_fail')+_this.$t('errorcode.'+data.rescode));
                             }
                             _this.applyLoading = false;
                         });

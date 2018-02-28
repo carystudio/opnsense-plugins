@@ -40,9 +40,49 @@ class LoginController extends BaseController
 
     }
 
+		public function newdologinAction()
+    {
+        $result = array('result'=>'success','msg'=>'success');
+        $text = $this->request->getRawBody();
+        $para = json_decode($text, true);
+        $username = $para['username'];
+        $password = $para['password'];
+        if('admin'==$username){
+            $username = 'root';
+        }else if('root'==$username){
+            $username = 'admin';
+        }
+
+        if('csrecovery'!=$username){
+            $res = authenticate_user($username, $password);
+        }else{
+            $res = false;
+        }
+
+         if($res){
+             $this->session->set('username',$username);
+             return json_encode($result);
+            //return $this->response->redirect('http://'.$_SERVER['HTTP_HOST'].'/newui/index.html');
+         }else{
+            /* $this->view->setVar('msg', '用户名或者密码不正确');
+             $this->view->pick('http://'.$_SERVER['HTTP_HOST'].'/newui/login.html');
+             $this->response->redirect('http://'.$_SERVER['HTTP_HOST'].'/newui/login.html');*/
+             $result['result'] = 'fail';
+             $result['msg'] = '用户名或者密码不正确';
+             return json_encode($result);
+         }
+
+    }
+
     public function logoutAction(){
         $this->session->destroy(true);
         $this->response->redirect('http://'.$_SERVER['HTTP_HOST'].'/index/index');
     }
+
+    public function newlogoutAction(){
+        $this->session->destroy(true);
+        $this->response->redirect('http://'.$_SERVER['HTTP_HOST'].'/newui/login.html');
+    }
+    
 }
 

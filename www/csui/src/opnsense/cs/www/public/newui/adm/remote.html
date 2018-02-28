@@ -175,10 +175,11 @@
                                 cs.loginOut();
                             }
                             if (0 == data.rescode) {
-                                _this.$Message.success(_this.$t('remote.success'));
-                                location.href = location.href;
+                                _this.$Message.success({content:_this.$t('remote.success'),onClose:function(){
+                                    location.href = location.href;
+                                }});
                             } else {
-                                _this.$Message.error(_this.$t('remote.fail')+data.rescode);
+                                _this.$Message.error(_this.$t('remote.fail')+_this.$t('errorcode.'+data.rescode));
                             }
                         });
                        /* var postVar = {};

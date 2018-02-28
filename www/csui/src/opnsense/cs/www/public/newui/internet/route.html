@@ -288,7 +288,7 @@
                                 _this.$Message.error(_this.$t('route.add_success'));
                                 location.href = location.href;
                             } else {
-                                _this.$Message.error(_this.$t('route.add_fail')+data.rescode);
+                                _this.$Message.error(_this.$t('route.add_fail')+_this.$t('errorcode.'+data.rescode));
                             }
                         });
                     }

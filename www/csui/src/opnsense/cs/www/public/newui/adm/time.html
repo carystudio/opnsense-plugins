@@ -169,12 +169,12 @@ var cs_main = {
                     cs.loginOut();
                 }
                 if (0 == data.rescode) {
-                    _this.$Message.success('修改时间成功！');
+                    _this.$Message.success(_this.$t('time.modify_success'));
                     setTimeout(function(){
                         location.href = location.href;
                     },2000);
                 } else {
-                    _this.$Message.error('修改时间失败！'+data.rescode);
+                    _this.$Message.error(_this.$t('time.modify_fail')+_this.$t('errorcode.'+data.rescode));
                 }
             });
 

@@ -412,7 +412,7 @@
                                 _this.$Message.success(_this.$t('portal.success'));
                                 location.href = location.href;
                             } else {
-                                _this.$Message.error(_this.$t('portal.fail')+data.rescode);
+                                _this.$Message.error(_this.$t('portal.fail')+_this.$t('errorcode.'+data.rescode));
                             }
                             _this.applyLoading = false;
                         });

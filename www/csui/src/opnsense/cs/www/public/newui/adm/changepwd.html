@@ -137,7 +137,7 @@
                             if (0 == data.rescode) {
                                 _this.$Message.success(_this.$t('changepwd.success'));
                             } else {
-                                _this.$Message.error(_this.$t('changepwd.fail')+data.rescode);
+                                _this.$Message.error(_this.$t('changepwd.fail')+_this.$t('errorcode.'+data.rescode));
                             }
                             /*var lan_ip = data.lan_ip;
                             _this.$Message.success({content:'Success!',onClose:function(){

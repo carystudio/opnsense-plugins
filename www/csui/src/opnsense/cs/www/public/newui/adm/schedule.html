@@ -358,7 +358,7 @@ var cs_main = {
 						location.href = location.href;
 					}});
 				} else {
-					_this.$Message.error(_this.$t('reboot_schedule.set_fail')+data.rescode);
+					_this.$Message.error(_this.$t('reboot_schedule.set_fail')+_this.$t('errorcode.'+data.rescode));
 				}
 			});
 		},

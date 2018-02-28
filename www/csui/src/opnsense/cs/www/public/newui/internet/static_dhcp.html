@@ -247,7 +247,16 @@
                         data.Descr = _this.formValidate.description;
                         var postData = {"action":"addStaticDhcp", "data":data};
                         uiPost.addStaticDhcp(postData,function(data){
-                            location.href = location.href;
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:'Success!',onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            } else {
+                                _this.$Message.success('Fail! '+ _this.$t('errorcode.'+data.rescode));
+                            }
                         });
                     }
                 })

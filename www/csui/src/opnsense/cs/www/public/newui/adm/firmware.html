@@ -176,7 +176,7 @@
                             _this.percent++;
                         },cs.getTimer(wtime));
                     } else {
-                        _this.$Message.error('升级失败！' + data.rescode);
+                        _this.$Message.error('升级失败！' + _this.$t('errorcode.'+data.rescode));
                     }
                 });
             },

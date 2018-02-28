@@ -241,26 +241,25 @@ var cs_main = {
                 postVar.Nic = _this.interfaces[0].Nic;
                 var postData = {"action":"setLanInfo","data":postVar};
                 console.log(postData);
-                uiPost.setLanInfo(postData,function(){
-                    _this.$Modal.success({
-                        loading:true,
-                        render: function(h) {
-                            return h('div',[
-                                _this.$t('common.loading'),
-                                h('Progress',{
-                                    attrs:{ percent:_this.percent }
-                                })
-                            ])
-                        }
-                    });
-                    var percentTimer = setInterval(function(){
-                        if (_this.percent>=100) {
-                            clearInterval(percentTimer);
-                            location.href = location.href;
-                        }
-                        _this.percent++;
-                    },cs.getTimer(10));
+                uiPost.setLanInfo(postData);
+                _this.$Modal.success({
+                    loading:true,
+                    render: function(h) {
+                        return h('div',[
+                            _this.$t('common.loading'),
+                            h('Progress',{
+                                attrs:{ percent:_this.percent }
+                            })
+                        ])
+                    }
                 });
+                var percentTimer = setInterval(function(){
+                    if (_this.percent>=100) {
+                        clearInterval(percentTimer);
+                        location.href = location.href;
+                    }
+                    _this.percent++;
+                },cs.getTimer(15));
 
             } else {
                 // _this.$Message.error();

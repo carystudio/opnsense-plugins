@@ -353,7 +353,7 @@
                                     location.href = location.href;
                                 }});
                             } else {
-                                _this.$Message.error(_this.$t('ipf.msg18')+data.rescode);
+                                _this.$Message.error(_this.$t('ipf.msg18')+_this.$t('errorcode.'+data.rescode));
                             }
                         });
                     }else{
@@ -427,7 +427,7 @@
                                     location.href = location.href;
                                 }});
                             } else {
-                                alert(_this.$t('ipf.msg16')+data.rescode);
+                                alert(_this.$t('ipf.msg16')+_this.$t('errorcode.'+data.rescode));
                             }
                         });
                     }else{

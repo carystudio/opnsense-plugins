@@ -750,7 +750,9 @@ var messages = {
             "msg11":"Please select the rule to be deleted!",
             "msg12":"Do you really want to delete the selected entry?",
             "msg13":"Delete successfully!",
-            "msg14":"Internal  Port cannot be empty,please try again!"
+            "msg14":"Internal  Port cannot be empty,please try again!",
+            "msg15":"Add success!",
+            "msg16":"Add fail!"
         },
         "dnsfwd":{
             "title":"DNS Forwarding",
@@ -1041,6 +1043,8 @@ var messages = {
             "msg2":"NTP Server2 cannot be empty, please try again!",
             "msg3":"NTP Server3 cannot be empty, please try again!",
             "msg4":"NTP Server must be a valid IP or a valid URL address!",
+            "modify_success":"Successful modification time!",
+            "modify_fail":"Modification time failure!",
             "countdown":"Count down [ye-time] s"
         },
         "upnp":{
@@ -1413,6 +1417,150 @@ var messages = {
             "status":"Status",
             "connection_success=":"Connection successfully",
             "connection_fail":"Connection fail"
+        },
+        errorcode:{
+            'Dns_100':'Incorrectly opening parameters',
+            'Dns_101':'No DNS server is not set, and DNS forwarding cannot be shut down',
+            'Dns_200':'IP is incorrect',
+            'Dns_201':'The domain name is not correct',
+            'Dns_202':'The covered domain name has already existed',
+            'Dns_300':'The domain name to be deleted does not exist',
+
+
+            'Firewall_100':'Incorrect type',
+            'Firewall_101':'The agreement is incorrect',
+            'Firewall_102':'IP is incorrect',
+            'Firewall_103':'Port is incorrect',
+            'Firewall_104':'The rules have already existed',
+            'Firewall_200':'Rules do not exist',
+            'Firewall_300':'Interface does not exist',
+            'Firewall_301':'Forwarding IP is incorrect',
+            'Firewall_302':'Incorrect forwarding port',
+            'Firewall_303':'The rules have already existed',
+            'Firewall_400':'Rules do not exist',
+            'Firewall_500':'WEB port is incorrect',
+            'Firewall_501':'SSH port is incorrect',
+
+
+            'Firmware_100':'Incorrect version',
+            'Firmware_101':'The uploaded firmware information does not exist',
+
+
+            'L2tp_100':'Incorrectly opening parameters',
+            'L2tp_101':'Server IP is incorrect',
+            'L2tp_102':'The client starts IP incorrectly',
+            'L2tp_103':'Client end IP is incorrect',
+            'L2tp_104':'Wins server IP is incorrect',
+            'L2tp_105':'DNS1 is incorrect',
+            'L2tp_106':'DNS2 is incorrect',
+            'L2tp_107':'Incorrect authentication type',
+            'L2tp_200':'Incorrect username',
+            'L2tp_201':'Incorrect password',
+            'L2tp_202':'User IP is incorrect',
+            'L2tp_203':'The user has already existed',
+            'L2tp_300':'user does not exist',
+
+
+            'Network_100':'Incorrect interface name',
+            'Network_101':'IP is incorrect',
+            'Network_102':'Subnet mask incorrectly',
+            'Network_103':'DHCP server open parameter is incorrect',
+            'Network_104':'DHCP address pool starts IP incorrectly',
+            'Network_105':'The DHCP address pool is not correct at the end of the IP',
+            'Network_106':'The name of the interface does not exist',
+            'Network_200':'Interface does not exist',
+            'Network_201':'Network card is not correct',
+            'Network_202':'Incorrect interface name',
+            'Network_203':'DNS1 is incorrect',
+            'Network_204':'Monitoring IP is incorrect',
+            'Network_205':'IP address is incorrect',
+            'Network_206':'Subnet mask incorrectly',
+            'Network_207':'Default gateway is incorrect',
+            'Network_208':'The username and password can not be empty',
+            'Network_209':'Incorrect connection mode',
+            'Network_210':'Incorrect weight (1-4)',
+            'Network_211':'Incorrect priority (1-4)',
+            'Network_212':'The WAN interface specifies that the DNS can not be the same',
+
+            'Network_300':'Incorrect interface',
+            'Network_301':'Network card is unavailable',
+            'Network_302':'Failure to fetch the name of the interface',
+            'Network_303':'Interface identification failure',
+
+            'Network_400':'MAC is incorrect',
+            'Network_401':'IP is incorrect',
+            'Network_402':'The note can not be empty',
+            'Network_403':'The MAC address has been added to the rules',
+            'Network_404':'The IP address has been added to the rules',
+
+            'Network_500':'Incorrect interface name',
+            'Network_501':'The gateway is not within the network segment',
+            'Network_502':'Static routing description cannot be empty',
+            'Network_503':'Static routing already exists',
+            'Network_600':'Interface does not exist',
+            'Network_601':'Static routing does not exist',
+
+            'Network_700':'Network interface does not exist',
+            'Network_701':'The network interface belongs to the group and can not be deleted',
+            'Network_702':'The network interface belongs to the bridge and can not be deleted',
+            'Network_703':'The network interface belongs to GRE, which can not be deleted',
+            'Network_704':'The network interface belongs to GIF, which can not be deleted',
+            'Network_705':'Network card is not correct',
+
+
+            'Portal_100':'Incorrectly opening parameters',
+            'Portal_101':'Incorrect service type',
+            'Portal_102':'The idle break time is not correct (1-300)',
+            'Portal_103':'Login page upload failure',
+            'Portal_104':'IP white list is not correct',
+            'Portal_105':'MAC white list is not correct',
+            'Portal_106':'Hot ID can not be empty',
+            'Portal_200':'Incorrect password (6-15)',
+            'Portal_201':'Logon valid cut-off time is incorrect',
+            'Portal_202':'Incorrectly logon time',
+            'Portal_203':'Repeatable logon parameters are incorrect',
+            'Portal_204':'The user has already existed',
+            'Portal_205':'Create user failure',
+            'Portal_300':'user does not exist',
+            'Portal_301':'Delete user failure',
+            'Portal_400':'user does not exist',
+            'Portal_401':'Update user failure',
+            'Portal_500':'Logged in users do not exist',
+            'Portal_501':'Downline failure',
+
+
+
+            'Pptpd_100':'Incorrectly opening parameters',
+            'Pptpd_101':'Server IP is incorrect',
+            'Pptpd_102':'The client starts IP incorrectly',
+            'Pptpd_103':'Client end IP is incorrect',
+            'Pptpd_104':'Wins server IP is incorrect',
+            'Pptpd_105':'DNS1 is incorrect',
+            'Pptpd_106':'DNS2 is incorrect',
+            'Pptpd_107':'Incorrectly encrypted',
+            'Pptpd_200':'The username can not be empty',
+            'Pptpd_201':'The password can not be empty',
+            'Pptpd_202':'IP is incorrect',
+            'Pptpd_203':'The user has already existed',
+            'Pptpd_300':'user does not exist',
+
+
+            'Qos_100':'QOS open parameter is incorrect',
+            'Qos_101':'Incorrect bandwidth',
+            'Qos_200':'IP is incorrect',
+            'Qos_201':'IP already exists',
+
+
+            'System_100':'Time is not correct',
+            'System_200':'Minute is not correct',
+            'System_201':'Hour is not correct',
+            'System_202':'Date is not correct',
+            'System_203':'Month is not correct',
+            'System_204':'Week is not right',
+
+
+            'User_100':'Incorrect original password',
+            'User_101':'Failure to modify the password'
         },
         common:{
             "enabled":"Enabled",
@@ -2171,7 +2319,9 @@ var messages = {
             "msg11":"请选择要删除的规则！",
             "msg12":"您确定要删除选中的记录吗？",
             "msg13":"删除成功！",
-            "msg14":"内部端口不能为空，请重试！"
+            "msg14":"内部端口不能为空，请重试！",
+            "msg15":"添加成功！",
+            "msg16":"添加失败！"
         },
         "dnsfwd":{
             "title":"DNS转发",
@@ -2463,6 +2613,8 @@ var messages = {
             "msg2":"NTP服务器2不能为空，请重试！",
             "msg3":"NTP服务器3不能为空，请重试！",
             "msg4":"NTP服务器必须是个有效的IP地址或URL地址！",
+            "modify_success":"修改时间成功！",
+            "modify_fail":"修改时间失败！",
             "countdown":"倒计时[ye-time]秒..."
         },
         "upnp":{
@@ -2835,6 +2987,149 @@ var messages = {
             "status":"状态",
             "connection_success=":"连接成功",
             "connection_fail":"连接失败"
+        },
+        errorcode:{
+            'Dns_100':'开启参数不正确',
+            'Dns_101':'未设置DNS服务器不能，不能关闭DNS转发功能',
+            'Dns_200':'IP不正确',
+            'Dns_201':'域名不正确',
+            'Dns_202':'覆盖的域名已存在',
+            'Dns_300':'要删除的域名不存在',
+
+
+            'Firewall_100':'类型不正确',
+            'Firewall_101':'协议不正确',
+            'Firewall_102':'IP不正确',
+            'Firewall_103':'端口不正确',
+            'Firewall_104':'规则已存在',
+            'Firewall_200':'规则不存在',
+            'Firewall_300':'接口不存在',
+            'Firewall_301':'转发IP不正确',
+            'Firewall_302':'转发端口不正确',
+            'Firewall_303':'规则已存在',
+            'Firewall_400':'规则不存在',
+            'Firewall_500':'WEB端口不正确',
+            'Firewall_501':'SSH端口不正确',
+
+
+            'Firmware_100':'版本不正确',
+            'Firmware_101':'上传的固件信息不存在',
+
+
+            'L2tp_100':'开启参数不正确',
+            'L2tp_101':'服务器IP不正确',
+            'L2tp_102':'客户端开始IP不正确',
+            'L2tp_103':'客户端结束IP不正确',
+            'L2tp_104':'Wins服务器IP不正确',
+            'L2tp_105':'DNS1不正确',
+            'L2tp_106':'DNS2不正确',
+            'L2tp_107':'认证类型不正确',
+            'L2tp_200':'用户名不正确',
+            'L2tp_201':'密码不正确',
+            'L2tp_202':'用户IP不正确',
+            'L2tp_203':'用户已存在',
+            'L2tp_300':'用户不存在',
+
+
+            'Network_100':'接口名称不正确',
+            'Network_101':'IP不正确',
+            'Network_102':'子网掩码不正确',
+            'Network_103':'DHCP服务器开启参数不正确',
+            'Network_104':'DHCP地址池开始IP不正确',
+            'Network_105':'DHCP地址池结束IP不正确',
+            'Network_106':'接口名称不存在',
+            'Network_200':'接口不存在',
+            'Network_201':'网卡不正确',
+            'Network_202':'接口名称不正确',
+            'Network_203':'DNS1不正确',
+            'Network_204':'监视IP不正确',
+            'Network_205':'IP地址不正确',
+            'Network_206':'子网掩网不正确',
+            'Network_207':'默认网关不正确',
+            'Network_208':'用户名和密码不能为空',
+            'Network_209':'连接方式不正确',
+            'Network_210':'权重不正确(1-4)',
+            'Network_211':'优先级不正确(1-4)',
+            'Network_212':'WAN接口指定的DNS不能相同',
+
+            'Network_300':'接口不正确',
+            'Network_301':'网卡不可用',
+            'Network_302':'取接口名称失败',
+            'Network_303':'取接口标识失败',
+
+            'Network_400':'MAC不正确',
+            'Network_401':'IP不正确',
+            'Network_402':'备注不能为空',
+            'Network_403':'该MAC地址已添加过规则',
+            'Network_404':'该IP地址已添加过规则',
+
+            'Network_500':'接口名称不正确',
+            'Network_501':'网关不在网段内',
+            'Network_502':'静态路由描述不能为空',
+            'Network_503':'静态路由已存在',
+            'Network_600':'接口不存在',
+            'Network_601':'静态路由不存在',
+
+            'Network_700':'网络接口不存在',
+            'Network_701':'网络接口属于组，不能删除',
+            'Network_702':'网络接口属于桥，不能删除',
+            'Network_703':'网络接口属于gre,不能删除',
+            'Network_704':'网络接口属于gif,不能删除',
+            'Network_705':'网卡不正确',
+
+
+            'Portal_100':'开启参数不正确',
+            'Portal_101':'服务类型不正确',
+            'Portal_102':'空闲断开时间不正确（1-300）',
+            'Portal_103':'登录页面上传失败',
+            'Portal_104':'IP白名单不正确',
+            'Portal_105':'MAC白名单不正确',
+            'Portal_106':'热点ID不能为空',
+            'Portal_200':'密码不正确（6-15）',
+            'Portal_201':'登录有效截止时间不正确',
+            'Portal_202':'可登录时间不正确',
+            'Portal_203':'可重复登录参数不正确',
+            'Portal_204':'用户已存在',
+            'Portal_205':'创建用户失败',
+            'Portal_300':'用户不存在',
+            'Portal_301':'删除用户失败',
+            'Portal_400':'用户不存在',
+            'Portal_401':'更新用户失败',
+            'Portal_500':'登录用户不存在',
+            'Portal_501':'下线失败',
+
+
+            'Pptpd_100':'开启参数不正确',
+            'Pptpd_101':'服务器IP不正确',
+            'Pptpd_102':'客户端开始IP不正确',
+            'Pptpd_103':'客户端结束IP不正确',
+            'Pptpd_104':'Wins服务器IP不正确',
+            'Pptpd_105':'DNS1不正确',
+            'Pptpd_106':'DNS2不正确',
+            'Pptpd_107':'加密不正确',
+            'Pptpd_200':'用户名不能为空',
+            'Pptpd_201':'密码不能为空',
+            'Pptpd_202':'IP不正确',
+            'Pptpd_203':'用户已存在',
+            'Pptpd_300':'用户不存在',
+
+
+            'Qos_100':'QOS开启参数不正确',
+            'Qos_101':'带宽不正确',
+            'Qos_200':'IP不正确',
+            'Qos_201':'IP已存在',
+
+
+            'System_100':'时间不正确',
+            'System_200':'分不正确',
+            'System_201':'时不正确',
+            'System_202':'日不正确',
+            'System_203':'月不正确',
+            'System_204':'周不正确',
+
+
+            'User_100':'原密码不正确',
+            'User_101':'修改密码失败'
         },
         common:{
             enabled:"启用",

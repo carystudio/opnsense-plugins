@@ -282,10 +282,11 @@
                                 cs.loginOut();
                             }
                             if (0 == data.rescode) {
-                                _this.$Message.success(_this.$t('dnsfwd.msg18'));
-                                location.href = location.href;
+                                _this.$Message.success({content:_this.$t('dnsfwd.msg18'),onClose:function(){
+                                    location.href = location.href;
+                                }});
                             } else {
-                                _this.$Message.error(_this.$t('dnsfwd.msg19')+data.rescode);
+                                _this.$Message.error(_this.$t('dnsfwd.msg19')+_this.$t('errorcode.'+data.rescode));
                             }
                             _this.addDnsfwdLoading = false;
                         });
@@ -325,7 +326,7 @@
                     if (0 == data.rescode) {
                         _this.$Message.success(_this.$t('dnsfwd.msg20'));
                     } else {
-                        _this.$Message.error(_this.$t('dnsfwd.msg21')+data.rescode);
+                        _this.$Message.error(_this.$t('dnsfwd.msg21')+_this.$t('errorcode.'+data.rescode));
                     }
                 });
             },
