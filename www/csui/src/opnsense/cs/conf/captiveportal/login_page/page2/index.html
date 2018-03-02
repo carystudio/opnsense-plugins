@@ -6,13 +6,43 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-<script type="text/javascript" src="https://wifi.weixin.qq.com/resources/js/wechatticket/wechatutil.js" ></script>
+<script type="text/javascript" src="js/wechatutil.js" ></script>
 <script type="text/javascript" src="js/zone.js"></script>
 <script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
 <script type="application/x-javascript">
 	addEventListener("load", function() {
 		setTimeout(hideURLbar, 0);
 	}, false);
+
+	var loadIframe = null;
+    	 function createIframe(){
+         	var iframe = document.createElement("iframe");
+     		iframe.style.cssText = "display:none;width:0px;height:0px;";
+     		document.body.appendChild(iframe);
+     		loadIframe = iframe;
+ 	}
+ 	
+ 	function showTips(){
+		//IOS 11 navigate
+		var userAgentInfo = navigator.userAgent;
+		if (userAgentInfo.indexOf(' like Mac OS X') > 0 && userAgentInfo.indexOf(' OS 11_')>0) {
+			$("#IOS11Tip").show();
+        	}
+		
+	}
+
+	function callWechatBrowser(btn) {
+        	btn.attr("disabled",true); 
+        	$.get("/api/captiveportal/portaltoweixin",function(data,status){
+						btn.attr("disabled",false); 
+						if("success" == status){
+							//window.location.href=data;
+							createIframe();
+              loadIframe.src=data;
+							setTimeout("showTips()", 2000)
+						}
+					});
+        }
 
 	function hideURLbar(){
 		window.scrollTo(0,1);
@@ -79,29 +109,8 @@
 	});
 
 	function doweixin(){
-		$(":input").attr('disabled',true);
-		$.ajax({
-			type: 'post',
-			url: "/api/captiveportal/portaltoweixin",
-			data : "",
-			dataType: 'json',
-			async : true,
-			success: function (data) {
-				if(data.res == "Success"){
-					appId          = data.appId;
-					secretkey      = data.secretkey;
-					extend         = data.extend;    　　　 //开发者自定义参数集合
-					timestamp      = data.timestamp;　　　//时间戳(毫秒)
-					shop_id        = data.shop_id;            　　  //AP设备所在门店的ID
-					authUrl        = data.authUrl;        //认证服务端URL
-					mac            = data.mac;  　　　//用户手机mac地址 安卓设备必需
-					ssid           = data.ssid;
-					sign = data.sign;
-					weixinUrl = 'weixin://connectToFreeWifi/?apKey=_p33beta&appId='+data.appId+'&shopId='+data.shop_id+'&authUrl='+data.authUrl+'&extend='+data.extend+'&timestamp='+data.timestamp+'&sign='+data.sign;
-					$.getScript(data.getpassthrouthurl);
-				}
-			}
-		});
+		btn = $("#weixin");
+		callWechatBrowser(btn);
 	}
 
 	function checktoopenwechat(a) {

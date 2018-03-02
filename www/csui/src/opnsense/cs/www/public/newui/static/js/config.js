@@ -13,7 +13,7 @@
  * // 桥模式，没有广域网设置和状态信息显示，没有qos和防火墙
  */
 var globalConfig = {
-    "debug":true,
+    "debug":false,
     "ajaxType":false,
     "cs":"Carystudio",
     "showMenu":true,

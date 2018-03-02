@@ -41,6 +41,9 @@ class Dns extends Csbackend
             $dnsForwardStatus['Enable'] = '1';
             if('1' == $dnsForwardStatus['Enable'] && isset($config['dnsmasq']['hosts']) && is_array($config['dnsmasq']['hosts'])){
                 foreach($config['dnsmasq']['hosts'] as $host){
+                    if('PORTAL_SERVER'== $host['descr'] || 'WeChat Local Login'==$host['descr']){
+                        continue ;
+                    }
                     $overwrite = array();
                     $overwrite['Domain'] = $host['host'].'.'.$host['domain'];
                     $overwrite['Ip'] = $host['ip'];

@@ -1,0 +1,82 @@
+    <!DOCTYPE HTML> 
+    <html> 
+    <head> 
+    <title>微信登录</title>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="/css/style-simple-follow.css"/>
+    <script type="text/javascript" src="/js/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.md5.js"></script>
+    <!--为了让IE支持HTML5元素，做如下操作：--> 
+    <!--[if IE]> 
+    <script type="text/javascript"> 
+    document.createElement("section"); 
+    document.createElement("header"); 
+    document.createElement("footer");
+    </script> 
+    <![endif]-->
+    <script type="text/javascript">
+    		//注册回调函数
+				function jsonpCallback(result){  
+					if(result && result.success){
+						var ua=navigator.userAgent;              
+						if (ua.indexOf("iPhone") != -1 ||ua.indexOf("iPod")!=-1||ua.indexOf("iPad") != -1) {   //iPhone             
+							document.location = result.data;
+						}else{
+						    createIframe();
+						    loadIframe.src=result.data;
+							noResponse = setTimeout(function(){
+								errorJump();
+					      	},3000);
+						}
+					}else if(result && !result.success){
+						alert(result.data);
+					}
+				}
+
+
+        function callWechatBrowser() {
+        	$("#wechatbtn").attr("disabled",true); 
+        	$("#wechatbtn").attr("class","mod-simple-follow-page__attention-btn gray"); 
+        	
+					$("#wechatbtn").attr("class","mod-simple-follow-page__attention-btn"); 
+					$("#wechatbtn").attr("disabled",false); 
+					var script = document.createElement('script');  
+					script.setAttribute('src', "{{weixinurl}}");  
+					document.getElementsByTagName('head')[0].appendChild(script);
+        }
+    </script>
+    <style>
+    .gray { 
+    	-webkit-filter: grayscale(100%);
+    	-moz-filter: grayscale(100%);
+    	-ms-filter: grayscale(100%);
+    	-o-filter: grayscale(100%);
+    	filter: grayscale(100%);
+    	filter: gray;
+		}
+    </style>
+    </head>
+    <body>
+			<div class="mod-simple-follow-page">
+			    <div class="mod-simple-follow-page__banner">
+			        <img id="img_bg" class="mod-simple-follow-page__banner-bg" src="/images/background.jpg" alt=""/>
+			        <div class="mod-simple-follow-page__img-shadow"></div>
+			        <div class="mod-simple-follow-page__logo">
+			            <img class="mod-simple-follow-page__logo-img" src="/images/t.weixin.logo.jpg" alt=""/>
+			            <p class="mod-simple-follow-page__logo-name"></p>
+			            <p class="mod-simple-follow-page__logo-welcome">欢迎您</p>
+			        </div>
+			    </div>
+			    <div class="mod-simple-follow-page__attention">
+			        <p class="mod-simple-follow-page__attention-txt">上网前请先关注我们</p>
+			        <button id="wechatbtn" class="mod-simple-follow-page__attention-btn"  onClick="callWechatBrowser();">跳转去"关注我们"</button>
+			    </div>
+			</div>
+		</body>
+    </html>
+

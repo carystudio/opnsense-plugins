@@ -11,6 +11,8 @@ use OPNsense\Auth\AuthenticationFactory;
 class PortalapiController extends BaseController
 {
     private $db = false;
+    const WECHAT_USER = 'WeChatUser';
+    const WECHAT_USER_PWD = 'jkejr03uj24mfkjsskjf';
 
     private function getDbConn(){
         if(false === $this->db){
@@ -87,12 +89,29 @@ class PortalapiController extends BaseController
     }
 
     public function logonAction(){
+    	var_dump($_GET);
+    		$portal = self::getPortal();
         $username = trim($this->request->getPost('user',null, ''));
         $password = trim($this->request->getPost('password',null, ''));
-
+				
         $ip = Util::getClientIp($this->request);
         $mac = Util::getLanMacByIp($ip);
         $t = time();
+        if(empty($username) && empty($password)){
+					if(isset($_GET['extend'])){
+						$extend = base64_decode($_GET['extend']);
+						if($extend){
+							$extend = json_decode($extend,true);
+							if(is_array($extend) && isset($extend['ip']) && isset($extend['key'])){
+								$key = md5($extend['ip'].$portal['secretkey']);
+								if($extend['key'] == $key){
+									$username = PortalapiController::WECHAT_USER;
+									$password = PortalapiController::WECHAT_USER_PWD;
+								}
+							}
+						}
+					}
+				}
 
         $result = array('clientState' => 'NOT_AUTHORIZED','ipAddress'=>$ip);
         try{
@@ -143,8 +162,13 @@ class PortalapiController extends BaseController
         }catch (Exception $ex){
 
         }
-
-        echo json_encode($result);
+				var_dump($result);
+				if('AUTHORIZED' == $result['clientState'] && isset($_GET['force']) && '1'==$_GET['force']){
+        	$redir = 'http://'.$_SERVER['HTTP_HOST'].'/api/captiveportal/weixinforce?logined=OK&sessionid='.base64_encode($result['sessionId']);
+        	header('Location: '.$redir);
+        }else{
+        	echo json_encode($result);
+        }
     }
     public function weixinlogonAction(){
         $username = $_POST['openId'];
@@ -224,8 +248,8 @@ class PortalapiController extends BaseController
         }catch (AppException $aex){
         }catch (Exception $ex){
         }
-        echo json_encode($result);
 
+        echo json_encode($result);
     }
     //随机生成六位数密码
     function randStr($len=6,$format='ALL') {
@@ -417,11 +441,89 @@ class PortalapiController extends BaseController
         }
     }
 
+		public function weixinauthAction(){
+			file_put_contents('/tmp/wechat_test.log', date('Y-m-d H:i:s').' auth: '.json_encode($_SERVER)."\r\n", FILE_APPEND);
+			$portal = self::getPortal();
+			$t = time();
+			
+			var_dump($portal);
+			$extend = base64_decode($_GET['extend']);
+			if($extend){
+				$extend = json_decode($extend,true);
+			}
+			
+			if('yes' == $portal['attention']){
+				$url = 'http://'.$extend['gw_address'].':'.$extend['gw_port'].'/wifidog/api?callback=checktoopenwechat&action=wanwhiteset0&accesskey='.md5('wifiap'.$extend['ip']).'&clientip='.$extend['ip'];
+			}else{
+				$token = md5(''.$extend['mac'].$extend['ip'].$t);
+				$url = 'http://'.$extend['gw_address'].':'.$extend['gw_port'].'/api/captiveportal/logon?extend='.$_GET['extend'];
+			}
+			header('Location: '.$url);
+		}
+		
+		
+		public function weixinforceAction(){
+			$portal = self::getPortal();
+			$t = time();
+			
+			if('yes' == $portal['attention']){
+				$extend = base64_decode($_GET['extend']);
+				if($extend){
+					$extend = json_decode($extend,true);
+				}
+				if(isset($_GET['logined']) && 'OK' == $_GET['logined'] && !empty($_GET['sessionid'])){
+					$db = $this->getDbConn();
+        	$res = $db->query("select sessionid from cp_clients c where c.sessionid='".base64_decode($_GET['sessionid'])."' and c.deleted=0 limit 1");
+        	$session = $res->fetchArray(SQLITE3_ASSOC);
+        	var_dump($session);
+        	if(false !== $session){
+						if(isset($portal['redirect']) && !empty($portal['redirect'])){
+							//header('Location: '.$portal['redirect']);
+							echo 'redirect';
+						}else{
+							header('Location: http://www.baidu.com/');
+							echo 'baidu';
+						}
+						return ;
+					}else{
+						var_dump($_GET);
+					}
+				}
+					if('1' == $_GET['isContact']){
+						$token = md5(''.$extend['mac'].$extend['ip'].$t);
+						$url = 'http://'.$extend['gw_address'].'/api/captiveportal/logon?force=1&extend='.$_GET['extend'];
+						header('Location: '.$url);
+					}else{
+						$info = json_decode(base64_decode($_GET['extend']), true);
+						//var sign = appId + extend + timestamp + shop_id + authUrl + mac + ssid + bssid + secretkey;
+						$t = ''.$t.'000';
+						$bssid='D2:EE:07:13:88:DA';
+						$authurl = 'http://'.$_SERVER['SERVER_NAME'].'/api/captiveportal/weixinauth';
+						
+						$sign = md5($portal['appId'].$_GET['extend'].$t.$portal['shop_id'].$authurl.$info['mac'].$portal['ssid'].$bssid.$portal['secretkey']);
+						$weixinurl = sprintf('https://wifi.weixin.qq.com/operator/callWechat.xhtml?appId=%s&extend=%s&timestamp=%s&sign=%s&shopId=%s&authUrl=%s&mac=%s&ssid=%s&bssid=%s',
+						$portal['appId'], $_GET['extend'], $t, $sign, $portal['shop_id'], urlencode($authurl), $info['mac'], $portal['ssid'],$bssid);
+			
+						$page = file_get_contents('/var/captiveportal/zone0/htdocs/force.html');
+						$page = str_replace('{{weixinurl}}', $weixinurl, $page);
+						echo $page;
+					}
+			}else{
+				if(isset($portal['redirect']) && !empty($portal['redirect'])){
+					header('Location: '.$portal['redirect']);
+				}else{
+					header('Location: http://www.baidu.com/');
+				}
+			}
+			
+		}
+		
     public function portaltoweixinAction(){
         global $config;
         $portal = self::getPortal();
         $ipaddr = $config['interfaces']['lan']['ipaddr'];
 
+/*
         $result = array('res'=>'Success');
         $result['ip'] = Util::getClientIp($this->request);
         $result['mac'] = Util::getLanMacByIp($result['ip']);
@@ -437,7 +539,20 @@ class PortalapiController extends BaseController
         $result['sign'] = md5($result['appId'].$result['extend'].$result['timestamp'].$result['shop_id'].$result['authUrl'].$result['mac'].$result['ssid'].$result['secretkey']);
 //        $result['authUrl'] = urlencode($result['authUrl']);
 
-        echo json_encode($result);
+        echo json_encode($result);*/
+        
+        //referer2get();
+        $authurl = 'http://'.$_SERVER['SERVER_NAME'].'/api/captiveportal/weixinauth';
+        //print_r($_SERVER);
+        $ip = Util::getClientIp($this->request);
+        $mac = Util::getLanMacByIp($ip);
+				$timestamp = time().'000';
+				
+				$extend=base64_encode(json_encode(array('gw_id'=>'csg2000p','ip'=>$ip, 'mac'=>$mac,'gw_address'=>$ipaddr,'gw_port'=>8000, 'key'=>md5($ip.$portal['secretkey']))));
+				//$sign = md5($WC_APPID.$extend.$timestamp.$WC_SHOPID.$authurl.$_GET['mac'].$WC_SSID.$WC_SECRETKEY);
+				$sign = md5($portal['appId'].$portal['shop_id'].$authurl.$extend.$timestamp.$portal['secretkey']);
+				printf("weixin://connectToFreeWifi/?apKey=_p33beta&appId=%s&shopId=%s&authUrl=%s&extend=%s&timestamp=%s&sign=%s", $portal['appId'], $portal['shop_id'], urlencode($authurl), $extend, $timestamp, $sign);
+	
     }
     // 毫秒级时间戳
     function getMillisecond() {
@@ -447,10 +562,10 @@ class PortalapiController extends BaseController
 
     private static function getPortal(){
         global $config;
-
+      
         if(isset($config['OPNsense']['captiveportal']['zones']['zone']['@attributes']['uuid']) &&
             '154b5da3-b1d2-48e8-86d6-1f055cdb8efa'==$config['OPNsense']['captiveportal']['zones']['zone']['@attributes']['uuid']){
-            return $config['OPNsense']['captiveportal']['zones']['zone'];
+            $zone = $config['OPNsense']['captiveportal']['zones']['zone'];
         }else{
             $portal = array();
             $portal['@attributes'] = array('version'=>'1.0.0');
@@ -475,9 +590,12 @@ class PortalapiController extends BaseController
             $config['OPNsense']['captiveportal'] = $portal;
             write_config();
 
-            return $portal['zones']['zones'];
+            $zone =  $portal['zones']['zone'];
         }
+        
+        return $zone;
     }
+    
     public function loginpagedlAction(){
         $filename = '/usr/local/opnsense/cs/tmp/login_page.zip';
         if(!file_exists($filename)){

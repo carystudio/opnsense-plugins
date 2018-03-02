@@ -31,6 +31,7 @@ class Portal extends Csbackend
         'Portal_205'=>'创建用户失败',
         'Portal_300'=>'用户不存在',
         'Portal_301'=>'删除用户失败',
+        'Portal_302'=>'微信用户不能删除',
         'Portal_400'=>'用户不存在',
         'Portal_401'=>'更新用户失败',
         'Portal_500'=>'登录用户不存在',
@@ -130,6 +131,7 @@ class Portal extends Csbackend
             }else{
                 $portal_status['LoginPageStatus'] = '0';
             }
+            $portal_status['wc_enable'] = isset($portal['wc_enable'])?'yes'==$portal['wc_enable']?'yes':'no':'no';
             $portal_status['appId'] = $portal['appId'];
             $portal_status['shop_id'] = $portal['shop_id'];
             $portal_status['ssid'] = $portal['ssid'];
@@ -262,27 +264,31 @@ class Portal extends Csbackend
                         }
                     }
                 }
-
-                if(strlen(trim($data['appId']))<=0){
-                    throw new AppException('appId不能为空');
-                }
-                if(strlen(trim($data['shop_id']))<=0){
-                    throw new AppException('shop_id不能为空');
-                }
-                if(strlen(trim($data['ssid']))<=0){
-                    throw new AppException('ssid不能为空');
-                }
-                if(strlen(trim($data['secretkey']))<=0){
-                    throw new AppException('secretkey不能为空');
-                }
-                $portal['appId'] = trim($data['appId']);
-                $portal['shop_id'] = trim($data['shop_id']);
-                $portal['ssid'] = trim($data['ssid']);
-                $portal['secretkey'] = trim($data['secretkey']);
-                if ($data['attention'] ==  "0"){
-                    $portal['attention'] = "yes";
+                if(isset($data['wc_enable']) && 'yes' == $data['wc_enable']){
+                    if(strlen(trim($data['appId']))<=0){
+                        throw new AppException('appId不能为空');
+                    }
+                    if(strlen(trim($data['shop_id']))<=0){
+                        throw new AppException('shop_id不能为空');
+                    }
+                    if(strlen(trim($data['ssid']))<=0){
+                        throw new AppException('ssid不能为空');
+                    }
+                    if(strlen(trim($data['secretkey']))<=0){
+                        throw new AppException('secretkey不能为空');
+                    }
+                    $portal['wc_enable'] = 'yes';
+                    $portal['appId'] = trim($data['appId']);
+                    $portal['shop_id'] = trim($data['shop_id']);
+                    $portal['ssid'] = trim($data['ssid']);
+                    $portal['secretkey'] = trim($data['secretkey']);
+                    if ($data['attention'] ==  "0"){
+                        $portal['attention'] = "yes";
+                    }else{
+                        $portal['attention'] =  "no";
+                    }
                 }else{
-                    $portal['attention'] =  "no";
+                    $portal['wc_enable'] = 'no';
                 }
 
                 
@@ -381,7 +387,7 @@ class Portal extends Csbackend
             }
             $config['OPNsense']['captiveportal']['zones']['zone'] = $portal;
             self::updatePortalLanAlias($portal);
-            self::setDnsStrict();
+            //self::setDnsStrict();
 
             if('1'==$portal['enabled']){
                 $db = PortalHelper::getDbConn();
@@ -518,6 +524,9 @@ class Portal extends Csbackend
         $t = time();
         try{
             $username = SQLite3::escapeString(trim($data['Username']));
+            if('WeChatUser'==$username){
+                throw new AppException('Portal_302');
+            }
             $db = PortalHelper::getDbConn();
             $res = $db->query("select * from users where username='".SQLite3::escapeString($username)."' limit 1");
             $user = $res->fetchArray(SQLITE3_ASSOC);

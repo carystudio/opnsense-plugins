@@ -64,6 +64,7 @@ create table users (
 ,     deleted integer default (0)
 ,     primary key (username)
 );
+insert into users values ('WeChatUser', 'jkejr03uj24mfkjsskjf', 1924790400, 0, 1, 1519900764, 0);
 
 --  wanwhiteset record
 create table wanwhiteset (
