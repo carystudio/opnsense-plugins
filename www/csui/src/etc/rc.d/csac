@@ -49,25 +49,37 @@ csac_start()
 	echo "start csac process"
 	/bin/cp -rf /usr/local/opnsense/cs/conf/lighty-webConfigurator-ac.conf /usr/local/opnsense/cs/tmp/etc/
 	/usr/local/sbin/lighttpd -f /usr/local/opnsense/cs/tmp/etc/lighty-webConfigurator-ac.conf
-	/usr/local/bin/mysqladmin -uroot ping >&! /dev/null
+	/usr/local/bin/mysqladmin -uroot ping > /dev/null
 	if [ $? -ne 0 ];then
-		/usr/local/bin/mysqld_safe >/dev/null 2>&1 &
+		/usr/local/bin/mysqld_safe > /dev/null &
 		/bin/sleep 3
 	fi
 	
-	/usr/local/bin/mysqladmin -uroot ping >/dev/null 2>&1
+	/usr/local/bin/mysqladmin -uroot ping > /dev/null
 	if [ $? -eq 0 ];then
 		echo "mysql server start success"
 		/usr/local/bin/mysql -uroot </usr/local/opnsense/cs/ac/db/init.sql
 	else
 		/bin/sleep 2
-		/usr/local/bin/mysqladmin -uroot ping >/dev/null 2>&1
+		/usr/local/bin/mysqladmin -uroot ping > /dev/null
 		if [ $? -eq 0 ];then
 			echo "mysql server start success"
 			/usr/local/bin/mysql -uroot </usr/local/opnsense/cs/ac/db/init.sql
 		else
 			echo "ERROR:mysql server start fail"
 		fi
+	fi
+	if [ ! -d /usr/local/opnsense/cs/ac/webapi/firmware ];then
+		mkdir -p /usr/local/opnsense/cs/ac/webapi/firmware
+	fi
+	/bin/df | /usr/bin/grep -v grep|/usr/bin/grep webapi/firmware > /dev/null
+	if [ $? -ne 0 ];then
+		echo "mount"
+        	/sbin/mount -o size=104857600 -t tmpfs tmpfs /usr/local/opnsense/cs/ac/webapi/firmware
+	fi
+	/bin/ps -aux | /usr/bin/grep -v grep|/usr/bin/grep cs_daemon.sh > /dev/null
+	if [ $? -ne 0 ];then
+		/bin/sh /usr/local/bin/cs_daemon.sh &
 	fi
 }
 
