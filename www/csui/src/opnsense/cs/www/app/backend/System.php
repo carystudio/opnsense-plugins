@@ -37,6 +37,8 @@ class System extends Csbackend
         $statusInfo['system']['ReleaseDate']     = $csg2000p_config->csg2000p->build_date;
         $statusInfo['niclist'] = get_interface_list();
         $statusInfo['interface']        = array();
+        $pfctl_counters = json_decode(configd_run("filter list counters json"), true);
+        $statusInfo['packages'] = $pfctl_counters;
         foreach($config['interfaces'] as $inf=>$infinfo){
             $statusInfo['interface'][$infinfo['descr']]   = Network::getInfInfo($infinfo['descr']);
             if('static'!=$statusInfo['interface'][$infinfo['descr']]['Protocol']){

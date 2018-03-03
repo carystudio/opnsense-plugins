@@ -25,6 +25,7 @@ try{
 			foreach ($GET_FIELDS as $getvar => $dbvar) {
 				$ap[$dbvar] = $data[$getvar];
 			}
+			$ap['uptime'] = time();
 
 			$ap = Db::createAp($ap);
 			if (!ap) {
@@ -85,6 +86,9 @@ try{
 
 		if(false === $result){
 			$result = Action::getAction($ap);
+			if('SessionOver' == $result['action']){
+				$ap = Action::deleteState($ap, Action::STATE_ONLINE);
+			}
 		}
 	}
 }catch(AppException $aex){

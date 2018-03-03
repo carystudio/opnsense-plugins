@@ -4205,9 +4205,9 @@ uiPost.prototype.getDhcpSliList = function(postVar,callback){
 uiPost.prototype.getNetInfo = function(postVar,callback){
     this.topicurl = 'getNetInfo';
     this.async = true; // true:异步，false:同步。
-    if (globalConfig.debug) {
+    // if (globalConfig.debug) {
         this.url = "/newui/data/getNetInfo.json";
-    }
+    // }
     return this.post(postVar,callback);
 };
 
@@ -5383,6 +5383,66 @@ uiPost.prototype.setQos = function(postVar,callback){
 };
 
 /**
+ * 删除QOS规则
+ * @Author   Jeff       <Jeff@carystudio.com>
+ * @DateTime 2018-02-03
+ * @param    {String}   action       主题
+ * @param    {Object}   data    数据
+ * @param    {Object}   data.Ip    要删除的IP地址
+ *
+ * @property {String}
+ * @return   {object}
+ * @example
+ * request:
+ * {
+*       "action":"delQosCustom","
+*       data":{
+*           "Ip":"192.168.10.120"
+*           }
+* }
+ * response:
+ * {
+*
+* }
+ */
+uiPost.prototype.delQosCustom = function(postVar,callback){
+    this.topicurl = 'delQosCustom';
+    this.async = true; // true:异步，false:同步。
+    this.url = '/webapi';
+    return this.post(postVar,callback);
+};
+
+/**
+ * 新增QOS规则
+ * @Author   Jeff       <Jeff@carystudio.com>
+ * @DateTime 2018-02-03
+ * @param    {String}   action       主题
+ * @param    {Object}   data    数据
+ * @param    {Object}   data.Ip    要删除的IP地址
+ *
+ * @property {String}
+ * @return   {object}
+ * @example
+ * request:
+ * {
+*       "action":"addQosCustom","
+*       data":{
+*           "Ip":"192.168.10.120"
+*           }
+* }
+ * response:
+ * {
+*
+* }
+ */
+uiPost.prototype.addQosCustom = function(postVar,callback){
+    this.topicurl = 'addQosCustom';
+    this.async = true; // true:异步，false:同步。
+    this.url = '/webapi';
+    return this.post(postVar,callback);
+};
+
+/**
  * 获取防火墙信息
  * @Author   Jeff       <Jeff@carystudio.com>
  * @DateTime 2018-02-03
@@ -6436,9 +6496,28 @@ uiPost.prototype.doLogin = function(postVar,callback){
         this.async = true; // true:异步，false:同步。
         return this.post(postVar,callback);
     };
-    uiPost.prototype.acScanAp = function(postVar,callback){
-        this.topicurl = 'acScanAp';        /*恢复数据库出厂设置*/
+    uiPost.prototype.scanAp = function(postVar,callback){
+        this.topicurl = 'acScanAp';
         this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setApIp = function(postVar,callback){
+        this.topicurl = 'setApIp';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setApReboot = function(postVar,callback){
+        this.topicurl = 'setApReboot';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setApName = function(postVar,callback){
+        this.topicurl = 'setApName';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
         return this.post(postVar,callback);
     };
 

@@ -466,9 +466,10 @@
                 dataObj = '{ "name": "","value1": "","value2": ""}';
                 for(var i in temp){
                     if(i.substring(0,3) == "lan" || i.substring(0,3) == "wan"){
-                        dataObj += ',{ "name": "'+ i +'","value1": "","value2": ""}';
+                        dataObj += ',{ "name": "'+ i +'","value1": "'+temp[i].pkg_rx+'","value2": "'+temp[i].pkg_tx+'"}';
                     }
                 }
+                console.log(dataObj);
                 dataObj = '['+dataObj+']';
                 dataObj = JSON.parse(dataObj);
 
@@ -598,6 +599,8 @@
                     for(var i in _this.interface){
                         var _wan = '';
                         var _lan = '';
+                        _this.interface[i].pkg_tx = data.data.packages[_this.interface[i].Nic].outpkts;
+                        _this.interface[i].pkg_rx = data.data.packages[_this.interface[i].Nic].inpkts;
                         if(i.substring(0,3) == "lan"){
                             _this.interface[i].interface = 'LAN';
                         }
@@ -754,7 +757,11 @@
             },
             functionLoadCharts: function() {
                 var _this = this;
-                uiPost.getNetInfo(function(data) {
+                var postData = {"action":"getNetInfo", "data":{}};
+                uiPost.getNetInfo(postData, function(data) {
+                    if(data.rescode==0){
+                        data = data.data;
+                    }
                     if(_this.tab != 0){
                         data = data[_this.extInfo[_this.tab-1].Nic];
                     }else{
@@ -875,7 +882,11 @@
             },
             functionLinksCharts: function() {
                 var _this = this;
-                uiPost.getLinksData(function(data) {
+                var postData = {"action":"getLinksData", "data":{}};
+                uiPost.getLinksData(postData, function(data) {
+                    if(data.rescode==0){
+                        data = data.data;
+                    }
                     _this.linksChartsData.links_x.shift();
                     _this.linksChartsData.links_y.shift();
                     _this.linksChartsData.links_y1.shift();

@@ -270,6 +270,23 @@ class WebapiController extends BaseController
             }else if('delInterfaceBind'==$action){
                 $this->checkData($para);
                 $result['rescode'] = Network::delInterfaceBind($para['data']);
+            }else if('getNetInfo'==$action){
+                $result['rescode'] = Network::getNetInfo($para['data']);
+            }else if('getLinksData'==$action){
+                $result['rescode'] = Network::getLinksData($para['data']);
+            }else if("scanAp" == $action){
+                $this->checkData($para);
+                $result['rescode'] = Accontrol::acScanAp($para['data']);
+            }else if("setApIp" == $action){
+                $this->checkData($para);
+                $result['rescode'] = Accontrol::setApIp($para['data']);
+            }else if("setApReboot" == $action){
+                $this->checkData($para);
+                $result['rescode'] = Accontrol::setApReboot($para['data']);
+            }else if("setAcReset" == $action){
+                $result['rescode'] = Accontrol::setAcReset($para['data']);
+            }else if("setApName" == $action){
+                $result['rescode'] = Accontrol::setApName($para['data']);
             }else if('test' == $action){
                 $result['rescode'] = Dns::getErrors();
             }else{

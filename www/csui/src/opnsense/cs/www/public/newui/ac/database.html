@@ -22,22 +22,17 @@
               <!-- <h3>设置</h3> -->
               {{ $t('database.help') }}
             </Alert>
-            <Form ref="formValidate" :label-width="globalConfig.labelWith" label-position="left" method="post" id="ExportApCfgSettings" name="ExportApCfgSettings" action="/cgi-bin/ExportSqlSettings.sh">
+            <Form ref="formValidate" :label-width="globalConfig.labelWith" label-position="left" method="post" id="ExportApCfgSettings" name="ExportApCfgSettings" action="/newui/cgi-bin/ExportSqlSettings.cgi">
                 <FormItem :label="$t('database.database_backups')">     <!--数据备份-->
-                    <Button type="button" @click="backup">{{ $t('database.backups') }}</Button>
+                    <Button @click="backup">{{ $t('database.backups') }}</Button>
                 </FormItem>
             </Form>
             <Form ref="formValidate" :label-width="globalConfig.labelWith" label-position="left">
-              <FormItem :label="$t('database.save_database_file')">     <!--保存数据库文件-->
-                  <Button @click="saveDatabaseFile" >{{ $t('database.save') }}</Button>
-              </FormItem>
               <FormItem :label="$t('database.update_database_file')">       <!--更新数据库文件-->
                 <Upload
                     ref="upload"
                     :before-upload="handleUpload"
                     :action="upload.action"
-
-                    :max-size="upload.maxSize"
                     :on-exceeded-size="exceededSize"
                     :format="upload.format"
                     :on-format-error="formatError"
@@ -55,7 +50,7 @@
                 </Poptip>
               </FormItem>
           </Form>
-          </Card>
+            </Card>
         </Col>
         </Row>
     </div>
@@ -88,16 +83,12 @@ var cs_main = {
       operationMode: '',
       meshEnabled: '',
       percent: 0,
-      saveAction: '/cgi-bin/cstecgi.cgi?action=save&setting',
+      saveAction: '',
       upload: {
         file: null,
-        action: '/cgi-bin/cstecgi.cgi',
+        action: 'upload/file.php',
         format:['gz'],
-        data:{
-            /*action:'upload',
-            topicurl:'setting/UploadSqlConfig'*/
-        },
-        maxSize: 4096,
+        data:{}
       }
     }
   },
@@ -105,7 +96,7 @@ var cs_main = {
   },
   created: function() {
       var _this = this;
-        uiPost.SystemSettings(function(data){
+        /*uiPost.SystemSettings(function(data){
             _this.operationMode = data.operationMode;
             _this.meshEnabled = data.meshEnabled;
             if (data.exportAction != '') {
@@ -117,25 +108,23 @@ var cs_main = {
             if (data.maxSize!='') {
               _this.upload.maxSize = parseInt(data.maxSize);
             }
-        })
+        })*/
   },
   methods: {
       saveDatabaseFile:function() {
           var _this = this;
-          uiPost.SaveAcConfig(function (data) {     //保存数据库文件
+          uiPost.SaveAcConfig(postData,function (data) {     //保存数据库文件
               _this.$Message.success({content:'Success!',onClose:function(){
               }});
           })
       },
       backup:function() {
-          var _this = this;
-          uiPost.SaveAcConfig(function(data) {        //数据库备份
-              $("#ExportApCfgSettings").submit();
-          })
+          $("#ExportApCfgSettings").submit();
       },
       restoreOk:function() {        //恢复出厂设置
         var _this = this;
-        uiPost.AcRestore(function(data) {
+          var postData={"action":"setAcReset"};
+        uiPost.AcRestore(postData,function(data) {
             var time=data.wtime;
             var lan_ip=data.lan_ip;
             _this.$Modal.success({
@@ -152,10 +141,10 @@ var cs_main = {
             var percentTimer = setInterval(function(){
               if (_this.percent>=100) {
                 clearInterval(percentTimer);
-                location.href='http://'+lan_ip+'/login.html';
+                location.href=location.href;
               }
               _this.percent++;
-            },cs.getTimer(time));
+            },cs.getTimer(3));
         })
       },
 
@@ -168,44 +157,31 @@ var cs_main = {
       formatError: function() {
         this.$Message.error({content:this.$t('database.msg2',[this.upload.format.join('、')]),duration: 5});
       },
-      uploadSuccess:function(data){
-         /* this.$Message.success({content:'Success!',onClose:function(){
-          }});*/
-        var _this = this;
-        var percentTimer = null;
-        if (data.settingERR == "1") {
+      uploadSuccess:function(){
+          var _this = this;
           _this.$Modal.success({
-            loading:true,
-            render: function(h) {
-              return h('div',[
-                _this.$t('common.loading'),
-                h('Progress',{
-                  attrs:{ percent:_this.percent }
-                })
-              ])
-            },
+              loading:true,
+              render: function(h) {
+                  return h('div',[
+                      _this.$t('common.loading'),
+                      h('Progress',{
+                          attrs:{ percent:_this.percent }
+                      })
+                  ])
+              }
           });
-          percentTimer = setInterval(function(){
-            if (_this.percent>=100) {
-              clearInterval(percentTimer);
-              location.href='/login.html';
-            }
-            _this.percent++;
-          },cs.getTimer(120));
-        } else {
-          if(data.settingERR != ""){
-              clearInterval(percentTimer);
-              _this.$Modal.remove();  
-              _this.$Message.error({
-                duration: 5,
-                content: _this.$t('config["'+data.settingERR+'"]')
-              });
-            }
-        }
+          var percentTimer = setInterval(function(){
+              if (_this.percent>=100) {
+                  clearInterval(percentTimer);
+                  location.href = location.href;
+              }
+              _this.percent++;
+          },cs.getTimer(10));
       }
   }
 };
 </script>
 <script src="/newui/static/js/main.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
 </body>
 </html>

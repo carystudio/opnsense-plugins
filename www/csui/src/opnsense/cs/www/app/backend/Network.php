@@ -8,7 +8,7 @@ require_once("system.inc");
 require_once ('util.inc');
 require_once("interfaces.inc");
 require_once("gwlb.inc");
-
+require_once("/usr/local/www/widgets/api/plugins/traffic.inc");
 
 use \OPNsense\Core\Backend;
 
@@ -1356,5 +1356,55 @@ class Network extends Csbackend
         }
 
         return $static_route;
+    }
+
+    public static function getNetInfo(){
+        $t = time();
+        $traffic1 = traffic_api();
+        sleep(1);
+        $traffic2 = traffic_api();
+        $waninfo = self::getWanInfo();
+        $data = array();
+        foreach($waninfo['Interfaces'] as $a_waninfo){
+            $iftraffic = array();
+            $iftraffic['type'] = "1";
+            $iftraffic['status'] = "1";
+            $iftraffic['ip'] = $a_waninfo['Status']['ipaddr'];
+            $iftraffic['gateway'] = $a_waninfo['Status']['gateway'];
+            $iftraffic['timestamp'] = (string)$t;
+            $iftraffic['up'] = $traffic2['interfaces'][$a_waninfo['Nic']]['bytes transmitted']-$traffic1['interfaces'][$a_waninfo['Nic']]['bytes transmitted'];
+            $iftraffic['down'] = $traffic2['interfaces'][$a_waninfo['Nic']]['bytes received']-$traffic1['interfaces'][$a_waninfo['Nic']]['bytes received'];;
+            $data[$a_waninfo['Nic']] = $iftraffic;
+        }
+        return $data;
+    }
+
+    public static function getLinksData(){
+        $result = array("statistics"=>array('upload'=>0, 'download'=>0));
+        $connections = array();
+        $real_interface = get_real_interface('lan');
+        if (does_interface_exist($real_interface)) {
+            $netmask = find_interface_subnet($real_interface);
+            $intsubnet = gen_subnet(find_interface_ip($real_interface), $netmask) . "/$netmask";
+            $cmd_args = " -c " . $intsubnet . " ";
+            $cmd_args .= " -R ";
+            $cmd_action = "/usr/local/bin/rate -v -i {$real_interface} -nlq 1 -Aba 20 {$cmd_args} | tr \"|\" \" \" | awk '{ printf \"%s:%s:%s:%s:%s\\n\", $1,  $2,  $4,  $6,  $8
+}'";
+            exec($cmd_action, $listedIPs);
+            for ($idx = 2 ; $idx < count($listedIPs) ; ++$idx) {
+                $fields = explode(':', $listedIPs[$idx]);
+                if (!empty($pconfig['hostipformat'])) {
+                    $addrdata = gethostbyaddr($fields[0]);
+                } else {
+                    $addrdata = $fields[0];
+                }
+                $connections[] = array('src' => $addrdata, 'count_upload' => $fields[4], 'count_download' => $fields[3],'download'=>$fields[2], 'upload'=>$fields[1]);
+                $result['statistics']['upload'] += $fields[1];
+                $result['statistics']['download'] += $fields[2];
+            }
+        }
+        $result['connections'] = $connections;
+
+        return $result;
     }
 }
