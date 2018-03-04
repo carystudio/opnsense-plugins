@@ -415,7 +415,7 @@ class Network extends Csbackend
             $dnsmasq_restart = false;
             if(isset($config['dnsmasq']) && isset($config['dnsmasq']['hosts']) && is_array($config['dnsmasq']['hosts'])){
                 foreach($config['dnsmasq']['hosts'] as $idx=>$host){
-                    if('PORTAL_SERVER' == $host['descr']){
+                    if('PORTAL_SERVER' == $host['descr'] || 'WeChat Local Login' == $host['descr']){
                         if($host['ip'] != $lan['ipaddr']){
                             $config['dnsmasq']['hosts'][$idx]['ip'] = $lan['ipaddr'];
                             $dnsmasq_restart = true;
