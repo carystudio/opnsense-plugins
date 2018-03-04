@@ -6520,6 +6520,24 @@ uiPost.prototype.doLogin = function(postVar,callback){
         this.url = '/webapi';
         return this.post(postVar,callback);
     };
+	 uiPost.prototype.setApLedState = function(postVar,callback){
+        this.topicurl = 'setApLedState';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setApRestore = function(postVar,callback){
+        this.topicurl = 'setApRestore';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setApUpgrade = function(postVar,callback){
+        this.topicurl = 'setApUpgrade';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
 
 obj.uiPost = new uiPost();
 })(window);

@@ -122,7 +122,7 @@ class WebapiController extends BaseController
                 print_r($config);
                 throw new AppException('112');
             }
-            
+
             $action = $para['action'];
             if ('getWanInfo' == $action) {
                 $result['rescode'] = Network::getWanInfo();
@@ -249,8 +249,8 @@ class WebapiController extends BaseController
             }else if('getL2tpStatus' == $action) {
                 $result['rescode'] = L2tp::getStatus();
             }else if('setL2tpStatus' == $action){
-                    $this->checkData($para);
-                    $result['rescode']  = L2tp::setStatus($para['data']);
+                $this->checkData($para);
+                $result['rescode']  = L2tp::setStatus($para['data']);
             }else if('getL2tpUsers' == $action) {
                 $result['rescode'] = L2tp::getUsers();
             }else if('addL2tpUser' == $action){
@@ -270,7 +270,7 @@ class WebapiController extends BaseController
             }else if('delInterfaceBind'==$action){
                 $this->checkData($para);
                 $result['rescode'] = Network::delInterfaceBind($para['data']);
-            }else if('getNetInfo'==$action){
+                }else if('getNetInfo'==$action){
                 $result['rescode'] = Network::getNetInfo($para['data']);
             }else if('getLinksData'==$action){
                 $result['rescode'] = Network::getLinksData($para['data']);
@@ -280,13 +280,23 @@ class WebapiController extends BaseController
             }else if("setApIp" == $action){
                 $this->checkData($para);
                 $result['rescode'] = Accontrol::setApIp($para['data']);
+            }else if("setApName" == $action){
+                $this->checkData($para);
+                $result['rescode'] = Accontrol::setApName($para['data']);
             }else if("setApReboot" == $action){
                 $this->checkData($para);
                 $result['rescode'] = Accontrol::setApReboot($para['data']);
             }else if("setAcReset" == $action){
                 $result['rescode'] = Accontrol::setAcReset($para['data']);
-            }else if("setApName" == $action){
-                $result['rescode'] = Accontrol::setApName($para['data']);
+            }else if("setApLedState" == $action){
+                $this->checkData($para);
+                $result['rescode'] = Accontrol::setApLedState($para['data']);
+            }else if("setApRestore" == $action){
+                $this->checkData($para);
+                $result['rescode'] = Accontrol::setApRestore($para['data']);
+            }else if("setApUpgrade" == $action){
+                $this->checkData($para);
+                $result['rescode'] = Accontrol::setApUpgrade($para['data']);
             }else if('test' == $action){
                 $result['rescode'] = Dns::getErrors();
             }else{

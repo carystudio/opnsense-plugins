@@ -36,9 +36,11 @@
                     <Button type="primary" @click="firmwareClick">{{ $t('central.firmware') }}</Button>
                     </Col>
                     <br>
-                    <Col>
-                    <Table border ref="tableSelect" :columns="centralColumns" :data="centralData" @on-selection-change="centralTable"></Table>
-                    </Col>
+                    <Row>
+                        <Col>
+                        <Table border ref="tableSelect" :columns="centralColumns" :data="centralData" @on-selection-change="centralTable"></Table>
+                        </Col>
+                    </Row>
                 </Row>
             </Card>
             </Col>
@@ -416,9 +418,13 @@
                 },{
                     type: 'selection',
                     key: 'id',
-                    width: "60",
+                    width: "100",
                     render: function(h, params) {
-                        console.log('-----------灯控制-----------');
+                        return  h('Icon', {
+                            props: {
+                                type: "ios-lightbulb",
+                            }
+                        });
                     }
                 }, {
                     title: this.$t('central.apname'),
@@ -804,7 +810,27 @@
             },
             letctlOk: function(index){
                 var _this = this;
-                var postVar ={"topicurl":"setting/setApLedState"};
+                var temp = this.selectData;
+
+                console.log(temp);
+
+                var idArr = [];
+                var data = {};
+                for(var i in temp){
+                    idArr[i] = temp[i].id
+                }
+
+                data.id = idArr.join(',');
+                data.ledState = String(index);
+
+                var postVar ={"action":"setApLedState","data":data};
+                uiPost.setApLedState(postVar,function(data){
+                    _this.$Message.success(_this.$t('central.set_success'));
+                    _this.letctl = false;
+                });
+
+
+                /*var postVar ={"topicurl":"setting/setApLedState"};
                 postVar.Ledstate = index + '';
                 postVar.Action = 'setledState';
 
@@ -821,7 +847,7 @@
                     // location.href = location.href;
                     _this.$Message.success(_this.$t('central.set_success'));
                     _this.letctl = false;
-                });
+                });*/
             },
             rebootClick: function(){
                 var _this = this;
@@ -943,7 +969,17 @@
                     this.$Message.error(this.$t('central.msg1'));
                     return false;
                 }
-//                this.restore = true;
+                var data = [];
+                for(var i=0;i<temp.length;i++){
+                    data[i] = temp[i].id;
+                }
+
+                var postVar ={"action":"setApRestore","data":data};
+                uiPost.setApRestore(postVar,function(data){
+                    // location.href = location.href;
+                    _this.$Message.success(_this.$t('central.set_success'));
+                    _this.reboot = false;
+                });
             },
             restoreOk: function(){
                 var _this = this;
@@ -975,6 +1011,18 @@
                     return false;
                 }
                 this.firmware = true;
+
+                var data = [];
+                for(var i=0;i<temp.length;i++){
+                    data[i] = temp[i].id;
+                }
+
+                var postVar ={"action":"setApUpgrade","data":data};
+                uiPost.setApUpgrade(postVar,function(data){
+                    // location.href = location.href;
+                    _this.$Message.success(_this.$t('central.set_success'));
+                    _this.firmware = false;
+                });
             },
             firmwareOk: function(){
                 if (this.letctlAuthpwd == '') {

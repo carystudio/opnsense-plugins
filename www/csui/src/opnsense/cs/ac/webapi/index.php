@@ -86,9 +86,6 @@ try{
 
 		if(false === $result){
 			$result = Action::getAction($ap);
-			if('SessionOver' == $result['action']){
-				$ap = Action::deleteState($ap, Action::STATE_ONLINE);
-			}
 		}
 	}
 }catch(AppException $aex){

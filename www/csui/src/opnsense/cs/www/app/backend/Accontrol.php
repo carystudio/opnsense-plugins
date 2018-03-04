@@ -16,10 +16,11 @@ use \Phalcon\Logger\Adapter\Syslog;
 class Accontrol extends Csbackend
 {
     protected static $ERRORCODE = array(
-        'AcControl_test'=>'AC测试'
+        'AcControl_test'=>'AC测试',
+        "AcControl_001" => "更新AP名称失败",
     );
 
-    const STATE_ONLINE = 0x1;
+	const STATE_ONLINE = 0x1;
     const STATE_UPGRADE = 0x2;
     const STATE_RESET = 0x4;
     const STATE_REBOOT = 0x8;
@@ -42,18 +43,17 @@ class Accontrol extends Csbackend
 
         return $curstate;
     }
-
     protected static $CONFIG = array(
-        'ONLINE_STATE'=>0,
-        'UPGRADE_COMMAND'=>2,
-        'RESET_COMMAND'=>4,
-        'REBOOT_COMMAND'=>8,
-        'RADIO_CONFIG'=>16,
-        'WLAN_CONFIG'=>32,
-        'SYSTEM_CONFIG'=>64,
-        'AUTH_VERIFY'=>128,
-        'NETWORK_STATE'=>256,
-        'MAX_STATE_NUM'=>512,
+        'ONLINE_STATE'=>511,  //在线 1 1111 1111    0x1FF
+        'UPGRADE_COMMAND'=>509,   //更新固件 1 1111 1101  0x1FD
+        'RESET_COMMAND'=>507,     //复位 1 1111 1011    0x1FB
+        'REBOOT_COMMAND'=>503,    //重启 1 1111 0111    0x1F7
+        'RADIO_CONFIG'=>495,     //RADIO设置 1 1110 1111    0x1EF
+        'WLAN_CONFIG'=>479,      //WLAN设置 1 1101 1111     0x1DF
+        'SYSTEM_CONFIG'=>447,    //系统设置 1 1011 1111   0x1BF
+        'AUTH_VERIFY'=>383,      //权限管理 1 0111 1111   0x17F
+        'NETWORK_STATE'=>255,   //网络状态  0 1111 1111    0xFF
+//        'MAX_STATE_NUM'=>512,
     );
 
     private static function getPdo(){
@@ -64,7 +64,7 @@ class Accontrol extends Csbackend
         return self::$pdo;
     }
 
-    private static function getAp($apid){
+	private static function getAp($apid){
         $pdo = self::getPdo();
 
         $sth = $pdo->prepare("select * from APLIST WHERE id=:id");
@@ -74,19 +74,27 @@ class Accontrol extends Csbackend
         return $ap;
     }
 
-    private function setConfig($action,$id){
+    /* *
+     * 功能：更新APLIST表中的apstate字段
+     *  @params:
+     *      $config：配置数值 (int)
+     *      $id：APLIST的id
+     * */
+    private function setConfig($cfg,$id){
         $dbh = self::getPdo();
         $sql = "select * from APLIST WHERE id = '" . $id . "'";
         $arrInfo = array();
+        $count = 0;
         foreach ($dbh->query($sql,PDO::FETCH_ASSOC) as $key=>$row) {
             foreach ($row as $k=>$v){
                 if('apstate' == $k){
-                    var_dump($k);
+                    $apstate = $v & $cfg;
+                    $excSql = "update APLIST set apstate = '".$apstate."' where id = '".$id."'";
+                    $count = $dbh->exec($excSql);
                 }
             }
-            $arrInfo[$key] = $row;
         }
-        var_dump($arrInfo);
+        return $count;
     }
 
     public static function acScanAp($data){
@@ -125,29 +133,6 @@ class Accontrol extends Csbackend
         }
     }
 
-    public static function setApReboot($data){
-        $arr = array();
-        if($data){
-            $deviceId = explode(',',$data['id']);
-            foreach ($deviceId as $key=>$val){
-                self::setConfig('reboot',$val);
-            }
-
-
-            return $arr;
-        }else{
-            return false;
-        }
-    }
-
-    public static function setAcReset($data){
-        $output = '';
-        $returncode = 0;
-        exec('/usr/local/bin/mysql -uroot </usr/local/opnsense/cs/ac/db/init.sql', $output, $returncode);
-
-        return $returncode;
-    }
-
     public static function setApName($data){
         $result = 0;
         try{
@@ -181,4 +166,108 @@ class Accontrol extends Csbackend
         return $result;
     }
 
+    public static function setApReboot($data){
+        $arr = array();
+        if($data){
+            $deviceId = explode(',',$data['id']);
+            foreach ($deviceId as $key=>$val){
+                Accontrol::setConfig(Accontrol::$CONFIG['REBOOT_COMMAND'],$val);
+            }
+            return $arr;
+        }else{
+            return false;
+        }
+    }
+
+    public static function setAcReset($data){
+        $output = '';
+        $returncode = 0;
+        exec('/usr/local/bin/mysql -uroot </usr/local/opnsense/cs/ac/db/init.sql', $output, $returncode);
+
+        return $returncode;
+    }
+
+    public static function setApLedState($data){
+        $res = array();
+        try{
+            if($data){
+                var_dump($data);
+                if('2' == $data["ledState"]){
+                    $ledState = 0;
+                }else{
+                    $ledState = 1;
+                }
+                $dbh = self::getPdo();
+                $deviceId = explode(',',$data['id']);
+                foreach ($deviceId as $key=>$val){
+                    $excSql = "update APLIST set ledstate = '".$ledState."' where id = '".$val."'";
+                    $conut = $dbh->exec($excSql);
+                    if(0 == $conut){
+                        throw new AppException('AcControl_001');
+                    }
+                    Accontrol::setConfig(Accontrol::$CONFIG['SYSTEM_CONFIG'],$val);
+                }
+            }else{
+                return false;
+            }
+        } catch (AppException $aex) {
+            $res = $aex->getMessage();
+        } catch (Exception $ex) {
+            $res = '100';
+        }
+        return $res;
+    }
+
+    public static function setApRestore($data){
+        $res = 0;
+        try{
+            if(!is_array($data) && count($data)==0){
+                throw new AppException('data error');
+            }
+            $pdo = self::getPdo();
+            foreach($data as $apid){
+                $ap = self::getAp(intval($apid));
+                var_dump($ap);
+                if($ap){
+                    $ap['apstate'] = self::setState($ap['apstate'], Accontrol::STATE_RESET);
+                }
+                $sth = $pdo->prepare('UPDATE APLIST SET apstate=:apstate where id=:id');
+                $res = $sth->execute(array('apstate'=>$ap['apstate'], 'id'=>$ap['id']));
+                if(false === $res){
+                    throw new AppException('update apstate error');
+                }
+            }
+        } catch (AppException $aex) {
+            $res = $aex->getMessage();
+        } catch (Exception $ex) {
+            $res = '100';
+        }
+        return $res;
+    }
+
+    public static function setApUpgrade($data){
+        $result = 0;
+        try{
+            if(!is_array($data) && count($data)==0){
+                throw new AppException('data error');
+            }
+            $pdo = self::getPdo();
+            foreach($data as $apid){
+                $ap = self::getAp(intval($apid));
+                if($ap){
+                    $ap['apstate'] = self::setState($ap['apstate'], Accontrol::STATE_UPGRADE);
+                }
+                $sth = $pdo->prepare('UPDATE APLIST SET apstate=:apstate where id=:id');
+                $res = $sth->execute(array('apstate'=>$ap['apstate'], 'id'=>$ap['id']));
+                if(false === $res){
+                    throw new AppException('update apstate error');
+                }
+            }
+        } catch (AppException $aex) {
+            $result = $aex->getMessage();
+        } catch (Exception $ex) {
+            $result = '100';
+        }
+        return $result;
+    }
 }

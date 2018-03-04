@@ -127,7 +127,8 @@ class Db{
 	public static function getUpgrade($csid){
 		$pdo = self::getPdo();
 		
-		$sth = $pdo->query("SELECT * FROM ap_upgrade WHERE csid='".$csid."' limit 1");
+		$sth = $pdo->prepare("SELECT * FROM ap_upgrade WHERE csid=:csid limit 1");
+		$sth->execute(array('csid'=>$csid));
 		$upgrade = $sth->fetch();
 		if(false === $upgrade){
 			return false;
@@ -252,6 +253,10 @@ class Action{
 		}else{
 			unset($result['key']);
 			$result['action'] = 'SessionOver';
+		}
+
+		if('SessionOver' == $result['action']){
+			$ap = Action::deleteState($ap, Action::STATE_ONLINE);
 		}
 
 		return json_encode($result);
