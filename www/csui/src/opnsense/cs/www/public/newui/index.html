@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title></title>
+    <title>Carystudio</title>
     <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
     <link rel="stylesheet" href="/newui/static/css/style.css">
 </head>
@@ -182,6 +182,7 @@
                 lanTab:"lan1",
                 tab:1,
                 timestamp: 3000,
+                netTimestamp: 1000,
                 loadChartsData: {
                     type: '',
                     status: '',
@@ -200,7 +201,9 @@
                 analysisData: [],
 
                 interface: {},
+                packages:{},
                 extInfo:[],
+                niclist:[],
                 system:{
                     FirmwareVersion:"",
                     ReleaseDate:"",
@@ -231,7 +234,7 @@
                             return h('a',{attrs:{href:"http://"+params.row.value}},params.row.value);
                         }
                         if (params.row.name == _this.$t('index.version')) {
-                            params.row.value = DEVICE.model +  " " + _this.system.FirmwareVersion;
+                            params.row.value = 'CSG2000P ' +  _this.system.FirmwareVersion;
                             return h('div', params.row.value);
                         }
                         if (params.row.name == _this.$t('index.build_time')) {
@@ -260,6 +263,7 @@
             wanColumns: function() {
                 var _this = this;
                 var temp = this.interface;
+                var niclist = this.niclist;
                 var dataObj = {};
 
                 for (var i in temp) {
@@ -312,7 +316,7 @@
                                 }
 
                                 if (params.row.name == _this.$t('index.mac_address')) {
-                                    return h('div', temp[idx].Status.macaddr);
+                                    return h('div', niclist[temp[idx].Nic].mac);
                                 }
                             }
                         }];
@@ -430,49 +434,36 @@
                     render: function(h, params) {
                         if (params.row.name == "") {
                             params.row.value1 = _this.$t('index.rx_packets');
-                            return h('div', params.row.value1);
                         }
-                        if (params.row.name == "WAN") {
-                            params.row.value1 = _this.wanTx;
-                            return h('div', params.row.value1);
-                        }
-                        if (params.row.name == "LAN") {
-                            params.row.value1 = _this.lanTx;
-                            return h('div', params.row.value1);
-                        }
+                        return h('div', params.row.value1);
                     }
                 }, {
                     title: 'value2',
                     key: 'value2',
                     render: function(h, params) {
+                        console.log('------------params----------');
+                        console.log(params);
                         if (params.row.name == "") {
                             params.row.value2 = _this.$t('index.tx_packets');
-                            return h('div', params.row.value2);
                         }
-                        if (params.row.name == "WAN") {
-                            params.row.value2 = _this.wanRx;
-                            return h('div', params.row.value2);
-                        }
-                        if (params.row.name == "LAN") {
-                            params.row.value2 = _this.lanRx;
-                            return h('div', params.row.value2);
-                        }
+                        return h('div', params.row.value2);
                     }
                 }]
             },
             statisticsData: function() {
-                var temp = this.interface;
+                var _this = this;
+                var temp = _this.interface;
+                var pack = _this.packages;
                 var dataObj = [];
                 dataObj = '{ "name": "","value1": "","value2": ""}';
                 for(var i in temp){
                     if(i.substring(0,3) == "lan" || i.substring(0,3) == "wan"){
-                        dataObj += ',{ "name": "'+ i +'","value1": "'+temp[i].pkg_rx+'","value2": "'+temp[i].pkg_tx+'"}';
+                        dataObj += ',{ "name": "'+ i +'","value1": "' + pack[temp[i].Nic].inpkts + '","value2": "' + pack[temp[i].Nic].outpkts + '"}';
                     }
                 }
-                console.log(dataObj);
                 dataObj = '['+dataObj+']';
                 dataObj = JSON.parse(dataObj);
-
+                console.log(dataObj);
                 return dataObj;
             },
             tabs: function() {
@@ -490,7 +481,7 @@
                     } else if (this.showCurrentTabs == 3 && this.tab == 0) {
                         this.timer.linksChartsTimer = setInterval(function() {
                             _this.functionLinksCharts();
-                        }, this.timestamp);
+                        }, this.netTimestamp);
                     }
                 }
                 return this.tab;
@@ -520,16 +511,16 @@
                     key: 'download',
                     sortable: true,
                     render: function(h, params) {
-                        return h('span', params.row.download + ' KB/s');
+                        return h('span',cs.bytesToSize(parseInt(params.row.download)));
                     }
                 }, {
                     title: this.$t('realtime.upload_speed'),
                     key: 'upload',
                     sortable: true,
                     render: function(h, params) {
-                        return h('span', params.row.upload + ' KB/s');
+                        return h('span',cs.bytesToSize(parseInt(params.row.upload)));
                     }
-                }, {
+                }/*, {
                     title: this.$t('realtime.links_conut'),
                     key: 'connect_count',
                     sortable: true,
@@ -548,7 +539,7 @@
                             }
                         });
                     }
-                }];
+                }*/];
             },
             analysisColumns: function() {
                 return [{
@@ -584,7 +575,6 @@
         },
         created: function() {
             var _this = this;
-            $(document).attr('title', DEVICE.model);
 
             var postData = {"action":"getStatusInfo", "data":{}};
             uiPost.getStatusInfo(postData,function(data) {
@@ -596,12 +586,12 @@
                 {
                     _this.system = data.data.system;
                     _this.interface = data.data.interface;
+                    _this.niclist = data.data.niclist;
+                    _this.packages = data.data.packages;
                     var idx = 0;
                     for(var i in _this.interface){
                         var _wan = '';
                         var _lan = '';
-                        _this.interface[i].pkg_tx = data.data.packages[_this.interface[i].Nic].outpkts;
-                        _this.interface[i].pkg_rx = data.data.packages[_this.interface[i].Nic].inpkts;
                         if(i.substring(0,3) == "lan"){
                             _this.interface[i].interface = 'LAN';
                         }
@@ -679,7 +669,7 @@
                         yAxis: [{
                             type: 'value',
                             min: 0,
-                            name: "KB/s"
+                            name: "B/s"
                         }],
                         legend: {
                             type: "plain",
@@ -759,11 +749,11 @@
             functionLoadCharts: function() {
                 var _this = this;
                 var postData = {"action":"getNetInfo", "data":{}};
-                uiPost.getNetInfo(postData, function(data) {
-                    if(data.rescode==0){
-                        data = data.data;
-                    }
+                uiPost.getNetInfo(postData,function(data) {
+                    data = data.data;
                     if(_this.tab != 0){
+                        console.log(data);
+                        console.log(data.em1);
                         data = data[_this.extInfo[_this.tab-1].Nic];
                     }else{
                         data = data[_this.extInfo[0].Nic];
@@ -793,8 +783,8 @@
                     _this.loadChartsData.status = (status == 1 ? _this.$t('realtime.succ') : _this.$t('realtime.fail'));
                     _this.loadChartsData.ip = (data.ip);
                     _this.loadChartsData.gateway = (data.gateway);
-                    _this.loadChartsData.up = (data.up + ' KB/s');
-                    _this.loadChartsData.down = (data.down + ' KB/s');
+                    _this.loadChartsData.up = cs.bytesToSize(parseInt((data.up)));
+                    _this.loadChartsData.down = cs.bytesToSize(parseInt((data.down)));
                 });
             },
             linksCharts: function() {
@@ -816,15 +806,16 @@
                         data: this.linksChartsData.links_x
                     }],
                     yAxis: [{
+                        name: "B/s",
                         type: 'value',
                         min: 0
                     }],
                     legend: {
                         type: "plain",
-                        data: ['TCP', 'UDP']
+                        data: ['上传', '下载']
                     },
                     series: [{
-                        name: "TCP",
+                        name: "上传",
                         type: 'line',
                         smooth: true,
                         symbol: 'none',
@@ -848,7 +839,7 @@
                         },
                         data: this.linksChartsData.links_y
                     }, {
-                        name: "UDP",
+                        name: "下载",
                         type: 'line',
                         smooth: true,
                         stack: 'a1',
@@ -879,21 +870,20 @@
                 this.linksChartsData.e_links_charts.setOption(this.linksChartsData.links_charts_option);
                 this.timer.linksChartsTimer = setInterval(function() {
                     _this.functionLinksCharts();
-                }, this.timestamp);
+                }, this.netTimestamp);
             },
             functionLinksCharts: function() {
                 var _this = this;
                 var postData = {"action":"getLinksData", "data":{}};
-                uiPost.getLinksData(postData, function(data) {
-                    if(data.rescode==0){
-                        data = data.data;
-                    }
+                uiPost.getLinksData(postData,function(data) {
+                    data = data.data;
+                    console.log(data);
                     _this.linksChartsData.links_x.shift();
                     _this.linksChartsData.links_y.shift();
                     _this.linksChartsData.links_y1.shift();
                     _this.linksChartsData.links_x.push(_this.linksChartsData.links_x_i++);
-                    _this.linksChartsData.links_y.push(data.statistics.tcp);
-                    _this.linksChartsData.links_y1.push(data.statistics.udp);
+                    _this.linksChartsData.links_y.push(data.statistics.upload);
+                    _this.linksChartsData.links_y1.push(data.statistics.download);
                     _this.linksChartsData.e_links_charts.setOption({
                         xAxis: [{
                             data: _this.linksChartsData.links_x

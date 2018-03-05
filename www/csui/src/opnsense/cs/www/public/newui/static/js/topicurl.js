@@ -4205,9 +4205,11 @@ uiPost.prototype.getDhcpSliList = function(postVar,callback){
 uiPost.prototype.getNetInfo = function(postVar,callback){
     this.topicurl = 'getNetInfo';
     this.async = true; // true:异步，false:同步。
-    // if (globalConfig.debug) {
+     if (globalConfig.debug) {
         this.url = "/newui/data/getNetInfo.json";
-    // }
+     }else{
+		 this.url = "/webapi";
+	 }
     return this.post(postVar,callback);
 };
 
@@ -4316,7 +4318,9 @@ uiPost.prototype.getLinksData = function(postVar,callback){
     this.async = true; // true:异步，false:同步。
     if (globalConfig.debug) {
         this.url = "/newui/data/getLinksData.json";
-    }
+    }else{
+		 this.url = "/webapi";
+	}
     return this.post(postVar,callback);
 };
 
