@@ -57,24 +57,32 @@
                         {{$t('portal.wechat_login')}}
                         <hr>
                         <br>
-                        <FormItem label="appId" prop="appId">
-                            <Input v-model="formValidate.appId" :maxlength="40"></Input>
+                        <FormItem :label="$t('portal.wc_login')">
+                            <i-switch v-model="formValidate.wc_enable" size="large" @on-change="wcLoginStatus">
+                                <span slot="open">{{ $t('common.on') }}</span>
+                                <span slot="close">{{ $t('common.off') }}</span>
+                            </i-switch>
                         </FormItem>
-                        <FormItem label="shopId" prop="shopId">
-                            <Input v-model="formValidate.shopId" :maxlength="40"></Input>
-                        </FormItem>
-                        <FormItem label="ssid" prop="ssid">
-                            <Input v-model="formValidate.ssid" :maxlength="40"></Input>
-                        </FormItem>
-                        <FormItem label="secretkey" prop="secretkey">
-                            <Input v-model="formValidate.secretkey" :maxlength="40"></Input>
-                        </FormItem>
-                        <FormItem :label="$t('portal.attention')" prop="attention">
-                            <Select v-model="formValidate.attention" >
-                                <Option value="0">{{$t('portal.force')}}</Option>
-                                <Option value="1">{{$t('portal.no_coercion')}}</Option>
-                            </Select>
-                        </FormItem>
+                        <div v-show="formValidate.wc_enable">
+                            <FormItem label="appId" prop="appId">
+                                <Input v-model="formValidate.appId" :maxlength="40"></Input>
+                            </FormItem>
+                            <FormItem label="shopId" prop="shopId">
+                                <Input v-model="formValidate.shopId" :maxlength="40"></Input>
+                            </FormItem>
+                            <FormItem label="ssid" prop="ssid">
+                                <Input v-model="formValidate.ssid" :maxlength="40"></Input>
+                            </FormItem>
+                            <FormItem label="secretkey" prop="secretkey">
+                                <Input v-model="formValidate.secretkey" :maxlength="40"></Input>
+                            </FormItem>
+                            <FormItem :label="$t('portal.attention')" prop="attention">
+                                <Select v-model="formValidate.attention" >
+                                    <Option value="0">{{$t('portal.force')}}</Option>
+                                    <Option value="1">{{$t('portal.no_coercion')}}</Option>
+                                </Select>
+                            </FormItem>
+                        </div>
                         <hr>
                         <br>
                         <FormItem :label="$t('portal.login_page')" prop="LoginPageStatus">
@@ -146,7 +154,7 @@
                 globalConfig:globalConfig,
                 applyLoading:false,
 
-                submitFalg:'0',
+//                submitFalg:'0',
                 upload: {
                     file: null,
                     action: '/webapi',
@@ -158,15 +166,16 @@
                 formValidate: {
                     status: false,
                     Type:'server',
-                    IdleTimeout:'',
-                    SessionTimeout:'',
+                    IdleTimeout:'15',
+                    SessionTimeout:'300',
                     AllowedIp:'',
                     AllowedMac:'',
+                    wc_enable:false,
                     appId:'',
                     shopId:'',
                     ssid:'',
                     secretkey:'',
-                    attention:'',
+                    attention:'0',
                     LoginPageStatus:'',
                     Mcode:'',
                     GatewayId:''
@@ -177,12 +186,12 @@
             ruleValidate: function(){
                 var _this = this;
                 console.log(_this.submitFalg);
-                if(true == _this.formValidate.status){
-                    if('local' == _this.formValidate.Type && '1' == _this.submitFalg){
-                        return{
-                            AllowedIp: [
-                                { validator:function(r, v, f) {
-                                    if('' != v){
+                return {
+                    AllowedIp: [
+                        {
+                            validator: function (r, v, f) {
+                                if ('local' == _this.formValidate.Type) {
+                                    if ('' != v) {
                                         var ipArr = v.split(',');
                                         for(var i = 0; i < ipArr.length;i++){
                                             var ret = cs.ip(ipArr[i]);
@@ -192,11 +201,17 @@
                                         }
                                     }
                                     f();
-                                },trigger: 'blur' }
-                            ],
-                            AllowedMac: [
-                                { validator:function(r, v, f) {
-                                    if('' != v){
+                                } else {
+                                    f();
+                                }
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    AllowedMac: [
+                        {
+                            validator: function (r, v, f) {
+                                if ('local' == _this.formValidate.Type) {
+                                    if ('' != v) {
                                         var macArr = v.split(',');
                                         for(var i = 0; i < macArr.length;i++){
                                             var ret = cs.mac(macArr[i]);
@@ -206,53 +221,87 @@
                                         }
                                     }
                                     f();
-                                },trigger: 'blur' }
-                            ],
-                            appId: [
-                                { validator:function(r, v, f) {
-                                    if('' == v){
-                                        f('appId'+_this.$t('portal.msg11'));
-                                    }
+                                } else {
                                     f();
-                                },trigger: 'blur' }
-                            ],
-                            shopId: [
-                                { validator:function(r, v, f) {
-                                    if('' == v){
-                                        f('shopId'+_this.$t('portal.msg11'));
-                                    }
-                                    f();
-                                },trigger: 'blur' }
-                            ],
-                            ssid: [
-                                { validator:function(r, v, f) {
-                                    if('' == v){
-                                        f('ssid');
-                                    }
-                                    f();
-                                },trigger: 'blur' }
-                            ],
-                            secretkey: [
-                                { validator:function(r, v, f) {
-                                    if('' == v){
-                                        f('secretkey'+_this.$t('portal.msg11'));
-                                    }
-                                    f();
-                                },trigger: 'blur' }
-                            ]
+                                }
+                            }, trigger: 'blur'
                         }
-                    }else if('server' == _this.formValidate.Type && '1' == _this.submitFalg){
-                        return{
-                            GatewayId: [
-                                { validator:function(r, v, f) {
-                                    if('' == v){
-                                        f(this.$t('portal.hot_id')+_this.$t('portal.msg11'));
+                    ],
+                    appId: [
+                        {
+                            validator: function (r, v, f) {
+                                if ('local' == _this.formValidate.Type && _this.formValidate.wc_enable) {
+                                    if ('' == v) {
+                                        f('appId' + _this.$t('portal.msg11'));
+                                    }else{
+                                        f();
                                     }
+                                } else {
                                     f();
-                                },trigger: 'blur' }
-                            ]
+                                }
+                            }, trigger: 'blur'
                         }
-                    }
+                    ],
+                    shopId: [
+                        {
+                            validator: function (r, v, f) {
+                                if ('local' == _this.formValidate.Type && _this.formValidate.wc_enable) {
+                                    if ('' == v) {
+                                        f('shopId' + _this.$t('portal.msg11'));
+                                    }else{
+                                        f();
+                                    }
+                                } else {
+                                    f();
+                                }
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    ssid: [
+                        {
+                            validator: function (r, v, f) {
+                                if ('local' == _this.formValidate.Type && _this.formValidate.wc_enable) {
+                                    if ('' == v) {
+                                        f('ssid' + _this.$t('portal.msg11'));
+                                    }else{
+                                        f();
+                                    }
+                                } else {
+                                    f();
+                                }
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    secretkey: [
+                        {
+                            validator: function (r, v, f) {
+                                if ('local' == _this.formValidate.Type && _this.formValidate.wc_enable) {
+                                    if ('' == v) {
+                                        f('secretkey' + _this.$t('portal.msg11'));
+                                    }else{
+                                        f();
+                                    }
+                                } else {
+                                    f();
+                                }
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    GatewayId: [
+                        {
+                            validator: function (r, v, f) {
+                                if ('server' == _this.formValidate.Type) {
+                                    if ('' == v) {
+                                        f(_this.$t('portal.hot_id') + _this.$t('portal.msg11'));
+                                    }else{
+                                        f();
+                                    }
+                                } else {
+                                    f();
+                                }
+                            }, trigger: 'blur'
+                        }
+                    ]
                 }
             }
         },
@@ -292,6 +341,12 @@
                         _this.formValidate.secretkey = data.data.secretkey;
                         _this.formValidate.shopId = data.data.shop_id;
                         _this.formValidate.ssid = data.data.ssid;
+                        if('no' == data.data.wc_enable){
+                            _this.formValidate.wc_enable = false ;
+                        }else{
+                            _this.formValidate.wc_enable = true ;
+                        }
+
                     }
 
                 }else {
@@ -306,12 +361,17 @@
                     uiPost.setPortalStatus(postVar);
                 }
             },
+            wcLoginStatus:function () {
+                var _this = this;
+
+                console.log(_this.formValidate.wc_enable);
+            },
             handleUpload: function(file) {
                 this.upload.file = file;
             },
             /*exceededSize: function() {
-                this.$Message.error({content:this.$t('firmware.msg4',[cs.bytesToSize( (parseInt(this.upload.maxSize)*1000) )]),duration: 5});
-            },*/
+             this.$Message.error({content:this.$t('firmware.msg4',[cs.bytesToSize( (parseInt(this.upload.maxSize)*1000) )]),duration: 5});
+             },*/
             formatError: function() {
                 this.$Message.error({content:this.$t('firmware.msg2',[this.upload.format.join('、')]),duration: 5});
             },
@@ -338,8 +398,7 @@
             },
             handleSubmit: function(name) {
                 var _this = this;
-                _this.applyLoading = true;
-                _this.submitFalg = '1';
+//                _this.submitFalg = '1';
                 _this.$refs[name].validate(function(valid){
                     if (valid) {
 
@@ -373,27 +432,35 @@
                             }
                             data.AllowedMac = _this.formValidate.AllowedMac;
                             data.LoginPageStatus = _this.formValidate.LoginPageStatus;
-                            if('' == _this.formValidate.appId){
-                                _this.$Message.error('appId'+_this.$t('portal.msg11'));
-                                return false;
+
+                            console.log('------------------------');
+                            console.log(_this.formValidate.appId);
+                            if(_this.formValidate.wc_enable){
+                                data.wc_enable = 'yes';
+                                if(!_this.formValidate.appId){
+                                    _this.$Message.error('appId'+_this.$t('portal.msg11'));
+                                    return false;
+                                }
+                                data.appId = _this.formValidate.appId;
+                                if(!_this.formValidate.shopId){
+                                    _this.$Message.error('shopId'+_this.$t('portal.msg11'));
+                                    return false;
+                                }
+                                data.shop_id = _this.formValidate.shopId;
+                                if(!_this.formValidate.ssid){
+                                    _this.$Message.error('ssid'+_this.$t('portal.msg11'));
+                                    return false;
+                                }
+                                data.ssid = _this.formValidate.ssid;
+                                if(!_this.formValidate.secretkey){
+                                    _this.$Message.error('secretkey'+_this.$t('portal.msg11'));
+                                    return false;
+                                }
+                                data.secretkey = _this.formValidate.secretkey;
+                                data.attention = _this.formValidate.attention;
+                            }else{
+                                data.wc_enable = 'no';
                             }
-                            data.appId = _this.formValidate.appId;
-                            if('' == _this.formValidate.shopId){
-                                _this.$Message.error('shopId'+_this.$t('portal.msg11'));
-                                return false;
-                            }
-                            data.shop_id = _this.formValidate.shopId;
-                            if('' == _this.formValidate.ssid){
-                                _this.$Message.error('ssid'+_this.$t('portal.msg11'));
-                                return false;
-                            }
-                            data.ssid = _this.formValidate.ssid;
-                            if('' == _this.formValidate.secretkey){
-                                _this.$Message.error('secretkey'+_this.$t('portal.msg11'));
-                                return false;
-                            }
-                            data.secretkey = _this.formValidate.secretkey;
-                            data.attention = _this.formValidate.attention;
                         }else{
                             if('' == _this.formValidate.GatewayId){
                                 _this.$Message.error(_this.$t('portal.hot_id')+_this.$t('portal.msg11'));
@@ -404,6 +471,7 @@
 
                         var postData = {"action":"setPortalStatus","data":data};
                         console.log(postData);
+                        _this.applyLoading = true;
                         uiPost.setPortalStatus(postData,function(data){
                             if (9999 == data.rescode){
                                 cs.loginOut();

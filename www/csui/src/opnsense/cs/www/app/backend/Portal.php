@@ -314,7 +314,9 @@ class Portal extends Csbackend
                 if('yes' == $portal['wc_enable']){
                     file_put_contents('/usr/local/opnsense/cs/conf/captiveportal/portal_wc_enable.txt', "1");
                 }else{
-                    unlink('/usr/local/opnsense/cs/conf/captiveportal/portal_wc_enable.txt');
+                    if(file_exists('/usr/local/opnsense/cs/conf/captiveportal/portal_wc_enable.txt')){
+                        unlink('/usr/local/opnsense/cs/conf/captiveportal/portal_wc_enable.txt');
+                    }
                 }
 
             }else if('1'==$portal['enabled'] && 'server'==$data['Type']){
