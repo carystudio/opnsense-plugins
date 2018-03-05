@@ -254,7 +254,7 @@ Vue.component('cs-footer', {
 <div>\
   <Col class="layout-footer-center" > \
     <div v-html="copyright" ></div>\
-    <div v-if="globalConfig.hasMobile" style="padding-top: 5px;"> {{ $t("menu.pc") }} | <a href="/mobile/">{{ $t("menu.mobile") }}</a> </div>\
+    <div v-if="globalConfig.hasMobile" style="padding-top: 5px;display:none;"> {{ $t("menu.pc") }} | <a href="/mobile/">{{ $t("menu.mobile") }}</a> </div>\
   </Col>\
   <BackTop :height="200"></BackTop>\
 </div>\

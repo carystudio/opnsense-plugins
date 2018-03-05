@@ -119,7 +119,7 @@ class Db{
 		foreach($ap as $var=>$val){
 			$ap_data[':'.$var] = $val;
 		}
-		$res = $sth->execute($ap_data);
+		$res = $sth->execute($ap);
 		
 		return $res;
 	}
@@ -190,17 +190,21 @@ class Action{
 	const STATE_AUTH = 0x80;
 	const STATE_NETWORK = 0x100;
 
-	public static function setState($ap, $state){
+	public static function setState($ap, $state, $update=true){
 		$ap['apstate'] = $ap['apstate'] & (~$state);
-		Db::updateAp($ap);
+		if($update){
+			Db::updateAp($ap);
+		}
 
 		return $ap;
 	}
 
-	public static function deleteState($ap, $state){
+	public static function deleteState($ap, $state, $update=true){
 
 		$ap['apstate'] = $ap['apstate'] | $state;
-		Db::updateAp($ap);
+		if($update){
+			Db::updateAp($ap);
+		}
 
 		return $ap;
 	}
@@ -223,7 +227,7 @@ class Action{
 		if(0 == (Action::STATE_UPGRADE & $ap['apstate'])){
 			$upgrade = Db::getUpgrade($ap['csid']);
 			if(false === $upgrade){
-				self::deleteState($ap, Action::STATE_UPGRADE);
+				$ap = self::deleteState($ap, Action::STATE_UPGRADE);
 				unset($result['key']);
 				$result['action'] = 'SessionOver';
 			}else{

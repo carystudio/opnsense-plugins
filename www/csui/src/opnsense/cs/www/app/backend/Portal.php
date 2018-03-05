@@ -311,6 +311,12 @@ class Portal extends Csbackend
                 if(file_exists('/usr/local/opnsense/cs/tmp/portal_server')){
                     unlink('/usr/local/opnsense/cs/tmp/portal_server');
                 }
+                if('yes' == $portal['wc_enable']){
+                    file_put_contents('/usr/local/opnsense/cs/conf/captiveportal/portal_wc_enable.txt', "1");
+                }else{
+                    unlink('/usr/local/opnsense/cs/conf/captiveportal/portal_wc_enable.txt');
+                }
+
             }else if('1'==$portal['enabled'] && 'server'==$data['Type']){
                 if(strlen(trim($data['GatewayId']))<=0){
                     throw new AppException('Portal_106');
@@ -330,6 +336,7 @@ class Portal extends Csbackend
                 file_put_contents('/usr/local/opnsense/cs/conf/captiveportal/portal_loginpage.txt',$loginpage);
                 file_put_contents('/usr/local/opnsense/cs/conf/captiveportal/portal_gatewayid.txt',$portal['description']);
                 file_put_contents('/usr/local/opnsense/cs/conf/captiveportal/portal_server.txt',PortalHelper::$PORTAL_SERVER);
+                unlink('/usr/local/opnsense/cs/conf/captiveportal/portal_wc_enable.txt');
                 if(PortalHelper::getConf()){
                     $center_conf = parse_ini_file('/usr/local/opnsense/cs/tmp/portal_server_config');
                     if(is_array($center_conf)){

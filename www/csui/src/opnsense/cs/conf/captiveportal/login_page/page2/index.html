@@ -106,6 +106,9 @@
 
 	$(function(){
 		document.onkeydown=keyListener;
+		if("yes" == wc_enable){
+			$("#weixin").css('display','inline-block'); ;
+		}
 	});
 
 	function doweixin(){
@@ -133,7 +136,7 @@
 					onMouseOver="this.style.background='#818181';"
 					onmouseout="this.style.background='#F45B4B';"
 					style="background: #F45B4B;color: #FFF;font-size: 17px;font-weight: 400;padding: 8px 7px;width: 30%;display: inline-block;cursor: pointer;-webkit-border-radius: 19px;margin: 0px 7px 0px 3px;outline: none;border: none;" onclick="dologin()" >登录</button>
-			<button type="button" id="weixin" onclick="doweixin()" style="background: #F45B4B;color: #FFF;font-size: 17px;font-weight: 400;padding: 8px 7px;width: 40%;display: inline-block;cursor: pointer;-webkit-border-radius: 19px;margin: 0px 7px 0px 3px;outline: none;border: none;">微信登录</button>
+			<button type="button" id="weixin" onclick="doweixin()" style="display:none;background: #F45B4B;color: #FFF;font-size: 17px;font-weight: 400;padding: 8px 7px;width: 40%;cursor: pointer;-webkit-border-radius: 19px;margin: 0px 7px 0px 3px;outline: none;border: none;">微信登录</button>
 	    </div>
 	</div>
 	<div class="login-bottom" style="text-align: center;">

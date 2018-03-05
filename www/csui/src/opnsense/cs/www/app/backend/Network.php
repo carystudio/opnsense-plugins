@@ -1398,9 +1398,9 @@ class Network extends Csbackend
                 } else {
                     $addrdata = $fields[0];
                 }
-                $connections[] = array('src' => $addrdata, 'count_upload' => $fields[4], 'count_download' => $fields[3],'download'=>$fields[2], 'upload'=>$fields[1]);
-                $result['statistics']['upload'] += $fields[1];
-                $result['statistics']['download'] += $fields[2];
+                $connections[] = array('src' => $addrdata, 'count_upload' => $fields[4], 'count_download' => $fields[3],'download'=>$fields[1], 'upload'=>$fields[2]);
+                $result['statistics']['upload'] += $fields[4];
+                $result['statistics']['download'] += $fields[3];
             }
         }
         $result['connections'] = $connections;

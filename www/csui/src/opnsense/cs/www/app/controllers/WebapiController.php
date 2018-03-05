@@ -297,6 +297,12 @@ class WebapiController extends BaseController
             }else if("setApUpgrade" == $action){
                 $this->checkData($para);
                 $result['rescode'] = Accontrol::setApUpgrade($para['data']);
+            }else if("getApStatusConfig" == $action){
+                $this->checkData($para);
+                $result['rescode'] = Accontrol::getApStatusConfig($para['data']);
+            }else if("setQuick" == $action){
+                $this->checkData($para);
+                $result['rescode'] = Accontrol::setQuick($para['data']);
             }else if('test' == $action){
                 $result['rescode'] = Dns::getErrors();
             }else{

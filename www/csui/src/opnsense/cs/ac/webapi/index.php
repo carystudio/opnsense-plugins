@@ -47,29 +47,28 @@ try{
 		}
 		switch ($data['action']) {
 			case 'SetUpgrade':
-				$ap = Action::deleteState($ap, Action::STATE_UPGRADE);
 				if(0 == $status){
-					$ap = Action::setState($ap, Action::STATE_RADIO);
-					$ap = Action::setState($ap, Action::STATE_WLAN);
-					$ap = Action::setState($ap, Action::STATE_SYSTEM);
+					$ap = Action::setState($ap, Action::STATE_RADIO, false);
+					$ap = Action::setState($ap, Action::STATE_WLAN, false);
+					$ap = Action::setState($ap, Action::STATE_SYSTEM, false);
 				}
+				$ap = Action::deleteState($ap, Action::STATE_UPGRADE);
 				break;
 			case 'SetReset':
-				$ap = Action::deleteState($ap, Action::STATE_RESET);
 				if(0 == $status){
-					$ap = Action::setState($ap, Action::STATE_RADIO);
-					$ap = Action::setState($ap, Action::STATE_WLAN);
-					$ap = Action::setState($ap, Action::STATE_SYSTEM);
+					$ap = Action::setState($ap, Action::STATE_RADIO, false);
+					$ap = Action::setState($ap, Action::STATE_WLAN, false);
+					$ap = Action::setState($ap, Action::STATE_SYSTEM, false);
 				}
+				$ap = Action::deleteState($ap, Action::STATE_RESET);
 				break;
 			case 'SetReboot':
-				$ap = Action::deleteState($ap, Action::STATE_REBOOT);
 				if(0 == $status){
-					$ap = Action::setState($ap, Action::STATE_RADIO);
-					$ap = Action::setState($ap, Action::STATE_WLAN);
-					$ap = Action::setState($ap, Action::STATE_SYSTEM);
+					$ap = Action::setState($ap, Action::STATE_RADIO, false);
+					$ap = Action::setState($ap, Action::STATE_WLAN, false);
+					$ap = Action::setState($ap, Action::STATE_SYSTEM, false);
 				}
-
+				$ap = Action::deleteState($ap, Action::STATE_REBOOT);
 				break;
 			case 'SetRadioConfig':
 				$ap = Action::deleteState($ap, Action::STATE_RADIO);

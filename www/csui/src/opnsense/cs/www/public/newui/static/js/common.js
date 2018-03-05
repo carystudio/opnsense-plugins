@@ -259,6 +259,8 @@ cs.prototype.mask = function(str){
 	if(!(buf[2]==0||buf[2]==128||buf[2]==192||buf[2]==224||buf[2]==240||buf[2]==248||buf[2]==252||buf[2]==254||buf[2]==255)) ret = 1;
 	if(!(buf[1]==0||buf[1]==128||buf[1]==192||buf[1]==224||buf[1]==240||buf[1]==248||buf[1]==252||buf[1]==254||buf[1]==255)) ret = 1;
 	if(!( buf[0]==128||buf[0]==192||buf[0]==224||buf[0]==240||buf[0]==248||buf[0]==252||buf[0]==254||buf[0]==255)) ret = 1;
+	if( (buf[1]==0 && (buf[2]!=0 || buf[3]!=0)) || (buf[2]==0 && buf[3]!=0 )) ret = 1;
+
 	return ret;
 };
 
@@ -406,6 +408,39 @@ cs.prototype.domain = function (str){
 	var reg = /^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$/;
 	if(!reg.test(str)) ret = 1;
 	return ret;
+};
+
+/**
+ * 时间戳转时间格式
+ * @Author   Jeff       <yexk@carystudio.com>
+ * @DateTime 2018-03-05
+ * @param    {String}	时间戳
+ * @param    {String}	时间格式
+ * @return   {String}                         换算后的时间
+ * @example
+ * console.log(cs.bytesToSize(1024)); // 1KB
+ */
+cs.prototype.formatDate = function(date, fmt) {
+	var data = parseInt(date+'000');
+	var d = new Date(data);
+	var o = {
+		"M+": d.getMonth() + 1, //month
+		"d+": d.getDate(),    //day
+		"h+": d.getHours(),   //hour
+		"m+": d.getMinutes(), //minute
+		"s+": d.getSeconds(), //second
+		"q+": Math.floor((d.getMonth() + 3) / 3),  //quarter
+		"S": d.getMilliseconds() //millisecond
+	}
+	if (/(y+)/.test(fmt)) {
+		fmt = fmt.replace(RegExp.$1,(d.getFullYear() + "").substr(4 - RegExp.$1.length));
+	}
+	for (var k in o) {
+		if (new RegExp("(" + k + ")").test(fmt)) {
+			fmt = fmt.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+		}
+	}
+	return fmt;
 };
 
 /**

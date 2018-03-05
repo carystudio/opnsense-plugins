@@ -497,28 +497,28 @@
                     key: 'count_download',
                     sortable: true,
                     render: function(h, params) {
-                        return h('span', cs.bytesToSize(parseInt(params.row.count_download)));
+                        return h('span', cs.bytesToSize(parseInt(params.row.count_download/8)));
                     }
                 }, {
                     title: this.$t('realtime.count_upload'),
                     key: 'count_upload',
                     sortable: true,
                     render: function(h, params) {
-                        return h('span', cs.bytesToSize(parseInt(params.row.count_upload)));
+                        return h('span', cs.bytesToSize(parseInt(params.row.count_upload/8)));
                     }
                 }, {
                     title: this.$t('realtime.download_speed'),
                     key: 'download',
                     sortable: true,
                     render: function(h, params) {
-                        return h('span',cs.bytesToSize(parseInt(params.row.download)));
+                        return h('span',cs.bytesToSize(parseInt(params.row.download/8)));
                     }
                 }, {
                     title: this.$t('realtime.upload_speed'),
                     key: 'upload',
                     sortable: true,
                     render: function(h, params) {
-                        return h('span',cs.bytesToSize(parseInt(params.row.upload)));
+                        return h('span',cs.bytesToSize(parseInt(params.row.upload/8)));
                     }
                 }/*, {
                     title: this.$t('realtime.links_conut'),
@@ -882,8 +882,8 @@
                     _this.linksChartsData.links_y.shift();
                     _this.linksChartsData.links_y1.shift();
                     _this.linksChartsData.links_x.push(_this.linksChartsData.links_x_i++);
-                    _this.linksChartsData.links_y.push(data.statistics.upload);
-                    _this.linksChartsData.links_y1.push(data.statistics.download);
+                    _this.linksChartsData.links_y.push(parseInt(data.statistics.upload/8));
+                    _this.linksChartsData.links_y1.push(parseInt(data.statistics.download/8));
                     _this.linksChartsData.e_links_charts.setOption({
                         xAxis: [{
                             data: _this.linksChartsData.links_x

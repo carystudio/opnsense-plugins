@@ -57,19 +57,19 @@
                 <Input v-model="formSetinfo.apname" ></Input>
             </FormItem>
             <!--<FormItem :label="$t('central.authpwd')" prop="authpwd">-->
-                <!--<Input v-model="formSetinfo.authpwd"></Input>-->
+            <!--<Input v-model="formSetinfo.authpwd"></Input>-->
             <!--</FormItem>-->
             <!--<FormItem :label="$t('central.change_passwd')">-->
-                <!--<Input v-model="formSetinfo.changePasswd" ></Input>-->
+            <!--<Input v-model="formSetinfo.changePasswd" ></Input>-->
             <!--</FormItem>-->
             <!--<FormItem :label="$t('central.ipaddr')" prop="ipaddr" v-if="multipleHide">-->
-                <!--<Input v-model="formSetinfo.ipaddr" ></Input>-->
+            <!--<Input v-model="formSetinfo.ipaddr" ></Input>-->
             <!--</FormItem>-->
             <!--<FormItem :label="$t('central.default_gateway')" prop="gateway">-->
-                <!--<Input v-model="formSetinfo.gateway" ></Input>-->
+            <!--<Input v-model="formSetinfo.gateway" ></Input>-->
             <!--</FormItem>-->
             <!--<FormItem label="DNS" prop="dns">-->
-                <!--<Input v-model="formSetinfo.dns" ></Input>-->
+            <!--<Input v-model="formSetinfo.dns" ></Input>-->
             <!--</FormItem>-->
             <FormItem :label="$t('central.ssid',[''])" prop="ssid2">
                 <Input v-model="formSetinfo.ssid2" ></Input>
@@ -82,33 +82,44 @@
                 </Select>
                 </Input>
             </FormItem>
-            <FormItem label="广播SSID" prop="hidessid">
+            <FormItem :label="$t('central.broad_ssid')" prop="hidessid">
                 <i-switch v-model="formSetinfo.hidessid" size="large" >
                     <span slot="open">{{ $t('central.apply') }}</span>
                     <span slot="close">{{ $t('central.disable') }}</span>
                 </i-switch>
             </FormItem>
-            <FormItem label="WiFi隔离" prop="wifi_quarantine">
+            <FormItem :label="$t('central.isolation')" prop="wifi_quarantine">
                 <i-switch v-model="formSetinfo.wifi_quarantine" size="large" >
                     <span slot="open">{{ $t('central.apply') }}</span>
                     <span slot="close">{{ $t('central.disable') }}</span>
                 </i-switch>
             </FormItem>
-            <FormItem label="最大用户数" prop="maxusernumber">    <!--最大用户数-->
+            <FormItem :label="$t('central.max_num')" prop="maxusernumber">    <!--最大用户数-->
                 <Input v-model="formSetinfo.maxusernumber"  style="width: 80px"></Input>
-                <span>(默认值为: 32)</span>
+                <span>({{$t('central.default_value')}}: 32)</span>
             </FormItem>
-            <FormItem label="Vlan标记" prop="vlanid">    <!--最大用户数-->
+            <FormItem :label="$t('central.vlan_mark')" prop="vlanid">    <!--最大用户数-->
                 <Input v-model="formSetinfo.vlanid"  style="width: 80px"></Input>
-                <span> (范围 0 - 4094,'缺省 0)</span>
+                <span> ({{$t('central.range')}} 0 - 4094,{{$t('central.default')}} 0)</span>
             </FormItem>
-            <FormItem label="WLAN设置" prop="wlanset">    <!--最大用户数-->
-                <Select v-model="formSetinfo.wlanset">
-                    <Option value="0">2.4G</Option>
-                    <Option value="1">5G</Option>
-                </Select>
+            <FormItem :label="$t('central.wlan_set')" prop="wlanset">    <!--最大用户数-->
+                <div v-if="wlanState">
+                    <Select v-model="formSetinfo.wlanset" disabled>
+                        <Option value="1">2.4G</Option>
+                        <Option value="2">5G</Option>
+                        <Option value="3">2.4G+5G</Option>
+                    </Select>
+                </div>
+                <div v-else>
+                    <Select v-model="formSetinfo.wlanset">
+                        <Option value="1">2.4G</Option>
+                        <Option value="2">5G</Option>
+                        <Option value="3">2.4G+5G</Option>
+                    </Select>
+                </div>
+
             </FormItem>
-            <FormItem label="2.4G 频段" prop="band2">    <!--最大用户数-->
+            <FormItem :label="$t('central.band2')" prop="band2">    <!--最大用户数-->
                 <Select v-model="formSetinfo.band2">
                     <Option value="1">2.4 GHz (B)</Option>
                     <Option value="4">2.4 GHz (G)</Option>
@@ -123,7 +134,7 @@
                     <Option v-for="i in 13" :key="i" :value="i">{{ i }}</Option>
                 </Select>
             </FormItem>
-            <FormItem label="2.4G 频宽" prop="band_width2">    <!--最大用户数-->
+            <FormItem :label="$t('central.bandwidth2')" prop="band_width2">    <!--最大用户数-->
                 <Select v-model="formSetinfo.band_width2">
                     <Option value="0">20M</Option>
                     <Option value="1">20M/40M</Option>
@@ -135,7 +146,7 @@
                 </Select>
             </FormItem>
             <div v-if="formSetinfo.ssid5 != ''">
-                <FormItem label="5G 频段" prop="band5">    <!--最大用户数-->
+                <FormItem :label="$t('central.band5')" prop="band5">    <!--最大用户数-->
                     <Select v-model="formSetinfo.band5">
                         <Option value="2">802.11A</Option>
                         <Option value="8">802.11A/N</Option>
@@ -149,8 +160,8 @@
                         <Option v-for="i in 13" :key="i" :value="i">{{ i }}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="5G 频宽" prop="band_width5">    <!--最大用户数-->
-                    <Select v-model="formSetinfo.band5">
+                <FormItem :label="$t('central.bandwidth5')" prop="band_width5">    <!--最大用户数-->
+                    <Select v-model="formSetinfo.band_width5">
                         <Option value="0">20M</Option>
                         <Option value="1">20M/40M</Option>
                         <Option value="2">80M</Option>
@@ -178,7 +189,7 @@
         </Alert>
         <Form :label-width="120" label-position="left">
             <FormItem>
-                <Button type="primary" @click="letctlOk(2)">{{ $t('central.open') }}</Button>
+                <Button type="primary" @click="letctlOk(0)">{{ $t('central.open') }}</Button>
                 <Button type="primary" @click="letctlOk(1)">{{ $t('central.finish') }}</Button>
             </FormItem>
         </Form>
@@ -242,9 +253,12 @@
                 restore: false,
                 uploads: false,
                 firmware: false,
-                txPower:[-1,15,35,50,75,100],
+                txPower:['-1','15','35','50','75','100'],
                 selectData:[],
                 apname:[],
+                ledStateInfo:[],
+                ledStatus:false,
+                wlanState:false,
                 formSetinfo: {
                     apname: '',
                     ssid2: '',
@@ -253,15 +267,25 @@
                     ipaddr: '',
                     gateway: '',
                     dns: '',
+
                     security2: '',
-                    securityMode2: '',
-                    channel2: '-1',
-                    tx_power2: -1,
+                    securityMode2: '0',
+                    hidessid:'0',
+                    wifi_quarantine:'0',
+                    maxusernumber:'32',
+                    vlanid:'0',
+                    wlanset:'3',
+                    band2:'9',
+                    channel2: '0',
+                    band_width2:'0',
+                    tx_power2: '100',
+                    band5:'14',
                     ssid5: '',
                     security5: '',
                     securityMode5: '',
-                    channel5: '-1',
-                    tx_power5: -1,
+                    channel5: '0',
+                    band_width5:'2',
+                    tx_power5: '100',
                     other:[]
                 },
                 letctlAuthpwd:'admin',
@@ -286,7 +310,7 @@
                             f(_this.$t('central.msg4'));
                         }
                         if (v.length>32) {
-                            f('AP名称长度不能超过32位！');
+                            f(_this.$t('central.msg6'));
                         }
                         f();
                     },
@@ -294,7 +318,7 @@
                     }],
                     ssid2: [{ validator: function(r, v, f) {
                         if (v == '') {
-                            f('SSID不能为空！');
+                            f(_this.$t('central.msg7'));
                         }
                         f();
                     },
@@ -376,7 +400,8 @@
             },
             centralColumns: function() {
                 var _this = this;
-                return [{
+                let columns = [];
+                columns.push({
                     type: 'expand',
                     width: 30,
                     render: function(h, params) {
@@ -391,26 +416,22 @@
                             }else{
                                 aptype = '2.4G+5G';
                             }
+                            var uptime = cs.formatDate(params.row.uptime,'yyyy-MM-dd hh:mm:ss');
                             return h('Row',[
-                                h('Col',{props:{span:6}},[h('p','IP:'+ params.row.ipaddr )]),
-                                h('Col',{props:{span:6}},[h('p','子网掩码：'+ params.row.netmask )]),
-                                h('Col',{props:{span:6}},[h('p','默认网关' + params.row.gateway )]),
-                                h('Col',{props:{span:6}},[h('p','NDS:'+ params.row.pridns )]),
+                                h('Col',{props:{span:6}},[h('p',_this.$t('central.ipaddr') + ': ' + params.row.ipaddr )]),
+                                h('Col',{props:{span:6}},[h('p',_this.$t('central.netmask') + ': '+ params.row.netmask )]),
+                                h('Col',{props:{span:6}},[h('p',_this.$t('central.default_gateway') + ': ' + params.row.gateway )]),
+                                h('Col',{props:{span:6}},[h('p','NDS: '+ params.row.pridns )]),
                                 h('Col',{props:{span:24}},[h('br')]),
-                                h('Col',{props:{span:6}},[h('p','产品型号：'+ params.row.model )]),
-                                h('Col',{props:{span:6}},[h('p','固件版本：' + params.row.softver + '.' + params.row.svnnum )]),
-                                h('Col',{props:{span:6}},[h('p','发布时间：'+ params.row.builddate )]),
-                                h('Col',{props:{span:6}},[h('p','上线时间：'+ params.row.uptime )]),
+                                h('Col',{props:{span:6}},[h('p',_this.$t('central.product_mode') + ': '+ params.row.model )]),
+                                h('Col',{props:{span:6}},[h('p',_this.$t('central.firmware_version') + ': ' + params.row.softver + '.' + params.row.svnnum )]),
+                                h('Col',{props:{span:6}},[h('p',_this.$t('central.publish_time') + ': '+ params.row.builddate )]),
+                                h('Col',{props:{span:6}},[h('p',_this.$t('central.online_time') + ': '+ uptime )]),
                                 h('Col',{props:{span:24}},[h('br')]),
-                                h('Col',{props:{span:6}},[h('p','AP类型：'+ aptype )]),
-                                h('Col',{props:{span:6}},[h('p','用户名：' + params.row.username )]),
-                                h('Col',{props:{span:6}},[h('p','密码：'+ params.row.password )]),
-                                h('Col',{props:{span:6}},[h('p','心跳失败次数：'+ params.row.hftimes )])
-//                            h('Col',{props:{span:8}},[h('p',_this.$t('central.ssid',['2.4G']) +':'+ params.row.ssid2g)]),
-//                            h('Col',{props:{span:8}},[h('p',_this.$t('central.security',['2.4G']) +':'+ params.row.wlanKey2g)]),
-//                            h('Col',{style:{display:_g5},props:{span:24}},[h('br')]),
-//                            h('Col',{style:{display:_g5},props:{span:8}},[h('p',_this.$t('central.ssid',['5G']) +':'+ params.row.ssid5g)]),
-//                            h('Col',{style:{display:_g5},props:{span:8}},[h('p',_this.$t('central.security',['5G']) +':'+ params.row.wlanKey5g)])
+                                h('Col',{props:{span:6}},[h('p',_this.$t('central.ap_type') + ': '+ aptype )]),
+                                h('Col',{props:{span:6}},[h('p',_this.$t('central.username') + ': ' + params.row.username )]),
+                                h('Col',{props:{span:6}},[h('p',_this.$t('central.password') + ': '+ params.row.password )]),
+                                h('Col',{props:{span:6}},[h('p',_this.$t('central.heartbeat') + ': '+ params.row.hftimes )])
                             ]);
                         }
 
@@ -418,15 +439,69 @@
                 },{
                     type: 'selection',
                     key: 'id',
-                    width: "100",
-                    render: function(h, params) {
-                        return  h('Icon', {
-                            props: {
-                                type: "ios-lightbulb",
-                            }
-                        });
-                    }
-                }, {
+                    width: "60"
+                }
+                );
+                if(_this.ledStatus){
+                    columns.push({
+                        title: this.$t('central.letctl'),
+                        key: 'id',
+                        width: "80",
+                        align:"center",
+                        render: function(h, params) {
+                            console.log(params);
+                            console.log(_this.ledStateInfo);
+                            _this.ledStateInfo[params.index].color = _this.ledStateInfo[params.index].state == '0'? "#f50" : "#000";
+                            return  h('Icon', {
+                                style:{
+                                    cursor: 'pointer',
+                                    color: _this.ledStateInfo[params.index].color
+                                },
+                                props: {
+                                    type: "ios-lightbulb-outline"
+                                },
+                                nativeOn: {
+                                    click: function () {
+                                        console.log('----------click----------');
+                                        console.log(params);
+                                        console.log(_this.ledStateInfo[params.index].state);
+                                        var data = {};
+                                        data.id = params.row.id;
+
+
+                                        if('0' == _this.ledStateInfo[params.index].state){
+                                            _this.ledStateInfo[params.index].state = '1';
+                                            _this.ledStateInfo[params.index].color = '#000';
+                                            data.ledState = '0';
+                                        }else{
+                                            _this.ledStateInfo[params.index].state = '0';
+                                            _this.ledStateInfo[params.index].color = '#f50';
+                                            data.ledState = '1';
+                                        }
+                                        console.log(_this.ledStateInfo[params.index]);
+
+                                        var postVar ={"action":"setApLedState","data":data};
+                                        uiPost.setApLedState(postVar,function(data){
+                                            console.log(data);
+                                            if (9999 == data.rescode){
+                                                cs.loginOut();
+                                            }
+                                            if (0 == data.rescode) {
+                                                _this.$Message.success({content: _this.$t('central.set_success'), onClose: function () {
+                                                    location.href = location.href;
+                                                }
+                                                });
+                                            } else {
+                                                _this.$Message.error(_this.$t('central.modify_fail')+_this.$t('errorcode.'+data.rescode));
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    })
+                }
+                columns.push({
                     title: this.$t('central.apname'),
                     key: 'apname',
                     sortable: true,
@@ -461,9 +536,9 @@
                                         placeholder :name
                                     },
                                     on:{
-                                       'on-change':function (e) {
+                                        'on-change':function (e) {
                                             _this.apname[params.index] = e.target.value;
-                                       } 
+                                        }
                                     }
                                 });
                             }else{
@@ -500,23 +575,7 @@
                             }
                         });
                     }
-                },  /*{
-                 title: this.$t('central.clientconn'),
-                 key: 'staNum2g',
-                 sortable: true,
-                 render: function(h, params) {
-                 if (params.row.staNum5g != "") {
-                 var tmp_num = params.row.staNum2g + "/" + params.row.staNum5g;
-                 } else {
-                 var tmp_num = params.row.staNum2g;
-                 }
-                 return h('div', tmp_num);
-                 }
-                 }, {
-                 title: this.$t('central.device_info'),
-                 key: 'softModel',
-                 sortable: true,
-                 }, */{
+                }, {
                     title: this.$t('central.device_status'),
                     key: 'apstate',
                     sortable: true,
@@ -526,109 +585,109 @@
                             apState = _this.$t('central.user_online');
                         }else {
                             if(!(params.row.apstate & (1<<8)) ) {
-                                apState = '不在同一网段';
+                                apState = _this.$t('central.no_same_segment');
                             }else if(!(params.row.apstate & (1<<7) )) {
-                                apState = '没有权限';
+                                apState = _this.$t('central.no_authority');
                             }else if(params.row.hftimes<7) {
-                                apState = '配置中';
+                                apState = _this.$t('central.configuration');
                             }else {
-                                apState = '离线';
+                                apState = _this.$t('central.offline');
                             }
                         }
                         return h('div',apState);
                     }
                 },
-                    {
-                        title: this.$t('central.operation'),
-                        key: 'operation',
-                        align: 'center',
-                        render: function(h, params) {
-                            if(!(params.row.apstate & (1<<8)) ){
-                                return [
-                                    h('Button', {
-                                        props: {
-                                            type: 'primary',
-                                            size: 'small'
-                                        },
-                                        on: {
-                                            click:function () {
-                                                var data = {};
-                                                data.apmac = params.row.apmac;
+                {
+                    title: this.$t('central.operation'),
+                    key: 'operation',
+                    align: 'center',
+                    render: function(h, params) {
+                        if(!(params.row.apstate & (1<<8)) ){
+                            return [
+                                h('Button', {
+                                    props: {
+                                        type: 'primary',
+                                        size: 'small'
+                                    },
+                                    on: {
+                                        click:function () {
+                                            var data = {};
+                                            data.apmac = params.row.apmac;
 //                                                _this.modifyApIp(data);
-                                                var postVar ={"action":"setApIp","data":data};
-                                                uiPost.setApIp(postVar);
-                                                var time = 12;
-                                                _this.$Modal.success({
-                                                    loading:true,
-                                                    render: function(h) {
-                                                        return h('div',[
-                                                            _this.$t('common.loading'),
-                                                            h('Progress',{
-                                                                attrs:{ percent:_this.percent }
-                                                            })
-                                                        ])
-                                                    }
-                                                });
-                                                var percentTimer = setInterval(function(){
-                                                    if (_this.percent>=100) {
-                                                        clearInterval(percentTimer);
-                                                        location.href = location.href;
-                                                    }
-                                                    _this.percent++;
-                                                },cs.getTimer(time));
-                                            }
+                                            var postVar ={"action":"setApIp","data":data};
+                                            uiPost.setApIp(postVar);
+                                            var time = 12;
+                                            _this.$Modal.success({
+                                                loading:true,
+                                                render: function(h) {
+                                                    return h('div',[
+                                                        _this.$t('common.loading'),
+                                                        h('Progress',{
+                                                            attrs:{ percent:_this.percent }
+                                                        })
+                                                    ])
+                                                }
+                                            });
+                                            var percentTimer = setInterval(function(){
+                                                if (_this.percent>=100) {
+                                                    clearInterval(percentTimer);
+                                                    location.href = location.href;
+                                                }
+                                                _this.percent++;
+                                            },cs.getTimer(time));
                                         }
-                                    }, '一键修改IP')
-                                ]
-                            }else{
-                                return [
-                                    h('Button',{
-                                        props: {
-                                            type: 'primary',
-                                            size: 'small'
-                                        },
-                                        on: {
-                                            click:function () {
-                                                console.log('-----------提交--------------');
-                                                var newapname = _this.apname[params.index];
-                                                var apname = params.row.apname;
-                                                console.log(params);
+                                    }
+                                }, _this.$t('central.unified_change_ip'))
+                            ]
+                        }else{
+                            return [
+                                h('Button',{
+                                            props: {
+                                                type: 'primary',
+                                                size: 'small'
+                                            },
+                                            on: {
+                                                click:function () {
+                                                    console.log('-----------提交--------------');
+                                                    var newapname = _this.apname[params.index];
+                                                    var apname = params.row.apname;
+                                                    console.log(params);
 
-                                                if(!newapname ){
-                                                    _this.$Message.error('设备名称不能为空');
-                                                    return false;
-                                                }
-                                                if (newapname && apname == newapname) {
-                                                    _this.$Message.error("修改名称和原名称相同！");
-                                                    return false;
-                                                }
-                                                console.log('-------end--------');
-                                                var data = {};
-                                                data.apid = params.row.id;
-                                                data.apname = newapname;
-                                                var postVar = {"action":"setApName","data":data};
-                                                uiPost.setApName(postVar,function(data) {
-                                                    if (9999 == data.rescode){
-                                                        cs.loginOut();
+                                                    if(!newapname ){
+                                                        _this.$Message.error(_this.$t('central.msg8'));
+                                                        return false;
                                                     }
-                                                    if (0 == data.rescode) {
-                                                        _this.$Message.success({content: '修改成功', onClose: function () {
+                                                    if (newapname && apname == newapname) {
+                                                        _this.$Message.error(_this.$t('central.msg9'));
+                                                        return false;
+                                                    }
+                                                    console.log('-------end--------');
+                                                    var data = {};
+                                                    data.apid = params.row.id;
+                                                    data.apname = newapname;
+                                                    var postVar = {"action":"setApName","data":data};
+                                                    uiPost.setApName(postVar,function(data) {
+                                                        if (9999 == data.rescode){
+                                                            cs.loginOut();
+                                                        }
+                                                        if (0 == data.rescode) {
+                                                            _this.$Message.success({content: _this.$t("central.modify_success"), onClose: function () {
                                                                 location.href = location.href;
                                                             }
-                                                        });
-                                                    } else {
-                                                        _this.$Message.error('修改失败！'+_this.$t('errorcode.'+data.rescode));
-                                                    }
+                                                            });
+                                                        } else {
+                                                            _this.$Message.error(_this.$t("central.modify_fail")+_this.$t('errorcode.'+data.rescode));
+                                                        }
 
-                                                });
+                                                    });
+                                                }
                                             }
-                                        }
-                                    }, '提交'
-                                    )]
-                            }
-
+                                        }, _this.$t("central.submit")
+                                )]
                         }
-                    }];
+                    }
+                });
+                return columns;
             }
         },
         created: function() {
@@ -643,15 +702,28 @@
                 }
                 _this.centralData = data.data;
                 _this.apscanLoading = false;
-
+                for(var x in data.data){
+                    if('0' == data.data[x].ledstate){
+                        _this.ledStatus = true;
+                        break;
+                    }
+                }
                 for(var i in data.data){
                     _this.apname[i] = data.data[i].apname;
+                    _this.ledStateInfo[i] = [];
+                    if('0' == data.data[i].ledstate){
+                        _this.ledStateInfo[i].state = "0";
+                        _this.ledStateInfo[i].color = "#f50";
+                    }else{
+                        _this.ledStateInfo[i].state = "1";
+                        _this.ledStateInfo[i].color = "#000";
+                    }
                 }
             });
             /*
-            uiPost.getUsbState(function(data){
-                _this.usbState = data.usbState != 1 ? true : false;
-            });*/
+             uiPost.getUsbState(function(data){
+             _this.usbState = data.usbState != 1 ? true : false;
+             });*/
         },
         methods: {
             init: function() {
@@ -712,36 +784,122 @@
                 var _this = this;
                 _this.apscanLoading = true;
                 _this.init();
-             },
+            },
             /*apscanClick:function() {
-                var _this = this;
-                uiPost.acScanAp(function (data) {     //扫描
-                    _this.$Message.success({content:'Success!',onClose:function(){
-                    }});
-                })
-            },*/
+             var _this = this;
+             uiPost.acScanAp(function (data) {     //扫描
+             _this.$Message.success({content:'Success!',onClose:function(){
+             }});
+             })
+             },*/
             setinfoClick: function(){
+                var _this = this;
                 var temp = this.selectData;
                 if (temp.length <= 0) {
                     this.$Message.error(this.$t('central.msg1'));
                     return false;
                 }
                 if (temp.length == 1) {
-                    this.formSetinfo.apname    = temp[0].name;
-                    this.formSetinfo.ipaddr    = temp[0].ipaddr;
-                    this.formSetinfo.gateway   = temp[0].gateway;
-                    this.formSetinfo.dns       = temp[0].dns1;
-                    this.formSetinfo.ssid2     = temp[0].ssid2g;
-                    this.formSetinfo.security2 = temp[0].wlanKey2g;
-                    this.formSetinfo.channel2  = temp[0].channel2g;
-                    this.formSetinfo.tx_power2 = temp[0].txPower2g;
-                    this.formSetinfo.ssid5     = temp[0].ssid5g;
-                    this.formSetinfo.security5 = temp[0].wlanKey5g;
-                    this.formSetinfo.channel5  = temp[0].channel5g;
-                    this.formSetinfo.tx_power5 = temp[0].txPower5g;
-                    this.formSetinfo.other     = temp[0];
+                    this.formSetinfo.apname    = temp[0].apname;
+                    var data = {};
+                    data.apid = temp[0].id;
+                    var postVar = {"action" : "getApStatusConfig","data":data};
+
+                    uiPost.getApStatusConfig(postVar,function(data){
+                        // _this.$Modal.remove();
+                        // location.href = location.href;
+                        console.log(data);
+
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        if (0 == data.rescode) {
+                            data = data.data;
+                            if(data.WLAN_STATUS){
+                                _this.formSetinfo.ssid2    = data.WLAN_STATUS.ssid;
+                                _this.formSetinfo.securityMode2    = data.WLAN_STATUS.encryption;
+                                _this.formSetinfo.security2    = data.WLAN_STATUS.passphrase;
+                                _this.formSetinfo.hidessid    = data.WLAN_STATUS.hide;
+                                _this.formSetinfo.wifi_quarantine    = data.WLAN_STATUS.isolate;
+                                _this.formSetinfo.maxusernumber    = data.WLAN_STATUS.stanum;
+//                                _this.formSetinfo.vlanid    = data.WLAN_STATUS.vlanid;
+                            }else{
+                                _this.formSetinfo.ssid2    = '';
+                                _this.formSetinfo.securityMode2    = '';
+                                _this.formSetinfo.security2    = '';
+                                _this.formSetinfo.hidessid    = '';
+                                _this.formSetinfo.wifi_quarantine    = '';
+                                _this.formSetinfo.maxusernumber    = '';
+                                _this.formSetinfo.vlanid    = '';
+                            }
+
+                            if(data.WIFI0_STATUS){
+//                            _this.formSetinfo.wlanset    = data.WIFI0_STATUS.vlanid;
+                                _this.formSetinfo.band2    = data.WIFI0_STATUS.wirelessmode;
+                                _this.formSetinfo.country2g    = data.WIFI0_STATUS.country;
+                                _this.formSetinfo.channel2    = data.WIFI0_STATUS.channel;
+                                _this.formSetinfo.band_width2    = data.WIFI0_STATUS.htmode;
+                                _this.formSetinfo.tx_power2    = data.WIFI0_STATUS.txpower;
+                            }else{
+//                            _this.formSetinfo.wlanset    = '3';
+                                _this.formSetinfo.band2    = '';
+                                _this.formSetinfo.country2g    = 'CN';
+                                _this.formSetinfo.channel2    = '';
+                                _this.formSetinfo.band_width2    = '';
+                                _this.formSetinfo.tx_power2    = '';
+                            }
+
+                            if(data.WIFI1_STATUS){
+                                _this.formSetinfo.band5    = data.WIFI1_STATUS.wirelessmode;
+//                            _this.formSetinfo.wlanset    = data.WIFI1_STATUS.vlanid;
+                                _this.formSetinfo.country5g    = data.WIFI1_STATUS.country;
+                                _this.formSetinfo.channel5    = data.WIFI1_STATUS.channel;
+                                _this.formSetinfo.band_width5    = data.WIFI1_STATUS.htmode;
+                                _this.formSetinfo.tx_power5    = data.WIFI1_STATUS.txpower;
+                            }else{
+                                _this.formSetinfo.band5    = '';
+                                _this.formSetinfo.country5g    = 'CN';
+                                _this.formSetinfo.channel5    = '';
+                                _this.formSetinfo.band_width5    = '';
+                                _this.formSetinfo.tx_power5    = '';
+                            }
+
+                            if('1' == temp[0].aptype){
+                                _this.formSetinfo.wlanset    = '1';
+                                _this.wlanState = true;
+                            }else if('2' == temp[0].aptype){
+                                _this.formSetinfo.wlanset    = '2';
+                                _this.wlanState = true;
+                            }
+
+                        }
+
+                    });
+
                     this.multipleHide = true;
                 }else{
+                    _this.formSetinfo.apname    = '';
+                    _this.formSetinfo.ssid2    = '';
+                    _this.formSetinfo.securityMode2    = '0';
+                    _this.formSetinfo.security2    = '';
+                    _this.formSetinfo.hidessid    = '0';
+                    _this.formSetinfo.wifi_quarantine    = '0';
+                    _this.formSetinfo.maxusernumber    = '32';
+                    _this.formSetinfo.vlanid    = '0';
+                    _this.formSetinfo.wlanset    = '3';
+
+                    _this.formSetinfo.band2    = '9';
+                    _this.formSetinfo.country2g    = 'CN';
+                    _this.formSetinfo.channel2    = '0';
+                    _this.formSetinfo.band_width2    = '0';
+                    _this.formSetinfo.tx_power2    = '100';
+
+                    _this.formSetinfo.band5    = '14';
+                    _this.formSetinfo.country2g    = 'CN';
+                    _this.formSetinfo.channel5    = '0';
+                    _this.formSetinfo.band_width5    = '2';
+                    _this.formSetinfo.tx_power5    = '100';
+
                     this.multipleHide = true;
                     for(var i in this.formSetinfo)
                     {
@@ -756,49 +914,122 @@
             },
             setinfoOk: function(){
                 var _this = this;
-                var postVar = {};
-                var postData = { Action: "QuickSetting" };
-                postData.AuthPassword = this.formSetinfo.authpwd;
-                if (this.formSetinfo.changePasswd != "") {
-                    postData.ModifyPassword = this.formSetinfo.changePasswd;
-                }
-                postData.Ipaddr = this.formSetinfo.ipaddr;
-                postData.Gateway = this.formSetinfo.gateway;
-                postData.Dns1 = this.formSetinfo.dns;
-                postData.Ssid2g = this.formSetinfo.ssid2;
-                postData.WlanKey2g = this.formSetinfo.security2;
-                postData.Channel2g = this.formSetinfo.channel2 + '';
-                postData.TxPower2g = this.formSetinfo.tx_power2 + '';
-                postData.Ssid5g = this.formSetinfo.ssid5;
-                postData.WlanKey5g = this.formSetinfo.security5;
-                postData.Channel5g = this.formSetinfo.channel5;
-                postData.TxPower5g = this.formSetinfo.tx_power5;
-                postData.APName = this.formSetinfo.apname;
+                var temp = this.selectData;
 
-                postVar.APMACLIST = [];
-                postVar.APIPLIST = [];
-                postVar.NETLIST = [];
-                var selectData = this.selectData;
-                for(var i=0; i<selectData.length; i++)
-                {
-                    postVar.APMACLIST.push(selectData[i].apMac);
-                    postVar.APIPLIST.push(selectData[i].ipaddr);
-                    postVar.NETLIST.push(selectData[i].sameNetwork);
+
+                var idArr = [];
+                var data = {};
+                for(var i in temp){
+                    idArr[i] = temp[i].id
                 }
 
-                postVar.Action = "QuickSetting";
-                postVar.postData = postData;
+                data.apid = idArr.join(',');
+                data.apname = _this.formSetinfo.apname;
 
-                this.$refs.formSetinfo.validate(function(valid){
-                    if (valid) {
-                        uiPost.QuickSetting(postVar,function(data){
-                            // _this.$Modal.remove();
-                            // location.href = location.href;
-                            _this.$Message.success(_this.$t('central.set_success'));
-                            _this.setinfo = false;
-                        });
+                var res = cs.ssid(_this.formSetinfo.ssid2);
+                if(0 == res){
+                    _this.$Message.error(_this.$t('central.msg10'));
+                    return false;
+                }else if(99 != res){
+                    _this.$Message.error(_this.$t('central.msg11'));
+                    return false;
+                }
+                data.ssid = _this.formSetinfo.ssid2;
+                data.encryption = _this.formSetinfo.securityMode2;
+                if('1' == _this.formSetinfo.securityMode2 && '' != _this.formSetinfo.security2 ){
+                    var res = cs.string(_this.formSetinfo.security2);
+                    if(99 != res || _this.formSetinfo.security2.length < 8 || _this.formSetinfo.security2.length > 63){
+                        _this.$Message.error(_this.$t('central.msg12'));
+                        return false;
                     }
+                    data.wlanKey = _this.formSetinfo.security2;
+                }else{
+                    data.wlanKey = '';
+                }
+                data.hedden = _this.formSetinfo.hidessid;
+                data.noforward = _this.formSetinfo.wifi_quarantine;
+                if(99 != cs.num(_this.formSetinfo.maxusernumber)){
+                    _this.$Message.error(_this.$t('central.msg13'));
+                    return false;
+                }
+                data.maxstanum = _this.formSetinfo.maxusernumber;
+
+                if('0' != _this.formSetinfo.vlanid && 4094 != _this.formSetinfo.vlanid && cs.num_range(_this.formSetinfo.vlanid,0,4094) ){
+                    _this.$Message.error(_this.$t('central.msg14'));
+                    return false;
+                }
+                data.vlanid = _this.formSetinfo.vlanid;
+                data.usefor = _this.formSetinfo.wlanset;
+//                postData['usefor']=$('#SELECT_usefor').val();
+
+                data.wirelessmode2g = _this.formSetinfo.band2;
+                data.country2g = _this.formSetinfo.country2g;
+                data.channel2g = _this.formSetinfo.channel2;
+                data.htbw2g = _this.formSetinfo.band_width2;
+                data.txpower2g = _this.formSetinfo.tx_power2;
+
+                data.wirelessmode5g = _this.formSetinfo.band5;
+                data.country5g = _this.formSetinfo.country5g;
+                data.channel5g = _this.formSetinfo.channel5;
+                data.htbw5g = _this.formSetinfo.band_width5;
+                data.txpower5g = _this.formSetinfo.tx_power5;
+
+
+                var postData = { "action": "setQuick","data":data };
+
+                uiPost.setQuick(postData,function(data){
+                    // _this.$Modal.remove();
+                    // location.href = location.href;
+                    console.log(data);
+                    _this.$Message.success({content: _this.$t('central.set_success'), onClose: function () {
+                        location.href = location.href;
+                    }
+                    });
                 });
+
+
+
+//                postData.AuthPassword = this.formSetinfo.authpwd;
+//                if (this.formSetinfo.changePasswd != "") {
+//                    postData.ModifyPassword = this.formSetinfo.changePasswd;
+//                }
+//                postData.Ipaddr = this.formSetinfo.ipaddr;
+//                postData.Gateway = this.formSetinfo.gateway;
+//                postData.Dns1 = this.formSetinfo.dns;
+//                postData.Ssid2g = this.formSetinfo.ssid2;
+//                postData.WlanKey2g = this.formSetinfo.security2;
+//                postData.Channel2g = this.formSetinfo.channel2 + '';
+//                postData.TxPower2g = this.formSetinfo.tx_power2 + '';
+//                postData.Ssid5g = this.formSetinfo.ssid5;
+//                postData.WlanKey5g = this.formSetinfo.security5;
+//                postData.Channel5g = this.formSetinfo.channel5;
+//                postData.TxPower5g = this.formSetinfo.tx_power5;
+//                postData.APName = this.formSetinfo.apname;
+//
+//                postVar.APMACLIST = [];
+//                postVar.APIPLIST = [];
+//                postVar.NETLIST = [];
+//                var selectData = this.selectData;
+//                for(var i=0; i<selectData.length; i++)
+//                {
+//                    postVar.APMACLIST.push(selectData[i].apMac);
+//                    postVar.APIPLIST.push(selectData[i].ipaddr);
+//                    postVar.NETLIST.push(selectData[i].sameNetwork);
+//                }
+//
+//                postVar.Action = "QuickSetting";
+//                postVar.postData = postData;
+//
+//                this.$refs.formSetinfo.validate(function(valid){
+//                    if (valid) {
+//                        uiPost.QuickSetting(postVar,function(data){
+//                            // _this.$Modal.remove();
+//                            // location.href = location.href;
+//                            _this.$Message.success(_this.$t('central.set_success'));
+//                            _this.setinfo = false;
+//                        });
+//                    }
+//                });
             },
             letctlClick: function(){
                 var temp = this.selectData;
@@ -811,6 +1042,12 @@
             letctlOk: function(index){
                 var _this = this;
                 var temp = this.selectData;
+
+                if('0' == index){
+                    _this.ledStatus = true;
+                }else{
+                    _this.ledStatus = false;
+                }
 
                 console.log(temp);
 
@@ -825,29 +1062,32 @@
 
                 var postVar ={"action":"setApLedState","data":data};
                 uiPost.setApLedState(postVar,function(data){
-                    _this.$Message.success(_this.$t('central.set_success'));
                     _this.letctl = false;
+                    _this.$Message.success({content: _this.$t('central.set_success'), onClose: function () {
+                        location.href = location.href;
+                    }
+                    });
                 });
 
 
                 /*var postVar ={"topicurl":"setting/setApLedState"};
-                postVar.Ledstate = index + '';
-                postVar.Action = 'setledState';
+                 postVar.Ledstate = index + '';
+                 postVar.Action = 'setledState';
 
-                postVar.APMACLIST = [];
-                postVar.APIPLIST = [];
-                var selectData = this.selectData;
-                for(var i=0; i<selectData.length; i++)
-                {
-                    postVar.APMACLIST.push(selectData[i].apMac);
-                    postVar.APIPLIST.push(selectData[i].ipaddr);
-                }
+                 postVar.APMACLIST = [];
+                 postVar.APIPLIST = [];
+                 var selectData = this.selectData;
+                 for(var i=0; i<selectData.length; i++)
+                 {
+                 postVar.APMACLIST.push(selectData[i].apMac);
+                 postVar.APIPLIST.push(selectData[i].ipaddr);
+                 }
 
-                uiPost.QuickSetting(postVar,function(){
-                    // location.href = location.href;
-                    _this.$Message.success(_this.$t('central.set_success'));
-                    _this.letctl = false;
-                });*/
+                 uiPost.QuickSetting(postVar,function(){
+                 // location.href = location.href;
+                 _this.$Message.success(_this.$t('central.set_success'));
+                 _this.letctl = false;
+                 });*/
             },
             rebootClick: function(){
                 var _this = this;
@@ -873,7 +1113,7 @@
                     _this.reboot = false;
                 });
 
-           
+
             },
             timingRebootClick: function(status){
                 var _this = this;
@@ -881,7 +1121,7 @@
                     var getSelection = this.$refs.tableSelect.getSelection();
                     if (getSelection.length>0) {
                         /*全选*/
-                       console.log(getSelection);
+                        console.log(getSelection);
                         var tmpData = [];
                         var data = {};
                         for(var i=0; i<getSelection.length; i++){
@@ -891,7 +1131,7 @@
                         }
                         tmpData['apmac'] = tmpData.join(',');
                         if('' == tmpData['apmac'].length) {
-                            _this.$Message.error("请选择不同网络的设备!");
+                            _this.$Message.error(_this.$t('central.msg15'));
                             return;
                         }
                         data.apmac = tmpData['apmac'];
@@ -919,7 +1159,7 @@
                             _this.percent++;
                         },cs.getTimer(time));
                     }else{
-                        _this.$Message.error('请选择需要修改的IP');
+                        _this.$Message.error(_this.$t('central.msg16'));
                     }
                 }else{
                     _this.$refs.tableSelect.selectAll(status);

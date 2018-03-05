@@ -4205,11 +4205,11 @@ uiPost.prototype.getDhcpSliList = function(postVar,callback){
 uiPost.prototype.getNetInfo = function(postVar,callback){
     this.topicurl = 'getNetInfo';
     this.async = true; // true:异步，false:同步。
-     if (globalConfig.debug) {
+    if (globalConfig.debug) {
         this.url = "/newui/data/getNetInfo.json";
-     }else{
-		 this.url = "/webapi";
-	 }
+    }else{
+        this.url = "/webapi";
+    }
     return this.post(postVar,callback);
 };
 
@@ -4319,8 +4319,8 @@ uiPost.prototype.getLinksData = function(postVar,callback){
     if (globalConfig.debug) {
         this.url = "/newui/data/getLinksData.json";
     }else{
-		 this.url = "/webapi";
-	}
+        this.url = "/webapi";
+    }
     return this.post(postVar,callback);
 };
 
@@ -6524,7 +6524,7 @@ uiPost.prototype.doLogin = function(postVar,callback){
         this.url = '/webapi';
         return this.post(postVar,callback);
     };
-	 uiPost.prototype.setApLedState = function(postVar,callback){
+    uiPost.prototype.setApLedState = function(postVar,callback){
         this.topicurl = 'setApLedState';
         this.async = true; // true:异步，false:同步。
         this.url = '/webapi';
@@ -6538,6 +6538,18 @@ uiPost.prototype.doLogin = function(postVar,callback){
     };
     uiPost.prototype.setApUpgrade = function(postVar,callback){
         this.topicurl = 'setApUpgrade';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getApStatusConfig = function(postVar,callback){
+        this.topicurl = 'getApStatusConfig';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setQuick = function(postVar,callback){
+        this.topicurl = 'setQuick';
         this.async = true; // true:异步，false:同步。
         this.url = '/webapi';
         return this.post(postVar,callback);
