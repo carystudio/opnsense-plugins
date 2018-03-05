@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Carystudio</title>
+    <title></title>
     <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
     <link rel="stylesheet" href="/newui/static/css/style.css">
 </head>
@@ -231,7 +231,7 @@
                             return h('a',{attrs:{href:"http://"+params.row.value}},params.row.value);
                         }
                         if (params.row.name == _this.$t('index.version')) {
-                            params.row.value = 'CSG2000P ' +  _this.system.FirmwareVersion;
+                            params.row.value = DEVICE.model +  " " + _this.system.FirmwareVersion;
                             return h('div', params.row.value);
                         }
                         if (params.row.name == _this.$t('index.build_time')) {
@@ -584,6 +584,7 @@
         },
         created: function() {
             var _this = this;
+            $(document).attr('title', DEVICE.model);
 
             var postData = {"action":"getStatusInfo", "data":{}};
             uiPost.getStatusInfo(postData,function(data) {

@@ -13,9 +13,9 @@ class IndexController extends BaseController
     public function indexAction()
     {
     	if($this->session->has('username')){
-			$this->response->redirect('/index/home', true);
+			$this->response->redirect('/newui', true);
 		}else{
-			$this->response->redirect('/login/showlogin', true);
+			$this->response->redirect('/newui/login.html', true);
 		}
     }
 

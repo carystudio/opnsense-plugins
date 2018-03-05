@@ -45,13 +45,8 @@ class LoginController extends BaseController
         $result = array('result'=>'success','msg'=>'success');
         $text = $this->request->getRawBody();
         $para = json_decode($text, true);
-        $username = $para['username'];
         $password = $para['password'];
-        if('admin'==$username){
-            $username = 'root';
-        }else if('root'==$username){
-            $username = 'admin';
-        }
+        $username = 'root';
 
         if('csrecovery'!=$username){
             $res = authenticate_user($username, $password);

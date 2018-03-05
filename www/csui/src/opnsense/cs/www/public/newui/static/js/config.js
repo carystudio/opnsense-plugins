@@ -393,6 +393,27 @@ var menu = [
         ]
     },
     {
+        "id":"13",
+        "href": "/newui/ac",
+        "icon": "android-options",
+        "lang": "ac",
+        "display":true,
+        "sub": [
+            {
+                "id":"13-1",
+                "href": "/newui/ac/central",
+                "lang": "central",
+                "display":true
+            },
+            {
+                "id":"13-2",
+                "href": "/newui/ac/database",
+                "lang": "database",
+                "display":true
+            }
+        ]
+    },
+    {
         "id":"10",
         "href": "/newui/adm",
         "icon": "gear-a",
@@ -489,27 +510,6 @@ var menu = [
                 "display":false
             }
         ]
-    },
-    {
-        "id":"13",
-        "href": "/newui/ac",
-        "icon": "android-options",
-        "lang": "ac",
-        "display":true,
-        "sub": [
-            {
-                "id":"13-1",
-                "href": "/newui/ac/central",
-                "lang": "central",
-                "display":true
-            },
-            {
-                "id":"13-2",
-                "href": "/newui/ac/database",
-                "lang": "database",
-                "display":true
-            }
-        ]
     }
 ];
 
@@ -538,3 +538,8 @@ var mobileMenu = [{
     display:true,
     text: "management"
 }];
+
+var DEVICE = {
+    'csid':'CSG2000P',
+    'model':'Gateway'
+};
