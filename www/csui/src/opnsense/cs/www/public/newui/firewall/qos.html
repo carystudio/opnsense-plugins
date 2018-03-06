@@ -63,10 +63,33 @@
                                 </Input>
                                 (100-125000KBytes)
                             </FormItem>
+                            {{ $t('qos.add_rule') }}
+                            <hr>
+                            <br>
+                            <FormItem :label="$t('qos.ip')" prop="ipAddr">
+                                <Input v-model="formValidate.ipAddr"></Input>
+                            </FormItem>
+                            <FormItem :label="$t('qos.single_up_bandwidth')" prop="upBandwidth">
+                                <Input v-model="formValidate.upBandwidth" :maxlength="6">
+                                <span slot="append"> (KBytes) </span>
+                                (100-125000KBytes)
+                                </Input>
+                            </FormItem>
+                            <FormItem :label="$t('qos.single_down_bandwidth')" prop="downBandwidth">
+                                <Input v-model="formValidate.downBandwidth" :maxlength="6">
+                                <span slot="append"> (KBytes) </span>
+                                (100-125000KBytes)
+                                </Input>
+                            </FormItem>
+                            <FormItem>
+                                <Button type="primary" @click="addSubmit('formValidate')" :loading="addLoading">{{ $t('qos.add') }}</Button>
+                            </FormItem>
+                            <hr>
+                            <br>
                         </div>
                         <!-- btn -->
                         <FormItem>
-                            <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('qos.apply') }}</Button>
+                            <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('qos.apply') }}</Button>
                         </FormItem>
                     </div>
                 </Form>
@@ -74,6 +97,13 @@
             <br>
             </Col>
         </row>
+        <Row v-show="formValidate.status && formValidate.limitType == '2'">
+            <Col class="cs-btn-del">
+            </Col>
+            <Col>
+            <Table border ref="tableSelect" :columns="qosColumns" :data="qosListsData"></Table>
+            </Col>
+        </Row>
 
     </div>
 
@@ -100,90 +130,201 @@
                 arpLoading:true,
                 isLoading:true,
 
-                submitFlag:false,
+                addStatus:false,
+                addLoading:false,
+                applyLoading:false,
                 formValidate: {
                     status:false,
                     limitType:'1',
                     totalUplinkSpeed:'',
                     totalDownlinkSpeed:'',
                     singleUplinkSpeed:'',
-                    singleDownlinkSpeed:''
+                    singleDownlinkSpeed:'',
+                    ipAddr:'',
+                    upBandwidth:'',
+                    downBandwidth:''
                 },
                 lanIp:'',
                 lanNetmask:'',
                 arpData: [],
-                qosLists: []
+                qosListsData: []
             }
         },
         computed:{
             ruleValidate: function(){
                 var _this = this;
-                if(true == _this.submitFlag){
-                    _this.submitFlag = false;
-                    if('1' == _this.formValidate.limitType){
-                        return{
-                            totalUplinkSpeed:[
-                                { validator:function(r, v, f) {
-                                    var ret = cs.num_range(v,100,125000);
-                                    if (0 == ret) {
-                                        f(_this.$t('qos.msg1'));
-                                    } else if (1 == ret) {
-                                        f(_this.$t('qos.msg3'));
-                                    } else if (2 == ret) {
-                                        f(_this.$t('qos.msg5')+'(100-125000)');
-                                    }else{
-                                        f();
-                                    }
-                                },trigger: 'blur' }
-                            ],
-                            totalDownlinkSpeed:[
-                                { validator:function(r, v, f) {
-                                    var ret = cs.num_range(v,100,125000);
-                                    if (0 == ret) {
-                                        f(_this.$t('qos.msg2'));
-                                    } else if (1 == ret) {
-                                        f(_this.$t('qos.msg4'));
-                                    } else if (2 == ret) {
-                                        f(_this.$t('qos.msg6')+'(100-125000)');
-                                    }else{
-                                        f();
-                                    }
-                                },trigger: 'blur' }
-                            ]
-                        }
-                    }else{
-                        return{
-                            singleUplinkSpeed:[
-                                { validator:function(r, v, f) {
-                                    var ret = cs.num_range(v,100,125000);
-                                    if (0 == ret) {
-                                        f(_this.$t('qos.msg28'));
-                                    } else if (1 == ret) {
-                                        f(_this.$t('qos.msg30'));
-                                    } else if (2 == ret) {
-                                        f(_this.$t('qos.msg32')+'(100-125000)');
-                                    }else{
-                                        f();
-                                    }
-                                },trigger: 'blur' }
-                            ],
-                            singleDownlinkSpeed:[
-                                { validator:function(r, v, f) {
-                                    var ret = cs.num_range(v,100,125000);
-                                    if (0 == ret) {
-                                        f(_this.$t('qos.msg29'));
-                                    } else if (1 == ret) {
-                                        f(_this.$t('qos.msg31'));
-                                    } else if (2 == ret) {
-                                        f(_this.$t('qos.msg33')+'(100-125000)');
-                                    }else{
-                                        f();
-                                    }
-                                },trigger: 'blur' }
-                            ]
-                        }
-                    }
+                return{
+                    totalUplinkSpeed:[
+                        { validator:function(r, v, f) {
+                            if('1' == _this.formValidate.limitType) {
+                                var ret = cs.num_range(v, 100, 125000);
+                                if (0 == ret) {
+                                    f(_this.$t('qos.msg1'));
+                                } else if (1 == ret) {
+                                    f(_this.$t('qos.msg3'));
+                                } else if (2 == ret) {
+                                    f(_this.$t('qos.msg5') + '(100-125000)');
+                                } else {
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    totalDownlinkSpeed:[
+                        { validator:function(r, v, f) {
+                            if('1' == _this.formValidate.limitType) {
+                                var ret = cs.num_range(v, 100, 125000);
+                                if (0 == ret) {
+                                    f(_this.$t('qos.msg2'));
+                                } else if (1 == ret) {
+                                    f(_this.$t('qos.msg4'));
+                                } else if (2 == ret) {
+                                    f(_this.$t('qos.msg6') + '(100-125000)');
+                                } else {
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    singleUplinkSpeed:[
+                        { validator:function(r, v, f) {
+                            if('2' == _this.formValidate.limitType) {
+                                var ret = cs.num_range(v, 100, 125000);
+                                if (0 == ret) {
+                                    f(_this.$t('qos.msg28'));
+                                } else if (1 == ret) {
+                                    f(_this.$t('qos.msg30'));
+                                } else if (2 == ret) {
+                                    f(_this.$t('qos.msg32') + '(100-125000)');
+                                } else {
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    singleDownlinkSpeed:[
+                        { validator:function(r, v, f) {
+                            if('2' == _this.formValidate.limitType) {
+                                var ret = cs.num_range(v, 100, 125000);
+                                if (0 == ret) {
+                                    f(_this.$t('qos.msg29'));
+                                } else if (1 == ret) {
+                                    f(_this.$t('qos.msg31'));
+                                } else if (2 == ret) {
+                                    f(_this.$t('qos.msg33') + '(100-125000)');
+                                } else {
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    ipAddr:[
+                        { validator:function(r, v, f) {
+                            if('2' == _this.formValidate.limitType && (_this.addStatus == true || '' != _this.formValidate.ipAddr)) {
+                                var ret = cs.ip(v);
+                                if (0 == ret) {
+                                    f(_this.$t('qos.msg40'));
+                                } else if (99 != ret) {
+                                    f(_this.$t('qos.msg41'));
+                                } else {
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    upBandwidth:[
+                        { validator:function(r, v, f) {
+                            if('2' == _this.formValidate.limitType && (_this.addStatus == true || '' != _this.formValidate.upBandwidth)) {
+                                var ret = cs.num_range(v, 100, 125000);
+                                if (0 == ret) {
+                                    f(_this.$t('qos.msg34'));
+                                } else if (1 == ret) {
+                                    f(_this.$t('qos.msg36'));
+                                } else if (2 == ret) {
+                                    f(_this.$t('qos.msg38') + '(100-125000)');
+                                } else {
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    downBandwidth:[
+                        { validator:function(r, v, f) {
+                            if('2' == _this.formValidate.limitType && (_this.addStatus == true || '' != _this.formValidate.downBandwidth)) {
+                                var ret = cs.num_range(v, 100, 125000);
+                                if (0 == ret) {
+                                    f(_this.$t('qos.msg35'));
+                                } else if (1 == ret) {
+                                    f(_this.$t('qos.msg37'));
+                                } else if (2 == ret) {
+                                    f(_this.$t('qos.msg39') + '(100-125000)');
+                                } else {
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ]
                 }
+            },
+            qosColumns: function() {
+                var _this = this;
+                return [{
+                    title: 'ID',
+                    key: 'idx',
+                    sortable: true
+                }, {
+                    title: this.$t('qos.ip'),
+                    key: 'Ip',
+                    sortable: true
+                }, {
+                    title: this.$t('qos.upload_bandwidth'),
+                    key: 'Up',
+                    sortable: true
+                },{
+                    title: this.$t('qos.download_bandwidth'),
+                    key: 'Down',
+                    sortable: true
+                }, {
+                    title: this.$t('qos.operation'),
+                    key: 'Ip',
+                    align: 'center',
+                    render: function(h, params) {
+                        return h('Poptip',{
+                            props: {
+                                confirm: true,
+                                title: _this.$t('static_dhcp.msg9'),
+                                "ok-text":_this.$t('common.ok'),
+                                "cancel-text":_this.$t('common.cancel')
+                            },
+                            on: {
+                                "on-ok": function(){
+                                    _this.deleteData(params);
+                                }
+                            }
+                        }, [
+                            h('Button', {
+                                props: {
+                                    type: 'error',
+                                    size: 'small'
+                                }
+                            }, _this.$t('qos.delete'))
+                        ]);
+                    }
+                }];
             }
         },
         created:function() {
@@ -200,29 +341,24 @@
                     }else{
                         _this.formValidate.status = true;
                         _this.formValidate.limitType = data.data.Type;
-                        if('1' == data.data.Type){
-                            _this.formValidate.totalUplinkSpeed = data.data.Up;
-                            _this.formValidate.totalDownlinkSpeed = data.data.Down;
-                        }else{
+                        if('2' == data.data.Type){
                             _this.formValidate.singleUplinkSpeed = data.data.Up;
                             _this.formValidate.singleDownlinkSpeed = data.data.Down;
+
+                            _this.qosListsData = data.data.Custom;
+                            for(var i in _this.qosListsData){
+                                _this.qosListsData[i].idx = Number(i)+1;
+                            }
+                            console.log(_this.qosListsData);
+                        }else{
+                            _this.formValidate.totalUplinkSpeed = data.data.Up;
+                            _this.formValidate.totalDownlinkSpeed = data.data.Down;
                         }
                     }
                 }
             });
         },
         methods: {
-            init:function(){
-                var _this = this;
-                _this.isLoading = true;
-                uiPost.getIpQosRules(function(data){
-                    var rule_num = data.length;
-                    _this.isLoading = false;
-                    if (rule_num >= 2){
-                        _this.qosLists = data.slice(1);
-                    }
-                })
-            },
             submitStatus:function(){
                 if(false == this.formValidate.status){
                     var postData = {"action":"setQos","data":{"Type":"0"}};
@@ -230,9 +366,37 @@
                     uiPost.setQos(postData);
                 }
             },
+            addSubmit:function (name) {
+                var _this = this;
+                _this.addLoading = true;
+
+                this.$refs[name].validate(function(valid){
+                    _this.addStatus = false;
+                    _this.addStatus = true;
+
+                    var data = {};
+                    data.Ip = _this.formValidate.ipAddr;
+                    data.Up = _this.formValidate.upBandwidth;
+                    data.Down = _this.formValidate.downBandwidth;
+                    var postVar = {"action":"addQosCustom", "data":data};
+                    console.log(postVar);
+                    uiPost.addQosCustom(postVar,function(data){
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        _this.addStatus = false;
+                        if (0 == data.rescode) {
+                            _this.$Message.success({content:'规则添加成功！',onClose:function(){
+                                location.href = location.href;
+                            }});
+                        } else {
+                            _this.$Message.error('规则添加失败！'+_this.$t('errorcode.'+data.rescode));
+                        }
+                    });
+                })
+            },
             handleSubmit: function (name) {
                 var _this = this;
-                _this.submitFlag = true;
                 this.$refs[name].validate(function(valid){
                     if (valid) {
                         var data = {};
@@ -251,8 +415,9 @@
                         if(0 == upRet || 1 == upRet || 2 == upRet || 0 == downRet || 1 == downRet || 2 == downRet){
                             return false;
                         }
-                        var postData = {"action":"setQos","data":{"Type":data}};
+                        var postData = {"action":"setQos","data":data};
                         console.log(postData);
+                        _this.applyLoading = true;
                         uiPost.setQos(postData,function(data){
                             if (9999 == data.rescode){
                                 cs.loginOut();
@@ -264,6 +429,7 @@
                             } else {
                                 _this.$Message.success('Fail! '+ _this.$t('errorcode.'+data.rescode));
                             }
+                            _this.applyLoading = false;
                         });
                     }
                 })
@@ -286,10 +452,12 @@
             },
             deleteData:function (obj) {
                 var _this = this;
-                var postVar = {};
-                postVar[obj.row.delRuleName] = obj.index;
-                uiPost.delIpQosRules(postVar,function(){
-                    _this.qosLists.splice(obj.index, 1);
+                var data = {};
+                data.Ip = obj.row.Ip;
+                var postVar = {"action":"delQosCustom", "data":data};
+                console.log(obj);
+                uiPost.delQosCustom(postVar,function(){
+                    _this.qosListsData.splice(obj.Ip, 1);
                 });
             },
             tableSelect:function(status){

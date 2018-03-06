@@ -779,7 +779,7 @@
                         }]
                     });
                     // 其他显示
-                    _this.loadChartsData.type = (type == 1 ? "DHCP" : type == 2 ? _this.$t('realtime.staticip') : "PPPoE");
+                    _this.loadChartsData.type = (type == 'dhcp' ? "DHCP" : type == 'static' ? _this.$t('realtime.staticip') : "PPPoE");
                     _this.loadChartsData.status = (status == 1 ? _this.$t('realtime.succ') : _this.$t('realtime.fail'));
                     _this.loadChartsData.ip = (data.ip);
                     _this.loadChartsData.gateway = (data.gateway);
@@ -812,10 +812,10 @@
                     }],
                     legend: {
                         type: "plain",
-                        data: ['上传', '下载']
+                        data: [this.$t('realtime.upload'), this.$t('realtime.download')]
                     },
                     series: [{
-                        name: "上传",
+                        name: this.$t('realtime.upload'),
                         type: 'line',
                         smooth: true,
                         symbol: 'none',
@@ -839,7 +839,7 @@
                         },
                         data: this.linksChartsData.links_y
                     }, {
-                        name: "下载",
+                        name: this.$t('realtime.download'),
                         type: 'line',
                         smooth: true,
                         stack: 'a1',

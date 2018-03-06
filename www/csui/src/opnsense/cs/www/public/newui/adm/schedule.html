@@ -295,9 +295,21 @@ var cs_main = {
 				console.log(data);
 				if ('0' != data.Enable) {
 					_this.formValidate.status = true;
-					_this.formValidate.month = data.TimeMonth;
-					_this.formValidate.date = data.TimeDate;
-					_this.formValidate.week = data.TimeWeek;
+					if(undefined == data.TimeMonth){
+						_this.formValidate.month = '0';
+					}else{
+						_this.formValidate.month = data.TimeMonth;
+					}
+					if(undefined == data.TimeDate){
+						_this.formValidate.date = '0';
+					}else{
+						_this.formValidate.date = data.TimeDate;
+					}
+					if(undefined == data.TimeWeek){
+						_this.formValidate.week = '0';
+					}else{
+						_this.formValidate.week = data.TimeWeek;
+					}
 
 					var time_h = data.TimeHour?data.TimeHour:0;
 					var time_m = data.TimeMin?data.TimeMin:0;
@@ -354,9 +366,13 @@ var cs_main = {
 				}
 				console.log(data);
 				if (0 == data.rescode) {
-					_this.$Message.success({content:_this.$t('reboot_schedule.set_success'),onClose:function(){
-						location.href = location.href;
-					}});
+					if(true == _this.formValidate.status) {
+						_this.$Message.success({
+							content: _this.$t('reboot_schedule.set_success'), onClose: function () {
+								location.href = location.href;
+							}
+						});
+					}
 				} else {
 					_this.$Message.error(_this.$t('reboot_schedule.set_fail')+_this.$t('errorcode.'+data.rescode));
 				}
@@ -366,13 +382,9 @@ var cs_main = {
 			this.formValidate.time = value;
 		},
         submitStatus:function(){
-            var postVar = {};
-            if(true == this.formValidate.status){
-                postVar.scheEn = "1";
-            }else{
-                postVar.scheEn = "0";
+			if(false == this.formValidate.status){
+				this.handleSubmit();
             }
-            uiPost.setRebootScheCfg(postVar);
         },
 		swithDate:function () {
 			var _this = this;

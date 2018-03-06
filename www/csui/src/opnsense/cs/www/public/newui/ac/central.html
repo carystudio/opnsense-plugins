@@ -270,8 +270,8 @@
 
                     security2: '',
                     securityMode2: '0',
-                    hidessid:'0',
-                    wifi_quarantine:'0',
+                    hidessid:false,
+                    wifi_quarantine:false,
                     maxusernumber:'32',
                     vlanid:'0',
                     wlanset:'3',
@@ -472,11 +472,11 @@
                                         if('0' == _this.ledStateInfo[params.index].state){
                                             _this.ledStateInfo[params.index].state = '1';
                                             _this.ledStateInfo[params.index].color = '#000';
-                                            data.ledState = '0';
+                                            data.ledState = '1';
                                         }else{
                                             _this.ledStateInfo[params.index].state = '0';
                                             _this.ledStateInfo[params.index].color = '#f50';
-                                            data.ledState = '1';
+                                            data.ledState = '0';
                                         }
                                         console.log(_this.ledStateInfo[params.index]);
 
@@ -819,16 +819,24 @@
                                 _this.formSetinfo.ssid2    = data.WLAN_STATUS.ssid;
                                 _this.formSetinfo.securityMode2    = data.WLAN_STATUS.encryption;
                                 _this.formSetinfo.security2    = data.WLAN_STATUS.passphrase;
-                                _this.formSetinfo.hidessid    = data.WLAN_STATUS.hide;
-                                _this.formSetinfo.wifi_quarantine    = data.WLAN_STATUS.isolate;
+                                if('0' == data.WLAN_STATUS.hide){
+                                    _this.formSetinfo.hidessid = true;
+                                }else{
+                                    _this.formSetinfo.hidessid = false;
+                                }
+                                if('0' == data.WLAN_STATUS.isolate){
+                                    _this.formSetinfo.wifi_quarantine = true;
+                                }else{
+                                    _this.formSetinfo.wifi_quarantine = false;
+                                }
                                 _this.formSetinfo.maxusernumber    = data.WLAN_STATUS.stanum;
 //                                _this.formSetinfo.vlanid    = data.WLAN_STATUS.vlanid;
                             }else{
                                 _this.formSetinfo.ssid2    = '';
                                 _this.formSetinfo.securityMode2    = '';
                                 _this.formSetinfo.security2    = '';
-                                _this.formSetinfo.hidessid    = '';
-                                _this.formSetinfo.wifi_quarantine    = '';
+                                _this.formSetinfo.hidessid    = false;
+                                _this.formSetinfo.wifi_quarantine    = false;
                                 _this.formSetinfo.maxusernumber    = '';
                                 _this.formSetinfo.vlanid    = '';
                             }
@@ -882,8 +890,8 @@
                     _this.formSetinfo.ssid2    = '';
                     _this.formSetinfo.securityMode2    = '0';
                     _this.formSetinfo.security2    = '';
-                    _this.formSetinfo.hidessid    = '0';
-                    _this.formSetinfo.wifi_quarantine    = '0';
+                    _this.formSetinfo.hidessid    = false;
+                    _this.formSetinfo.wifi_quarantine    = false;
                     _this.formSetinfo.maxusernumber    = '32';
                     _this.formSetinfo.vlanid    = '0';
                     _this.formSetinfo.wlanset    = '3';
@@ -946,8 +954,17 @@
                 }else{
                     data.wlanKey = '';
                 }
-                data.hedden = _this.formSetinfo.hidessid;
-                data.noforward = _this.formSetinfo.wifi_quarantine;
+                if(true == _this.formSetinfo.hidessid){
+                    data.hedden = '0';
+                }else{
+                    data.hedden = '1';
+                }
+                if(true == _this.formSetinfo.wifi_quarantine){
+                    data.noforward = '0';
+                }else{
+                    data.noforward = '1';
+                }
+
                 if(99 != cs.num(_this.formSetinfo.maxusernumber)){
                     _this.$Message.error(_this.$t('central.msg13'));
                     return false;

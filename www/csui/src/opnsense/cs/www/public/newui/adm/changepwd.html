@@ -122,7 +122,7 @@
         methods:{
             handleSubmit: function(name) {
                 var _this = this;
-                _this.applyLoading = true;
+
                 _this.$refs[name].validate(function(valid){
                     if (valid) {
                         var data = {};
@@ -130,10 +130,12 @@
                         data.OldPassword = _this.formValidate.origPass;
                         var postVar ={"action":"changePassword","data":data};
                         console.log(postVar);
+                        _this.applyLoading = true;
                         uiPost.changePassword(postVar,function(data){
                             if (9999 == data.rescode){
                                 cs.loginOut();
                             }
+                            _this.applyLoading = false;
                             if (0 == data.rescode) {
                                 _this.$Message.success(_this.$t('changepwd.success'));
                             } else {
