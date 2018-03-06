@@ -1367,7 +1367,7 @@ class Network extends Csbackend
         $data = array();
         foreach($waninfo['Interfaces'] as $a_waninfo){
             $iftraffic = array();
-            $iftraffic['type'] = "1";
+            $iftraffic['type'] = $a_waninfo['Protocol'];
             $iftraffic['status'] = "1";
             $iftraffic['ip'] = $a_waninfo['Status']['ipaddr'];
             $iftraffic['gateway'] = $a_waninfo['Status']['gateway'];

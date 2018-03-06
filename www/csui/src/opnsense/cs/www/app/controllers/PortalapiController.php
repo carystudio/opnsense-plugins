@@ -89,7 +89,6 @@ class PortalapiController extends BaseController
     }
 
     public function logonAction(){
-    	var_dump($_GET);
     		$portal = self::getPortal();
         $username = trim($this->request->getPost('user',null, ''));
         $password = trim($this->request->getPost('password',null, ''));
@@ -116,7 +115,9 @@ class PortalapiController extends BaseController
         $result = array('clientState' => 'NOT_AUTHORIZED','ipAddress'=>$ip);
         try{
             $session = $this->getClientInfo();
-            if('AUTHORIZED'!=$session['clientState']){
+            if('AUTHORIZED'==$session['clientState']) {
+                $result['clientState'] = $session['clientState'];
+            }else{
                 $authFactory = new AuthenticationFactory();
                 $auth = $authFactory->get('Portal Local');
                 $check_user = $auth->authenticate($username, $password);
@@ -162,7 +163,6 @@ class PortalapiController extends BaseController
         }catch (Exception $ex){
 
         }
-				var_dump($result);
 				if('AUTHORIZED' == $result['clientState'] && isset($_GET['force']) && '1'==$_GET['force']){
         	$redir = 'http://'.$_SERVER['HTTP_HOST'].'/api/captiveportal/weixinforce?logined=OK&sessionid='.base64_encode($result['sessionId']);
         	header('Location: '.$redir);

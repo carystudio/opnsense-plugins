@@ -318,7 +318,6 @@ class Portal extends Csbackend
                         unlink('/usr/local/opnsense/cs/conf/captiveportal/portal_wc_enable.txt');
                     }
                 }
-
             }else if('1'==$portal['enabled'] && 'server'==$data['Type']){
                 if(strlen(trim($data['GatewayId']))<=0){
                     throw new AppException('Portal_106');
