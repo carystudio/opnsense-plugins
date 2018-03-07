@@ -541,5 +541,7 @@ var mobileMenu = [{
 
 var DEVICE = {
     'csid':'CSG2000P',
-    'model':'Gateway'
+    'model':'Gateway',
+    'wcManage':false
 };
+

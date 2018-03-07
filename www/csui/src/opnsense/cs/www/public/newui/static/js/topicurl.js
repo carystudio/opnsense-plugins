@@ -6498,6 +6498,7 @@ uiPost.prototype.doLogin = function(postVar,callback){
     uiPost.prototype.AcRestore = function(postVar,callback){
         this.topicurl = 'AcRestore';        /*恢复数据库出厂设置*/
         this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
         return this.post(postVar,callback);
     };
     uiPost.prototype.scanAp = function(postVar,callback){

@@ -10,6 +10,13 @@ mount -t msdosfs /dev/da0s1 /usb
 if [ $? -nq 0 ];then
 	exit 1
 fi
+if [ -f /upgrade_tmp/FW.md5 ];then
+    md5="`cat /upgrade_tmp/FW.md5`"
+    fwmd5="`md5 /usb/CSG2000P_upgrade.bin|awk '{print $4}'`"
+    if [ "$md5" = "$fwmd5" ];then
+        exit 0
+    fi
+fi
 rm -rf /upgrade_tmp
 if [ -f /usr/local/opnsense/cs/tmp/upgrade_config.ini ];then
 	rm -f /usr/local/opnsense/cs/tmp/upgrade_config.ini
@@ -38,4 +45,5 @@ tar zxvf packagesite.txz packagesite.yaml
 mv usr/local/opnsense/cs/www/app/config/config.ini /usr/local/opnsense/cs/tmp/upgrade_config.ini
 cd ..
 rm -f packages-${version}-amd64.tar
+echo -n "$fwmd5">/upgrade_tmp/FW.md5
 fi
