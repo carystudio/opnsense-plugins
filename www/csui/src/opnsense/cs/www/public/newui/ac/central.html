@@ -1321,6 +1321,7 @@
                 this.uploads = true;
             },
             firmwareClick: function(){
+                var _this = this;
                 var temp = this.selectData;
                 if (temp.length <= 0) {
                     this.$Message.error(this.$t('central.msg1'));

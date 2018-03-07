@@ -19,7 +19,7 @@ var globalConfig = {
     "showMenu":true,
     "urlExtension":'.html',
     "showSearch":false,
-    "showWechatQR":true,
+    "showWechatQR":false,
     "showLanguage":true,
     "showHelp":true,
     "hasMobile":true,
@@ -541,7 +541,6 @@ var mobileMenu = [{
 
 var DEVICE = {
     'csid':'CSG2000P',
-    'model':'Gateway',
-    'wcManage':false
+    'model':'Gateway'
 };
 

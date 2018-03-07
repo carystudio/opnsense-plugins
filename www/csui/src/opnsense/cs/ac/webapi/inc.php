@@ -127,7 +127,7 @@ class Db{
 	public static function getUpgrade($csid){
 		$pdo = self::getPdo();
 		
-		$sth = $pdo->prepare("SELECT * FROM ap_upgrade WHERE csid=:csid limit 1");
+		$sth = $pdo->prepare("SELECT * FROM AP_UPGRADE WHERE csid=:csid limit 1");
 		$sth->execute(array('csid'=>$csid));
 		$upgrade = $sth->fetch();
 		if(false === $upgrade){

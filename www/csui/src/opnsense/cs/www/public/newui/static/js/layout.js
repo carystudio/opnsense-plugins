@@ -6,7 +6,7 @@ Vue.component('cs-header', {
     <div class="layout-logo">carystudio</div>\
     <div class="layout-nav">\
         <MenuItem v-if="globalConfig.showWechatQR" name="3">\
-        <Dropdown v-if="wcManage" trigger="click" @on-visible-change="getWechatQR">\
+        <Dropdown trigger="click" @on-visible-change="getWechatQR">\
             {{ $t("menu.wechat_manager") }}\
             <Icon type="qr-scanner"></Icon>\
             <DropdownMenu slot="list">\
