@@ -183,6 +183,12 @@ var messages = {
             "modify_fail":"The modification failed!",
             "modify_success":"The modification is successful!",
 
+            "firmware_manage":"Manage FW",
+            "upload_success":"Upload success",
+            "msg17":"No equipment to update the firmware available!",
+            "msg18":"Sure you want to delete the firmware version?",
+            "msg19":"Invalid file format, please choose again!Supported formats：{0}",
+
             "tip1":"Warm hint: @:central.upload needs to be connected to the U disk. Please use the U disk."
         },
         "database":{
@@ -1818,6 +1824,12 @@ var messages = {
             "msg16":"请选择需要修改的IP！",
             "modify_fail":"修改失败！",
             "modify_success":"修改成功！",
+
+            "firmware_manage":"固件管理",
+            "upload_success":"上传成功",
+            "msg17":"没有可用的设备更新该固件！",
+            "msg18":"确定要删除该固件版本吗？",
+            "msg19":"无效的文件格式，请重新选择！,支持的格式有：{0}",
 
             "tip1":"温馨提示:@:central.upload需要接U盘。请接U盘使用！"
         },

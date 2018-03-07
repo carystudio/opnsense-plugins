@@ -6555,6 +6555,18 @@ uiPost.prototype.doLogin = function(postVar,callback){
         this.url = '/webapi';
         return this.post(postVar,callback);
     };
+    uiPost.prototype.getApUpgradeInfo = function(postVar,callback){
+        this.topicurl = 'getApUpgradeInfo';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.delApUpgradeFile = function(postVar,callback){
+        this.topicurl = 'delApUpgradeFile';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
 
-obj.uiPost = new uiPost();
+    obj.uiPost = new uiPost();
 })(window);

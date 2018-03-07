@@ -218,6 +218,7 @@ class Accontrol extends Csbackend
         return $res;
     }
 
+	
 	public static function setApRestore($data){
         $res = 0;
         try{
@@ -374,6 +375,108 @@ class Accontrol extends Csbackend
         return $res;
     }
 
-	
+    public static function setUploadFile($request){
+        $filename = $_FILES['file']['name'];
+        $tmp = $_FILES['file']['tmp_name'];
+        $uploaddir="/var/uploadfirm";
+        if(!is_dir($uploaddir)) {
+            mkdir($uploaddir);
+            chmod($uploaddir, 0777);
+        }
+        $uploadpath = '/var/uploadfirm/';
+        if(move_uploaded_file($tmp,$uploadpath.$filename)){
+            $filepath=$uploadpath.$filename;
+            $namearray = explode("_",$filename);
+            $csid=$namearray[1];
+            $name1=explode(".",$namearray[7]);
+            $svnnum=$name1[2];
+            $builddate=strstr($namearray[8],"20");
+
+            $dbh = self::getPdo();
+            $apUpgradeSql = "select * from AP_UPGRADE where csid =:csid";
+            $sth = $dbh->prepare($apUpgradeSql);
+            $sth->execute(array('csid'=>$csid));
+            $apUpgradeInfo = $sth->fetch(PDO::FETCH_ASSOC);
+            if($apUpgradeInfo){
+                $delApFileSql = "delete from AP_UPGRADE where csid=:csid";
+                $del = $dbh->prepare($delApFileSql);
+                $del->execute(array('csid'=>$csid));
+                $delApFileInfo = $sth->fetch(PDO::FETCH_ASSOC);
+                if($delApFileInfo){
+                    $file = $apUpgradeInfo["filepath"];
+                    if (unlink($file)){
+                        echo ("删除旧文件成功");
+                    }else{
+                        echo ("删除旧文件失败");
+                    }
+                }
+            }
+            $excSql = "INSERT INTO AP_UPGRADE (csid,svnnum,builddate,filepath) VALUES ('$csid','$svnnum','$builddate','$filepath')";
+            $count = $dbh->exec($excSql);
+            var_dump('count'.$count);
+            if ($count){
+                echo "upload success";
+            }else{
+                echo "upload fail";
+            }
+        }else{
+            echo "move fail";
+        }
+    }
+
+    public static function getApUpgradeInfo($data){
+        $res = array();
+        try{
+            $postcsid = array();
+            $apUpgradeInfos=array();
+            $pdo = self::getPdo();
+            $sum = 0;
+            foreach ($data as $key=>$val){
+                $apUpgradeSql = "select filepath as version from AP_UPGRADE where csid = '$val'";
+                $arr = array();
+                foreach ($pdo->query($apUpgradeSql,PDO::FETCH_ASSOC) as $k=>$row) {
+                    $arr[$sum] = $row;
+                    $sum++;
+                }
+            }
+            foreach ($arr as $k=>$v){
+                $ver = strstr($v["version"],"TOTOLINK");
+                $apUpgradeInfos[]["version"]=$ver;
+            }
+            $res = $apUpgradeInfos;
+
+        } catch (AppException $aex) {
+            $res = $aex->getMessage();
+        } catch (Exception $ex) {
+            $res = '100';
+        }
+        return $res;
+    }
+
+    public static function delApUpgradeFile($data){
+        var_dump($data);
+        $result = 0;
+        try{
+            $pdo = self::getPdo();
+            $filename = '/var/uploadfirm/'.$data["version"];
+            var_dump($filename);
+            $apUpgradeSql = "select * from AP_UPGRADE where filepath = :path";
+            $sth = $pdo->prepare($apUpgradeSql);
+            $sth->execute(array('path'=>$filename));
+            $apUpgradeInfo = $sth->fetch(PDO::FETCH_ASSOC);
+            if($apUpgradeInfo){
+                $delApFileSql = "delete from AP_UPGRADE where filepath=:path";
+                $del = $pdo->prepare($delApFileSql);
+                $del->execute(array('path'=>$filename));
+                $delApFileInfo = $sth->fetch(PDO::FETCH_ASSOC);
+                var_dump($delApFileInfo);
+            }
+        }catch(AppException $aex){
+            $result = $aex->getMessage();
+        }catch(Exception $ex){
+            $result = 100;
+        }
+        return $result;
+    }
 
 }

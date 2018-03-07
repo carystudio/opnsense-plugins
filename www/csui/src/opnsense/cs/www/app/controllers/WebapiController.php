@@ -108,6 +108,8 @@ class WebapiController extends BaseController
                     System::restoreConfig($this->request);
                 }else if('setPortalStatusUp'==$action){
                     Portal::setPortalStatusUp($this->request);
+                }else if('setUploadFile'==$action){
+                    Accontrol::setUploadFile($this->request);
                 }
             }
             $para = json_decode($text, true);
@@ -291,7 +293,7 @@ class WebapiController extends BaseController
             }else if("setApLedState" == $action){
                 $this->checkData($para);
                 $result['rescode'] = Accontrol::setApLedState($para['data']);
-            }else if("setApRestore" == $action){
+			}else if("setApRestore" == $action){
                 $this->checkData($para);
                 $result['rescode'] = Accontrol::setApRestore($para['data']);
             }else if("setApUpgrade" == $action){
@@ -303,6 +305,12 @@ class WebapiController extends BaseController
             }else if("setQuick" == $action){
                 $this->checkData($para);
                 $result['rescode'] = Accontrol::setQuick($para['data']);
+            }else if("getApUpgradeInfo" == $action){
+                $this->checkData($para);
+                $result['rescode'] = Accontrol::getApUpgradeInfo($para['data']);
+            }else if("delApUpgradeFile" == $action){
+                $this->checkData($para);
+                $result['rescode'] = Accontrol::delApUpgradeFile($para['data']);
             }else if('test' == $action){
                 $result['rescode'] = Dns::getErrors();
             }else{

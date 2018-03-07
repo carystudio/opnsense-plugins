@@ -30,8 +30,8 @@
                     <Button type="primary" @click="rebootClick">{{ $t('central.reboot') }}</Button>
                     <Button type="primary" @click="restoreClick">{{ $t('central.restore') }}</Button>
                     <Tooltip trigger="hover" placement="top" :disabled="!usbState">
-                        <Button type="primary" @click="uploadClick" >{{ $t('central.upload') }}</Button>
-                        <div slot="content" style="white-space: normal;"> {{ $t('central.tip1') }} </div>
+                        <Button type="primary" @click="uploadClick" >{{ $t('central.firmware_manage') }}</Button>
+                        <div slot="content" style="white-space: normal;"> {{ $t('central.firmware_manage') }} </div>
                     </Tooltip>
                     <Button type="primary" @click="firmwareClick">{{ $t('central.firmware') }}</Button>
                     </Col>
@@ -198,24 +198,30 @@
     </Modal>
     <Modal
             v-model="uploads"
-            :title="$t('central.upload')"
+            :title="$t('central.firmware_manage')"
     >
         <Form :label-width="120" label-position="left">
-            <FormItem :label="$t('central.fwfile')">
+            <FormItem :label="$t('central.upload')">
                 <!-- :max-size="upload.maxSize" -->
                 <Upload
                         ref="upload"
-                        :before-upload="handleUpload"
                         :action="upload.action"
                         :data="upload.data"
-                        :on-exceeded-size="exceededSize"
                         :format="upload.format"
                         :on-format-error="formatError"
+                        :before-upload="handleBeforeUpload"
                         :on-success="uploadSuccess"
                 >
                     <Button icon="ios-cloud-upload-outline">{{ $t('central.select_file')+' & '+$t('central.file_upload')   }}</Button>
                 </Upload>
             </FormItem>
+            <br>
+            <Row>
+                <Col>
+                <Table border :columns="columns" :data="firmData"></Table>
+                </Col>
+            </Row>
+            <br>
         </Form>
         <div slot="footer">
         </div>
@@ -257,6 +263,8 @@
                 selectData:[],
                 apname:[],
                 ledStateInfo:[],
+//				uploadData:'',
+
                 ledStatus:false,
                 wlanState:false,
                 formSetinfo: {
@@ -292,12 +300,62 @@
                 timingRebootSelect:'',
                 upload: {
                     file: null,
-                    action: '/cgi-bin/uploadFile.cgi',
-                    format:[],
-                    data:{},
-                    maxSize: 1024
+                    action: '/webapi',
+                    format:['web'],
+                    data:{
+                        action:'setUploadFile'
+                    }
                 },
-                percent: 0
+                columns:[
+                    {
+                        type: 'index',
+                        width: 40,
+                        align: 'center'
+                    },{
+                        title: this.$t('central.firmware_version'),
+                        key: 'version',
+                        align: 'center'
+                    },{
+                        title: this.$t('central.operation'),
+                        key: 'action',
+                        width: 95,
+                        align: 'center',
+                        render: (h, params) => {
+                        return h('div', [
+                            h('Poptip', {
+                                props: {
+                                    confirm: true,
+                                    title: _this.$t('central.msg18'),
+                                    "ok-text":_this.$t('common.ok'),
+                                    "cancel-text":_this.$t('common.cancel')
+                                },
+                                on: {
+                                    "on-ok": function(){
+                                        console.log('-----------delete--------------');
+                                        var postData = {"action":"delApUpgradeFile","data":{"version":params.row.version}};
+                                        uiPost.delApUpgradeFile(postData,function(){
+                                            _this.$Message.success({content:_this.$t('account.msg11'),onClose:function(){
+                                                location.href = location.href;
+                                            }});
+                                        });
+                                    }
+                        }
+                },
+                                    [
+                                        h('Button', {
+                                            props: {
+                                                type: 'error',
+                                                size: 'small'
+                                            }
+                                        }, _this.$t('localaccount.delete'))
+                                    ])
+//                                    '删除')
+                ]);
+            }
+            }
+            ],
+            firmData:[],
+            percent: 0
             }
         },
         computed: {
@@ -696,7 +754,7 @@
             data.type = "scan";
             var postVar = {"action":"scanAp","data":data};
             uiPost.scanAp(postVar,function(data){
-                console.log(data);
+                console.log(data.data[0].apmac+'=====================================');
                 if (9999 == data.rescode){
                     cs.loginOut();
                 }
@@ -746,7 +804,6 @@
                             data.type = "scan";
                             var postVar = {"action":"scanAp","data":data};
                             uiPost.scanAp(postVar,function(data){
-                                console.log(data);
                                 _this.centralData = data.data;
                                 _this.apscanLoading = false;
                             });
@@ -757,7 +814,6 @@
             },
             modifyApIp:function (data) {
                 console.log('----------modifyApIp--------------');
-                console.log(data);
                 var postVar ={"action":"setApIp","data":data};
                 uiPost.setApIp(postVar);
                 var time = 12;
@@ -808,7 +864,6 @@
                     uiPost.getApStatusConfig(postVar,function(data){
                         // _this.$Modal.remove();
                         // location.href = location.href;
-                        console.log(data);
 
                         if (9999 == data.rescode){
                             cs.loginOut();
@@ -964,7 +1019,6 @@
                 }else{
                     data.noforward = '1';
                 }
-
                 if(99 != cs.num(_this.formSetinfo.maxusernumber)){
                     _this.$Message.error(_this.$t('central.msg13'));
                     return false;
@@ -997,7 +1051,6 @@
                 uiPost.setQuick(postData,function(data){
                     // _this.$Modal.remove();
                     // location.href = location.href;
-                    console.log(data);
                     _this.$Message.success({content: _this.$t('central.set_success'), onClose: function () {
                         location.href = location.href;
                     }
@@ -1066,8 +1119,6 @@
                     _this.ledStatus = false;
                 }
 
-                console.log(temp);
-
                 var idArr = [];
                 var data = {};
                 for(var i in temp){
@@ -1109,7 +1160,6 @@
             rebootClick: function(){
                 var _this = this;
                 var temp = this.selectData;
-                console.log(temp);
                 if (temp.length <= 0) {
                     this.$Message.error(this.$t('central.msg1'));
                     return false;
@@ -1121,7 +1171,6 @@
                     apid[i] = temp[i].id;
                 }
                 data.id = apid.join(',');
-                console.log(data);
 
                 var postVar ={"action":"setApReboot","data":data};
                 uiPost.setApReboot(postVar,function(data){
@@ -1138,7 +1187,6 @@
                     var getSelection = this.$refs.tableSelect.getSelection();
                     if (getSelection.length>0) {
                         /*全选*/
-                        console.log(getSelection);
                         var tmpData = [];
                         var data = {};
                         for(var i=0; i<getSelection.length; i++){
@@ -1154,7 +1202,6 @@
                         data.apmac = tmpData['apmac'];
                         console.log('---------------setApIp----------------');
                         var postVar ={"action":"setApIp","data":data};
-                        console.log(postVar);
                         uiPost.setApIp(postVar);
                         var time = 12;
                         _this.$Modal.success({
@@ -1259,6 +1306,18 @@
                 });
             },
             uploadClick: function(){
+                var _this = this;
+                var data =[];
+                var centdata = _this.centralData;
+                for(var i in centdata){
+                    data[i] = centdata[i].csid;
+                }
+                var postData = {"action":"getApUpgradeInfo","data":data};
+                uiPost.getApUpgradeInfo(postData,function(data){
+                    for (var j in data.data){
+                        _this.firmData=data.data;
+                    }
+                });
                 this.uploads = true;
             },
             firmwareClick: function(){
@@ -1316,14 +1375,50 @@
             handleUpload: function(file) {
                 this.upload.file = file;
             },
-            exceededSize: function() {
+           /* exceededSize: function() {
                 this.$Message.error({content:this.$t('config.msg3'),duration: 5});
-            },
+            },*/
             formatError: function() {
-                this.$Message.error({content:this.$t('config.msg2',[this.upload.format.join('、')]),duration: 5});
+                this.$Message.error({content:this.$t('central.msg19',[this.upload.format.join('、')]),duration: 5});
             },
             uploadSuccess:function(){
-
+                this.$Message.success({content:this.$t('central.upload_success'),onClose:function(){
+                    location.href = location.href;
+                }});
+            },
+		    handleBeforeUpload (file) {
+                var _this = this;
+                var filename=file.name;
+                /*var name2 = filename.split(".");
+                var filetype = name2[3];
+                console.log(this.upload.format.join('、'));return false;
+                if(filetype != this.upload.format.join('、')){
+                    this.$Message.error({content:this.$t('central.msg19',[this.upload.format.join('、')]),duration: 5});
+                    return false;
+                }*/
+                var name1 = filename.split("_");
+                var csid = name1[1];
+                var apdata = _this.centralData;
+                if(apdata.length == 0){
+                    this.$Message.error({content:this.$t('central.msg17')});
+                    return false;
+                }
+                var k = 0;
+                for(var i in apdata){
+                    if(apdata[i].csid == csid){
+                        k = 1;
+                        break;
+                    }
+                }
+                if(k == 0){
+                    this.$Message.error({content:this.$t('central.msg17')});
+                    return false;
+                }else {
+                    return true;
+                }
+            },
+            remove (index) {
+                this.firmData.splice(index, 1);
             }
         }
     };
