@@ -232,7 +232,7 @@ class Action{
 				$result['action'] = 'SessionOver';
 			}else{
 				$result['action'] = "SetUpgrade";
-				$result['url']="http://".$_SERVER['HTTP_HOST'].':'.$_SERVER['HTTP_PORT']."/firmware/".$upgrade['filepath'];
+				$result['url']="http://".$_SERVER['HTTP_HOST']."/firmware/".$upgrade['filepath'];
 			}
 		}else if(0 == (Action::STATE_RESET & $ap['apstate'])){
 			$result['action']='SetReset';

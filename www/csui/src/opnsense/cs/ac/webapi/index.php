@@ -53,6 +53,7 @@ try{
 					$ap = Action::setState($ap, Action::STATE_SYSTEM, false);
 				}
 				$ap = Action::deleteState($ap, Action::STATE_UPGRADE);
+				$result = array('action' => 'SessionOver', 'apMac' => $data['apMac'], 'errmsg' => 'action error');
 				break;
 			case 'SetReset':
 				if(0 == $status){

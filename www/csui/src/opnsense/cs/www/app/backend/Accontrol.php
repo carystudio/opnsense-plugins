@@ -31,6 +31,8 @@ class Accontrol extends Csbackend
     const STATE_AUTH = 0x80;
     const STATE_NETWORK = 0x100;
 
+    const FW_DIR = "/usr/local/opnsense/cs/ac/webapi/firmware/";
+
     private static $pdo = false;
 
     private static function setState($curstate, $state){
@@ -226,7 +228,6 @@ class Accontrol extends Csbackend
             $pdo = self::getPdo();
             foreach($data as $apid){
                 $ap = self::getAp(intval($apid));
-                var_dump($ap);
                 if($ap){
                     $ap['apstate'] = self::setState($ap['apstate'], Accontrol::STATE_RESET);
                 }
@@ -273,7 +274,6 @@ class Accontrol extends Csbackend
     public static function getApStatusConfig($data){
         $res = array();
         try{
-//            var_dump($data);
             if($data['apid']) {
                 $pdo = self::getPdo();
                 //2.4G
@@ -281,7 +281,6 @@ class Accontrol extends Csbackend
                 $sth = $pdo->prepare($wifi0StatusSql);
                 $sth->execute(array('id'=>intval($data['apid'])));
                 $wifi0StatusInfo = $sth->fetch(PDO::FETCH_ASSOC);
-//                var_dump($wifi0StatusInfo);
                 $res['WIFI0_STATUS'] = $wifi0StatusInfo;
 
 
@@ -290,7 +289,6 @@ class Accontrol extends Csbackend
                 $sth = $pdo->prepare($wifi1StatusSql);
                 $sth->execute(array('id'=>intval($data['apid'])));
                 $wifi1StatusInfo = $sth->fetch(PDO::FETCH_ASSOC);
-//                var_dump($wifi1StatusInfo);
                 $res['WIFI1_STATUS'] = $wifi1StatusInfo;
 
                 //无线基础设置信息
@@ -298,7 +296,6 @@ class Accontrol extends Csbackend
                 $sth = $pdo->prepare($wlanStatusSql);
                 $sth->execute(array('id'=>intval($data['apid'])));
                 $wlanStatusInfo = $sth->fetch(PDO::FETCH_ASSOC);
-//                var_dump($wlanStatusInfo);
                 $res['WLAN_STATUS'] = $wlanStatusInfo;
 
             }
@@ -376,14 +373,9 @@ class Accontrol extends Csbackend
 	public static function setUploadFile($request){
         $filename = $_FILES['file']['name'];
         $tmp = $_FILES['file']['tmp_name'];
-        $uploaddir="/var/uploadfirm";
-        if(!is_dir($uploaddir)) {
-            mkdir($uploaddir);
-            chmod($uploaddir, 0777);
-        }
-        $uploadpath = '/var/uploadfirm/';
-        if(move_uploaded_file($tmp,$uploadpath.$filename)){
-            $filepath=$uploadpath.$filename;
+
+        if(move_uploaded_file($tmp,Accontrol::FW_DIR.$filename)){
+            $filepath=Accontrol::FW_DIR.$filename;
             $namearray = explode("_",$filename);
             $csid=$namearray[1];
             $name1=explode(".",$namearray[7]);
@@ -402,16 +394,15 @@ class Accontrol extends Csbackend
                 $delApFileInfo = $sth->fetch(PDO::FETCH_ASSOC);
                 if($delApFileInfo){
                     $file = $apUpgradeInfo["filepath"];
-                    if (unlink($file)){
+                    if (unlink(Accontrol::FW_DIR.$file)){
                         echo ("删除旧文件成功");
                     }else{
                         echo ("删除旧文件失败");
                     }
                 }
             }
-            $excSql = "INSERT INTO AP_UPGRADE (csid,svnnum,builddate,filepath) VALUES ('$csid','$svnnum','$builddate','$filepath')";
+            $excSql = "INSERT INTO AP_UPGRADE (csid,svnnum,builddate,filepath) VALUES ('$csid','$svnnum','$builddate','$filename')";
             $count = $dbh->exec($excSql);
-            var_dump('count'.$count);
             if ($count){
                 echo "upload success";
             }else{
@@ -452,12 +443,10 @@ class Accontrol extends Csbackend
     }
 
     public static function delApUpgradeFile($data){
-        var_dump($data);
         $result = 0;
         try{
             $pdo = self::getPdo();
-            $filename = '/var/uploadfirm/'.$data["version"];
-            var_dump($filename);
+            $filename = $data["version"];
             $apUpgradeSql = "select * from AP_UPGRADE where filepath = :path";
             $sth = $pdo->prepare($apUpgradeSql);
             $sth->execute(array('path'=>$filename));
@@ -467,7 +456,6 @@ class Accontrol extends Csbackend
                 $del = $pdo->prepare($delApFileSql);
                 $del->execute(array('path'=>$filename));
                 $delApFileInfo = $sth->fetch(PDO::FETCH_ASSOC);
-                var_dump($delApFileInfo);
             }
         }catch(AppException $aex){
             $result = $aex->getMessage();
