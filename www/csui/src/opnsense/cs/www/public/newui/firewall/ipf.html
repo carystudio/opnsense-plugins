@@ -74,7 +74,7 @@
         </row>
         <Row>
             <Col class="cs-btn-del">
-            <Button size="small" @click="tableSelect(true)" type="error">{{ $t('ipf.delete') }}</Button>
+            <Button size="small" @click="tableSelect(true)" type="error"  :loading="delAllIpfLoading">{{ $t('ipf.delete') }}</Button>
             </Col>
             <Col>
             <Table border ref="tableSelect" :columns="ipfColumns" :data="ipfData"></Table>
@@ -110,6 +110,7 @@
                 globalConfig:globalConfig,
                 arpLoading:true,
                 addIpfLoading:false,
+                delAllIpfLoading:false,
                 formValidate: {
 //          status:false,
                     filterType:'2',
@@ -418,10 +419,12 @@
                             data[i] = getSelection[i].Id;
                         }
                         var postVar = {"action":"delFilter", "data":{"Id":data}};
+                        _this.delAllIpfLoading = true;
                         uiPost.delFilter(postVar,function(data){
                             if (9999 == data.rescode){
                                 cs.loginOut();
                             }
+                            _this.delAllIpfLoading = false;
                             if (0 == data.rescode) {
                                 _this.$Message.success({content:_this.$t('ipf.msg13'),onClose:function(){
                                     location.href = location.href;

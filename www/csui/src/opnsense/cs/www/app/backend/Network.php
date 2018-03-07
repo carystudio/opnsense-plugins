@@ -1042,9 +1042,9 @@ class Network extends Csbackend
             if(!is_ipaddr($data['Ip'])){
                 throw new AppException('Network_401');
             }
-            if(!isset($data['Descr']) || strlen($data['Descr'])==0){
-                throw new AppException('Network_402');
-            }
+//            if(!isset($data['Descr']) || strlen($data['Descr'])==0){
+//                throw new AppException('Network_402');
+//            }
             if ($config['dhcpd']['lan']['staticmap']){
                 foreach($config['dhcpd']['lan']['staticmap'] as $macip){
                     if($data['Mac'] == $macip['mac']){

@@ -30,10 +30,17 @@
                     </FormItem>
                     <Col v-show="formValidate.status" >
                     <FormItem :label="$t('portal.server_type')" prop="Type">
-                        <Select v-model="formValidate.Type" >
+                        <Select v-model="formValidate.Type" v-show="'local' == formValidate.Type">
                             <Option value="local">{{$t('portal.local')}}</Option>
                             <Option value="server">{{$t('portal.cloud')}}</Option>
                         </Select>
+                        <Col span="19" v-show="'server' == formValidate.Type">
+                            <Select v-model="formValidate.Type" >
+                                <Option value="local">{{$t('portal.local')}}</Option>
+                                <Option value="server">{{$t('portal.cloud')}}</Option>
+                            </Select>
+                        </Col>
+                        <Col span="4" offset="1" v-show="'server' == formValidate.Type"><Button long @click="jumpCloudServer">{{ $t('portal.jump') }}</Button></Col>
                     </FormItem>
                     <div v-show="formValidate.Type == 'local'">
                         <FormItem :label="$t('portal.idle_timeout')" prop="IdleTimeout">
@@ -360,6 +367,9 @@
                     var postVar = {"action":"setPortalStatus","data":{"Enable":"0"}};
                     uiPost.setPortalStatus(postVar);
                 }
+            },
+            jumpCloudServer:function () {
+                window.open("http://totolink.carystudio.com");
             },
             wcLoginStatus:function () {
                 var _this = this;

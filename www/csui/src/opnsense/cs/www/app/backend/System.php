@@ -82,7 +82,7 @@ class System extends Csbackend
         $conf = serialize($config);
         $data = Mcrypt::encrypt($conf);
 
-        $filename="CSG2000P_".date("YmdHis")."_config.dat"; //文件名
+        $filename="Config-CSG2000P-".date("Ymd")."_config.dat"; //文件名
         Header( "Content-type:  application/octet-stream ");
         Header( "Accept-Ranges:  bytes ");
         Header( "Accept-Length: " .strlen($data));

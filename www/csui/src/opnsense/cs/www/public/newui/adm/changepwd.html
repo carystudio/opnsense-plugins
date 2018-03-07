@@ -29,10 +29,10 @@
                         <Input v-model="formValidate.origPass" :maxlength="32"></Input>
                     </FormItem>
                     <FormItem :label="$t('changepwd.new_pass')" prop="newPass">
-                        <Input v-model="formValidate.newPass" :maxlength="32"></Input>
+                        <Input type="password" v-model="formValidate.newPass" :maxlength="32"></Input>
                     </FormItem>
                     <FormItem :label="$t('changepwd.confirm_pass')" prop="confirmPass">
-                        <Input v-model="formValidate.confirmPass" :maxlength="32"></Input>
+                        <Input type="password" v-model="formValidate.confirmPass" :maxlength="32"></Input>
                     </FormItem>
                     <!-- btn -->
                     <FormItem>

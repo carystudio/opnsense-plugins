@@ -192,14 +192,13 @@ class Accontrol extends Csbackend
         $res = array();
         try{
             if($data){
-//                if('2' == $data["ledState"]){
-//                    $ledState = 0;
-//                }else{
-//                    $ledState = 1;
-//                }
                 $dbh = self::getPdo();
                 $deviceId = explode(',',$data['id']);
                 foreach ($deviceId as $key=>$val){
+                    $ap = self::getAp(intval($val));
+                    if($data["ledState"] == $ap['ledstate']){
+                        continue;
+                    }
                     $excSql = "update APLIST set ledstate = '".$data["ledState"]."' where id = '".$val."'";
                     $conut = $dbh->exec($excSql);
                     if(0 == $conut){
@@ -218,7 +217,6 @@ class Accontrol extends Csbackend
         return $res;
     }
 
-	
 	public static function setApRestore($data){
         $res = 0;
         try{
@@ -375,7 +373,7 @@ class Accontrol extends Csbackend
         return $res;
     }
 
-    public static function setUploadFile($request){
+	public static function setUploadFile($request){
         $filename = $_FILES['file']['name'];
         $tmp = $_FILES['file']['tmp_name'];
         $uploaddir="/var/uploadfirm";

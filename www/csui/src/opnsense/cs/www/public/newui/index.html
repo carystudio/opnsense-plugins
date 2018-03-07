@@ -231,7 +231,7 @@
                         }
                         if (params.row.name == _this.$t('index.website')) {
                             params.row.value = 'www.carystudio.com';
-                            return h('a',{attrs:{href:"http://"+params.row.value}},params.row.value);
+                            return h('a',{attrs:{href:"http://"+params.row.value,target: '_blank'}},params.row.value);
                         }
                         if (params.row.name == _this.$t('index.version')) {
                             params.row.value = 'CSG2000P ' +  _this.system.FirmwareVersion;
