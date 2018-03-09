@@ -214,6 +214,8 @@ class WebapiController extends BaseController
             }else if('setRebootSched' == $action){
                 $this->checkData($para);
                 $result['rescode']  = System::setRebootSched($para['data']);
+            }else if("LoadDefSettings" == $action){
+                $result['rescode'] = System::loadDefSettings();
             }else if('getPptpdStatus' == $action){
                 $result['rescode']  = Pptpd::getStatus();
             }else if('setPptpdStatus' == $action){

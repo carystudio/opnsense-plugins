@@ -1617,6 +1617,8 @@ var messages = {
 
 
             'System_100':'Time is not correct',
+            'System_101':'please choose a time zone!',
+            'System_102':'please enter the NTP server',
             'System_200':'Minute is not correct',
             'System_201':'Hour is not correct',
             'System_202':'Date is not correct',
@@ -3252,6 +3254,8 @@ var messages = {
 
 
             'System_100':'时间不正确',
+            'System_101':'请选择一个时区！',
+            'System_102':'请输入NTP服务器',
             'System_200':'分不正确',
             'System_201':'时不正确',
             'System_202':'日不正确',

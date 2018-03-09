@@ -5,6 +5,7 @@ require_once("services.inc");
 require_once("config.inc");
 require_once("system.inc");
 require_once("util.inc");
+require_once("plugins.inc.d/ntpd.inc");
 
 use \OPNsense\Core\Backend;
 
@@ -12,6 +13,8 @@ class System extends Csbackend
 {
     protected static $ERRORCODE = array(
         'System_100'=>'时间不正确',
+        'System_101'=>'请选择一个时区！',
+        'System_102'=>'请输入NTP服务器',
         'System_200'=>'分不正确',
         'System_201'=>'时不正确',
         'System_202'=>'日不正确',
@@ -55,17 +58,75 @@ class System extends Csbackend
 
 
     public static function getGwTime(){
-        return array('Time'=>date("YmdHis"));
+        global $config;
+
+        $a_ntpd = &config_read_array('ntpd');
+
+        $pconfig = array();
+        $pconfig['timeservers_host'] = array();
+        $pconfig['timeservers_prefer'] = array();
+
+        if (!empty($config['system']['timeservers'])) {
+            $pconfig['timeservers_prefer'] = !empty($a_ntpd['prefer']) ? explode(' ', $a_ntpd['prefer']) : array();
+            $pconfig['timeservers_host'] = explode(' ', $config['system']['timeservers']);
+        }
+
+        $pconfig['timezone'] = $config['system']['timezone'];
+        return array('Time'=>date("YmdHis"),'config'=>$pconfig);
     }
 
     public static function setGwTime($data){
+        global $config;
+        $a_ntpd = &config_read_array('ntpd');
         $result = 0;
 
         try{
             if(!is_numeric($data['Time']) || strlen($data['Time'])!=12|| '2'!=$data['Time'][0]){
                 throw new AppException('System_100');
             }
-            mwexec("/bin/date ".$data['Time']);
+            if(!$data['timezone']){
+                throw new AppException('System_101');
+            }
+            if(!$data['ntpServer']){
+                throw new AppException('System_102');
+            }
+            $ntpServer = str_replace('*',' ',$data['ntpServer']);
+            $config['system']['timeservers'] = trim($ntpServer);
+
+            if (empty($config['system']['timeservers'])) {
+                unset($config['system']['timeservers']);
+            }
+
+            $config['system']['timezone'] = $data['timezone'];
+
+            if('1' == $data['ntpEnabled']){
+                $a_ntpd['prefer'] = !empty($ntpServer) ? trim($ntpServer) : null;
+
+                if (empty($a_ntpd['prefer'])) {
+                    unset($a_ntpd['prefer']);
+                }
+
+
+
+
+                write_config();
+                /* time zone change first */
+                system_timezone_configure();
+
+                write_config("Updated NTP Server Settings");
+                ntpd_configure_start();
+
+            }else{
+
+                if (!empty($a_ntpd['prefer'])) {
+                    unset($a_ntpd['prefer']);
+                }
+                write_config();
+                /* time zone change first */
+                system_timezone_configure();
+                ntpd_configure_start();
+                mwexec("/bin/date ".$data['Time']);
+            }
 
         }catch(AppException $aex){
             $result = $aex->getMessage();
@@ -266,5 +327,11 @@ class System extends Csbackend
         }
 
         return $infos;
+    }
+
+    public static function loadDefSettings(){
+        reset_factory_defaults(false);
+
+        return 0;
     }
 }

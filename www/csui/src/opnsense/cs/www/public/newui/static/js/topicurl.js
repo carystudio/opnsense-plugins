@@ -1106,6 +1106,7 @@ uiPost.prototype.SystemSettings = function(postVar,callback){
 uiPost.prototype.LoadDefSettings = function(postVar,callback){
     this.topicurl = 'LoadDefSettings';
     this.async = true; // true:异步，false:同步。
+    this.url = "/webapi";
     return this.post(postVar,callback);
 };
 

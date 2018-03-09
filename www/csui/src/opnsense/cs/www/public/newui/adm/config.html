@@ -42,14 +42,14 @@
                             <Button icon="ios-cloud-upload-outline">{{ $t('config.select_file')+' & '+$t('config.update')   }}</Button>
                         </Upload>
                     </FormItem>
-                    <!--<FormItem :label="$t('config.restore_factory_default')">
+                    <FormItem :label="$t('config.restore_factory_default')">
                         <Poptip
                                 confirm
                                 :title="$t('config.msg4')"
                                 @on-ok="restoreOk">
                             <Button>{{ $t('config.restore') }}</Button>
                         </Poptip>
-                    </FormItem>-->
+                    </FormItem>
                     <FormItem :label="$t('config.reboot_system')">
                         <Poptip
                                 confirm
@@ -93,6 +93,7 @@
                 operationMode: '',
                 meshEnabled: '',
                 percent: 0,
+                lan_ip:'192.168.10.1',
                 saveAction: '/webapi',
                 upload: {
                     file: null,
@@ -130,28 +131,31 @@
             },
             restoreOk:function() {
                 var _this = this;
-                uiPost.LoadDefSettings(function(data) {
-                    var time=data.wtime;
-                    var lan_ip=data.lan_ip;
-                    _this.$Modal.success({
-                        loading:true,
-                        render: function(h) {
-                            return h('div',[
-                                _this.$t('common.loading'),
-                                h('Progress',{
-                                    attrs:{ percent:_this.percent }
-                                })
-                            ])
-                        }
-                    });
-                    var percentTimer = setInterval(function(){
-                        if (_this.percent>=100) {
-                            clearInterval(percentTimer);
-                            location.href='http://'+lan_ip+'/login.html';
-                        }
-                        _this.percent++;
-                    },cs.getTimer(time));
-                })
+                var postData = {"action":"LoadDefSettings"};
+                uiPost.LoadDefSettings(postData,function(data) {
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                });
+
+                _this.$Modal.success({
+                    loading:true,
+                    render: function(h) {
+                        return h('div',[
+                            _this.$t('common.loading'),
+                            h('Progress',{
+                                attrs:{ percent:_this.percent }
+                            })
+                        ])
+                    }
+                });
+                var percentTimer = setInterval(function(){
+                    if (_this.percent>=100) {
+                        clearInterval(percentTimer);
+                        location.href='http://'+_this.lan_ip+'/login.html';
+                    }
+                    _this.percent++;
+                },cs.getTimer(100));
             },
             rebootOk:function() {
                 var _this = this;

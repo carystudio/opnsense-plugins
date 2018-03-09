@@ -29,9 +29,50 @@
                 <FormItem>
                   <Button type="primary" @click="submitLocaltime" >{{ $t('time.manntpsyncwithhost') }}</Button>
                 </FormItem>
+                <FormItem :label="$t('time.timezone')">
+                    <Select v-model="formValidate.timezone" >
+                        <Option value="Pacific/Kwajalein">(UTC-12:00) {{$t('time.ntp25')}}</Option>
+                        <Option value="Pacific/Midway">(UTC-11:00) {{$t('time.ntp1')}}</Option>
+                        <Option value="Pacific/Honolulu">(UTC-10:00) {{ $t('time.ntp2') }}</Option>
+                        <Option value="America/Anchorage">(UTC-09:00) {{ $t('time.ntp3') }}</Option>
+                        <Option value="America/Vancouver">(UTC-08:00) {{ $t('time.ntp4') }}</Option>
+                        <Option value="America/Edmonton">(UTC-07:00) {{ $t('time.ntp5') }}</Option>
+                        <Option value="America/Winnipeg">(UTC-06:00) {{ $t('time.ntp6') }}</Option>
+                        <Option value="America/Bogota">(UTC-05:00) {{ $t('time.ntp7') }}</Option>
+                        <Option value="America/La_Paz">(UTC-04:00) {{ $t('time.ntp8') }}</Option>
+                        <Option value="America/Sao_Paulo">(UTC-03:00) {{ $t('time.ntp9') }}</Option>
+                        <Option value="Atlantic/South_Georgia">(UTC-02:00) {{ $t('time.ntp10') }}</Option>
+                        <Option value="Atlantic/Cape_Verde">(UTC-01:00) {{ $t('time.ntp11') }}</Option>
+                        <Option value="Europe/London">(UTC-00:00) {{ $t('time.ntp12') }}</Option>
+                        <Option value="Europe/Paris">(UTC+01:00) {{ $t('time.ntp13') }}</Option>
+                        <Option value="Europe/Athens">(UTC+02:00) {{ $t('time.ntp14') }}</Option>
+                        <Option value="Asia/Baghdad">(UTC+03:00) {{ $t('time.ntp15') }}</Option>
+                        <Option value="Asia/Yerevan">(UTC+04:00) {{ $t('time.ntp16') }}</Option>
+                        <Option value="Asia/Karachi">(UTC+05:00) {{ $t('time.ntp17') }}</Option>
+                        <Option value="Asia/Dhaka">(UTC+06:00) {{ $t('time.ntp18') }}</Option>
+                        <Option value="Asia/Bangkok">(UTC+07:00) {{ $t('time.ntp19') }}</Option>
+                        <Option value="Asia/Shanghai">(UTC+08:00) {{ $t('time.ntp20') }}</Option>
+                        <Option value="Asia/Tokyo">(UTC+09:00) {{ $t('time.ntp21') }}</Option>
+                        <Option value="Pacific/Guam">(UTC+10:00) {{ $t('time.ntp22') }}</Option>
+                        <Option value="Australia/Melbourne">(UTC+11:00) {{ $t('time.ntp23') }}</Option>
+                        <Option value="Asia/Kamchatka">(UTC+12:00) {{ $t('time.ntp24') }}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem prop="ntpEnabled">
+                    <Checkbox v-model="formValidate.ntpEnabled">{{ $t('time.ntpclientupdate')}}</Checkbox>
+                </FormItem>
+                <FormItem :label="$t('time.ntpserver')+'1'" prop="ntpServerIp1">
+                    <Input v-model="formValidate.ntpServerIp1" ></Input>
+                </FormItem>
+                <FormItem :label="$t('time.ntpserver')+'2'" prop="ntpServerIp2">
+                    <Input v-model="formValidate.ntpServerIp2" ></Input>
+                </FormItem>
+                <FormItem :label="$t('time.ntpserver')+'3'" prop="ntpServerIp3">
+                    <Input v-model="formValidate.ntpServerIp3" ></Input>
+                </FormItem>
               <!-- btn -->
               <FormItem>
-                  <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('common.apply') }}</Button>
+                  <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('common.apply') }}</Button>
               </FormItem>
           </Form>
           </Card>
@@ -63,9 +104,14 @@ var cs_main = {
             formValidate: {
                 currentTime: '',
                 date:'',
-                tz: '',
-                ntpClientEnabled: ''
-            }
+                timezone: 'Asia/Shanghai',
+                ntpClientEnabled: '',
+                ntpEnabled:false,
+                ntpServerIp1:'pool.ntp.org',
+                ntpServerIp2:'cn.pool.ntp.org',
+                ntpServerIp3:'europe.pool.ntp.org'
+            },
+            percent: 0
         }
     },
     computed: {
@@ -125,6 +171,26 @@ var cs_main = {
             if (0 == data.rescode) {
                 var time = data.data.Time;
                 _this.formValidate.date = time.substr(0,4) + '-' + time.substr(4,2) + '-' + time.substr(6,2) + ' ' + time.substr(8,2) + ':' + time.substr(10,2) + ':' + time.substr(12,2);
+
+                var config = data.data.config;
+                var ntpServer = ['ntpServerIp1','ntpServerIp2','ntpServerIp3'];
+                console.log(config);
+                for(var i in config.timeservers_host){
+                    _this.formValidate[ntpServer[i]] = config.timeservers_host[i];
+                }
+                console.log(_this.formValidate);
+
+                _this.formValidate.timezone = config.timezone;
+
+                if(config.timeservers_prefer.length <= 0){
+                    _this.formValidate.ntpEnabled = false;
+                }else{
+                    _this.formValidate.ntpEnabled = true;
+                }
+//                _this.formValidate.ntpServerIp1 = config.timeservers_host[0];
+//                _this.formValidate.ntpServerIp2 = config.timeservers_host[1];
+//                _this.formValidate.ntpServerIp3 = config.timeservers_host[2];
+
             }
             console.log(_this.formValidate.date);
         });
@@ -157,17 +223,62 @@ var cs_main = {
         handleSubmit: function(name) {
             var _this = this;
             console.log('---------'+_this.formValidate.date+'----------');
+
             var dateTmp = _this.formValidate.date.replace(/\ /g,'');
             dateTmp = dateTmp.replace(/\-/g,'');
             dateTmp = dateTmp.replace(/\:/g,'');
             console.log(dateTmp);
             dateTmp = dateTmp.substr(0,12);
             console.log(dateTmp);
-            var postVar = {"action":"setGwTime","data":{"Time":dateTmp}};
+
+//            console.log(_this.formValidate.ntpEnabled);
+            var temp;
+            if (0 == cs.string(this.formValidate.ntpServerIp1)) {
+                this.$Message.error(_this.$t('time.msg1'));
+                return false;
+            } else if (1 == cs.string(this.formValidate.ntpServerIp1)) {
+                this.$Message.error(_this.$t('time.msg4'));
+                return false;
+            } else {
+                temp = this.formValidate.ntpServerIp1;
+            }
+            if (0 == cs.string(this.formValidate.ntpServerIp2)) {
+                this.$Message.error(_this.$t('time.msg2'));
+                return false;
+            } else if (1 == cs.string(this.formValidate.ntpServerIp2)) {
+                this.$Message.error(_this.$t('time.msg4'));
+                return false;
+            } else {
+                temp += "*" + this.formValidate.ntpServerIp2;
+            }
+            if (0 == cs.string(this.formValidate.ntpServerIp3)) {
+                this.$Message.error(_this.$t('time.msg2'));
+                return false;
+            } else if (1 == cs.string(this.formValidate.ntpServerIp3)) {
+                this.$Message.error(_this.$t('time.msg4'));
+                return false;
+            } else {
+                temp += "*" + this.formValidate.ntpServerIp3;
+            }
+
+            var data = {};
+            data.Time = dateTmp;
+            data.timezone = _this.formValidate.timezone;
+            data.ntpServer = temp;
+            if(true == _this.formValidate.ntpEnabled){
+                data.ntpEnabled = '1';
+            }else{
+                data.ntpEnabled = '0';
+            }
+
+            var postVar = {"action":"setGwTime","data":data};
+            _this.applyLoading = true;
+            console.log(postVar);
             uiPost.setGwTime(postVar, function(data) {
                 if (9999 == data.rescode){
                     cs.loginOut();
                 }
+                _this.applyLoading = false;
                 if (0 == data.rescode) {
                     _this.$Message.success(_this.$t('time.modify_success'));
                     setTimeout(function(){
@@ -178,35 +289,8 @@ var cs_main = {
                 }
             });
 
-            //_this.applyLoading = true;
-//            var temp;
-           /* if (0 == cs.string(this.formValidate.ntpServerIp1)) {
-                this.$Message.error(_this.$t('time.msg1'));
-                return false;
-            } else if (1 == cs.string(this.formValidate.ntpServerIp1)) {
-                this.$Message.error(_this.$t('time.msg4'));
-                return false;
-            } else {
-                tmp = this.formValidate.ntpServerIp1;
-            }
-            if (0 == cs.string(this.formValidate.ntpServerIp2)) {
-                this.$Message.error(_this.$t('time.msg2'));
-                return false;
-            } else if (1 == cs.string(this.formValidate.ntpServerIp2)) {
-                this.$Message.error(_this.$t('time.msg4'));
-                return false;
-            } else {
-                tmp += "*" + this.formValidate.ntpServerIp2;
-            }
-            if (0 == cs.string(this.formValidate.ntpServerIp3)) {
-                this.$Message.error(_this.$t('time.msg2'));
-                return false;
-            } else if (1 == cs.string(this.formValidate.ntpServerIp3)) {
-                this.$Message.error(_this.$t('time.msg4'));
-                return false;
-            } else {
-                tmp += "*" + this.formValidate.ntpServerIp3;
-            }*/
+
+
             /*_this.$refs[name].validate(function(valid) {
                 console.log('-------------------');
                 if (valid) {
