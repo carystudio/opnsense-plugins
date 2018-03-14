@@ -195,7 +195,7 @@ EOD;
   set link enable chap-msv2
   set link mtu 1460
   set link keep-alive 10 60
-  set pptp self {$pptpdcfg['localip']}
+  set pptp self 0.0.0.0
   set link enable incoming
 
 EOD;

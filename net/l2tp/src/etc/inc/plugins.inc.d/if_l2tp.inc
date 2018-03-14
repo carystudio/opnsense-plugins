@@ -194,7 +194,7 @@ EOD;
   {$paporchap}
   set link keep-alive 10 60
   set link mtu 1460
-  set l2tp self ${l2tpcfg['localip']}
+  set l2tp self 0.0.0.0
   set link enable incoming
 
 EOD;
