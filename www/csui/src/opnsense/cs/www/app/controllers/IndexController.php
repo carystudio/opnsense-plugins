@@ -26,6 +26,18 @@ class IndexController extends BaseController
 		}
 	}
 
+	public function getlangcfgAction(){
+		$result = System::getLangConfig();
+		echo json_encode($result);
+	}
+
+	public function setlangcfgAction(){
+		$text = $this->request->getRawBody();
+		$para = json_decode($text, true);
+		$result = System::setLangConfig($para['data']);
+		echo json_encode($result);
+	}
+
 	public function topAction()
 	{
 

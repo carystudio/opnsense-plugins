@@ -299,8 +299,8 @@ var messages = {
             "ip":"IP Address",
             "upload_bandwidth":"Upload Bandwidth",
             "download_bandwidth":"Download Bandwidth",
-            "single_up_bandwidth":"Single IP Upload Bandwidth",
-            "single_down_bandwidth":"Single IP Download Bandwidth",
+            "single_up_bandwidth":"Upload Bandwidth",
+            "single_down_bandwidth":"Download Bandwidth",
             "comment":"Comment",
             "qos_table":"Current Qos List",
             "scan":"Scan",
@@ -319,8 +319,8 @@ var messages = {
             "custom":"Custom Speed Limit",
             "totalUplinkSpeed":"Total Uploads Bandwidth",
             "totalDownlinkSpeed":"Total Download Bandwidth",
-            "singleUplinkSpeed":"Default Single IP Upload Bandwidth",
-            "singleDownlinkSpeed":"Default Single IP Download Bandwidth",
+            "singleUplinkSpeed":"Total Upload Bandwidth",
+            "singleDownlinkSpeed":"Total Download Bandwidth",
             "msg1":"Total Uplink Bandwidth cannot be empty,please try again!",
             "msg2":"Total Downlink Bandwidth cannot be empty,please try again?",
             "msg3":"Total Uplink Bandwidth cannot be empty,please try again!",
@@ -417,6 +417,18 @@ var messages = {
             "file_upload":"Upload Files",
             "countdown":"Count down [ye-time] s",
             "upload":"The firmware and upgrade are being downloaded ...",
+
+            "current_firmware_version":"Current Firmware Version",
+            "current_compilation_time":"Current Firmware Compilation Time",
+            "u_firmware_version":"U Disk Firmware Version",
+            "u_compilation_time":"U Disk Firmware Time",
+            "check_firmware_now":"The U disk firmware information is being detected...",
+            "nothing":"No",
+            "no_upgrade_firmware":"* now there is no renewable version",
+            "have_upgrade_firmware":"* now there is an updated version that can be upgraded",
+            "fireware_error":"Firmware version error",
+            "upgrade_fail":"The upgrade failed!",
+
             "msg1":"Please select a valid file.",
             "msg2":"Invalid file format, please try again. Supported file formats: {0}",
             "msg3":"The file is too large!",
@@ -516,7 +528,11 @@ var messages = {
             "msg18":"The MAC address is invalid, It cannot be a multicast address!The second char cannot be 1,3,5,7,9,b,d,f.",
             "msg19":"The MAC address is invalid, It must be 16 hexadecimal characters, such as XX:XX:XX:XX:XX:XX!",
             "msg20":" is invalid, it must be 0-255 numbers and dots by the symbols!",
-            "msg21":"Host Name cannot contain full-width characters!"
+            "msg21":"Host Name cannot contain full-width characters!",
+            "msg22":"The username is invalid and can't exceed 32 characters!",
+            "msg23":"The password is not valid, not more than 32 characters!",
+            "msg24":"DNS server can't be empty!",
+            "msg25":"DNS server is not legal!"
         },
         "lan":{
             "title":"LAN Setting",
@@ -674,7 +690,8 @@ var messages = {
             "msg7":"The first choice DNS is invalid!",
             "msg8":"Alternative DNS is invalid!",
             "msg9":"The Wins server address is not valid!",
-            "msg10":"Fail"
+            "msg10":"Fail",
+            "msg11":"First choice DNS can't be empty!"
         },
         "account":{
             "title":"Account Management",
@@ -1943,8 +1960,8 @@ var messages = {
             "ip":"IP地址",
             "upload_bandwidth":"上传带宽",
             "download_bandwidth":"下载带宽",
-            "single_up_bandwidth":"单IP上传带宽",
-            "single_down_bandwidth":"单IP下载带宽",
+            "single_up_bandwidth":"上传带宽",
+            "single_down_bandwidth":"下载带宽",
             "comment":"描述",
             "qos_table":"当前QoS列表  (最多允许增加10条规则)",
             "scan":"扫描",
@@ -1963,8 +1980,8 @@ var messages = {
             "custom":"自定义限速",
             "totalUplinkSpeed":"总上传带宽",
             "totalDownlinkSpeed":"总下载带宽",
-            "singleUplinkSpeed":"默认单IP上传带宽",
-            "singleDownlinkSpeed":"默认单IP下载带宽",
+            "singleUplinkSpeed":"总上传带宽",
+            "singleDownlinkSpeed":"总下载带宽",
             "msg1":"总上传带宽不能为空，请重试！",
             "msg2":"总下载带宽不能为空，请重试！",
             "msg3":"总上传带宽必须是有效的数字！",
@@ -2060,6 +2077,18 @@ var messages = {
             "file_upload":"文件上传",
             "countdown":"倒计时[ye-time]秒",
             "upload":"正在下载固件和升级...",
+
+            "current_firmware_version":"当前固件版本",
+            "current_compilation_time":"当前固件编译时间",
+            "u_firmware_version":"U盘固件的版本",
+            "u_compilation_time":"U盘固件编译时间",
+            "check_firmware_now":"正在检测U盘固件信息...",
+            "nothing":"无",
+            "no_upgrade_firmware":"*现在没有可更新版本",
+            "have_upgrade_firmware":"*现在有可更新版本，可以进行升级",
+            "fireware_error":"固件版本错误",
+            "upgrade_fail":"升级失败！",
+
             "msg1":"请选择一个正确的文件！",
             "msg2":"无效的文件格式，请重新选择！,支持的格式有：{0}",
             "msg3":"文件太大！",
@@ -2160,7 +2189,11 @@ var messages = {
             "msg18":"MAC地址无效，它不能是组播地址,如：第二位不能是1、3、5、7、9、b、d、f！",
             "msg19":"MAC地址无效，它必须是16进制字符组成，如XX:XX:XX:XX:XX:XX！",
             "msg20":"无效，它必须是由0-255数字和圆点符号组成",
-            "msg21":"主机名称不能包含全角字符和中文字符！"
+            "msg21":"主机名称不能包含全角字符和中文字符！",
+            "msg22":"用户名无效，不能超过32个字符！",
+            "msg23":"密码无效，不能超过32个字符！",
+            "msg24":"DNS服务器不能为空！",
+            "msg25":"DNS服务器不合法！"
         },
         "lan":{
             "title":"局域网设置",
@@ -2311,7 +2344,8 @@ var messages = {
             "msg7":"首选DNS无效！",
             "msg8":"备选DNS无效！",
             "msg9":"Wins服务器地址无效！",
-            "msg10":"设置失败！"
+            "msg10":"设置失败！",
+            "msg11":"首选DNS不能为空！"
         },
         "account":{
             "title":"账号管理",

@@ -18,9 +18,9 @@
         <Row>
             <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
             <Card>
-                <!-- <Alert>
-                    {{ $t('ss_server.help') }}
-                </Alert> -->
+                 <Alert>
+                    {{ $t('l2tp.help') }}
+                </Alert>
                 <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
                     <FormItem :label="$t('l2tp.server')">
                         <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">
@@ -148,7 +148,7 @@
                                     f();
                                 }
                             }else{
-                                f();
+                                f(_this.$t('l2tp.msg11'));
                             }
                         },trigger: 'blur' }
                     ],

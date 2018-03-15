@@ -23,17 +23,17 @@
                     {{ $t('firmware.help') }}
                 </Alert>
                 <Form ref="formValidate" :label-width="globalConfig.labelWith" label-position="left">
-                    <FormItem label="当前固件版本">
+                    <FormItem :label="$t('firmware.current_firmware_version')">
                         <!--<Button @click="cloudCheck">{{ $t('firmware.cloud_check_newversion') }}</Button>-->
                         <span>{{ version }}</span>
                     </FormItem>
-                    <FormItem label="当前固件编译时间">
+                    <FormItem :label="$t('firmware.current_compilation_time')">
                         {{ buildTime }}
                     </FormItem>
-                    <FormItem label="U盘固件的版本">
+                    <FormItem :label="$t('firmware.u_firmware_version')">
                         <span>{{ fwVersion }}</span>
                     </FormItem>
-                    <FormItem label="当前固件编译时间">
+                    <FormItem :label="$t('firmware.u_compilation_time')">
                         {{ fwbuiltTime }}
                     </FormItem>
                     <FormItem>
@@ -109,11 +109,11 @@
         },
         created: function() {
             var _this = this;
-            _this.upgradeDescribe = '正在检测U盘固件信息...';
+            _this.upgradeDescribe = _this.$t('firmware.check_firmware_now');
             var postData = {"action":"getFirmwareInfo", "data":{}};
             uiPost.getFirmwareInfo(postData,function(data) {
                 console.log(data);
-                _this.upgradeDescribe = '升级';
+                _this.upgradeDescribe = _this.$t('firmware.upgrade');
                 if (9999 == data.rescode) {
                     cs.loginOut();
                 }
@@ -124,16 +124,16 @@
                         _this.buildTime = fwData.Build_date;
                     }
                     if (fwData.Fw_version == "") {
-                        _this.fwVersion = '无';
-                        _this.firmwareDescribe = '*现在没有可更新版本';
+                        _this.fwVersion = _this.$t('firmware.nothing');
+                        _this.firmwareDescribe = _this.$t('firmware.no_upgrade_firmware');
                         _this.upgradeStatus = true;
                     } else {
                         _this.fwVersion = fwData.Fw_version;
-                        _this.firmwareDescribe = '*现在有可更新版本，可以进行升级';
+                        _this.firmwareDescribe = _this.$t('firmware.have_upgrade_firmware');
                         _this.upgradeStatus = false;
                     }
                     if (fwData.Fw_build_date == "") {
-                        _this.fwbuiltTime = '无';
+                        _this.fwbuiltTime = _this.$t('firmware.nothing');
                     }else{
                         _this.fwbuiltTime = fwData.Fw_build_date;
                     }
@@ -144,7 +144,7 @@
             handleSubmit: function() {
                 var _this = this;
                 if(_this.fwVersion == ''){
-                    _this.$Message.error('固件版本错误');
+                    _this.$Message.error(_this.$t('firmware.fireware_error'));
                     return false;
                 }
                 var version_num = {};
@@ -176,7 +176,7 @@
                             _this.percent++;
                         },cs.getTimer(wtime));
                     } else {
-                        _this.$Message.error('升级失败！' + _this.$t('errorcode.'+data.rescode));
+                        _this.$Message.error(_this.$t('firmware.upgrade_fail') + _this.$t('errorcode.'+data.rescode));
                     }
                 });
             },

@@ -87,14 +87,14 @@
                         <Input v-model="formValidate.pppoeUser" ></Input>
                     </FormItem>
                     <FormItem :label="$t('wan.pass')" prop="pppoePass">
-                        <Input v-model="formValidate.pppoePass" ></Input>
+                        <Input type="password" v-model="formValidate.pppoePass" ></Input>
                     </FormItem>
                     <FormItem label="MTU" prop="pppoeMtu">
                         <Input v-model="formValidate.pppoeMtu" :maxlength="4" ></Input>
                         <span>(546-1492)</span>
                     </FormItem>
                   </Col>
-                  <FormItem :label="$t('wan.dns_server')">
+                  <FormItem :label="$t('wan.dns_server')" prop="dnsServer">
                       <Input v-model="formValidate.dnsServer" ></Input>
                   </FormItem>
                   <FormItem :label="$t('wan.monitor_ip')">
@@ -283,7 +283,11 @@ var cs_main = {
               }else if(1 == _s) {
                 f(_this.$t('wan.msg13'));
               }else{
-                f();
+                  if(2 == cs.srtLength(v,32)){
+                      f(_this.$t('wan.msg22'));
+                  }else{
+                      f();
+                  }
               }
             },trigger: 'blur' }
           ],
@@ -295,9 +299,26 @@ var cs_main = {
               }else if(1 == _s) {
                 f(_this.$t('wan.msg15'));
               }else{
-                f();
+                  if(2 == cs.srtLength(v,32)){
+                      f(_this.$t('wan.msg23'));
+                  }else{
+                      f();
+                  }
               }
             },trigger: 'blur' }
+          ],
+          dnsServer: [
+              { validator:function(r, v, f) {
+                  var _s = cs.ip(v);
+                  console.log(_s);
+                  if(0 == _s) {
+                      f(_this.$t('wan.msg24'));
+                  }else if(99 != _s) {
+                      f(_this.$t('wan.msg25'));
+                  }else{
+                      f();
+                  }
+              },trigger: 'blur' }
           ],
           pppoeMtu: [
             { validator:function(r, v, f) {

@@ -441,8 +441,6 @@
                     title: 'value2',
                     key: 'value2',
                     render: function(h, params) {
-                        console.log('------------params----------');
-                        console.log(params);
                         if (params.row.name == "") {
                             params.row.value2 = _this.$t('index.tx_packets');
                         }
@@ -463,7 +461,6 @@
                 }
                 dataObj = '['+dataObj+']';
                 dataObj = JSON.parse(dataObj);
-                console.log(dataObj);
                 return dataObj;
             },
             tabs: function() {
@@ -577,49 +574,48 @@
             var _this = this;
 
             var postData = {"action":"getStatusInfo", "data":{}};
-            uiPost.getStatusInfo(postData,function(data) {
-                console.log(data);
-                if (9999 == data.rescode){
-                   cs.loginOut();
-                }
-                if (0 == data.rescode)
-                {
-                    _this.system = data.data.system;
-                    _this.interface = data.data.interface;
-                    _this.niclist = data.data.niclist;
-                    _this.packages = data.data.packages;
-                    var idx = 0;
-                    for(var i in _this.interface){
-                        var _wan = '';
-                        var _lan = '';
-                        if(i.substring(0,3) == "lan"){
-                            _this.interface[i].interface = 'LAN';
-                        }
-                        if(i.substring(0,3) == "wan"){
-                            _this.interface[i].interface = 'WAN';
-                            _this.extInfo[idx] = _this.interface[i];
-                            _this.extInfo[idx].idx = idx+1;
-                            _this.extInfo[idx].idName = "load_charts"+(idx+1);
-                            idx++;
+
+            setInterval(function() {
+                uiPost.getStatusInfo(postData,function(data) {
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 == data.rescode)
+                    {
+                        _this.system = data.data.system;
+                        _this.interface = data.data.interface;
+                        _this.niclist = data.data.niclist;
+                        _this.packages = data.data.packages;
+                        console.log( _this.interface);
+                        var idx = 0;
+                        for(var i in _this.interface){
+                            var _wan = '';
+                            var _lan = '';
+                            if(i.substring(0,3) == "lan"){
+                                _this.interface[i].interface = 'LAN';
+                            }
+                            if(i.substring(0,3) == "wan"){
+                                _this.interface[i].interface = 'WAN';
+                                _this.extInfo[idx] = _this.interface[i];
+                                _this.extInfo[idx].idx = idx+1;
+                                _this.extInfo[idx].idName = "load_charts"+(idx+1);
+                                idx++;
+                            }
                         }
                     }
-                    console.log(_this.extInfo);
-                }
-            });
+                });
+            },1000);
 
         },
         watch: {
             wanTab: function () {
                 var _this = this;
-                console.log(_this.wanTab);
             },
             lanTab: function () {
                 var _this = this;
-                console.log(_this.lanTab);
             },
             tab:function () {
                 var _this = this;
-                console.log(_this.tab);
                 _this.functionLoadCharts();
             }
         },
@@ -641,9 +637,6 @@
             },
             loadCharts: function() {
                 var _this = this;
-                console.log('-----------------loadCharts-----------------');
-                console.log(this.loadChartsData);
-                console.log('-----------------loadCharts END-----------------');
 
                 for(var x in _this.extInfo) {
                     var idName = [];
@@ -734,7 +727,6 @@
                             }
                         }
                     };
-                    console.log(_this.extInfo);
 
                     this.loadChartsData[x].load_charts = document.getElementById("load_charts" + (Number(x)+1));
                     this.loadChartsData[x].e_load_charts = echarts.init(this.loadChartsData[x].load_charts);
@@ -752,14 +744,11 @@
                 uiPost.getNetInfo(postData,function(data) {
                     data = data.data;
                     if(_this.tab != 0){
-                        console.log(data);
-                        console.log(data.em1);
                         data = data[_this.extInfo[_this.tab-1].Nic];
                     }else{
                         data = data[_this.extInfo[0].Nic];
                         return;
                     }
-                    console.log(data);
                     var type = data.type;
                     var status = data.status;
                     _this.loadChartsData[_this.tab-1].load_x.shift();
@@ -780,7 +769,7 @@
                     });
                     // 其他显示
                     _this.loadChartsData.type = (type == 'dhcp' ? "DHCP" : type == 'static' ? _this.$t('realtime.staticip') : "PPPoE");
-                    _this.loadChartsData.status = (status == 1 ? _this.$t('realtime.succ') : _this.$t('realtime.fail'));
+                    _this.loadChartsData.status = (data.gateway != null ? _this.$t('realtime.succ') : _this.$t('realtime.fail'));
                     _this.loadChartsData.ip = (data.ip);
                     _this.loadChartsData.gateway = (data.gateway);
                     _this.loadChartsData.up = cs.bytesToSize(parseInt((data.up)));
@@ -877,7 +866,6 @@
                 var postData = {"action":"getLinksData", "data":{}};
                 uiPost.getLinksData(postData,function(data) {
                     data = data.data;
-                    console.log(data);
                     _this.linksChartsData.links_x.shift();
                     _this.linksChartsData.links_y.shift();
                     _this.linksChartsData.links_y1.shift();

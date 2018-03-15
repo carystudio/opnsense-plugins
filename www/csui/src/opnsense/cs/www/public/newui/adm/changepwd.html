@@ -137,7 +137,9 @@
                             }
                             _this.applyLoading = false;
                             if (0 == data.rescode) {
-                                _this.$Message.success(_this.$t('changepwd.success'));
+                                _this.$Message.success({content:_this.$t('changepwd.success'),onClose:function(){
+                                    cs.loginOut();
+                                }});
                             } else {
                                 _this.$Message.error(_this.$t('changepwd.fail')+_this.$t('errorcode.'+data.rescode));
                             }

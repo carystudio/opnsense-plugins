@@ -38,9 +38,11 @@
                                 :format="upload.format"
                                 :on-format-error="formatError"
                                 :on-success="uploadSuccess"
+                                :on-remove="removeFile"
                         >
-                            <Button icon="ios-cloud-upload-outline">{{ $t('config.select_file')+' & '+$t('config.update')   }}</Button>
+                            <Button icon="ios-cloud-upload-outline">{{ $t('config.select_file') }}</Button>
                         </Upload>
+                        <div v-if="upload.fileStatus == true"><Button @click="doUpload" :loading="loadingStatus">{{ loadingStatus ? 'Uploading' : $t('config.update')  }}</Button></div>
                     </FormItem>
                     <FormItem :label="$t('config.restore_factory_default')">
                         <Poptip
@@ -95,13 +97,16 @@
                 percent: 0,
                 lan_ip:'192.168.10.1',
                 saveAction: '/webapi',
+                loadingStatus:false,
+                upfileStatus:false,
                 upload: {
                     file: null,
+                    fileStatus:false,
                     action: '/webapi',
                     name:'filename',
                     format:['dat'],
                     data:{
-                        action:'restoreConfig'
+                        action:'saveConfigFile'
                     },
                     maxSize: 4000
                 }
@@ -181,17 +186,16 @@
                     },cs.getTimer(120));
                 })
             },
-            handleUpload: function(file) {
-                this.upload.file = file;
+            removeFile:function () {
+                this.upload.fileStatus = false;
             },
-            exceededSize: function() {
-                this.$Message.error({content:this.$t('config.msg3',[cs.bytesToSize( (parseInt(this.upload.maxSize)*1000) )]),duration: 5});
-            },
-            formatError: function() {
-                this.$Message.error({content:this.$t('config.msg2',[this.upload.format.join('、')]),duration: 5});
-            },
-            uploadSuccess:function(){
+            doUpload: function () {
                 var _this = this;
+                _this.loadingStatus = true;
+                var postData = {"action":"updataConfig"};
+
+                uiPost.updataConfig(postData);
+
                 _this.$Modal.success({
                     loading:true,
                     render: function(h) {
@@ -210,6 +214,38 @@
                     }
                     _this.percent++;
                 },cs.getTimer(120));
+
+            },
+            handleUpload: function(file) {
+                this.upload.file = file;
+            },
+            exceededSize: function() {
+                this.$Message.error({content:this.$t('config.msg3',[cs.bytesToSize( (parseInt(this.upload.maxSize)*1000) )]),duration: 5});
+            },
+            formatError: function() {
+                this.$Message.error({content:this.$t('config.msg2',[this.upload.format.join('、')]),duration: 5});
+            },
+            uploadSuccess:function(){
+                var _this = this;
+                this.upload.fileStatus = true;
+               /* _this.$Modal.success({
+                    loading:true,
+                    render: function(h) {
+                        return h('div',[
+                            _this.$t('common.loading'),
+                            h('Progress',{
+                                attrs:{ percent:_this.percent }
+                            })
+                        ])
+                    }
+                });
+                var percentTimer = setInterval(function(){
+                    if (_this.percent>=100) {
+                        clearInterval(percentTimer);
+                        location.href='/login.html';
+                    }
+                    _this.percent++;
+                },cs.getTimer(120));*/
             }
         }
     };

@@ -127,8 +127,9 @@ class Firewall extends Csbackend
                     $a_rule['ipprotocol'] == $rule['ipprotocol'] &&
                     $a_rule['protocol'] == $rule['protocol'] && (
                         (isset($a_rule['source']['address']) && isset($rule['source']['address']) &&
-                    $a_rule['destination']['any'] == $rule['destination']['any'] &&
-                    $a_rule['destination']['port'] == $rule['destination']['port'])
+                        $a_rule['source']['address'] == $rule['source']['address'] &&
+                        $a_rule['destination']['any'] == $rule['destination']['any'] &&
+                        $a_rule['destination']['port'] == $rule['destination']['port'])
                     )){
                     throw new AppException('Firewall_104');
                 }

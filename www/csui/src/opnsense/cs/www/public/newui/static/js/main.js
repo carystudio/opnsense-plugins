@@ -36,6 +36,13 @@
         created:function(){
             var _this = this;
             this.$i18n.locale = localStorage.getItem('lang') || globalConfig.defaultLang;
+            var postData = {"action":"getLangConfig"};
+            uiPost.getLangConfig(postData,function(data){
+                if (data.defaultLang) {
+                    localStorage.setItem('lang',data.defaultLang);
+                    _this.$i18n.locale = data.defaultLang;
+                }
+            });
             /*uiPost.getInitConfig(function(data){
                 localStorage.setItem('globalConfig',JSON.stringify(data));
                 if (data.defaultLang) {

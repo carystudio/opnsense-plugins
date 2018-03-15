@@ -85,10 +85,14 @@ Vue.component('cs-header', {
       this.currentLang = lang;
       this.$i18n.locale = lang;
       localStorage.setItem('lang',lang);
-      uiPost.setLanguageCfg({lang:lang});
+      var data = {};
+      data.language = lang;
+      var postData = {"action":"setLangConfig","data":data};
+      uiPost.setLangConfig(postData);
     },
     goto:function(){
-      location.href = this.globalConfig.helpUrl;
+      // location.href = this.globalConfig.helpUrl;
+      window.open(this.globalConfig.helpUrl);
     },
     getWechatQR:function(){
       var _this = this;

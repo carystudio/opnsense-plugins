@@ -6568,6 +6568,30 @@ uiPost.prototype.doLogin = function(postVar,callback){
         this.url = '/webapi';
         return this.post(postVar,callback);
     };
+    uiPost.prototype.getLangConfig = function(postVar,callback){
+        this.topicurl = 'getLangConfig';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/index/getlangcfg';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setLangConfig = function(postVar,callback){
+        this.topicurl = 'setLangConfig';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/index/setlangcfg';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.saveConfigFile = function(postVar,callback){
+        this.topicurl = 'saveConfigFile';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.updataConfig = function(postVar,callback){
+        this.topicurl = 'updataConfig';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
 
 	obj.uiPost = new uiPost();
 })(window);

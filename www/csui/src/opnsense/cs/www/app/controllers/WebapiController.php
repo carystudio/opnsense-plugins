@@ -110,6 +110,8 @@ class WebapiController extends BaseController
                     Portal::setPortalStatusUp($this->request);
                 }else if('setUploadFile'==$action){
                     Accontrol::setUploadFile($this->request);
+                }else if('saveConfigFile'==$action){
+                    System::saveConfigFile($this->request);
                 }
             }
             $para = json_decode($text, true);
@@ -313,6 +315,8 @@ class WebapiController extends BaseController
             }else if("delApUpgradeFile" == $action){
                 $this->checkData($para);
                 $result['rescode'] = Accontrol::delApUpgradeFile($para['data']);
+            }else if("updataConfig" == $action){
+                System::updataConfig();
             }else if('test' == $action){
                 $result['rescode'] = Dns::getErrors();
             }else{

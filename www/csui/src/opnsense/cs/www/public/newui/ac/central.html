@@ -117,35 +117,36 @@
                         <Option value="3">2.4G+5G</Option>
                     </Select>
                 </div>
-
             </FormItem>
-            <FormItem :label="$t('central.band2')" prop="band2">    <!--最大用户数-->
-                <Select v-model="formSetinfo.band2">
-                    <Option value="1">2.4 GHz (B)</Option>
-                    <Option value="4">2.4 GHz (G)</Option>
-                    <Option value="6">2.4 GHz (N)</Option>
-                    <Option value="9">2.4 GHz (B+G+N)</Option>
-                </Select>
-            </FormItem>
-            <FormItem :label="$t('central.channels',['2.4G'])" prop="channel2">
-                <Select v-model="formSetinfo.channel2">
-                    <Option value="-1">{{ $t('central.unmodify') }}</Option>
-                    <Option value="0">{{ $t('central.auto_select') }}</Option>
-                    <Option v-for="i in 13" :key="i" :value="i">{{ i }}</Option>
-                </Select>
-            </FormItem>
-            <FormItem :label="$t('central.bandwidth2')" prop="band_width2">    <!--最大用户数-->
-                <Select v-model="formSetinfo.band_width2">
-                    <Option value="0">20M</Option>
-                    <Option value="1">20M/40M</Option>
-                </Select>
-            </FormItem>
-            <FormItem :label="$t('central.tx_powers',['2.4G'])" prop="tx_power2">
-                <Select v-model="formSetinfo.tx_power2">
-                    <Option v-for="i in txPower" :key="i" :value="i">{{ i!='-1'?i+'%':$t('central.unmodify') }}</Option>
-                </Select>
-            </FormItem>
-            <div v-if="formSetinfo.ssid5 != ''">
+            <div v-if="formSetinfo.wlanset != '2'">
+                <FormItem :label="$t('central.band2')" prop="band2">    <!--最大用户数-->
+                    <Select v-model="formSetinfo.band2">
+                        <Option value="1">2.4 GHz (B)</Option>
+                        <Option value="4">2.4 GHz (G)</Option>
+                        <Option value="6">2.4 GHz (N)</Option>
+                        <Option value="9">2.4 GHz (B+G+N)</Option>
+                    </Select>
+                </FormItem>
+                <FormItem :label="$t('central.channels',['2.4G'])" prop="channel2">
+                    <Select v-model="formSetinfo.channel2">
+                        <Option value="-1">{{ $t('central.unmodify') }}</Option>
+                        <Option value="0">{{ $t('central.auto_select') }}</Option>
+                        <Option v-for="i in 13" :key="i" :value="i">{{ i }}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem :label="$t('central.bandwidth2')" prop="band_width2">    <!--最大用户数-->
+                    <Select v-model="formSetinfo.band_width2">
+                        <Option value="0">20M</Option>
+                        <Option value="1">20M/40M</Option>
+                    </Select>
+                </FormItem>
+                <FormItem :label="$t('central.tx_powers',['2.4G'])" prop="tx_power2">
+                    <Select v-model="formSetinfo.tx_power2">
+                        <Option v-for="i in txPower" :key="i" :value="i">{{ i!='-1'?i+'%':$t('central.unmodify') }}</Option>
+                    </Select>
+                </FormItem>
+            </div>
+            <div v-if="formSetinfo.wlanset != '1'">
                 <FormItem :label="$t('central.band5')" prop="band5">    <!--最大用户数-->
                     <Select v-model="formSetinfo.band5">
                         <Option value="2">802.11A</Option>
@@ -320,7 +321,7 @@
                         key: 'action',
                         width: 95,
                         align: 'center',
-                        render: (h, params) => {
+                        render: function (h, params) {
                         return h('div', [
                             h('Poptip', {
                                 props: {
@@ -339,16 +340,16 @@
                                             }});
                                         });
                                     }
-                        }
-                },
-                                    [
-                                        h('Button', {
-                                            props: {
-                                                type: 'error',
-                                                size: 'small'
-                                            }
-                                        }, _this.$t('localaccount.delete'))
-                                    ])
+                                }
+                            },
+                        [
+                            h('Button', {
+                                props: {
+                                    type: 'error',
+                                    size: 'small'
+                                }
+                            }, _this.$t('localaccount.delete'))
+                        ])
 //                                    '删除')
                 ]);
             }
@@ -880,9 +881,9 @@
                                     _this.formSetinfo.hidessid = false;
                                 }
                                 if('0' == data.WLAN_STATUS.isolate){
-                                    _this.formSetinfo.wifi_quarantine = true;
-                                }else{
                                     _this.formSetinfo.wifi_quarantine = false;
+                                }else{
+                                    _this.formSetinfo.wifi_quarantine = true;
                                 }
                                 _this.formSetinfo.maxusernumber    = data.WLAN_STATUS.stanum;
 //                                _this.formSetinfo.vlanid    = data.WLAN_STATUS.vlanid;
@@ -1015,9 +1016,9 @@
                     data.hedden = '1';
                 }
                 if(true == _this.formSetinfo.wifi_quarantine){
-                    data.noforward = '0';
-                }else{
                     data.noforward = '1';
+                }else{
+                    data.noforward = '0';
                 }
                 if(99 != cs.num(_this.formSetinfo.maxusernumber)){
                     _this.$Message.error(_this.$t('central.msg13'));

@@ -19,7 +19,9 @@ class System extends Csbackend
         'System_201'=>'时不正确',
         'System_202'=>'日不正确',
         'System_203'=>'月不正确',
-        'System_204'=>'周不正确'
+        'System_204'=>'周不正确',
+
+        'System_300'=>'请选择需要上传的配置文件'
     );
 
     public static function getStatusInfo(){
@@ -143,7 +145,7 @@ class System extends Csbackend
         $conf = serialize($config);
         $data = Mcrypt::encrypt($conf);
 
-        $filename="Config-CSG2000P-".date("Ymd")."_config.dat"; //文件名
+        $filename="Config-CSG2000P-".date("Ymd").".dat"; //文件名
         Header( "Content-type:  application/octet-stream ");
         Header( "Accept-Ranges:  bytes ");
         Header( "Accept-Length: " .strlen($data));
@@ -151,6 +153,42 @@ class System extends Csbackend
         echo $data;
         exit(0);
 
+    }
+
+    public static function saveConfigFile($request){
+        foreach ($request->getUploadedFiles() as $file) {
+            $filecontent = file_get_contents($file->getTempName());
+            if(file_exists('/tmp/file_config.conf')){
+                unlink('/tmp/file_config.conf');
+            }
+            file_put_contents('/tmp/file_config.conf',$filecontent);
+        }
+        exit(0);
+    }
+
+    public static function updataConfig(){
+        global $config;
+        $result = 0;
+        try{
+            if(!file_exists('/tmp/file_config.conf')){
+                throw new AppException('System_300');
+            }
+
+            $filecontent = file_get_contents('/tmp/file_config.conf');
+            $data = unserialize(Mcrypt::decrypt($filecontent));
+            unlink('/tmp/file_config.conf');
+            if(is_array($data) && isset($data['version']) && isset($data['system'])){
+                $config = $data;
+                write_config();
+                echo "Success";
+                mwexec('/sbin/shutdown -r +3sec');
+            }
+        }catch(AppException $aex){
+            $result = $aex->getMessage();
+        }catch(Exception $ex){
+            $result = '100';
+        }
+        return $result;
     }
 
     public static function restoreConfig($request){
@@ -165,7 +203,6 @@ class System extends Csbackend
                 echo "Success";
                 mwexec('/sbin/shutdown -r +3sec');
             }
-
         }
 
         exit(0);
@@ -333,5 +370,30 @@ class System extends Csbackend
         reset_factory_defaults(false);
 
         return 0;
+    }
+
+    public static function getLangConfig(){
+        global $config;
+        $data = array('defaultLang'=>'en');
+        if('zh_CN' == $config['system']['language']){
+            $data['defaultLang'] = 'cn';
+        }
+        return $data;
+    }
+
+    public static function setLangConfig($data){
+        global $config;
+        if('en' == $data['language']){
+            $data['language'] = 'en_US';
+        }else{
+            $data['language'] = 'zh_CN';
+        }
+        if (!empty($data['language']) && $data['language'] != $config['system']['language']) {
+            $config['system']['language'] = $data['language'];
+        }
+
+        write_config();
+
+        return $data['language'];
     }
 }

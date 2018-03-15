@@ -110,7 +110,7 @@ cs.prototype.string = function (str){
 	var ret = 99;		
 	if(str == undefined || str=="") { ret = 0;  return ret; }//不能为空
 	if(/[\xB7]/.test(str))	ret = 1;//无效，包含了无效的字符
-	if(/[^\x00-\xff]/.test(str)) ret = 1;	//无效，包含了无效的字符	
+	if(/[^\x00-\xff]/.test(str)) ret = 1;	//无效，包含了无效的字符
 	
 	var re1=/[^\x20-\x7D]/;
 	var re2=/[\x20\x22\x24\x25\x27\x2C\x2F\x3B\x3C\x3E\x5C\x60]/;
@@ -441,6 +441,35 @@ cs.prototype.formatDate = function(date, fmt) {
 		}
 	}
 	return fmt;
+};
+
+/**
+ * 检测字符串长度是否符合规则
+ * 规则：不能超过指定字符。
+ *
+ * @Author   Jeff       <Jeff@carystudio.com>
+ * @DateTime 2018-3-12
+ * @param    {String}   str                   字符串
+ * @param    {Number}   num                   字符串
+ * @return   {Number}
+ * 0: 不能为空 <br/>
+ * 1: 无效，包含了无效的字符 <br/>
+ * 2: 无效，不能超过指定字符个数 <br/>
+ * 99: 有效
+ */
+cs.prototype.srtLength = function (str,num){
+	var ret = 99;
+	if(str == undefined || str==""){ ret = 0;  return ret; }
+	// var reg=/[\x22\x24\x25\x27\x2C\x2F\x3B\x3C\x3E\x5C\x60\x7E]/;
+	// if(reg.test(str)) ret = 1;
+	//for chinese
+	var strlen = 0;
+	for(var i = 0;i < str.length; i++){
+		if(str.charCodeAt(i) > 255) strlen += 3;
+		else strlen++;
+	}
+	if(strlen>num) ret = 2;
+	return ret;
 };
 
 /**

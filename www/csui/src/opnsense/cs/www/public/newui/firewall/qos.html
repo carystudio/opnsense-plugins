@@ -63,6 +63,12 @@
                                 </Input>
                                 (100-125000KBytes)
                             </FormItem>
+                        </div>
+                        <!-- btn -->
+                        <FormItem>
+                            <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('qos.apply') }}</Button>
+                        </FormItem>
+                        <div v-show="formValidate.limitType == '2' && formValidate.tempType == '2'">
                             {{ $t('qos.add_rule') }}
                             <hr>
                             <br>
@@ -84,13 +90,7 @@
                             <FormItem>
                                 <Button type="primary" @click="addSubmit('formValidate')" :loading="addLoading">{{ $t('qos.add') }}</Button>
                             </FormItem>
-                            <hr>
-                            <br>
                         </div>
-                        <!-- btn -->
-                        <FormItem>
-                            <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('qos.apply') }}</Button>
-                        </FormItem>
                     </div>
                 </Form>
             </Card>
@@ -136,6 +136,7 @@
                 formValidate: {
                     status:false,
                     limitType:'1',
+                    tempType:'0',
                     totalUplinkSpeed:'125000',
                     totalDownlinkSpeed:'125000',
                     singleUplinkSpeed:'125000',
@@ -341,6 +342,7 @@
                     }else{
                         _this.formValidate.status = true;
                         _this.formValidate.limitType = data.data.Type;
+                        _this.formValidate.tempType = data.data.Type;
                         if('2' == data.data.Type){
                             _this.formValidate.singleUplinkSpeed = data.data.Up;
                             _this.formValidate.singleDownlinkSpeed = data.data.Down;

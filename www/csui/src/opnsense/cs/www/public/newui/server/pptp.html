@@ -206,13 +206,21 @@
                         _this.formValidate.status = false;
                     }
 
-                    _this.formValidate.startIpAddr = data.data.ClientIpStart;
-                    _this.formValidate.endIpAddr = data.data.ClientIpEnd;
-                    _this.formValidate.serverAddr = data.data.LocalIp;
-                    _this.formValidate.firstDns = data.data.Dns1;
-                    _this.formValidate.secondDns = data.data.Dns2;
-                    _this.formValidate.winsServerAddr = data.data.Wins;
-                    _this.formValidate.mppeEncrypt = data.data.Encrypt;
+                    if(null != data.data.LocalIp){
+                        _this.formValidate.startIpAddr = data.data.ClientIpStart;
+                        _this.formValidate.endIpAddr = data.data.ClientIpEnd;
+                        _this.formValidate.serverAddr = data.data.LocalIp;
+                        _this.formValidate.firstDns = data.data.Dns1;
+                        _this.formValidate.secondDns = data.data.Dns2;
+                        _this.formValidate.winsServerAddr = data.data.Wins;
+                        console.log( data.data.Encrypt);
+                        if(null == data.data.Encrypt){
+                            _this.formValidate.mppeEncrypt = '0';
+                        }else{
+                            _this.formValidate.mppeEncrypt = data.data.Encrypt;
+                        }
+                    }
+
                 }
             });
         },

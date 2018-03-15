@@ -32,7 +32,7 @@
                      {{ $t('ipf.add_rule') }}
                      <hr>-->
                     <br>
-                    <FormItem :label="$t('ipf.type')" prop="filterType">
+                    <FormItem v-show="false" :label="$t('ipf.type')" prop="filterType">
                         <Select v-model="formValidate.filterType" >
                             <!--<Option value="1">WAN</Option>-->
                             <Option value="2">LAN1</Option>
@@ -210,12 +210,12 @@
                     key: 'idx',
                     align: 'center',
                     sortable: true
-                }, {
+                }, /*{
                     title: this.$t('ipf.type'),
                     key: 'portType',
                     align: 'center',
                     sortable: true
-                }, {
+                }, */{
                     title: this.$t('ipf.ip'),
                     key: 'Ip',
                     align: 'center',
@@ -268,7 +268,6 @@
             var _this = this;
             var postData = {"action":"getFilterStatus"};
             uiPost.getFilterStatus(postData,function(data) {
-                console.log(data);
                 if (9999 == data.rescode){
                     cs.loginOut();
                 }
