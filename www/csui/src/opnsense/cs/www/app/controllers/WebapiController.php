@@ -151,7 +151,10 @@ class WebapiController extends BaseController
             }else if('reboot' == $action){
                 $result['rescode']  = System::reboot();
             }elseif('getArpInfo' == $action){
-                $result['rescode']  = System::getArpInfo();
+                if(!is_array($para['data'])){
+                    $para['data'] = null;
+                }
+                $result['rescode']  = System::getArpInfo($para['data']);
             }else if('getStaticRoute' == $action){
                 $result['rescode']  = Network::getStaticRoute();
             }else if('addStaticRoute' == $action){

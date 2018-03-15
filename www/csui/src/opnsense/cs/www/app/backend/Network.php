@@ -107,20 +107,33 @@ class Network extends Csbackend
         }*/
     }
 
-    private static function getAvailableNic(){
+    private static function getAvailableNic($include=false){
         global  $config;
 
         if(false == self::$availableNic){
             $niclist = get_interface_list();
-            foreach($config['interfaces'] as $inf=>$infinfo){
-                $infinfo = self::getInfInfo($infinfo['descr']);
-                if(isset($niclist[$infinfo['Nic']])){
-                    unset($niclist[$infinfo['Nic']]);
+            foreach($config['interfaces'] as $if_name=>$if_info){
+                if('wan'==substr($if_info['descr'],0,3)){
+                    if(isset($niclist[$config['interfaces'][$if_name]['if']])){
+                        unset($niclist[$config['interfaces'][$if_name]['if']]);
+                    }
                 }
             }
+            if(false == $include){
+                if(isset($config['bridges']['bridged'][0]['members'])){
+                    $lan_ifs = trim($config['bridges']['bridged'][0]['members']);
+                    $lan_ifs = explode(',', $lan_ifs);
+                    foreach($lan_ifs as $lan_if){
+                        $lan_if = trim($lan_if);
+                        if(isset($niclist[$config['interfaces'][$lan_if]['if']])){
+                            unset($niclist[$config['interfaces'][$lan_if]['if']]);
+                        }
+                    }
+                }
+            }
+
             self::$availableNic = $niclist;
         }
-
 
         return self::$availableNic;
     }
@@ -145,13 +158,14 @@ class Network extends Csbackend
         global $config;
 
         $lanInfo = array();
-        $lanInfo['AvailableNic'] = self::getAvailableNic();
+        $lanInfo['Nics'] = self::getAvailableNic('lan');
         $lanInfo['Interfaces'] = array();
         foreach($config['interfaces'] as $idx=>$infinfo){
             if(strpos($infinfo['descr'], 'lan')===0){
                 $lanInfo['Interfaces'][] = self::getInfInfo($infinfo['descr']);
             }
         }
+
 
 
         return $lanInfo;
@@ -248,6 +262,19 @@ class Network extends Csbackend
                                     }
                                 }
                             }
+                        }
+                        $interfaceInfo['Nic'] = array();
+                        if(strpos($infinfo['if'], 'bridge')===0){
+                            foreach($config['bridges']['bridged'] as $idx=>$bridge_info){
+                                if($bridge_info['bridgeif'] == $infinfo['if']){
+                                    $members = explode(',', $bridge_info['members']);
+                                    foreach($members as $member){
+                                        $interfaceInfo['Nic'][] = $config['interfaces'][$member]['if'];
+                                    }
+
+                                }
+                            }
+
                         }
                     }
 
@@ -375,7 +402,7 @@ class Network extends Csbackend
                 throw new AppException('Network_103');
             }
             $lan = array();
-            $lan['if'] = $data['Nic'];
+            $lan['if'] = 'bridge0';
             $lan['descr'] = $data['Interface'];
             $lan['enable'] = '1';
             $lan['spoofmac'] = '';
@@ -384,6 +411,13 @@ class Network extends Csbackend
             $lan['ipaddrv6'] = 'track6';
             $lan['track6-interface'] = '';
             $lan['track6-prefix-id'] = '0';
+            $if_members = array();
+            foreach($config['interfaces'] as $if_name=>$if_info){
+                if(in_array($if_info['if'], $data['Nic'])){
+                    $if_members[] = $if_name;
+                }
+            }
+            $config['bridges']['bridged'][0]['members'] = implode(',', $if_members);
 
             $seted = false;
             foreach($config['interfaces'] as $infidx=>$tmp_infinfo){

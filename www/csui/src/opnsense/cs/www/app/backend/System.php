@@ -335,7 +335,7 @@ class System extends Csbackend
         return 0;
     }
 
-    public static function getArpInfo(){
+    public static function getArpInfo($data=null){
         global $config;
         exec("/usr/sbin/arp -n -a",$arp);
         $arpinfo = array();
@@ -358,6 +358,9 @@ class System extends Csbackend
                 $a_arp["ip"] = ltrim( rtrim($line[1],')' ) , '(' );
                 $a_arp["mac"] = $line[3];
                 if(in_array($line[5], $interfaces)){
+                    if($data && 'gateway' == $data['except'] && '8' == count($line)){
+                        continue;
+                    }
                     $infos[] = $a_arp;
                 }
             }

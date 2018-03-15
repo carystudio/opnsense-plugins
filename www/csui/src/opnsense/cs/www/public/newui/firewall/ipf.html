@@ -364,14 +364,14 @@
             showClientList:function(){
                 var _this = this;
                 _this.showModel = true;
-                var postData = {"action":"getArpInfo", "data":{}};
+                var postData = {"action":"getArpInfo", "data":{"except":"gateway"}};
                 uiPost.getArpInfo(postData,function(data) {
-                    _this.arpData = data.data;
-                    for(var i in _this.arpData){
-                        _this.arpData[i].idx = ''+( Number(i) + 1 );
+                    var tempArr = [];
+                    for(var x in data.data){
+                        tempArr[x] = data.data[x];
+                        tempArr[x].idx = ''+( Number(x) + 1 );
                     }
-                    console.log( _this.arpData);
-
+                    _this.arpData = tempArr;
 
                     _this.arpLoading = false;
                 });
