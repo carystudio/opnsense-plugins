@@ -190,7 +190,7 @@
         </Alert>
         <Form :label-width="120" label-position="left">
             <FormItem>
-                <Button type="primary" @click="letctlOk(0)">{{ $t('central.open') }}</Button>
+                <Button type="primary" @click="letctlOk(2)">{{ $t('central.open') }}</Button>
                 <Button type="primary" @click="letctlOk(1)">{{ $t('central.finish') }}</Button>
             </FormItem>
         </Form>
@@ -510,7 +510,7 @@
                         render: function(h, params) {
                             console.log(params);
                             console.log(_this.ledStateInfo);
-                            _this.ledStateInfo[params.index].color = _this.ledStateInfo[params.index].state == '0'? "#f50" : "#000";
+                            _this.ledStateInfo[params.index].color = _this.ledStateInfo[params.index].state == '2'? "#f50" : "#000";
                             return  h('Icon', {
                                 style:{
                                     cursor: 'pointer',
@@ -528,14 +528,14 @@
                                         data.id = params.row.id;
 
 
-                                        if('0' == _this.ledStateInfo[params.index].state){
+                                        if('2' == _this.ledStateInfo[params.index].state){
                                             _this.ledStateInfo[params.index].state = '1';
                                             _this.ledStateInfo[params.index].color = '#000';
                                             data.ledState = '1';
                                         }else{
-                                            _this.ledStateInfo[params.index].state = '0';
+                                            _this.ledStateInfo[params.index].state = '2';
                                             _this.ledStateInfo[params.index].color = '#f50';
-                                            data.ledState = '0';
+                                            data.ledState = '2';
                                         }
                                         console.log(_this.ledStateInfo[params.index]);
 
@@ -762,7 +762,7 @@
                 _this.centralData = data.data;
                 _this.apscanLoading = false;
                 for(var x in data.data){
-                    if('0' == data.data[x].ledstate){
+                    if('2' == data.data[x].ledstate){
                         _this.ledStatus = true;
                         break;
                     }
@@ -770,8 +770,8 @@
                 for(var i in data.data){
                     _this.apname[i] = data.data[i].apname;
                     _this.ledStateInfo[i] = [];
-                    if('0' == data.data[i].ledstate){
-                        _this.ledStateInfo[i].state = "0";
+                    if('2' == data.data[i].ledstate){
+                        _this.ledStateInfo[i].state = "2";
                         _this.ledStateInfo[i].color = "#f50";
                     }else{
                         _this.ledStateInfo[i].state = "1";
@@ -1114,7 +1114,7 @@
                 var _this = this;
                 var temp = this.selectData;
 
-                if('0' == index){
+                if('2' == index){
                     _this.ledStatus = true;
                 }else{
                     _this.ledStatus = false;
