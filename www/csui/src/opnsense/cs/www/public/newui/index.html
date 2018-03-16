@@ -454,9 +454,27 @@
                 var pack = _this.packages;
                 var dataObj = [];
                 dataObj = '{ "name": "","value1": "","value2": ""}';
+                console.log('--------------------------temp---------------------------');
+                var lanInpkts = null;
+                var lanOutpkts = null;
+                for(var x in temp){
+                    if(x.substring(0,3) == "lan"){
+                        for(var j in temp[x].Nic){
+                            lanInpkts += pack[temp[x].Nic[j]].inpkts;
+                            lanOutpkts += pack[temp[x].Nic[j]].outpkts;
+                        }
+                        break;
+                    }
+                }
                 for(var i in temp){
                     if(i.substring(0,3) == "lan" || i.substring(0,3) == "wan"){
-                        dataObj += ',{ "name": "'+ i +'","value1": "' + pack[temp[i].Nic].inpkts + '","value2": "' + pack[temp[i].Nic].outpkts + '"}';
+                        if(i.substring(0,3) == "wan"){
+                            console.log('-----------------------wan------------------------');
+                            console.log(pack[temp[i].Nic].inpkts);
+                            dataObj += ',{ "name": "'+ i +'","value1": "' + pack[temp[i].Nic].inpkts + '","value2": "' + pack[temp[i].Nic].outpkts + '"}';
+                        }else{
+                            dataObj += ',{ "name": "'+ i +'","value1": "' + lanInpkts + '","value2": "' + lanOutpkts + '"}';
+                        }
                     }
                 }
                 dataObj = '['+dataObj+']';
@@ -580,6 +598,7 @@
                     if (9999 == data.rescode){
                         cs.loginOut();
                     }
+                    console.log(data);
                     if (0 == data.rescode)
                     {
                         _this.system = data.data.system;
