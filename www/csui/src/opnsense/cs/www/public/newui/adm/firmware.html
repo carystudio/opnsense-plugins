@@ -30,17 +30,23 @@
                     <FormItem :label="$t('firmware.current_compilation_time')">
                         {{ buildTime }}
                     </FormItem>
-                    <FormItem :label="$t('firmware.u_firmware_version')">
+                    <FormItem :label="$t('firmware.u_firmware_version')" v-show="fwVersionStatus">
                         <span>{{ fwVersion }}</span>
                     </FormItem>
-                    <FormItem :label="$t('firmware.u_compilation_time')">
+                    <FormItem :label="$t('firmware.u_firmware_version')" v-show="!fwVersionStatus">
+                        {{ $t('firmware.nothing') }}
+                    </FormItem>
+                    <FormItem :label="$t('firmware.u_compilation_time')" v-show="fwbuiltTimeStatus">
                         {{ fwbuiltTime }}
                     </FormItem>
-                    <FormItem>
-                        <span>{{ firmwareDescribe }}</span>
+                    <FormItem :label="$t('firmware.u_compilation_time')" v-show="!fwbuiltTimeStatus">
+                        {{ $t('firmware.nothing') }}
                     </FormItem>
                     <FormItem>
-                        <Button type="primary" @click="handleSubmit" :disabled="upgradeStatus">{{ upgradeDescribe }}</Button>
+                        <span>{{ $t('firmware.firmwareDescribe['+ firmwareDescribeStatus +']') }}</span>
+                    </FormItem>
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit" :disabled="upgradeStatus">{{ $t('firmware.upgradeDescribe['+ upgradeDescribeStatus +']') }}</Button>
                     </FormItem>
                 </Form>
             </Card>
@@ -76,10 +82,16 @@
                 version:'',
                 buildTime:'',
                 fwVersion:'',
+                fwVersionStatus:false,
                 fwbuiltTime:'',
+                fwbuiltTimeStatus:false,
                 firmwareDescribe:'',
+                firmwareDescribeStatus:"0",
                 upgradeDescribe:'',
+                upgradeDescribeStatus:"0",
                 upgradeStatus:true,
+
+
 
                 newVersion: '',
                 hardModel: '',
@@ -109,11 +121,13 @@
         },
         created: function() {
             var _this = this;
-            _this.upgradeDescribe = _this.$t('firmware.check_firmware_now');
+//            _this.upgradeDescribe = _this.$t('firmware.check_firmware_now');
+            _this.upgradeDescribeStatus = '0';
             var postData = {"action":"getFirmwareInfo", "data":{}};
             uiPost.getFirmwareInfo(postData,function(data) {
                 console.log(data);
-                _this.upgradeDescribe = _this.$t('firmware.upgrade');
+                _this.upgradeDescribeStatus = '1';
+//                _this.upgradeDescribe = _this.$t('firmware.upgrade');
                 if (9999 == data.rescode) {
                     cs.loginOut();
                 }
@@ -125,16 +139,21 @@
                     }
                     if (fwData.Fw_version == "") {
                         _this.fwVersion = _this.$t('firmware.nothing');
-                        _this.firmwareDescribe = _this.$t('firmware.no_upgrade_firmware');
+                        _this.fwVersionStatus = false;
+//                        _this.firmwareDescribe = _this.$t('firmware.no_upgrade_firmware');
+                        _this.firmwareDescribeStatus = '0';
                         _this.upgradeStatus = true;
                     } else {
                         _this.fwVersion = fwData.Fw_version;
-                        _this.firmwareDescribe = _this.$t('firmware.have_upgrade_firmware');
+                        _this.fwVersionStatus = true;
+//                        _this.firmwareDescribe = _this.$t('firmware.have_upgrade_firmware');
+                        _this.firmwareDescribe = '1';
                         _this.upgradeStatus = false;
                     }
                     if (fwData.Fw_build_date == "") {
-                        _this.fwbuiltTime = _this.$t('firmware.nothing');
+                        _this.fwbuiltTimeStatus = false;
                     }else{
+                        _this.fwbuiltTimeStatus = true;
                         _this.fwbuiltTime = fwData.Fw_build_date;
                     }
                 }

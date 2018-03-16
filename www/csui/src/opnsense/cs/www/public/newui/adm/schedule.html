@@ -32,7 +32,7 @@
                 </FormItem>
 				<Col v-show="formValidate.status" >
 				<br>
-				<FormItem :label="$t('reboot_schedule.month')" >
+				<FormItem :label="$t('reboot_schedule.month')" :key="$t('reboot_schedule.month')">
 					<template>
 						<Select v-model="formValidate.month" @on-change="swithDate">
 							<Option v-for="item in monthList" :value="item.value" :key="item.value">{{ item.lable }}</Option>
@@ -41,14 +41,14 @@
 				</FormItem>
 				<FormItem :label="$t('reboot_schedule.date')" >
 					<template>
-						<Select v-model="formValidate.date" >
+						<Select v-model="formValidate.date" :key="$t('reboot_schedule.date')">
 							<Option v-for="item in dateList" :value="item.value" :key="item.value"  v-show="item.value <= days">{{ item.lable }}</Option>
 						</Select>
 					</template>
 				</FormItem>
 				<FormItem :label="$t('reboot_schedule.week')" >
                     <template>
-						<Select v-model="formValidate.week" >
+						<Select v-model="formValidate.week" :key="$t('reboot_schedule.week')">
 							<Option v-for="item in weekList" :value="item.value" :key="item.value">{{ item.lable }}</Option>
 						</Select>
 					</template>
@@ -105,8 +105,52 @@ var cs_main = {
 				week:'0',
 				time:'00:00'
 			},
-			ntpEnabled:'',
-			monthList:[
+			ntpEnabled:''
+		}
+	},
+	created:function() {
+		var _this = this;
+		var postData = {"action":"getRebootSched"};
+		uiPost.getRebootSched(postData,function(data){
+			console.log(data);
+			if (9999 == data.rescode){
+				cs.loginOut();
+			}
+			if (0 == data.rescode) {
+				var data = data.data;
+				console.log(data);
+				if ('0' != data.Enable) {
+					_this.formValidate.status = true;
+					if(undefined == data.TimeMonth){
+						_this.formValidate.month = '0';
+					}else{
+						_this.formValidate.month = data.TimeMonth;
+					}
+					if(undefined == data.TimeDate){
+						_this.formValidate.date = '0';
+					}else{
+						_this.formValidate.date = data.TimeDate;
+					}
+					if(undefined == data.TimeWeek){
+						_this.formValidate.week = '0';
+					}else{
+						_this.formValidate.week = data.TimeWeek;
+					}
+
+					var time_h = data.TimeHour?data.TimeHour:0;
+					var time_m = data.TimeMin?data.TimeMin:0;
+					_this.formValidate.time = time_h + ':' + time_m;
+
+				} else {
+					_this.formValidate.status = false;
+				}
+			}
+		});
+	},
+    computed:{
+		monthList:function () {
+			var _this = this;
+			return [
 				{
 					value:'0',
 					lable:_this.$t('reboot_schedule.all')
@@ -153,8 +197,11 @@ var cs_main = {
 					value:"12",
 					lable:_this.$t('reboot_schedule.dec')
 				}
-			],
-			dateList:[
+			];
+		},
+		dateList:function () {
+			var _this = this;
+			return [
 				{
 					value:'0',
 					lable:_this.$t('reboot_schedule.all')
@@ -252,8 +299,11 @@ var cs_main = {
 					value:"31",
 					lable:_this.$t('reboot_schedule.thirty_one_day')
 				}
-			],
-			weekList:[
+			];
+		},
+		weekList:function () {
+			var _this = this;
+			return [
 				{
 					value:'0',
 					lable:_this.$t('reboot_schedule.all')
@@ -279,49 +329,8 @@ var cs_main = {
 					value:"6",
 					lable:_this.$t('reboot_schedule.sat')
 				}
-			]
+			];
 		}
-	},
-	created:function() {
-		var _this = this;
-		var postData = {"action":"getRebootSched"};
-		uiPost.getRebootSched(postData,function(data){
-			console.log(data);
-			if (9999 == data.rescode){
-				cs.loginOut();
-			}
-			if (0 == data.rescode) {
-				var data = data.data;
-				console.log(data);
-				if ('0' != data.Enable) {
-					_this.formValidate.status = true;
-					if(undefined == data.TimeMonth){
-						_this.formValidate.month = '0';
-					}else{
-						_this.formValidate.month = data.TimeMonth;
-					}
-					if(undefined == data.TimeDate){
-						_this.formValidate.date = '0';
-					}else{
-						_this.formValidate.date = data.TimeDate;
-					}
-					if(undefined == data.TimeWeek){
-						_this.formValidate.week = '0';
-					}else{
-						_this.formValidate.week = data.TimeWeek;
-					}
-
-					var time_h = data.TimeHour?data.TimeHour:0;
-					var time_m = data.TimeMin?data.TimeMin:0;
-					_this.formValidate.time = time_h + ':' + time_m;
-
-				} else {
-					_this.formValidate.status = false;
-				}
-			}
-		});
-	},
-    computed:{
     },
     methods:{
 		handleSubmit:function(){

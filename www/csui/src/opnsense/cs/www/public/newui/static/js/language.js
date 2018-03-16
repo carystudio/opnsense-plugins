@@ -418,6 +418,9 @@ var messages = {
             "countdown":"Count down [ye-time] s",
             "upload":"The firmware and upgrade are being downloaded ...",
 
+            "upgradeDescribe":["he U disk firmware information is being detected...","Upgrade"],
+            "firmwareDescribe":["* now there is no renewable version","* now there is an updated version that can be upgraded"],
+
             "current_firmware_version":"Current Firmware Version",
             "current_compilation_time":"Current Firmware Compilation Time",
             "u_firmware_version":"U Disk Firmware Version",
@@ -537,6 +540,7 @@ var messages = {
         "lan":{
             "title":"LAN Setting",
             "help":"This page is used to configure the parameters for local area network which connects to the LAN port of your device. Here you may change the setting for IP address, Mask.",
+            "lanport":"LAN Port",
             "ip":"IP Address",
             "mac":"MAC Address",
             "expired_time":"Expired Time (s)",
@@ -566,6 +570,7 @@ var messages = {
             "msg12":"Invalid Start IP address, Tt and the current subnet mask, gateway address does not match!",
             "msg13":"Invalid End IP address, Tt and the current subnet mask, gateway address does not match!",
             "msg14":"You set the LAN IP address and WAN IP in the same subnet??",
+            "msg15":"Please select the LAN port!"
         },
         "static_dhcp":{
             "title":"Static DHCP Setting",
@@ -695,7 +700,7 @@ var messages = {
         },
         "account":{
             "title":"Account Management",
-            "help":"This page is used to add authenticated users of the local server, and the bandwidth speed limit is used only for authentication of the PPPoE server.",
+            "help":"This page is used to add the authenticated user of the local server.",
             "auth_type":"Authentication Type",
             "account":"Account",
             "password":"Password",
@@ -2078,6 +2083,9 @@ var messages = {
             "countdown":"倒计时[ye-time]秒",
             "upload":"正在下载固件和升级...",
 
+            "upgradeDescribe":["正在检测U盘固件信息...","升级"],
+            "firmwareDescribe":["*现在没有可更新版本","*现在有可更新版本，可以进行升级"],
+
             "current_firmware_version":"当前固件版本",
             "current_compilation_time":"当前固件编译时间",
             "u_firmware_version":"U盘固件的版本",
@@ -2198,6 +2206,7 @@ var messages = {
         "lan":{
             "title":"局域网设置",
             "help":"本页面用于设置局域网内的参数，即连接上本设备LAN端口的本地网络。您可以设置IP地址、子网掩码等参数。",
+            "lanport":"LAN端口",
             "ip":"IP地址",
             "mac":"MAC地址",
             "expired_time":"过期时间 (s)",
@@ -2226,6 +2235,7 @@ var messages = {
             "msg12":"您设置的起始IP地址无效，它和当前的子网掩码、网关地址不匹配！",
             "msg13":"您设置的结束IP地址无效，它和当前的子网掩码、网关地址不匹配！",
             "msg14":"您设置的LAN IP地址与WAN IP在同一子网内！",
+            "msg15":"请选择LAN端口！"
         },
         "static_dhcp":{
             "title":"静态DHCP设置",
@@ -2349,7 +2359,7 @@ var messages = {
         },
         "account":{
             "title":"账号管理",
-            "help":"本页面用于添加本地服务器的认证用户，带宽限速仅用于PPPoE服务器的认证。",
+            "help":"本页面用于添加本地服务器的认证用户。",
             "auth_type":"认证类型",
             "account":"账号",
             "password":"密码",

@@ -43,7 +43,7 @@
                     <hr>
                     <br>
                     <FormItem :label="$t('pptp.mppe_encryption')">
-                        <Select v-model="formValidate.mppeEncrypt" >
+                        <Select v-model="formValidate.mppeEncrypt" :key="$t('pptp.mppe_encryption')">
                             <Option value="0">{{$t('pptp.unencryption')}}</Option>
                             <Option value="1">{{$t('pptp.encryption')}}</Option>
                         </Select>
