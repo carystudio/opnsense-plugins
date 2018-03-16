@@ -478,6 +478,7 @@ class Network extends Csbackend
             write_config();
 
             Portal::reconfigureAction();
+            interface_bridge_configure($config['bridges']['bridged'][0]);
             if (isset($lan['enable']) && isset($ifname)) {
                 interface_bring_down($ifname, false, $lan);
                 interface_configure($ifname, true);
@@ -579,10 +580,46 @@ class Network extends Csbackend
             if(''==$ifname){
                 throw new AppException('Network_303');
             }
-            $interface = array('descr'=>$inf, 'if'=>$nic);
-            $config['interfaces'][$ifname] = $interface;
+            $wan['if'] = $nic;
+            $wan['descr'] = $inf;
+            $wan['enable'] = '1';
+            $wan['ipaddr']='dhcp';
+            $wan['gateway']='';
+            $wan['mtu'] = 1500;
+            $wan['spoofmac'] = '';
+            $wan['blockbogons'] = '1';
+            $wan['dhcphostname'] = '';
+            $wan['alias-address'] = '';
+            $wan['alias-subnet'] = '32';
+            $wan['dhcprejectfrom'] = '';
+            $wan['adv_dhcp_pt_timeout'] = '';
+            $wan['adv_dhcp_pt_retry'] = '';
+            $wan['adv_dhcp_pt_select_timeout'] = '';
+            $wan['adv_dhcp_pt_reboot'] = '';
+            $wan['adv_dhcp_pt_backoff_cutoff'] = '';
+            $wan['adv_dhcp_pt_initial_interval'] = '';
+            $wan['adv_dhcp_pt_values'] = 'SavedCfg';
+            $wan['adv_dhcp_send_options'] = '';
+            $wan['adv_dhcp_request_options'] = '';
+            $wan['adv_dhcp_required_options'] = '';
+            $wan['adv_dhcp_option_modifiers'] = '';
+            $wan['adv_dhcp_config_advanced'] = '';
+            $wan['adv_dhcp_config_file_override'] = '';
+            $wan['adv_dhcp_config_file_override_path'] = '';
+            $config['interfaces'][$ifname] = $wan;
+
             write_config();
-            $result = array('Interface'=>$interface['descr'], 'Nic'=>$interface['if']);
+            self::applyGatewayConfig();
+            self::setMultiWan();
+
+            interface_configure($ifname, true);
+            plugins_configure('newwanip');
+            /* sync filter configuration */
+            setup_gateways_monitor();
+            filter_configure();
+            rrd_configure();
+
+            $result = array('Interface'=>$wan['descr'], 'Nic'=>$wan['if']);
         } catch (AppException $aex) {
             $result = $aex->getMessage();
         } catch (Exception $ex) {
@@ -681,7 +718,6 @@ class Network extends Csbackend
                 if (!empty($config['interfaces']['lan']) && !empty($config['dhcpd']['wan']) && !empty($config['dhcpd']['wan'])) {
                     unset($config['dhcpd']['wan']);
                 }
-                link_interface_to_vlans($realid, "update");
             }
         } catch (AppException $aex) {
             $result = $aex->getMessage();
@@ -824,7 +860,6 @@ class Network extends Csbackend
                         }
                     }
                 }
-
                 $gateway_group['item'][] = $gateway_name.'|'.$tier.'|ADDRESS';
             }
             $config['gateways']['gateway_group'] = array($gateway_group);
@@ -1020,7 +1055,16 @@ class Network extends Csbackend
             self::setMultiWan();
 
             write_config();
+            if (!empty($old_wan['ipaddr']) && $old_wan['ipaddr'] == 'dhcp' && $config['interfaces'][$ifname]['ipaddr'] != 'dhcp') {
+                // change from dhcp to something else, kill dhclient
+                kill_dhclient_process($old_wan['if']);
+            }
+            if (!empty($old_wan['ipaddrv6']) && $old_wan['ipaddrv6'] == 'dhcp6' && $config['interfaces'][$ifname]['ipaddrv6'] != 'dhcp6') {
+                // change from dhcp to something else, kill dhcp6c
+                killbypid("/var/run/dhcp6c_{$old_wan['if']}.pid");
+            }
             if (isset($config['interfaces'][$ifname]['enable'])) {
+                $old_wan['realif'] = $old_wan['if'];
                 if(isset($old_wan['ppps']['ppp']) && is_array($old_wan['ppps']['ppp'])){
                     interface_bring_down($ifname, $destroy, array('ifcfg'=>$old_wan,'ppps'=>$old_wan['ppps']['ppp']));
                 }else{
@@ -1031,6 +1075,16 @@ class Network extends Csbackend
                 interface_bring_down($ifname, true, $config['interfaces'][$ifname]);
             }
 
+            plugins_configure('newwanip');
+
+            /* sync filter configuration */
+            setup_gateways_monitor();
+            filter_configure();
+            rrd_configure();
+            if (is_subsystem_dirty('staticroutes') && (system_routing_configure() == 0)) {
+                clear_subsystem_dirty('staticroutes');
+            }
+            /*
             system_routing_configure();
             filter_configure();
             setup_gateways_monitor();
@@ -1038,6 +1092,7 @@ class Network extends Csbackend
 
             system_resolvconf_generate();
             self::applyGatewayConfig();
+            */
             $result = 0;
         }catch(AppException $aex){
             $result = $aex->getMessage();
