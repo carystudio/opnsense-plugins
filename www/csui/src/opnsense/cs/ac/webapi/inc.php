@@ -253,7 +253,7 @@ class Action{
 			$result['action']="SetWlanConfig";
 		}else if(0 == (Action::STATE_SYSTEM & $ap['apstate'])){
 			$result['apName'] = $ap['apname'];
-			$result['ledStatus'] = (string)$ap['ledStatus'];
+			$result['ledState'] = (string)$ap['ledstate'];
 			$result['action'] = "SetSysConfig";
 		}else{
 			unset($result['key']);
