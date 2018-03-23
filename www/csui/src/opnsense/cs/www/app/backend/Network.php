@@ -35,6 +35,7 @@ class Network extends Csbackend
         'Network_210'=>'权重不正确(1-4)',
         'Network_211'=>'优先级不正确(1-4)',
         'Network_212'=>'WAN接口指定的DNS不能相同',
+        'Network_213'=>'MAC克隆不正确',
 
         'Network_300'=>'接口不正确',
         'Network_301'=>'网卡不可用',
@@ -274,7 +275,6 @@ class Network extends Csbackend
 
                                 }
                             }
-
                         }
                     }
 
@@ -302,7 +302,7 @@ class Network extends Csbackend
                             }
                         }
                     }
-
+                    $interfaceInfo['MacClone'] = $infinfo['spoofmac'];
                 }
 
 								$infStatus = self::getInfStatus($inf);
@@ -930,6 +930,14 @@ class Network extends Csbackend
             }else{
                 $monitor = $data['Dns'];
             }
+            if(isset($data['MacClone']) && !empty($data['MacClone'])){
+                if(!is_macaddr($data['MacClone'])){
+                    throw new AppException('Network_213');
+                }
+            }else{
+                $data['MacClone'] = '';
+            }
+
 
 
             $destroy = false;
@@ -942,7 +950,7 @@ class Network extends Csbackend
                 $wan['ipaddr']='dhcp';
                 $wan['gateway']='';
                 $wan['mtu'] = $mtu;
-                $wan['spoofmac'] = '';
+                $wan['spoofmac'] = $data['MacClone'];
                 $wan['blockbogons'] = '1';
                 $wan['dhcphostname'] = '';
                 $wan['alias-address'] = '';
@@ -982,7 +990,7 @@ class Network extends Csbackend
                 }
                 $wan['if'] = $data['Nic'];
                 $wan['enable'] = '1';
-                $wan['spoofmac'] = '';
+                $wan['spoofmac'] = $data['MacCline'];
                 $wan['blockbogons'] = '1';
                 $wan['ipaddr'] = $data['Ip'];
                 $wan['subnet'] = Util::maskip2bit($data['Netmask']);
@@ -1006,7 +1014,7 @@ class Network extends Csbackend
                 }
                 $wan['enable'] = '1';
                 $wan['ipaddr'] = 'pppoe';
-                $wan['spoofmac'] = '';
+                $wan['spoofmac'] = $data['MacCline'];
                 $wan['blockbogons'] = '1';
                 $wan['mtu'] = $mtu>1492?1492:$mtu;
 
