@@ -110,6 +110,7 @@
                 netSelCardDinding:[],
                 nics:{},
                 interfaces:{},
+                tmpLanIp:'',
                 formValidate: {
                     lanIp:'',
                     lanNetmask:'',
@@ -203,15 +204,39 @@
 
                     _this.netSelCardDinding = _this.interfaces[0].Nic;
                     _this.formValidate.lanIp = _this.interfaces[0].Ip;
+                    _this.tmpLanIp = _this.formValidate.lanIp;
                     _this.formValidate.lanNetmask = _this.interfaces[0].Netmask;
                     _this.formValidate.dhcp = (_this.interfaces[0].DhcpSvrEnable=="1")?true:false;
                     _this.formValidate.dhcpLease = _this.interfaces[0].DhcpLeasetime ?  ''+_this.interfaces[0].DhcpLeasetime : "86400" ;
                     _this.formValidate.dhcpStart = _this.interfaces[0].DhcpStart;
                     _this.formValidate.dhcpEnd = _this.interfaces[0].DhcpEnd;
-
-
                 }
             });
+        },
+        watch:{
+            "formValidate.lanIp":function () {
+                var _this = this;
+                _this.tmpLanIp = this.formValidate.lanIp;
+                if(cs.ip(_this.tmpLanIp) != 99){
+                    return false;
+                }
+                var addr = cs.getAddrPool(_this.tmpLanIp,_this.formValidate.lanNetmask);
+                if(addr['start'] && addr['end']){
+                    _this.formValidate.dhcpStart = addr['start'];
+                    _this.formValidate.dhcpEnd = addr['end'];
+                }
+            },
+            "formValidate.lanNetmask":function () {
+                var _this = this;
+                if(cs.ip(_this.tmpLanIp) != 99 || cs.mask(_this.formValidate.lanNetmask) != 99){
+                    return false;
+                }
+                var addr = cs.getAddrPool(_this.tmpLanIp,_this.formValidate.lanNetmask);
+                if(addr['start'] && addr['end']){
+                    _this.formValidate.dhcpStart = addr['start'];
+                    _this.formValidate.dhcpEnd = addr['end'];
+                }
+            }
         },
         methods:{
             handleSubmit: function(name) {
@@ -275,7 +300,7 @@
                         var percentTimer = setInterval(function(){
                             if (_this.percent>=100) {
                                 clearInterval(percentTimer);
-                                location.href = location.href;
+                                location.href = 'http://'+_this.tmpLanIp+'/login.html';
                             }
                             _this.percent++;
                         },cs.getTimer(15));

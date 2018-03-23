@@ -94,7 +94,10 @@ var messages = {
             "restore":"Reset",
             "unified_change_ip":"Quick Modification IP",
             "operation":"Operation",
+            "encryption":"Encryption",
+            "unencrypted":"Unencrypted",
 
+            "beacon":"Beacon Interval",
             "broad_ssid":"Broadcast SSID",
             "isolation":"WiFi isolation",
             "max_num":"MAX Client Count",
@@ -147,7 +150,7 @@ var messages = {
             "security_psk":"Security",
             "unmodify":"Default",
             "auto_select":"Auto",
-            "disable":"Default",
+            "disable":"Disable",
             "apply":"Apply",
             "ledctl_tip":"Click the 'Start' button to open the AP breathing lamp, the AP lights begin to flash; the 'Stop' button ends the AP breathing lamp control, the AP lamp ends the flash and restores the normally bright state.",
             "finish":"Stop",
@@ -1758,7 +1761,8 @@ var messages = {
             "letctl":"灯控制",
             "unified_change_ip":"一键修改IP",
             "operation":"操作",
-            
+
+            "beacon":"信标间隔",
             "broad_ssid":"广播SSID",
             "isolation":"WiFi隔离",
             "max_num":"最大用户数",

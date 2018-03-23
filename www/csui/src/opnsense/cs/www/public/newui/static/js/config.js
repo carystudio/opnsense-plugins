@@ -32,7 +32,7 @@ var globalConfig = {
     "xs":24,
     "lg":{span:18,offset:3},
     "version":"V1.0.1bate",
-    "helpUrl":"http://www.totolink.cn",
+    "helpUrl":"http://www.carystudio.com",
     "wlanSupport" :'2,5',
     "cgiUrl" :'/cgi-bin/cstecgi.cgi',
     "copyright":'Copyright &copy; [date] Carystudio Ltd., All Rights Reserved',

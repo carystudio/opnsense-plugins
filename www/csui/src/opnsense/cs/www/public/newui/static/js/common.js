@@ -485,5 +485,67 @@ cs.prototype.loginOut= function (){
 	// error();
 };
 
+/**
+ * IP转成整型
+ *
+ * @Author   Jeff       <Jeff@carystudio.com>
+ * @DateTime 2018-02-26
+ * @param    {String}   ip
+ * @return   {Number}	IP整形
+ */
+cs.prototype.ip2int= function (ip){
+	var num = 0;
+	ip = ip.split(".");
+	num = Number(ip[0]) * 256 * 256 * 256 + Number(ip[1]) * 256 * 256 + Number(ip[2]) * 256 + Number(ip[3]);
+	num = num >>> 0;
+	return num;
+};
+
+/**
+ * 整型解析为IP地址
+ *
+ * @Author   Jeff       <Jeff@carystudio.com>
+ * @DateTime 2018-02-26
+ * @param    {Number}   整形
+ * @return   {String}	IP
+ */
+cs.prototype.int2ip= function (num){
+	var str;
+	var tt = [];
+	tt[0] = (num >>> 24) >>> 0;
+	tt[1] = ((num << 8) >>> 24) >>> 0;
+	tt[2] = (num << 16) >>> 24;
+	tt[3] = (num << 24) >>> 24;
+	str = String(tt[0]) + "." + String(tt[1]) + "." + String(tt[2]) + "." + String(tt[3]);
+	return str;
+};
+
+/**
+ * 返回地址池IP
+ *
+ * @Author   Jeff       <Jeff@carystudio.com>
+ * @DateTime 2018-02-26
+ * @param    {String}   ip		网关IP
+ * @param    {String}   mask	子网掩码
+ * @return   {Array}	ipArr
+ * ipArr.start	地址池开始IP<br/>
+ * ipArr.end: 地址池结束IP<br/>
+ */
+cs.prototype.getAddrPool= function (ip,mask){
+	var arr = [];
+	var ipInt = this.ip2int(ip);	//整形IP
+	var maskInt = this.ip2int(mask);	//整形子网掩码
+	var getsub = this.ip2int("0.0.0.255");
+	var getEndIpInt = ipInt & getsub;    //获取ip地址的最后一位数
+	var ipSubmask = ipInt & maskInt;	//设置同网段
+	arr['start'] = this.int2ip(ipSubmask+getEndIpInt+1);
+	arr['end'] = this.int2ip(ipSubmask+254);
+	if(254 == getEndIpInt){
+		arr['start'] = this.int2ip(ipSubmask+1);
+		arr['end']  =  this.int2ip(ipSubmask+253);
+	}
+	return arr;
+};
+
 obj.cs = new cs();
 })(window);

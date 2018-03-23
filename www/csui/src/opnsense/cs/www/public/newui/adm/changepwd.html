@@ -29,10 +29,10 @@
                         <Input v-model="formValidate.origPass" :maxlength="32"></Input>
                     </FormItem>
                     <FormItem :label="$t('changepwd.new_pass')" prop="newPass">
-                        <Input type="password" v-model="formValidate.newPass" :maxlength="32"></Input>
+                    <Input v-model="formValidate.newPass" :type="newPwd" @on-focus="pwdFocus('new')" @on-blur="pwdBlur('new')" :maxlength="32"></Input>
                     </FormItem>
                     <FormItem :label="$t('changepwd.confirm_pass')" prop="confirmPass">
-                        <Input type="password" v-model="formValidate.confirmPass" :maxlength="32"></Input>
+					<Input v-model="formValidate.confirmPass" :type="confirmPwd" @on-focus="pwdFocus('confirm')" @on-blur="pwdBlur('confirm')" :maxlength="32"></Input>
                     </FormItem>
                     <!-- btn -->
                     <FormItem>
@@ -69,7 +69,9 @@
                     origPass:'',
                     newPass:'',
                     confirmPass:''
-                }
+                },
+			    newPwd:'text',
+			    confirmPwd:'text'
             }
         },
         computed:{
@@ -156,6 +158,22 @@
                         _this.applyLoading = false;
                     }
                 })
+            },
+            pwdFocus:function(name){
+                if(name == 'new'){
+                    this.newPwd = 'text';
+                }
+                else if(name == 'confirm'){
+                    this.confirmPwd = 'text';
+                }
+            },
+            pwdBlur:function(name){
+                if(name == 'new'){
+                    this.newPwd = 'password';
+                }
+                else if(name == 'confirm'){
+                    this.confirmPwd = 'password';
+                }
             }
         }
     };

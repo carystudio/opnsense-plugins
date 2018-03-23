@@ -105,6 +105,20 @@ class Db{
 		return $ap;
 	}
 
+	public static function updateApInfo($ap){
+		$pdo = self::getPdo();
+		
+		$sth = $pdo->prepare("UPDATE `APLIST` set 
+		apmac=:apmac,ipaddr=:ipaddr,netmask=:netmask,
+		gateway=:gateway,pridns=:pridns,secdns=:secdns,apstate=:apstate,
+		csid=:csid,model=:model,svnnum=:svnnum,
+		builddate=:builddate,uptime=:uptime,softver=:softver,timestamp=:timestamp,
+		aptype=:aptype,username=:username,password=:password where id=:id");
+		$res = $sth->execute($ap);
+	
+		return $res;
+	}
+
 	public static function updateAp($ap){
 		$pdo = self::getPdo();
 		
@@ -115,10 +129,7 @@ class Db{
 		ledstate=:ledstate,apkey=:apkey,csid=:csid,model=:model,svnnum=:svnnum,
 		builddate=:builddate,uptime=:uptime,softver=:softver,timestamp=:timestamp,
 		aptype=:aptype,username=:username,password=:password,gid=:gid,hftimes=:hftimes where id=:id");
-		$ap_data = array();
-		foreach($ap as $var=>$val){
-			$ap_data[':'.$var] = $val;
-		}
+		
 		$res = $sth->execute($ap);
 		
 		return $res;

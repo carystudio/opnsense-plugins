@@ -7,7 +7,6 @@ var_dump($ap);
 */
 $postcontent = file_get_contents('php://input', 'r');
 $data = json_decode($postcontent, true);
-
 try{
 	if(!is_array($data)||!isset($data['action'])){
 		throw new AppException('wrong data.'.$postcontent);
@@ -28,9 +27,21 @@ try{
 			$ap['uptime'] = time();
 
 			$ap = Db::createAp($ap);
-			if (!ap) {
+			if (!$ap) {
 				throw new AppException('save ap data error');
 			}
+		}else{
+			$apNewInfo = array();
+			$apNewInfo['uptime'] = time();
+			$apNewInfo['id'] = $ap['id'];
+			$apNewInfo['apstate'] = $ap['apstate'];
+			foreach ($GET_FIELDS as $getvar => $dbvar) {
+				if('apName' != $getvar && 'apIp' != $getvar){
+					$apNewInfo[$dbvar] = $data[$getvar];
+				}
+			}
+			Db::updateApInfo($apNewInfo);
+			$ap = Db::getApByMac($data['apMac']);
 		}
 		$result = Action::getAction($ap);
 	}else {

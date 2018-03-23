@@ -35,7 +35,7 @@ class Network extends Csbackend
         'Network_210'=>'权重不正确(1-4)',
         'Network_211'=>'优先级不正确(1-4)',
         'Network_212'=>'WAN接口指定的DNS不能相同',
-        'Network_213'=>'MAC克隆不正确',
+		'Network_213'=>'MAC克隆不正确',
 
         'Network_300'=>'接口不正确',
         'Network_301'=>'网卡不可用',
@@ -275,6 +275,7 @@ class Network extends Csbackend
 
                                 }
                             }
+
                         }
                     }
 
@@ -302,7 +303,7 @@ class Network extends Csbackend
                             }
                         }
                     }
-                    $interfaceInfo['MacClone'] = $infinfo['spoofmac'];
+					$interfaceInfo['MacClone'] = $infinfo['spoofmac'];
                 }
 
 								$infStatus = self::getInfStatus($inf);
@@ -412,6 +413,20 @@ class Network extends Csbackend
             $lan['track6-interface'] = '';
             $lan['track6-prefix-id'] = '0';
             $if_members = array();
+            $lanInfoNics = self::getAvailableNic('lan');;
+            foreach ($lanInfoNics as $emName => $emVal){
+                if("" == $emVal['friendly'] && !$emVal['up']){
+                    $emVal['friendly'] = str_replace('em','opt',$emName);
+                }
+                if(!in_array($emName, $data['Nic']) && isset($config['interfaces'][$emVal['friendly']])){
+                    unset($config['interfaces'][$emVal['friendly']]);
+                }else if(in_array($emName, $data['Nic']) && !isset($config['interfaces'][$emVal['friendly']])){     //lan已选网卡，同时网卡未绑定，则添加为绑定网卡
+                    $config['interfaces'][$emVal['friendly']]['if'] = $emName;
+                    $config['interfaces'][$emVal['friendly']]['enable'] = '1';
+                    $config['interfaces'][$emVal['friendly']]['spoofmac'] = '';
+                    $config['interfaces'][$emVal['friendly']]['descr'] = $emName;
+                }
+            }
             foreach($config['interfaces'] as $if_name=>$if_info){
                 if(in_array($if_info['if'], $data['Nic'])){
                     $if_members[] = $if_name;
@@ -930,14 +945,13 @@ class Network extends Csbackend
             }else{
                 $monitor = $data['Dns'];
             }
-            if(isset($data['MacClone']) && !empty($data['MacClone'])){
+			if(isset($data['MacClone']) && !empty($data['MacClone'])){
                 if(!is_macaddr($data['MacClone'])){
                     throw new AppException('Network_213');
                 }
             }else{
                 $data['MacClone'] = '';
             }
-
 
 
             $destroy = false;
