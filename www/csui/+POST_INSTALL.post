@@ -1,0 +1,2 @@
+d=`date "+%Y%m%d"`
+sed -i '' 's/^build_date.*$/build_date = '"$d"'/g' /usr/local/opnsense/cs/www/app/config/config.ini
