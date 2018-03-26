@@ -75,8 +75,8 @@ var messages = {
             "help":"The server {0} requires a password.",
             "user":"User Name",
             "pass":"Passsword",
-            "err_empty":"User Name and Password cannot be empty.",
-            "err_wrong":"User Name or Password is wrong.",
+            "err_empty":" cannot be empty.",
+            "err_wrong":" is wrong.",
             "login_btn":"LOGIN",
             "login_success":"Login Success!",
             "login_fail":"Error incorrect username or password!",
@@ -96,6 +96,7 @@ var messages = {
             "operation":"Operation",
             "encryption":"Encryption",
             "unencrypted":"Unencrypted",
+            "restore_set_title":"Restore Factory Settings",
 
             "beacon":"Beacon Interval",
             "broad_ssid":"Broadcast SSID",
@@ -191,6 +192,7 @@ var messages = {
             "msg17":"No equipment to update the firmware available!",
             "msg18":"Sure you want to delete the firmware version?",
             "msg19":"Invalid file format, please choose again!Supported formats：{0}",
+            "msg20":"Are you sure you need to restore the factory settings?",
 
             "tip1":"Warm hint: @:central.upload needs to be connected to the U disk. Please use the U disk."
         },
@@ -447,6 +449,7 @@ var messages = {
             "save":"Save",
             "update_config_file":"Update Configuration File",
             "select_file":"Select File",
+            "uploading":"Uploading",
             "update":"Update",
             "restore_factory_default":"Restore Factory Default",
             "restore":"Restore",
@@ -458,7 +461,8 @@ var messages = {
             "msg2":"Invalid file format, please try again. Supported file formats: {0} ",
             "msg3":"The correct upgrade file should be no more than {0}, please confirm that the correct upgrade file has been selected!",
             "msg4":"Do you really want to load factory default?",
-            "msg5":"Do you really want to reboot the device?"
+            "msg5":"Do you really want to reboot the device?",
+            "msg6":"Please select the correct configuration file!"
         },
         "wan":{
             "title":"WAN Setting",
@@ -526,9 +530,9 @@ var messages = {
             "msg9":"MTU must be a valid number!",
             "msg_mtu":"MTU is invalid, the value is out of range({0}-{1})!",
             "msg12":"User Name cannot be empty,please try again!",
-            "msg13":"User Name cannot contain full-width characters!",
+            "msg13":"User Name cannot contain full-width characters! can only contain the following special character:!@#^&*()+_-={}[]|:.?",
             "msg14":"Password cannot be empty,please try again!",
-            "msg15":"Password cannot contain full-width characters?",
+            "msg15":"Password cannot contain full-width characters! can only contain the following special character:!@#^&*()+_-={}[]|:.?",
             "msg16":"MAC address cannot be empty,please try again!",
             "msg17":"The MAC address is not valid, It cannot be all 0 or F!",
             "msg18":"The MAC address is invalid, It cannot be a multicast address!The second char cannot be 1,3,5,7,9,b,d,f.",
@@ -665,6 +669,8 @@ var messages = {
             "timeout":"Timeout (seconds)",
             "password":"Password",
             "encrypt_method":"Encryption",
+            "set_success":"Set up success!",
+            "set_fail":"Setting failure!",
             "msg1":"The starting IP address is not empty!",
             "msg2":"Starting IP is illegal!",
             "msg3":"The end of the IP address is not empty!",
@@ -689,6 +695,7 @@ var messages = {
             "wins_server_addr":"Wins Server Address",
             "auth_type":"Auth Type",
 
+            "set_success":"Set up success!",
             "msg1":"The starting IP address is not empty, please try again!",
             "msg2":"Invalid starting IP address!",
             "msg3":"At the end of the IP address is not empty, please try again!",
@@ -714,7 +721,12 @@ var messages = {
             "operation":"Operation",
             "msg8":"Please select the rule to delete!",
             "msg9":"Do you really want to delete the selected entry?",
-            "msg11":"Delete successfully!"
+            "msg11":"Delete successfully!",
+            "msg1":"The username can not be empty",
+            "msg2":"The username is invalid and contains invalid characters",
+            "msg3":"The password can not be empty",
+            "msg4":"The password is invalid and contains invalid characters",
+            "msg5":"IP address is invalid"
         },
         "ipf":{
             "title":"IP/Port Filtering",
@@ -1763,6 +1775,7 @@ var messages = {
             "operation":"操作",
             "encryption":"加密",
             "unencrypted":"不加密",
+            "restore_set_title":"恢复出厂设置",
 
             "beacon":"信标间隔",
             "broad_ssid":"广播SSID",
@@ -1861,8 +1874,10 @@ var messages = {
             "msg17":"没有可用的设备更新该固件！",
             "msg18":"确定要删除该固件版本吗？",
             "msg19":"无效的文件格式，请重新选择！,支持的格式有：{0}",
+            "msg20":"您确定需要恢复出厂设置？",
 
             "tip1":"温馨提示:@:central.upload需要接U盘。请接U盘使用！"
+
         },
         "database":{
             "title":"数据库管理",
@@ -2115,6 +2130,7 @@ var messages = {
             "save":"保存",
             "update_config_file":"更新配置文件",
             "select_file":"选择文件",
+            "uploading":"升级中",
             "update":"更新",
             "restore_factory_default":"恢复出厂设置",
             "restore":"恢复",
@@ -2126,7 +2142,8 @@ var messages = {
             "msg2":"无效的文件格式，请重新选择！支持的格式：{0}",
             "msg3":"正确的升级文件应该不大于{0}，请确认已选择正确升级文件！",
             "msg4":"您确定要恢复出厂设置？",
-            "msg5":"您确定要重启设备？"
+            "msg5":"您确定要重启设备？",
+            "msg6":"请选择正确的配置文件！"
         },
         "wan":{
             "title":"广域网设置",
@@ -2195,9 +2212,9 @@ var messages = {
             "msg9":"MTU必须是有效的数字！",
             "msg_mtu":"MTU无效，它的值已超出范围（{0}-{1}）！",
             "msg12":"用户名不能为空，请重试！",
-            "msg13":"用户名不能包含全角字符和中文字符！",
+            "msg13":"用户名不能包含全角字符和中文字符！只允许包含特殊字符:!@#^&*()+_-={}[]|:.?",
             "msg14":"密码不能为空，请重试！",
-            "msg15":"密码不能包含全角字符和中文字符！",
+            "msg15":"密码不能包含全角字符和中文字符！只允许包含特殊字符:!@#^&*()+_-={}[]|:.?",
             "msg16":"MAC地址不能为空！",
             "msg17":"MAC地址无效，它不能全部是0或F！",
             "msg18":"MAC地址无效，它不能是组播地址,如：第二位不能是1、3、5、7、9、b、d、f！",
@@ -2327,6 +2344,8 @@ var messages = {
             "timeout":"超时时间(秒)",
             "password":"密码",
             "encrypt_method":"加密方式",
+            "set_success":"设置成功！",
+            "set_fail":"设置失败！",
             "msg1":"起始IP地址不能为空！",
             "msg2":"起始IP不合法！",
             "msg3":"结束IP地址不能为空！",
@@ -2351,6 +2370,7 @@ var messages = {
             "wins_server_addr":"Wins服务器地址",
             "auth_type":"认证类型",
 
+            "set_success":"设置成功！",
             "msg1":"起始IP地址不能为空，请重试！",
             "msg2":"起始IP地址无效！",
             "msg3":"结束IP地址不能为空，请重试！",
@@ -2376,7 +2396,12 @@ var messages = {
             "operation":"操作",
             "msg8":"请选择要删除的规则！",
             "msg9":"您确定要删除选中的记录吗？",
-            "msg11":"删除成功！"
+            "msg11":"删除成功！",
+            "msg1":"用户名不能为空",
+            "msg2":"用户名无效，包含了无效的字符",
+            "msg3":"密码不能为空",
+            "msg4":"密码无效，包含了无效的字符",
+            "msg5":"IP地址无效"
         },
         "ipf":{
             "title":"IP/端口过滤",

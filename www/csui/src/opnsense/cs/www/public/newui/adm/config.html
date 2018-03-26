@@ -42,7 +42,7 @@
                         >
                             <Button icon="ios-cloud-upload-outline">{{ $t('config.select_file') }}</Button>
                         </Upload>
-                        <div v-if="upload.fileStatus == true"><Button @click="doUpload" :loading="loadingStatus">{{ loadingStatus ? 'Uploading' : $t('config.update')  }}</Button></div>
+                        <div v-if="upload.fileStatus == true"><Button @click="doUpload" :loading="loadingStatus">{{ loadingStatus ? $t('config.uploading') : $t('config.update')  }}</Button></div>
                     </FormItem>
                     <FormItem :label="$t('config.restore_factory_default')">
                         <Poptip
@@ -217,6 +217,12 @@
 
             },
             handleUpload: function(file) {
+                var _this = this;
+                var confName = file.name.split('-');
+                if('Config' != confName[0] || 'CSG2000P' != confName[1]){
+                    this.$Message.error(this.$t('config.msg6'));
+                    return false;
+                }
                 this.upload.file = file;
             },
             exceededSize: function() {

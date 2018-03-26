@@ -122,6 +122,7 @@
                 var _this = this;
                 return {
                     routeIp: [    //IP校验
+                        { required: true, message: this.$t('route.msg1'), trigger: 'blur' },
                         { validator:function(r, v, f) {
                             var ret = cs.ip(v);
                             if (ret == 0 || ret == 1 || ret == 2 || ret == 3 || ret == 4) {

@@ -94,6 +94,7 @@
                 var _this = this;
                 return {
                     webPort: [
+                        { required: true, message: "WEB"+this.$t('remote.msg1'), trigger: 'blur' },
                         { validator:function(r, v, f){
                             console.log('--------------webPort---------------');
                             console.log(_this.formValidate.webStatus);

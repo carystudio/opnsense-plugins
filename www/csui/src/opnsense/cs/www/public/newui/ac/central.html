@@ -28,7 +28,7 @@
                     <Button type="primary" @click="letctlClick">{{ $t('central.letctl') }}</Button>
                     <Button type="primary" @click="timingRebootClick(true)">{{ $t('central.unified_change_ip') }}</Button>
                     <Button type="primary" @click="rebootClick">{{ $t('central.reboot') }}</Button>
-                    <Button type="primary" @click="restoreClick">{{ $t('central.restore') }}</Button>
+                    <Button type="primary" @click="showModel=true">{{ $t('central.restore') }}</Button>
                     <Tooltip trigger="hover" placement="top" :disabled="!usbState">
                         <Button type="primary" @click="uploadClick" >{{ $t('central.firmware_manage') }}</Button>
                         <div slot="content" style="white-space: normal;"> {{ $t('central.firmware_manage') }} </div>
@@ -46,6 +46,16 @@
             </Col>
         </Row>
     </div>
+    <Modal
+            v-model="showModel"
+            :title="$t('central.restore_set_title')"
+            @on-ok="ok"
+            @on-cancel="cancel"
+            :ok-text="$t('common.ok')"
+            :cancel-text="$t('common.cancel')"
+            >
+        <span>{{$t('central.msg20')}}</span>
+    </Modal>
     <Modal
             v-model="setinfo"
             :title="$t('central.setinfo')"
@@ -281,6 +291,7 @@
                 ledStatus:false,
                 wlanState:false,
                 wlanset:'3',
+                showModel:false,
                 securityMode2:false,
                 /*formSetinfo: {
                     apname: '',
@@ -866,6 +877,13 @@
                     },cs.getTimer(wtime));
                 });
             },
+            ok:function () {
+                this.restoreClick();
+            },
+            cancel:function () {
+                var _this = this;
+                _this.showModel = false;
+            },
             modifyApIp:function (data) {
                 var postVar ={"action":"setApIp","data":data};
                 uiPost.setApIp(postVar);
@@ -1276,6 +1294,7 @@
                 });
             },
             restoreClick: function(){
+                var _this = this ;
                 var temp = this.selectData;
                 if (temp.length <= 0) {
                     this.$Message.error(this.$t('central.msg1'));

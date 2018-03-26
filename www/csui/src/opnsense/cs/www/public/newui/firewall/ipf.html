@@ -150,6 +150,7 @@
                 var _this = this;
                 return{
                     ip: [
+                        { required: true, message: this.$t('ipf.msg15'), trigger: 'blur' },
                         { validator:function(r, v, f) {
                             var ret = cs.ip(v);
                             if (ret == 0) {

@@ -270,6 +270,7 @@
                     }
                 }
 
+                _this.$Spin.show();  //加载动画
                 this.applyLoading = true;
                 this.$refs[name].validate(function(valid){
                     if (valid) {
@@ -285,25 +286,17 @@
                         postVar.Nic = _this.netSelCardDinding;
                         var postData = {"action":"setLanInfo","data":postVar};
                         console.log(postData);
-                        uiPost.setLanInfo(postData);
-                        _this.$Modal.success({
-                            loading:true,
-                            render: function(h) {
-                                return h('div',[
-                                    _this.$t('common.loading'),
-                                    h('Progress',{
-                                        attrs:{ percent:_this.percent }
-                                    })
-                                ])
+
+                        uiPost.setLanInfo(postData,function (data) {
+                            _this.$Spin.hide();   //关闭加载动画
+                            if (9999 == data.rescode){
+                                cs.loginOut();
                             }
-                        });
-                        var percentTimer = setInterval(function(){
-                            if (_this.percent>=100) {
-                                clearInterval(percentTimer);
+                            _this.applyLoading = false;
+                            if (0 == data.rescode) {
                                 location.href = 'http://'+_this.tmpLanIp+'/newui/internet/lan.html';
                             }
-                            _this.percent++;
-                        },cs.getTimer(15));
+                        });
 
                     } else {
                         // _this.$Message.error();

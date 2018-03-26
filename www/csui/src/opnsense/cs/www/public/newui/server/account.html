@@ -94,16 +94,13 @@
                 var _this = this;
                 return {
                     username: [
+                        { required: true, message: this.$t('l2tp.msg1'), trigger: 'blur' },
                         { validator:function(r, v, f) {
-                            if('' != _this.formValidate.ipAddr){
-                                var ret = cs.string(v);
-                                if (ret == 0) {
-                                    f('用户名不能为空');
-                                }else if(ret == 1){
-                                    f('用户名无效，包含了无效的字符');
-                                }else{
-                                    f();
-                                }
+                            var ret = cs.string(v);
+                            if (ret == 0) {
+                                f(_this.$t('account.msg1'));
+                            }else if(ret == 1){
+                                f(_this.$t('account.msg2'));
                             }else{
                                 f();
                             }
@@ -111,15 +108,11 @@
                     ],
                     password: [
                         { validator:function(r, v, f) {
-                            if('' != _this.formValidate.ipAddr){
-                                var ret = cs.string(v);
-                                if (ret == 0) {
-                                    f('密码不能为空');
-                                }else if(ret == 1){
-                                    f('密码无效，包含了无效的字符');
-                                }else{
-                                    f();
-                                }
+                            var ret = cs.string(v);
+                            if (ret == 0) {
+                                f(_this.$t('account.msg3'));
+                            }else if(ret == 1){
+                                f(_this.$t('account.msg4'));
                             }else{
                                 f();
                             }
@@ -130,7 +123,7 @@
                             if('' != _this.formValidate.ipAddr){
                                 var ret = cs.ip(v);
                                 if (ret == 0 || ret == 1 || ret == 2 || ret == 3 || ret == 4) {
-                                    f('IP地址无效');
+                                    f(_this.$t('account.msg5'));
                                 }
                                 f();
                             }else{

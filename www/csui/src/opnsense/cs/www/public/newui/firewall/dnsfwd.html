@@ -133,6 +133,7 @@
                 var _this = this;
                 return{
                     domain: [
+                        { required: true, message: this.$t('portfwd.msg14'), trigger: 'blur' },
                         { validator:function(r, v, f){
                             var _s = cs.domain(v);
                             console.log('--------------------'+_s+'-------------------------');

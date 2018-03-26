@@ -101,9 +101,15 @@
                     winsServerAddr:'',
                     firstDns:'',
                     secondDns:''
-                },
-                ruleValidate: {
+                }
+            }
+        },
+        computed:{
+            ruleValidate:function () {
+                var _this = this;
+                return {
                     startIpAddr: [
+                        { required: true, message: this.$t('pptp.msg1'), trigger: 'blur' },
                         { validator:function(r, v, f) {
                             var _s = cs.ip(v);
                             if(_s != 99) {
@@ -187,7 +193,7 @@
                             }
                         },trigger: 'blur' }
                     ]
-                }
+                };
             }
         },
         created:function() {
@@ -249,13 +255,27 @@
                         data.Dns2 = _this.formValidate.secondDns;
                         var postData = {"action":"setPptpdStatus", "data":data};
                         uiPost.setPptpdStatus(postData,function(data){
-                            _this.$Message.success({content:'Success!',onClose:function(){
-                                _this.applyLoading = false;
-                            }});
-                            var percentTimer = setInterval(function(){
-                                clearInterval(percentTimer);
-                                location.href=location.href;
-                            },cs.getTimer(10));
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            _this.applyLoading = false;
+                            if (0 == data.rescode) {
+                                _this.$Message.success({
+                                    content: _this.$t('pptp.set_success'), onClose: function () {
+                                        _this.applyLoading = false;
+                                    }
+                                });
+                                var percentTimer = setInterval(function () {
+                                    clearInterval(percentTimer);
+                                    location.href = location.href;
+                                }, cs.getTimer(200));
+                            }else{
+                                _this.$Message.error({
+                                    content: _this.$t('pptp.set_fail')+' '+_this.$t('errorcode.'+data.rescode), onClose: function () {
+                                        _this.applyLoading = false;
+                                    }
+                                });
+                            }
                         });
                     } else {
                         _this.applyLoading = false;

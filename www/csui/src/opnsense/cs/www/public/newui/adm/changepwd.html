@@ -79,6 +79,7 @@
                 var _this = this;
                 return {
                     origPass: [
+                        { required: true, message: this.$t('changepwd.msg1'), trigger: 'blur' },
                         { validator:function(r, v, f) {
                             var _s = cs.string(v);
                             if(_s == 0) {

@@ -80,9 +80,15 @@
                     endtime:'',
                     canlogin:'',
                     relogin: false
-                },
-                ruleValidate: {
+                }
+            }
+        },
+        computed: {
+            ruleValidate:function(){
+                var _this = this;
+                return {
                     username:[
+                        { required: true, message: _this.$t('addaccounts.username')+_this.$t('addaccounts.msg1'), trigger: 'blur' },
                         { validator:function(r, v, f) {
                             var _s = cs.string(v);
                             if (0 == _s) {
@@ -114,7 +120,7 @@
                             f();
                         },trigger: 'blur' }
                     ]
-                }
+                };
             }
         },
         created:function() {

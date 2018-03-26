@@ -87,7 +87,7 @@
                         <Input v-model="formValidate.pppoeUser" ></Input>
                     </FormItem>
                     <FormItem :label="$t('wan.pass')" prop="pppoePass">
-                        <Input type="password" v-model="formValidate.pppoePass" ></Input>
+                        <Input v-model="formValidate.pppoePass" :type="pppoePwd" @on-focus="pwdFocus()" @on-blur="pwdBlur()"  ></Input>
                     </FormItem>
                     <FormItem label="MTU" prop="pppoeMtu">
                         <Input v-model="formValidate.pppoeMtu" :maxlength="4" ></Input>
@@ -161,7 +161,7 @@ var cs_main = {
       l2tpBt:'',
       pptpBt:'',
 
-
+        pppoePwd:'text',
         netCardDinding:'',
         netSelCardDinding:'',
         switchWanPort:'wan1',
@@ -187,417 +187,421 @@ var cs_main = {
           weight:'',
           wanMode:'0',
           monitorIp:''
-      },
-      ruleValidate: {
-          staticIp: [
-              { validator:function(r, v, f) {
-                var _s = cs.ip(v);
-                if(0 == _s) {
-                  f(_this.$t('wan.ip')+_this.$t('wan.msg1'));
-                }else if(1 == _s) {
-                  f(_this.$t('wan.ip')+_this.$t('wan.msg20'));
-                }else if(2 == _s) {
-                  f(_this.$t('wan.ip')+_this.$t('wan.msg2'));
-                }else if(3 == _s) {
-                  f(_this.$t('wan.ip')+_this.$t('wan.msg3'));
-                }else if(4 == _s) {
-                  f(_this.$t('wan.ip')+_this.$t('wan.msg4'));
-                }else{
-                  f();
-                }
-              },trigger: 'blur' }
-          ],
-          staticMask: [
-              { validator:function(r, v, f) {
-                var _s = cs.mask(v);
-                if(0 == _s) {
-                  f(_this.$t('wan.mask')+_this.$t('wan.msg1'));
-                }else if(1 == _s) {
-                  f(_this.$t('wan.msg5'));
-                }else{
-                  f();
-                }
-              },trigger: 'blur' }
-          ],
-          staticGw: [
-              { validator:function(r, v, f) {
-                var _s = cs.ip(v);
-                if(0 == _s) {
-                  f(_this.$t('wan.gateway')+_this.$t('wan.msg1'));
-                }else if(1 == _s) {
-                  f(_this.$t('wan.gateway')+_this.$t('wan.msg20'));
-                }else if(2 == _s) {
-                  f(_this.$t('wan.gateway')+_this.$t('wan.msg2'));
-                }else if(3 == _s) {
-                  f(_this.$t('wan.gateway')+_this.$t('wan.msg3'));
-                }else if(4 == _s) {
-                  f(_this.$t('wan.gateway')+_this.$t('wan.msg4'));
-                }else{
-                  if(
-                       _this.formValidate.staticGw.split('.')[0] != _this.formValidate.staticIp.split('.')[0]
-                    || _this.formValidate.staticGw.split('.')[1] != _this.formValidate.staticIp.split('.')[1]
-                    || _this.formValidate.staticGw.split('.')[2] != _this.formValidate.staticIp.split('.')[2]
-                  ){
-                    f(_this.$t('wan.msg6'));
-                  }
-                  if(_this.formValidate.staticGw == _this.formValidate.staticIp){
-                    f(_this.$t('wan.msg7'));
-                  }
-                  f();
-                }
-              },trigger: 'blur' }
-          ],
-          staticMtu: [
-              { validator:function(r, v, f) {
-                var _s = cs.num_range(v,576,1500);
-                if(0 == _s) {
-                  f(_this.$t('wan.msg8'));
-                }else if(1 == _s) {
-                  f(_this.$t('wan.msg9'));
-                }else if(2 == _s) {
-                  f(_this.$t('wan.msg_mtu',[576,1500]));
-                }else{
-                  f();
-                }
-              },trigger: 'blur' }
-          ],
-          dhcpMtu: [
-            { validator:function(r, v, f) {
-              var _s = cs.num_range(v,576,1500);
-              if(0 == _s) {
-                f(_this.$t('wan.msg8'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg9'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.msg_mtu',[576,1500]));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          pppoeUser: [
-            { validator:function(r, v, f) {
-              var _s = cs.string(v);
-              if(0 == _s) {
-                f(_this.$t('wan.msg12'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg13'));
-              }else{
-                  if(2 == cs.srtLength(v,32)){
-                      f(_this.$t('wan.msg22'));
-                  }else{
-                      f();
-                  }
-              }
-            },trigger: 'blur' }
-          ],
-          pppoePass: [
-            { validator:function(r, v, f) {
-              var _s = cs.string(v);
-              if(0 == _s) {
-                f(_this.$t('wan.msg14'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg15'));
-              }else{
-                  if(2 == cs.srtLength(v,32)){
-                      f(_this.$t('wan.msg23'));
-                  }else{
-                      f();
-                  }
-              }
-            },trigger: 'blur' }
-          ],
-          dnsServer: [
-              { validator:function(r, v, f) {
-                  var _s = cs.ip(v);
-                  console.log(_s);
-                  if(0 == _s) {
-                      f(_this.$t('wan.msg24'));
-                  }else if(99 != _s) {
-                      f(_this.$t('wan.msg25'));
-                  }else{
-                      f();
-                  }
-              },trigger: 'blur' }
-          ],
-          pppoeMtu: [
-            { validator:function(r, v, f) {
-              var _s = cs.num_range(v,576,1492);
-              if(0 == _s) {
-                f(_this.$t('wan.msg8'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg9'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.msg_mtu',[576,1492]));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          pptpUser: [
-            { validator:function(r, v, f) {
-              var _s = cs.string(v);
-              if(0 == _s) {
-                f(_this.$t('wan.msg12'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg13'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          pptpPass: [
-            { validator:function(r, v, f) {
-              var _s = cs.string(v);
-              if(0 == _s) {
-                f(_this.$t('wan.msg14'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg15'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          pptpIp: [
-            { validator:function(r, v, f) {
-              var _s = cs.ip(v);
-              if(0 == _s) {
-                f(_this.$t('wan.ip')+_this.$t('wan.msg1'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.ip')+_this.$t('wan.msg20'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.ip')+_this.$t('wan.msg2'));
-              }else if(3 == _s) {
-                f(_this.$t('wan.ip')+_this.$t('wan.msg3'));
-              }else if(4 == _s) {
-                f(_this.$t('wan.ip')+_this.$t('wan.msg4'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          pptpMask: [
-            { validator:function(r, v, f) {
-              var _s = cs.mask(v);
-              if(0 == _s) {
-                f(_this.$t('wan.mask')+_this.$t('wan.msg1'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg5'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          pptpGw: [
-            { validator:function(r, v, f) {
-              var _s = cs.ip(v);
-              if(0 == _s) {
-                f(_this.$t('wan.gateway')+_this.$t('wan.msg1'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.gateway')+_this.$t('wan.msg20'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.gateway')+_this.$t('wan.msg2'));
-              }else if(3 == _s) {
-                f(_this.$t('wan.gateway')+_this.$t('wan.msg3'));
-              }else if(4 == _s) {
-                f(_this.$t('wan.gateway')+_this.$t('wan.msg4'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          pptpServerIp: [
-            { validator:function(r, v, f) {
-              var _s = cs.ip(v);
-              if(0 == _s) {
-                f(_this.$t('wan.server_ip')+_this.$t('wan.msg1'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.server_ip')+_this.$t('wan.msg20'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.server_ip')+_this.$t('wan.msg2'));
-              }else if(3 == _s) {
-                f(_this.$t('wan.server_ip')+_this.$t('wan.msg3'));
-              }else if(4 == _s) {
-                f(_this.$t('wan.server_ip')+_this.$t('wan.msg4'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          pptpMtu: [
-            { validator:function(r, v, f) {
-              var _s = cs.num_range(v,576,1492);
-              if(0 == _s) {
-                f(_this.$t('wan.msg8'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg9'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.msg_mtu',[576,1492]));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          l2tpUser: [
-            { validator:function(r, v, f) {
-              var _s = cs.string(v);
-              if(0 == _s) {
-                f(_this.$t('wan.msg12'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg13'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          l2tpPass: [
-            { validator:function(r, v, f) {
-              var _s = cs.string(v);
-              if(0 == _s) {
-                f(_this.$t('wan.msg14'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg15'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          l2tpIp: [
-            { validator:function(r, v, f) {
-              var _s = cs.ip(v);
-              if(0 == _s) {
-                f(_this.$t('wan.ip')+_this.$t('wan.msg1'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.ip')+_this.$t('wan.msg20'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.ip')+_this.$t('wan.msg2'));
-              }else if(3 == _s) {
-                f(_this.$t('wan.ip')+_this.$t('wan.msg3'));
-              }else if(4 == _s) {
-                f(_this.$t('wan.ip')+_this.$t('wan.msg4'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          l2tpMask: [
-            { validator:function(r, v, f) {
-              var _s = cs.mask(v);
-              if(0 == _s) {
-                f(_this.$t('wan.mask')+_this.$t('wan.msg1'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg5'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          l2tpGw: [
-            { validator:function(r, v, f) {
-              var _s = cs.ip(v);
-              if(0 == _s) {
-                f(_this.$t('wan.gateway')+_this.$t('wan.msg1'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.gateway')+_this.$t('wan.msg20'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.gateway')+_this.$t('wan.msg2'));
-              }else if(3 == _s) {
-                f(_this.$t('wan.gateway')+_this.$t('wan.msg3'));
-              }else if(4 == _s) {
-                f(_this.$t('wan.gateway')+_this.$t('wan.msg4'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          l2tpServerIp: [
-            { validator:function(r, v, f) {
-              var _s = cs.ip(v);
-              if(0 == _s) {
-                f(_this.$t('wan.server_ip')+_this.$t('wan.msg1'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.server_ip')+_this.$t('wan.msg20'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.server_ip')+_this.$t('wan.msg2'));
-              }else if(3 == _s) {
-                f(_this.$t('wan.server_ip')+_this.$t('wan.msg3'));
-              }else if(4 == _s) {
-                f(_this.$t('wan.server_ip')+_this.$t('wan.msg4'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          l2tpMtu: [
-            { validator:function(r, v, f) {
-              var _s = cs.num_range(v,576,1492);
-              if(0 == _s) {
-                f(_this.$t('wan.msg8'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg9'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.msg_mtu',[576,1492]));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          priDns: [
-            { validator:function(r, v, f) {
-              var _s = cs.ip(v);
-              if(0 == _s) {
-                f(_this.$t('wan.pri_dns')+_this.$t('wan.msg1'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.pri_dns')+_this.$t('wan.msg20'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.pri_dns')+_this.$t('wan.msg2'));
-              }else if(3 == _s) {
-                f(_this.$t('wan.pri_dns')+_this.$t('wan.msg3'));
-              }else if(4 == _s) {
-                f(_this.$t('wan.pri_dns')+_this.$t('wan.msg4'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          secDns: [
-            { validator:function(r, v, f) {
-              var _s = cs.ip(v);
-              if(0 == _s) {
-                f(_this.$t('wan.sec_dns')+_this.$t('wan.msg1'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.sec_dns')+_this.$t('wan.msg20'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.sec_dns')+_this.$t('wan.msg2'));
-              }else if(3 == _s) {
-                f(_this.$t('wan.sec_dns')+_this.$t('wan.msg3'));
-              }else if(4 == _s) {
-                f(_this.$t('wan.sec_dns')+_this.$t('wan.msg4'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ],
-          mac: [
-            { validator:function(r, v, f) {
-              var _s = cs.mac(v);
-              if(0 == _s) {
-                f(_this.$t('wan.msg19'));
-              }else if(1 == _s) {
-                f(_this.$t('wan.msg16'));
-              }else if(2 == _s) {
-                f(_this.$t('wan.msg17'));
-              }else if(3 == _s) {
-                f(_this.$t('wan.msg18'));
-              }else{
-                f();
-              }
-            },trigger: 'blur' }
-          ]
       }
     }
   },
   computed:{
+      ruleValidate:function () {
+          var _this = this;
+          return {
+              staticIp: [
+                  { required: true, message: this.$t('wan.msg1',[this.$t('wan.staticIp')]), trigger: 'blur' },
+                  { validator:function(r, v, f) {
+                      var _s = cs.ip(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg20'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg2'));
+                      }else if(3 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg3'));
+                      }else if(4 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg4'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              staticMask: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.mask(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.mask')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg5'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              staticGw: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.ip(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg20'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg2'));
+                      }else if(3 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg3'));
+                      }else if(4 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg4'));
+                      }else{
+                          if(
+                                  _this.formValidate.staticGw.split('.')[0] != _this.formValidate.staticIp.split('.')[0]
+                                  || _this.formValidate.staticGw.split('.')[1] != _this.formValidate.staticIp.split('.')[1]
+                                  || _this.formValidate.staticGw.split('.')[2] != _this.formValidate.staticIp.split('.')[2]
+                          ){
+                              f(_this.$t('wan.msg6'));
+                          }
+                          if(_this.formValidate.staticGw == _this.formValidate.staticIp){
+                              f(_this.$t('wan.msg7'));
+                          }
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              staticMtu: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.num_range(v,576,1500);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg8'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg9'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.msg_mtu',[576,1500]));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              dhcpMtu: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.num_range(v,576,1500);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg8'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg9'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.msg_mtu',[576,1500]));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              pppoeUser: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.string(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg12'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg13'));
+                      }else{
+                          if(2 == cs.srtLength(v,32)){
+                              f(_this.$t('wan.msg22'));
+                          }else{
+                              f();
+                          }
+                      }
+                  },trigger: 'blur' }
+              ],
+              pppoePass: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.string(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg14'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg15'));
+                      }else{
+                          if(2 == cs.srtLength(v,32)){
+                              f(_this.$t('wan.msg23'));
+                          }else{
+                              f();
+                          }
+                      }
+                  },trigger: 'blur' }
+              ],
+              dnsServer: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.ip(v);
+                      console.log(_s);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg24'));
+                      }else if(99 != _s) {
+                          f(_this.$t('wan.msg25'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              pppoeMtu: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.num_range(v,576,1492);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg8'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg9'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.msg_mtu',[576,1492]));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              pptpUser: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.string(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg12'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg13'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              pptpPass: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.string(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg14'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg15'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              pptpIp: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.ip(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg20'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg2'));
+                      }else if(3 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg3'));
+                      }else if(4 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg4'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              pptpMask: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.mask(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.mask')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg5'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              pptpGw: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.ip(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg20'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg2'));
+                      }else if(3 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg3'));
+                      }else if(4 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg4'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              pptpServerIp: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.ip(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.server_ip')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.server_ip')+_this.$t('wan.msg20'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.server_ip')+_this.$t('wan.msg2'));
+                      }else if(3 == _s) {
+                          f(_this.$t('wan.server_ip')+_this.$t('wan.msg3'));
+                      }else if(4 == _s) {
+                          f(_this.$t('wan.server_ip')+_this.$t('wan.msg4'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              pptpMtu: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.num_range(v,576,1492);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg8'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg9'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.msg_mtu',[576,1492]));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              l2tpUser: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.string(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg12'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg13'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              l2tpPass: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.string(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg14'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg15'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              l2tpIp: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.ip(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg20'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg2'));
+                      }else if(3 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg3'));
+                      }else if(4 == _s) {
+                          f(_this.$t('wan.ip')+_this.$t('wan.msg4'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              l2tpMask: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.mask(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.mask')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg5'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              l2tpGw: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.ip(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg20'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg2'));
+                      }else if(3 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg3'));
+                      }else if(4 == _s) {
+                          f(_this.$t('wan.gateway')+_this.$t('wan.msg4'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              l2tpServerIp: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.ip(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.server_ip')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.server_ip')+_this.$t('wan.msg20'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.server_ip')+_this.$t('wan.msg2'));
+                      }else if(3 == _s) {
+                          f(_this.$t('wan.server_ip')+_this.$t('wan.msg3'));
+                      }else if(4 == _s) {
+                          f(_this.$t('wan.server_ip')+_this.$t('wan.msg4'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              l2tpMtu: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.num_range(v,576,1492);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg8'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg9'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.msg_mtu',[576,1492]));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              priDns: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.ip(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.pri_dns')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.pri_dns')+_this.$t('wan.msg20'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.pri_dns')+_this.$t('wan.msg2'));
+                      }else if(3 == _s) {
+                          f(_this.$t('wan.pri_dns')+_this.$t('wan.msg3'));
+                      }else if(4 == _s) {
+                          f(_this.$t('wan.pri_dns')+_this.$t('wan.msg4'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              secDns: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.ip(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.sec_dns')+_this.$t('wan.msg1'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.sec_dns')+_this.$t('wan.msg20'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.sec_dns')+_this.$t('wan.msg2'));
+                      }else if(3 == _s) {
+                          f(_this.$t('wan.sec_dns')+_this.$t('wan.msg3'));
+                      }else if(4 == _s) {
+                          f(_this.$t('wan.sec_dns')+_this.$t('wan.msg4'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ],
+              mac: [
+                  { validator:function(r, v, f) {
+                      var _s = cs.mac(v);
+                      if(0 == _s) {
+                          f(_this.$t('wan.msg19'));
+                      }else if(1 == _s) {
+                          f(_this.$t('wan.msg16'));
+                      }else if(2 == _s) {
+                          f(_this.$t('wan.msg17'));
+                      }else if(3 == _s) {
+                          f(_this.$t('wan.msg18'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
+              ]
+          }
+      },
       bingWanBtnEn:function () {
           console.log('----bingWanBtnEn----'+(this.bingWanBtnEnable == 1)+'---------');
           return this.bingWanBtnEnable == 1;
@@ -777,6 +781,13 @@ var cs_main = {
                     },cs.getTimer(time));
                 }
             })
+        },
+        pwdFocus:function(){
+            this.pppoePwd = 'text';
+
+        },
+        pwdBlur:function(){
+            this.pppoePwd = 'password';
         },
         delWanBtn:function () {
             var _this = this;

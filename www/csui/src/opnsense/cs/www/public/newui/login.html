@@ -27,7 +27,7 @@
                     <Input type="text" v-model="newui" name="newui" ></Input>
                 </FormItem>
                 <FormItem prop="password">
-                    <Input type="password" v-model="formInline.password" name="password">
+                    <Input :type="loginPwd" @on-focus="pwdFocus()" @on-blur="pwdBlur()"  v-model="formInline.password" name="password">
                     <span slot="prepend"> {{ $t("login.pass") }} </span>
                     </Input>
                 </FormItem>
@@ -67,8 +67,31 @@
                 loginUser:'',
                 loginPass:'',
                 msg:'',
+                loginPwd:"text"/*,
                 ruleInline: {
                     password: [
+                        { validator:function(r, v, f) {
+                            if(!v){
+                                f(_this.$t('login.pass')+_this.$t('login.err_empty'));
+                            }
+                            /!* if(v != _this.loginPass){
+                             f(_this.$t('login.pass')+_this.$t('login.err_wrong'));
+                             }*!/
+                            f();
+                        },trigger: 'blur' }
+                    ]
+                }*/
+            }
+        },
+        computed: {
+            local_href:function() {
+                return location.host;
+            },
+            ruleInline:function () {
+                var _this = this;
+                return {
+                    password: [
+                        { required: true, message: this.$t('login.pass')+this.$t('login.err_empty'), trigger: 'blur' },
                         { validator:function(r, v, f) {
                             if(!v){
                                 f(_this.$t('login.pass')+_this.$t('login.err_empty'));
@@ -80,11 +103,6 @@
                         },trigger: 'blur' }
                     ]
                 }
-            }
-        },
-        computed: {
-            local_href:function() {
-                return location.host;
             }
         },
         created:function() {
@@ -120,6 +138,12 @@
                         });
                     }
                 })
+            },
+            pwdFocus:function(){
+                this.loginPwd = 'text';
+            },
+            pwdBlur:function(){
+                this.loginPwd = 'password';
             }
         }
     };

@@ -94,9 +94,15 @@
                     secDns:'',
                     winsServerAddr:'',
                     encryptMethod:'chap'
-                },
-                ruleValidate: {
+                }
+            }
+        },
+        computed:{
+            ruleValidate:function () {
+                var _this = this;
+                return {
                     ipStart: [
+                        { required: true, message: this.$t('l2tp.msg1'), trigger: 'blur' },
                         { validator:function(r, v, f) {
                             var _s = cs.ip(v);
                             if(_s != 99) {
@@ -180,7 +186,7 @@
                             }
                         },trigger: 'blur' }
                     ]
-                }
+                };
             }
         },
         created:function() {
@@ -238,15 +244,15 @@
                                 cs.loginOut();
                             }
                             if (0 == data.rescode) {
-                                _this.$Message.success({content:'Success!',onClose:function(){
+                                _this.$Message.success({content:_this.$t('l2tp.set_success'),onClose:function(){
                                     _this.applyLoading = false;
                                 }});
                                 var percentTimer = setInterval(function(){
                                     clearInterval(percentTimer);
                                     location.href=location.href;
-                                },cs.getTimer(10));
+                                },cs.getTimer(200));
                             } else {
-                                _this.$Message.success(_this.$t('l2tp.msg10')+_this.$t('errorcode.'+data.rescode));
+                                _this.$Message.error(_this.$t('l2tp.msg10')+_this.$t('errorcode.'+data.rescode));
                                 _this.applyLoading = false;
                             }
                         });
