@@ -415,7 +415,7 @@ class Network extends Csbackend
             $if_members = array();
             $lanInfoNics = self::getAvailableNic('lan');;
             foreach ($lanInfoNics as $emName => $emVal){
-                if("" == $emVal['friendly'] && !$emVal['up']){
+                if("" == $emVal['friendly'] && $emVal['up']){
                     $emVal['friendly'] = str_replace('em','opt',$emName);
                 }
                 if(!in_array($emName, $data['Nic']) && isset($config['interfaces'][$emVal['friendly']])){

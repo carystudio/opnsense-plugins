@@ -1761,6 +1761,8 @@ var messages = {
             "letctl":"灯控制",
             "unified_change_ip":"一键修改IP",
             "operation":"操作",
+            "encryption":"加密",
+            "unencrypted":"不加密",
 
             "beacon":"信标间隔",
             "broad_ssid":"广播SSID",
