@@ -119,6 +119,13 @@ class Network extends Csbackend
                         unset($niclist[$config['interfaces'][$if_name]['if']]);
                     }
                 }
+                if('pppoe'==substr($if_info['if'],0,4)){
+                    foreach($config['ppps']['ppp'] as $idx=>$ppp){
+                        if($ppp['if'] == $if_info['if']){
+                            unset($niclist[$config['ppps']['ppp'][$idx]['ports']]);
+                        }
+                    }
+                }
             }
             if(false == $include){
                 if(isset($config['bridges']['bridged'][0]['members'])){

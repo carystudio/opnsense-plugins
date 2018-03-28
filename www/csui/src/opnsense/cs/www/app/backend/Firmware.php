@@ -35,14 +35,17 @@ class Firmware extends Csbackend
     {
         if(false == $cache){
 //            echo 'exec script';
-            exec('/bin/sh /usr/local/opnsense/cs/script/extract_upgrade_file.sh');
+            exec('/bin/sh /usr/local/opnsense/cs/script/getfwinfo.sh');
         }
 
 	    $nowres = parse_ini_file('/usr/local/opnsense/cs/www/app/config/config.ini',true);
-	    if(file_exists('/usr/local/opnsense/cs/tmp/upgrade_config.ini')){
-		    $firmwareres = parse_ini_file('/usr/local/opnsense/cs/tmp/upgrade_config.ini',true);
-	    }else{
-		    $firmwareres = array('csg2000p'=>array('version'=>'','build_date'=>''));
+        $firmwareres = array('csg2000p'=>array('version'=>'','build_date'=>''));
+	    if(file_exists('/usr/local/opnsense/cs/tmp/fw_info.tmp')){
+		    $info_str = file_get_contents('/usr/local/opnsense/cs/tmp/fw_info.tmp');
+            $info = explode('||', $info_str);
+            if(count($info)==3){
+                $firmwareres = array('csg2000p'=>array('version'=>$info[0],'build_date'=>$info[1]));
+            }
 	    }
 	    $res = array('Version'=>$nowres['csg2000p']['version'],
             'Build_date'=>$nowres['csg2000p']['build_date'],
@@ -58,6 +61,7 @@ class Firmware extends Csbackend
             if($data['Fw_version']!=$info['Fw_version']){
                 throw new AppException('Firmware_100');
             }
+            exec('/bin/sh /usr/local/opnsense/cs/script/extract_upgrade_file.sh');
             $db = self::getDbConn();
             $res = $db->query("select name,version from packages");
             $gw_packages_ver = array();
