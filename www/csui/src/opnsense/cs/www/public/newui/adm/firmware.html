@@ -169,10 +169,13 @@
                 var version_num = {};
                 version_num.Fw_version = _this.fwVersion;
                 var postData = {"action": "upgradeFirmware", "data": version_num};
+                _this.upgradeStatus = true;
+                _this.upgradeDescribeStatus = '2';
                 uiPost.upgradeFirmware(postData,function(data) {
                     if (9999 == data.rescode) {
                         cs.loginOut();
                     }
+                    _this.upgradeStatus = false;
                     if (0 == data.rescode) {
                         _this.$Modal.success({
                             loading:true,

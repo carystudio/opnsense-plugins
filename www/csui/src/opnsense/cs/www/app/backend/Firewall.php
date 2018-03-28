@@ -116,9 +116,9 @@ class Firewall extends Csbackend
             }
             $rule['source'] = Array('address' => $data['Ip']);
             if($port_start == $port_end){
-                $rule['destination'] = Array('any' => '1','port'=>$port_start);
+                $rule['destination'] = Array('network' => 'lanip','not'=>1, 'port'=>$port_start);
             }else{
-                $rule['destination'] = Array('any' => '1','port'=>$port_start.'-'.$port_end);
+                $rule['destination'] = Array('network' => 'lanip','not'=>1, 'any' => '1','port'=>$port_start.'-'.$port_end);
             }
             //$rule['updated'] = Array('username'=>'root@'.$_SERVER['REMOTE_ADDR'], 'time'=>time(), 'description'=>'backend Firewall made changes')
             $rule['created'] = Array('username'=>'root@'.$_SERVER['REMOTE_ADDR'], 'time'=>time(), 'description'=>'backend Firewall made changes');

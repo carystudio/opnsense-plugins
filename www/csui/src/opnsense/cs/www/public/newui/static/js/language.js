@@ -435,7 +435,7 @@ var messages = {
             "countdown":"Count down [ye-time] s",
             "upload":"The firmware and upgrade are being downloaded ...",
 
-            "upgradeDescribe":["he U disk firmware information is being detected...","Upgrade"],
+            "upgradeDescribe":["he U disk firmware information is being detected...","Upgrade","In the process of upgrading..."],
             "firmwareDescribe":["* now there is no renewable version","* now there is an updated version that can be upgraded"],
 
             "current_firmware_version":"Current Firmware Version",
@@ -2141,7 +2141,7 @@ var messages = {
             "countdown":"倒计时[ye-time]秒",
             "upload":"正在下载固件和升级...",
 
-            "upgradeDescribe":["正在检测U盘固件信息...","升级"],
+            "upgradeDescribe":["正在检测U盘固件信息...","升级","正在升级中..."],
             "firmwareDescribe":["*现在没有可更新版本","*现在有可更新版本，可以进行升级"],
 
             "current_firmware_version":"当前固件版本",
