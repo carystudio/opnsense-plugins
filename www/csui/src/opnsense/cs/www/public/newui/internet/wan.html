@@ -119,15 +119,7 @@
                       {{$t('wan.weight_note')}}
                   </FormItem>
                   <FormItem :label="$t('wan.macclone')" prop="macClone">
-                      <Row>
-                          <Col span="14"> <Input v-model="formValidate.macClone" ></Input></Col>
-                          <Col span="9" offset="1">
-                          <ButtonGroup>
-                              <Button @click="changeMac(1)" :disabled="cloneMacBtn">{{ $t('wan.clone') }}</Button>
-                              <Button @click="changeMac(0)" :disabled="defaultMacBtn">{{ $t('wan.default') }}</Button>
-                          </ButtonGroup>
-                          </Col>
-                      </Row>
+                      <Input v-model="formValidate.macClone" ></Input>
                   </FormItem>
                   <!-- btn -->
                   <FormItem>
@@ -665,11 +657,11 @@ var cs_main = {
                   console.log(_this.interface);
                   for(var i in _this.interface){
                       if(_this.interface[i].Interface == _this.switchWanPort){
-                          if(_this.interface[i].Status.if.substring(0, 5) == "pppoe"){
-                              _this.netCardDinding = _this.interface[i].Nic;
-                          }else{
-                              _this.netCardDinding = _this.interface[i].Nic+" | "+_this.interface[i].Mac;
-                          }
+//                          if(_this.interface[i].Status.if.substring(0, 5) == "pppoe"){
+                              _this.netCardDinding = _this.interface[i].Nic +" | "+_this.interface[i].Mac;
+//                          }else{
+//                              _this.netCardDinding = _this.interface[i].Nic+" | "+_this.interface[i].Mac;
+//                          }
                       }
                   }
 
@@ -694,12 +686,7 @@ var cs_main = {
                   }else{
                       _this.formValidate.wanMode = '1';
                   }
-                  _this.formValidate.MacClone = _this.interface[0].MacClone;
-                  if('' != _this.interface[0].MacClone){
-                        _this.macCloneEnabled = 1;
-                  }else{
-                      _this.macCloneEnabled = 0;
-                  }
+                  _this.formValidate.macClone = _this.interface[0].MacClone;
                   if(_this.interface[0].Monitor != ""){
                       _this.formValidate.monitorIp = _this.interface[0].Monitor;
                   }

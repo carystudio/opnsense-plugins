@@ -176,8 +176,8 @@
                 <FormItem :label="$t('central.channels',['5G'])" prop="channel5">
                     <Select v-model="formSetinfo.channel5" :key="$t('central.channels',['5G'])">
                         <Option value="0">{{ $t('central.auto_select') }}</Option>
-                        <Option v-for="i in channel5Arr" :key="i" :value="i">{{ i }}</Option>
-                        <Option v-show="channelsStatus165" :key="165" value="165">165</Option>
+                        <Option v-for="i in channel5Arr"  :value="i">{{ i }}</Option>
+                        <Option v-show="channelsStatus165" value="165">165</Option>
                     </Select>
                 </FormItem>
                 <FormItem :label="$t('central.bandwidth5')" prop="band_width5">
@@ -857,6 +857,9 @@
                 if('0' == _this.band_width5 && '2' != _this.band5){
                     _this.channelsStatus165 = true;
                 }else{
+                    if('165' == _this.formSetinfo.channel5){
+                        _this.formSetinfo.channel5 = '0';
+                    }
                     _this.channelsStatus165 = false;
                 }
             },
@@ -866,6 +869,9 @@
                 if('0' == _this.band_width5 && '2' != _this.band5){
                     _this.channelsStatus165 = true;
                 }else{
+                    if('165' == _this.formSetinfo.channel5){
+                        _this.formSetinfo.channel5 = '0';
+                    }
                     _this.channelsStatus165 = false;
                 }
             }

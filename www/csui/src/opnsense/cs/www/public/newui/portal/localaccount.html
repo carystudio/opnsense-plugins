@@ -65,7 +65,7 @@
                 <Button size="small" @click="tableSelect(true)" type="error">{{ $t('localaccount.delete') }}</Button>
             </Col>
             <Col>
-                <Table border ref="tableSelect" :columns="localUserListColumns" :data="localUserListData"></Table>
+                <Table border ref="tableSelect" :columns="localUserListColumns" :data="localUserListData" :no-data-text="$t('common.no_data')"></Table>
             </Col>
         </Row>
         <br>

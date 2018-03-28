@@ -182,7 +182,7 @@ var messages = {
             "msh11":"SSID is illegal!",
             "msg12":"The password must be 8-63 bit ASCII code characters!",
             "msg13":"The maximum number of users must be a number!",
-            "msg14":"The Vlan tag is invalid and its value exceeds the range (0-4096)!",
+            "msg14":"The Vlan tag is invalid and its value exceeds the range (0-4094)!",
             "msg15":"Please choose different network devices!",
             "msg16":"Please select the IP that needs to be modified!",
             "modify_fail":"The modification failed!",
@@ -229,7 +229,9 @@ var messages = {
             "MSG_database_multi": "Update the database file does not support multiple file upload!",
             "MSG_database_4gend": "Update the database file lack of 2.4 G the end tag, please import database file again.",
             "MSG_database_5gend": "Update the database file lack of 5.8 G the end tag, please import database file again.",
-            "MSG_database_diff": "The database file error, please to import this equipment database file!"
+            "MSG_database_diff": "The database file error, please to import this equipment database file!",
+            "msg6":"Database update success!",
+            "msg7":"Database update failed!"
         },
         "index":{
             "title":"System Status",
@@ -1887,7 +1889,7 @@ var messages = {
             "msh11":"SSID不合法！",
             "msg12":"密码必须是8-63位ASCII码字符！",
             "msg13":"最大用户数必须为数字！",
-            "msg14":"Vlan标记无效，它的值超出范围（0-4096）!",
+            "msg14":"Vlan标记无效，它的值超出范围（0-4094）!",
             "msg15":"请选择不同网络的设备！",
             "msg16":"请选择需要修改的IP！",
             "modify_fail":"修改失败！",
@@ -1935,7 +1937,9 @@ var messages = {
             "MSG_database_multi": "更新数据库文件不支持多文件上传！",
             "MSG_database_4gend": "更新数据库文件缺少2.4G结束标记，请重新导入数据库文件！",
             "MSG_database_5gend": "更新数据库文件缺少5.8G结束标记，请重新导入数据库文件！",
-            "MSG_database_diff": "数据库文件错误，请重新导入本设备的数据库文件！"
+            "MSG_database_diff": "数据库文件错误，请重新导入本设备的数据库文件！",
+            "msg6":"数据库更新成功！",
+            "msg7":"数据库更新失败！"
         },
         "index":{
             "title":"系统状态",

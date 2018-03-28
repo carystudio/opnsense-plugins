@@ -128,7 +128,7 @@ class Network extends Csbackend
                     }
                 }
             }
-            if(false == $include){
+			if(false == $include){
                 if(isset($config['bridges']['bridged'][0]['members'])){
                     $lan_ifs = trim($config['bridges']['bridged'][0]['members']);
                     $lan_ifs = explode(',', $lan_ifs);
@@ -435,7 +435,7 @@ class Network extends Csbackend
                     $if_members[] = $if_name;
                 }
             }
-            $old_members = explode(',', $config['bridges']['bridged'][0]['members']);
+			$old_members = explode(',', $config['bridges']['bridged'][0]['members']);
             foreach($old_members as $ifname){
                 unset($config['interfaces'][$ifname]['enable']);
             }
@@ -601,7 +601,7 @@ class Network extends Csbackend
             if(''==$inf){
                 throw new AppException('Network_302');
             }
-            $ifname = '';
+			$ifname = '';
             foreach($config['interfaces'] as $ifname_tmp=>$ifinfo){
                 if($ifinfo['if'] == $nic){
                     $ifname = $ifname_tmp;
@@ -643,7 +643,7 @@ class Network extends Csbackend
             $wan['adv_dhcp_config_file_override_path'] = '';
             $config['interfaces'][$ifname] = $wan;
 
-            self::setMultiWan();
+			self::setMultiWan();
             write_config();
             self::applyGatewayConfig();
 
@@ -675,7 +675,7 @@ class Network extends Csbackend
             foreach($config['interfaces'] as $idx=>$ifinfo){
                 if($ifinfo['descr'] == $if){
                     $ifname = $idx;
-                    break ;
+					break ;
                 }
             }
             if(empty($ifname)){
@@ -699,7 +699,7 @@ class Network extends Csbackend
                 $realid = get_real_interface($ifname);
                 interface_bring_down($ifname, true);   /* down the interface */
 
-                $realif = $config['interfaces'][$ifname]['if'];
+				$realif = $config['interfaces'][$ifname]['if'];
                 if(strpos($realif, 'pppoe') === 0){
                     foreach($config['ppps']['ppp'] as $idx=>$ppp){
                         if($ppp['if'] == $realif){
@@ -708,7 +708,6 @@ class Network extends Csbackend
                         }
                     }
                 }
-
                 if('pppoe'!=$config['interfaces'][$ifname]['ipaddr'] && $config['interfaces'][$ifname]['if'] != $nic){
                     throw new AppException('Network_705');
                 }else if('pppoe' == $config['interfaces'][$ifname]['ipaddr']){
@@ -716,16 +715,15 @@ class Network extends Csbackend
                         foreach($config['ppps']['ppp'] as $idx=>$ppp){
                             if($ppp['if'] == $config['interfaces'][$ifname]['if'] && $ppp['ports']!=$nic){
                                 throw new AppException('Network_705');
-                            }else if($ppp['if'] ==$config['interfaces'][$ifname]['if'] && $ppp['ports']==$nic){
+                            }else if($ppp['if'] == $config['interfaces'][$ifname]['if'] && $ppp['ports']==$nic){
                                 unset($config['ppps']['ppp'][$idx]);
                             }
                         }
                     }
                 }
-                $config['interfaces'][$ifname] = array('if'=>$realif,
+				$config['interfaces'][$ifname] = array('if'=>$realif,
                     'spoofmac'=>'',
                     'descr'=>$realif);
-
                 $wan = strpos($if, 'wan')===0;
                 if($wan){
                     if(isset($config['gateways']['gateway_item'])){
@@ -737,7 +735,6 @@ class Network extends Csbackend
                     }
                 }
                 //unset($config['interfaces'][$ifname]);  /* delete the specified OPTn or LAN*/
-
 
                 if (isset($config['dhcpd'][$ifname])) {
                     unset($config['dhcpd'][$ifname]);

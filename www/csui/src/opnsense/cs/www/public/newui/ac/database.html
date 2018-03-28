@@ -149,7 +149,8 @@ var cs_main = {
       },
 
       handleUpload: function(file) {
-        this.upload.file = file;
+          this.$Spin.show();  //加载动画
+          this.upload.file = file;
       },
       exceededSize: function() {
         this.$Message.error({content:this.$t('database.msg3',[cs.bytesToSize( (parseInt(this.upload.maxSize)*1000) )]),duration: 5});
@@ -157,9 +158,20 @@ var cs_main = {
       formatError: function() {
         this.$Message.error({content:this.$t('database.msg2',[this.upload.format.join('、')]),duration: 5});
       },
-      uploadSuccess:function(){
+      uploadSuccess:function(data){
           var _this = this;
-          _this.$Modal.success({
+          _this.$Spin.hide();   //关闭加载动画
+          console.log(data);
+          if('Success' == data.result){
+              _this.$Message.success({content:'数据库更新成功!',onClose:function(){
+                  location.href = location.href;
+              }});
+          }else{
+              _this.$Message.error({content:'数据库更新失败!',onClose:function(){
+                  location.href = location.href;
+              }});
+          }
+          /*_this.$Modal.success({
               loading:true,
               render: function(h) {
                   return h('div',[
@@ -176,7 +188,7 @@ var cs_main = {
                   location.href = location.href;
               }
               _this.percent++;
-          },cs.getTimer(10));
+          },cs.getTimer(10));*/
       }
   }
 };
