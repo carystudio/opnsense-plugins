@@ -47,6 +47,7 @@ class Network extends Csbackend
         'Network_402'=>'备注不能为空',
         'Network_403'=>'该MAC地址已添加过规则',
         'Network_404'=>'该IP地址已添加过规则',
+        'Network_405'=>'静态DHCP地址需要与lan ip地址同一网段',
 
         'Network_500'=>'接口名称不正确',
         'Network_501'=>'网关不在网段内',
@@ -119,7 +120,7 @@ class Network extends Csbackend
                         unset($niclist[$config['interfaces'][$if_name]['if']]);
                     }
                 }
-                if('pppoe'==substr($if_info['if'],0,4)){
+				if('pppoe'==substr($if_info['if'],0,4)){
                     foreach($config['ppps']['ppp'] as $idx=>$ppp){
                         if($ppp['if'] == $if_info['if']){
                             unset($niclist[$config['ppps']['ppp'][$idx]['ports']]);
@@ -152,12 +153,21 @@ class Network extends Csbackend
         $wanInfo = array();
         $wanInfo['AvailableNic'] = self::getAvailableNic();
         $wanInfo['Interfaces'] = array();
+        $niclist = get_interface_list();
         foreach($config['interfaces'] as $idx=>$infinfo){
             if(strpos($infinfo['descr'], 'wan')===0){
                 $wanInfo['Interfaces'][] = self::getInfInfo($infinfo['descr']);
             }
         }
 
+        foreach ($wanInfo['Interfaces'] as $key=>$val){
+            foreach ($val as $k=>$v){
+                if('Nic' == $k){
+                    $wanInfo['Interfaces'][$key]['Mac'] = $niclist[$val['Nic']]['mac'];
+                }
+            }
+
+        }
 
         return $wanInfo;
     }
@@ -1163,6 +1173,16 @@ class Network extends Csbackend
 //            if(!isset($data['Descr']) || strlen($data['Descr'])==0){
 //                throw new AppException('Network_402');
 //            }
+
+            $netMask = Util::maskbit2ip($config['interfaces']['lan']['subnet']);
+            $netMask = sprintf("%u", ip2long($netMask));
+            $long = sprintf("%u", ip2long($data['Ip']));
+            $lanIp = sprintf("%u", ip2long($config['interfaces']['lan']['ipaddr']));
+
+            if(($netMask & $long) != ($netMask & $lanIp)){
+                throw new AppException('Network_405');
+            }
+
             if ($config['dhcpd']['lan']['staticmap']){
                 foreach($config['dhcpd']['lan']['staticmap'] as $macip){
                     if($data['Mac'] == $macip['mac']){

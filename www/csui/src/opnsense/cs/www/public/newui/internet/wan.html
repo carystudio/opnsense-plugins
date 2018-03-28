@@ -118,6 +118,17 @@
                       </Select>
                       {{$t('wan.weight_note')}}
                   </FormItem>
+                  <FormItem :label="$t('wan.macclone')" prop="macClone">
+                      <Row>
+                          <Col span="14"> <Input v-model="formValidate.macClone" ></Input></Col>
+                          <Col span="9" offset="1">
+                          <ButtonGroup>
+                              <Button @click="changeMac(1)" :disabled="cloneMacBtn">{{ $t('wan.clone') }}</Button>
+                              <Button @click="changeMac(0)" :disabled="defaultMacBtn">{{ $t('wan.default') }}</Button>
+                          </ButtonGroup>
+                          </Col>
+                      </Row>
+                  </FormItem>
                   <!-- btn -->
                   <FormItem>
                       <Button type="primary" @click="handleSubmit('formValidate')">{{ $t('common.apply') }}</Button>
@@ -186,7 +197,8 @@ var cs_main = {
           tier:'',
           weight:'',
           wanMode:'0',
-          monitorIp:''
+          monitorIp:'',
+          macClone:''
       }
     }
   },
@@ -599,6 +611,16 @@ var cs_main = {
                           f();
                       }
                   },trigger: 'blur' }
+              ],
+              macClone:[
+                  { validator:function(r, v, f) {
+                      var _s = cs.mac(v);
+                      if(99 != _s && 0 != _s && v.length != 0) {
+                          f(_this.$t('wan.msg28'));
+                      }else{
+                          f();
+                      }
+                  },trigger: 'blur' }
               ]
           }
       },
@@ -639,12 +661,14 @@ var cs_main = {
                   /*初始化，显示wan1信息*/
                   _this.switchWanPort =  _this.interface[0].Interface;
                   //绑定网卡
+                  console.log('===================================');
+                  console.log(_this.interface);
                   for(var i in _this.interface){
                       if(_this.interface[i].Interface == _this.switchWanPort){
-                          if(_this.interface[i].Status.if == "pppoe0"){
+                          if(_this.interface[i].Status.if.substring(0, 5) == "pppoe"){
                               _this.netCardDinding = _this.interface[i].Nic;
                           }else{
-                              _this.netCardDinding = _this.interface[i].Nic+" | "+_this.interface[i].Status.macaddr;
+                              _this.netCardDinding = _this.interface[i].Nic+" | "+_this.interface[i].Mac;
                           }
                       }
                   }
@@ -670,7 +694,12 @@ var cs_main = {
                   }else{
                       _this.formValidate.wanMode = '1';
                   }
-
+                  _this.formValidate.MacClone = _this.interface[0].MacClone;
+                  if('' != _this.interface[0].MacClone){
+                        _this.macCloneEnabled = 1;
+                  }else{
+                      _this.macCloneEnabled = 0;
+                  }
                   if(_this.interface[0].Monitor != ""){
                       _this.formValidate.monitorIp = _this.interface[0].Monitor;
                   }
@@ -682,6 +711,14 @@ var cs_main = {
 
     },
     watch:{
+        "formValidate.macClone":function () {
+            var _this = this;
+            if('' != _this.formValidate.macClone){
+                _this.macCloneEnabled = 1;
+            }else{
+                _this.macCloneEnabled = 0;
+            }
+        },
         switchWanPort:function () {
             var _this = this;
             if(_this.switchWanPort != 'add'){
@@ -691,11 +728,10 @@ var cs_main = {
             for(var i in _this.interface){
                 if(_this.interface[i].Interface == _this.switchWanPort){
                     console.log(_this.interface[i].Interface);
-                    if(_this.interface[i].Status.if == "pppoe0"){
-                        _this.netCardDinding = _this.interface[i].Nic;
-                    }else{
-                        _this.netCardDinding = _this.interface[i].Nic+" | "+_this.interface[i].Status.macaddr;
-                    }
+
+                    _this.netCardDinding = _this.interface[i].Nic+" | "+_this.interface[i].Mac;
+
+                    _this.formValidate.macClone = _this.interface[i].MacClone;
 
                     _this.formValidate.dnsServer = _this.interface[i].Dns;
                     _this.formValidate.tier = _this.interface[i].Tier;
@@ -757,10 +793,24 @@ var cs_main = {
                     }
                     postVar.Monitor = _this.formValidate.monitorIp;
                     postVar.Dns = _this.formValidate.dnsServer;
+                    postVar.MacClone = _this.formValidate.macClone;
 
                     var postData = {"action":"setWanInfo", "data":postVar};
-                    uiPost.setWanInfo(postData);
-                    var time = 30;
+                    _this.$Spin.show();  //加载动画
+                    uiPost.setWanInfo(postData,function (data) {
+                        _this.$Spin.hide();   //关闭加载动画
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        if (0 == data.rescode) {
+                            _this.$Message.success({content:_this.$t('wan.msg26'),onClose:function(){
+                                location.href = location.href;
+                            }});
+                        }else{
+                            _this.$Message.error(_this.$t('wan.msg27')+ ' ' +_this.$t('errorcode.'+data.rescode));
+                        }
+                    });
+                    /*var time = 30;
                     _this.$Modal.success({
                         loading:true,
                         render: function(h) {
@@ -778,7 +828,7 @@ var cs_main = {
                             location.href = location.href;
                         }
                         _this.percent++;
-                    },cs.getTimer(time));
+                    },cs.getTimer(time));*/
                 }
             })
         },
@@ -849,12 +899,10 @@ var cs_main = {
             var _this = this;
             if(1 == val){
                 this.macCloneEnabled = 1;
-                uiPost.getStationMacByIp(function(data){
-                    _this.formValidate.mac = data.stationMac;
-                })
+                _this.formValidate.macClone = $.trim(_this.netCardDinding.split('|')[1]);
             }else{
                 this.macCloneEnabled = 0;
-                this.formValidate.mac = this.formValidate.wanDefMac;
+                _this.formValidate.macClone = '';
             }
         },
         pppConnectClick:function(val){

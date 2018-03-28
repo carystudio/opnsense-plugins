@@ -176,13 +176,13 @@ var messages = {
 
             "msg6":"The AP name is not more than 32 bits in length!",
             "msg7":"SSID can't be empty!",
-            "msg8":"The name of the device can not be empty!",
+            "msg8":"The AP Name can not be empty!",
             "msg9":"The name is the same as the original name!",
             "msg10":"SSID can't be empty!",
             "msh11":"SSID is illegal!",
             "msg12":"The password must be 8-63 bit ASCII code characters!",
             "msg13":"The maximum number of users must be a number!",
-            "msg14":"The Vlan tag is incorrect!",
+            "msg14":"The Vlan tag is invalid and its value exceeds the range (0-4096)!",
             "msg15":"Please choose different network devices!",
             "msg16":"Please select the IP that needs to be modified!",
             "modify_fail":"The modification failed!",
@@ -199,6 +199,7 @@ var messages = {
             "msg22":"The password can not be empty",
             "msg23":"The password is invalid and contains invalid characters",
             "msg24":"A number with a maximum number of users 0~64",
+            "msg25":"The VLAN tag must be a valid number!",
 
             "tip1":"Warm hint: @:central.upload needs to be connected to the U disk. Please use the U disk."
         },
@@ -330,8 +331,8 @@ var messages = {
             "custom":"Custom Speed Limit",
             "totalUplinkSpeed":"Total Uploads Bandwidth",
             "totalDownlinkSpeed":"Total Download Bandwidth",
-            "singleUplinkSpeed":"Total Upload Bandwidth",
-            "singleDownlinkSpeed":"Total Download Bandwidth",
+            "singleUplinkSpeed":"Default Upload Bandwidth",
+            "singleDownlinkSpeed":"Default Download Bandwidth",
             "msg1":"Total Uplink Bandwidth cannot be empty,please try again!",
             "msg2":"Total Downlink Bandwidth cannot be empty,please try again?",
             "msg3":"Total Uplink Bandwidth cannot be empty,please try again!",
@@ -359,12 +360,12 @@ var messages = {
             "msg25":"Please select the rule to be deleted!",
             "msg26":"Do you really want to delete the selected entry?",
             "msg27":"Delete successfully!",
-            "msg28":"Default single IP upload bandwidth can not be empty, please try again!",
-            "msg29":"Default single IP download bandwidth can not be empty, please try again!",
-            "msg30":"The default single IP upload bandwidth must be a valid number!",
-            "msg31":"The default single IP download bandwidth must be a valid number!",
-            "msg32":"The default single IP upload bandwidth is invalid, the value is out of range ",
-            "msg33":"The default single IP download bandwidth is invalid, the value is out of range ",
+            "msg28":"Default upload bandwidth can not be empty, please try again!",
+            "msg29":"Default download bandwidth can not be empty, please try again!",
+            "msg30":"The default upload bandwidth must be a valid number!",
+            "msg31":"The default download bandwidth must be a valid number!",
+            "msg32":"The default upload bandwidth is invalid, the value is out of range ",
+            "msg33":"The default download bandwidth is invalid, the value is out of range ",
             "msg34":"Single IP upload bandwidth can not be empty, please try again!",
             "msg35":"Single IP download bandwidth can not be empty, please try again!",
             "msg36":"The single IP upload bandwidth must be a valid number!",
@@ -372,7 +373,10 @@ var messages = {
             "msg38":"The single IP upload bandwidth is invalid and its value is beyond the range ",
             "msg39":"The single IP download bandwidth is invalid and its value is beyond the scope ",
             "msg40":"IP address is not empty!",
-            "msg41":"IP address is invalid!"
+            "msg41":"IP address is invalid!",
+
+            "msg42":"Rules add success!",
+            "msg43":"Rule add failure!"
         },
         "opmode":{
             "title":"Operation Mode",
@@ -521,6 +525,7 @@ var messages = {
             "pri_dns":"Primary DNS",
             "sec_dns":"Secondary DNS",
             "mac":"MAC Address",
+            "macclone":"MAC Clone",
             "clone":"Clone MAC",
             "default":"Default MAC",
             "apply":"Apply",
@@ -548,7 +553,10 @@ var messages = {
             "msg22":"The username is invalid and can't exceed 32 characters!",
             "msg23":"The password is not valid, not more than 32 characters!",
             "msg24":"DNS server can't be empty!",
-            "msg25":"DNS server is not legal!"
+            "msg25":"DNS server is not legal!",
+            "msg26":"Set up success!",
+            "msg27":"Fail to set up!",
+            "msg28":"Cloned MAC address is invalid!"
         },
         "lan":{
             "title":"LAN Setting",
@@ -614,6 +622,8 @@ var messages = {
             "msg9":"Do you really want to delete the selected entry?",
             "msg10":"MAC addre cannot be empty,please try again!",
             "msg11":"Delete successfully!",
+            "msg12":"The description cannot exceed 32 characters!",
+            "msg13":"Description cannot contain full width and Chinese character!"
         },
         "route":{
             "title":"Static Routing Setup",
@@ -652,7 +662,9 @@ var messages = {
             "msg13":"Can not be the same as the gateway address, please try again!",
             "msg14":"Can't be empty",
             "msg15":"The IP address has already existed. Please replace the other IP address again!",
-            "msg16":"Gateway address is invalid!"
+            "msg16":"Gateway address is invalid!",
+            "msg17":"The description cannot exceed 32 characters!",
+            "msg18":"Description cannot contain full width and Chinese character!"
         },
         "pptp":{
             "title":"PPTP Server",
@@ -720,7 +732,7 @@ var messages = {
             "auth_type":"Authentication Type",
             "account":"Account",
             "password":"Password",
-            "specifyIp":"Specify IP",
+            "specifyIp":"Specify the user's IP",
             "add":"Add",
             "delete":"Delete",
             "account_type":"Account Type",
@@ -771,7 +783,8 @@ var messages = {
             "msg15":"IP address can not be empty!",
             "msg16":"Delete failure!",
             "msg17":"Add successful!",
-            "msg18":"Add failure!"
+            "msg18":"Add failure!",
+            "msg19":"The description cannot exceed 32 characters!"
         },
         "macf":{
             "title":"MAC Filtering",
@@ -899,7 +912,9 @@ var messages = {
             "msg18":"Add success!",
             "msg19":"Add failure!",
             "msg20":"Success!",
-            "msg21":"Failure!"
+            "msg21":"Failure!",
+            "msg22":"Description cannot contain full width and Chinese character!",
+            "msg23":"The description cannot exceed 32 characters!"
         },
         "dmz":{
             "title":"DMZ",
@@ -1600,6 +1615,7 @@ var messages = {
             'Network_402':'The note can not be empty',
             'Network_403':'The MAC address has been added to the rules',
             'Network_404':'The IP address has been added to the rules',
+            'Network_405':'The static DHCP address needs the same network segment as the LAN IP address',
 
             'Network_500':'Incorrect interface name',
             'Network_501':'The gateway is not within the network segment',
@@ -1865,13 +1881,13 @@ var messages = {
 
             "msg6":"AP名称长度不能超过32位！",
             "msg7":"SSID不能为空！",
-            "msg8":"设备名称不能为空！",
+            "msg8":"AP名称不能为空！",
             "msg9":"修改名称和原名称相同！",
             "msg10":"SSID不能为空！",
             "msh11":"SSID不合法！",
             "msg12":"密码必须是8-63位ASCII码字符！",
             "msg13":"最大用户数必须为数字！",
-            "msg14":"Vlan标记不正确！",
+            "msg14":"Vlan标记无效，它的值超出范围（0-4096）!",
             "msg15":"请选择不同网络的设备！",
             "msg16":"请选择需要修改的IP！",
             "modify_fail":"修改失败！",
@@ -1888,6 +1904,7 @@ var messages = {
             "msg22":"密码不能为空",
             "msg23":"密码无效，包含了无效的字符",
             "msg24":"最大用户数为0~64的数字",
+            "msg25":"VLAN标记必须是有效的数字！",
 
             "tip1":"温馨提示:@:central.upload需要接U盘。请接U盘使用！"
 
@@ -1989,7 +2006,7 @@ var messages = {
         },
         "qos":{
             "title":"QoS",
-            "help":"本页面用于设置QoS参数（125000KBytes=1000M带宽，125KBytes=1M带宽）。您可以通过设置游戏的流量超过其他的网络流量（如FTP或Web），来优化您的网游体验。",
+            "help":"本页面用于设置QoS参数。",
             "state":"启用/禁用",
             "on":"开",
             "off":"关",
@@ -2019,8 +2036,8 @@ var messages = {
             "custom":"自定义限速",
             "totalUplinkSpeed":"总上传带宽",
             "totalDownlinkSpeed":"总下载带宽",
-            "singleUplinkSpeed":"总上传带宽",
-            "singleDownlinkSpeed":"总下载带宽",
+            "singleUplinkSpeed":"默认上传带宽",
+            "singleDownlinkSpeed":"默认下载带宽",
             "msg1":"总上传带宽不能为空，请重试！",
             "msg2":"总下载带宽不能为空，请重试！",
             "msg3":"总上传带宽必须是有效的数字！",
@@ -2048,12 +2065,12 @@ var messages = {
             "msg25":"请选择要删除的规则！",
             "msg26":"您确定要删除选中的记录吗？",
             "msg27":"删除成功！",
-            "msg28":"默认单IP上传带宽不能为空，请重试！",
-            "msg29":"默认单IP下载带宽不能为空，请重试！",
-            "msg30":"默认单IP上传带宽必须是有效的数字！",
-            "msg31":"默认单IP下载带宽必须是有效的数字！",
-            "msg32":"默认单IP上传带宽无效，它的值已超出范围 ",
-            "msg33":"默认单IP下载带宽无效，它的值已超出范围 ",
+            "msg28":"默认上传带宽不能为空，请重试！",
+            "msg29":"默认下载带宽不能为空，请重试！",
+            "msg30":"默认上传带宽必须是有效的数字！",
+            "msg31":"默认下载带宽必须是有效的数字！",
+            "msg32":"默认上传带宽无效，它的值已超出范围 ",
+            "msg33":"默认下载带宽无效，它的值已超出范围 ",
             "msg34":"单IP上传带宽不能为空，请重试！",
             "msg35":"单IP下载带宽不能为空，请重试！",
             "msg36":"单IP上传带宽必须是有效的数字！",
@@ -2061,7 +2078,10 @@ var messages = {
             "msg38":"单IP上传带宽无效，它的值已超出范围 ",
             "msg39":"单IP下载带宽无效，它的值已超出范围 ",
             "msg40":"IP地址不能为空！",
-            "msg41":"IP地址无效！"
+            "msg41":"IP地址无效！",
+
+            "msg42":"规则添加成功！",
+            "msg43":"规则添加失败！"
         },
         "opmode":{
             "title":"系统模式",
@@ -2210,6 +2230,7 @@ var messages = {
             "pri_dns":"首选DNS",
             "sec_dns":"备选DNS",
             "mac":"MAC地址",
+            "macclone":"MAC克隆",
             "clone":"克隆MAC",
             "default":"缺省MAC",
             "apply":"应用",
@@ -2237,7 +2258,10 @@ var messages = {
             "msg22":"用户名无效，不能超过32个字符！",
             "msg23":"密码无效，不能超过32个字符！",
             "msg24":"DNS服务器不能为空！",
-            "msg25":"DNS服务器不合法！"
+            "msg25":"DNS服务器不合法！",
+            "msg26":"设置成功！",
+            "msg27":"设置失败！",
+            "msg28":"克隆MAC地址无效！"
         },
         "lan":{
             "title":"局域网设置",
@@ -2299,7 +2323,9 @@ var messages = {
             "msg8":"请选择要删除的规则！",
             "msg9":"您确定要删除选中的记录吗？",
             "msg10":"MAC地址不能为空，请重试！",
-            "msg11":"删除成功！"
+            "msg11":"删除成功！",
+            "msg12":"描述不能超过32个字符！",
+            "msg13":"描述不能包含全角字符和中文字符！"
         },
         "route":{
             "title":"静态路由设置",
@@ -2335,7 +2361,9 @@ var messages = {
             "msg13":"不能与网关地址相同，请重试！",
             "msg14":"不能为空",
             "msg15":"该IP地址已经存在了，请更换其它IP地址的再试！",
-            "msg16":"网关地址无效！"
+            "msg16":"网关地址无效！",
+            "msg17":"描述不能超过32个字符！",
+            "msg18":"描述不能包含全角字符和中文字符！",
         },
         "pptp":{
             "title":"PPTP服务器",
@@ -2402,7 +2430,7 @@ var messages = {
             "auth_type":"认证类型",
             "account":"账号",
             "password":"密码",
-            "specifyIp":"指定添加的IP",
+            "specifyIp":"指定用户的IP",
             "add":"新增",
             "delete":"删除",
             "account_type":"账号类型",
@@ -2453,7 +2481,8 @@ var messages = {
             "msg15":"IP地址不能为空！",
             "msg16":"删除失败！",
             "msg17":"添加成功！",
-            "msg18":"添加失败！"
+            "msg18":"添加失败！",
+            "msg19":"描述不能超过32个字符！"
         },
         "macf":{
             "title":"MAC 过滤",
@@ -2581,7 +2610,9 @@ var messages = {
             "msg18":"添加成功！",
             "msg19":"添加失败！",
             "msg20":"应用成功！",
-            "msg21":"应用失败！"
+            "msg21":"应用失败！",
+            "msg22":"描述不能包含全角字符和中文字符！",
+            "msg23":"描述不能超过32个字符！"
         },
         "dmz":{
             "title":"DMZ",
@@ -3283,6 +3314,7 @@ var messages = {
             'Network_402':'备注不能为空',
             'Network_403':'该MAC地址已添加过规则',
             'Network_404':'该IP地址已添加过规则',
+            'Network_405':'静态DHCP地址需要与lan ip地址同一网段',
 
             'Network_500':'接口名称不正确',
             'Network_501':'网关不在网段内',

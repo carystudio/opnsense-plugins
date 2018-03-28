@@ -1121,6 +1121,10 @@
                 }
                 data.maxstanum = _this.formSetinfo.maxusernumber;
 
+                if(99 != cs.num(_this.formSetinfo.vlanid)){
+                    _this.$Message.error(_this.$t('central.msg25'));
+                    return false;
+                }
                 if('0' != _this.formSetinfo.vlanid && 4094 != _this.formSetinfo.vlanid && cs.num_range(_this.formSetinfo.vlanid,0,4094) ){
                     _this.$Message.error(_this.$t('central.msg14'));
                     return false;

@@ -39,7 +39,7 @@
                     <FormItem :label="$t('route.gateway')" prop="gateway">
                         <Input v-model="formValidate.gateway" ></Input>
                     </FormItem>
-                    <FormItem :label="$t('route.description')">
+                    <FormItem :label="$t('route.description')" prop="description">
                         <Input v-model="formValidate.description" ></Input>
                     </FormItem>
                     <!-- btn -->
@@ -159,6 +159,19 @@
                             if (_s == 0 || _s == 1 || _s == 2 || _s == 3 || _s == 4) {
                                 f(_this.$t('route.msg16'));
                             }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    description:[
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if(_s == 1) {
+                                f(_this.$t('route.msg18'));
+                            }else{
+                                if (v.length > 32 ) {
+                                    f(_this.$t('route.msg17'));
+                                }
                                 f();
                             }
                         },trigger: 'blur' }

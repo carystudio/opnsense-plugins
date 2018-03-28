@@ -164,17 +164,20 @@
                             }*/
                             f();
                         },trigger: 'blur' }
-                    ]/*,
+                    ],
                      comment: [
                      { validator:function(r, v, f){
-                     var _s = cs.string(v);
-                     if(_s == 1){
-                     f(_this.$t('dnsfwd.msg10'));
-                     }else{
-                     f();
-                     }
+                         var _s = cs.string(v);
+                         if(_s == 1){
+                             f(_this.$t('dnsfwd.msg22'));
+                         }else{
+                             if(v.length > 32){
+                                 f(_this.$t('dnsfwd.msg23'));
+                             }
+                             f();
+                         }
                      },trigger: 'blur'}
-                     ]*/
+                     ]
                 }
             },
             dnsfwdColumns: function() {

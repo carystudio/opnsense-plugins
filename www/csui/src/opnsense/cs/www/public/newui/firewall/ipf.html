@@ -193,6 +193,9 @@
                             if(_s == 1) {
                                 f(_this.$t('ipf.msg9'));
                             }else{
+                                if(v.length > 32){
+                                    f(_this.$t('ipf.msg19'));
+                                }
                                 f();
                             }
                         },trigger: 'blur' }

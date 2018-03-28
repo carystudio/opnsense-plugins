@@ -38,30 +38,30 @@
                         </FormItem>
                         <div v-show="formValidate.limitType == '1'">
                             <FormItem :label="$t('qos.totalUplinkSpeed')" prop="totalUplinkSpeed">
-                                <Input v-model="formValidate.totalUplinkSpeed" :maxlength="6">
-                                <span slot="append"> (KBytes) </span>
+                                <Input v-model="formValidate.totalUplinkSpeed" :maxlength="7">
+                                <span slot="append"> (kbit/s) </span>
                                 </Input>
-                                (100-125000KBytes)
+                                (1-1000000kbit/s)
                             </FormItem>
                             <FormItem :label="$t('qos.totalDownlinkSpeed')" prop="totalDownlinkSpeed">
-                                <Input v-model="formValidate.totalDownlinkSpeed" :maxlength="6">
-                                <span slot="append"> (KBytes) </span>
+                                <Input v-model="formValidate.totalDownlinkSpeed" :maxlength="7">
+                                <span slot="append"> (kbit/s) </span>
                                 </Input>
-                                (100-125000KBytes)
+                                (1-1000000kbit/s)
                             </FormItem>
                         </div>
                         <div v-show="formValidate.limitType == '2'">
                             <FormItem :label="$t('qos.singleUplinkSpeed')" prop="singleUplinkSpeed">
-                                <Input v-model="formValidate.singleUplinkSpeed" :maxlength="6">
-                                <span slot="append"> (KBytes) </span>
+                                <Input v-model="formValidate.singleUplinkSpeed" :maxlength="7">
+                                <span slot="append"> (kbit/s) </span>
                                 </Input>
-                                (100-125000KBytes)
+                                (1-1000000kbit/s)
                             </FormItem>
                             <FormItem :label="$t('qos.singleDownlinkSpeed')" prop="singleDownlinkSpeed">
-                                <Input v-model="formValidate.singleDownlinkSpeed" :maxlength="6">
-                                <span slot="append"> (KBytes) </span>
+                                <Input v-model="formValidate.singleDownlinkSpeed" :maxlength="7">
+                                <span slot="append"> (kbit/s) </span>
                                 </Input>
-                                (100-125000KBytes)
+                                (1-1000000kbit/s)
                             </FormItem>
                         </div>
                         <!-- btn -->
@@ -76,15 +76,15 @@
                                 <Input v-model="formValidate.ipAddr"></Input>
                             </FormItem>
                             <FormItem :label="$t('qos.single_up_bandwidth')" prop="upBandwidth">
-                                <Input v-model="formValidate.upBandwidth" :maxlength="6">
-                                <span slot="append"> (KBytes) </span>
-                                (100-125000KBytes)
+                                <Input v-model="formValidate.upBandwidth" :maxlength="7">
+                                <span slot="append"> (kbit/s) </span>
+                                (1-1000000kbit/s)
                                 </Input>
                             </FormItem>
                             <FormItem :label="$t('qos.single_down_bandwidth')" prop="downBandwidth">
-                                <Input v-model="formValidate.downBandwidth" :maxlength="6">
-                                <span slot="append"> (KBytes) </span>
-                                (100-125000KBytes)
+                                <Input v-model="formValidate.downBandwidth" :maxlength="7">
+                                <span slot="append"> (kbit/s) </span>
+                                (1-1000000kbit/s)
                                 </Input>
                             </FormItem>
                             <FormItem>
@@ -137,10 +137,10 @@
                     status:false,
                     limitType:'1',
                     tempType:'0',
-                    totalUplinkSpeed:'125000',
-                    totalDownlinkSpeed:'125000',
-                    singleUplinkSpeed:'125000',
-                    singleDownlinkSpeed:'125000',
+                    totalUplinkSpeed:'1000000',
+                    totalDownlinkSpeed:'1000000',
+                    singleUplinkSpeed:'1000000',
+                    singleDownlinkSpeed:'1000000',
                     ipAddr:'',
                     upBandwidth:'',
                     downBandwidth:''
@@ -158,13 +158,13 @@
                     totalUplinkSpeed:[
                         { validator:function(r, v, f) {
                             if('1' == _this.formValidate.limitType) {
-                                var ret = cs.num_range(v, 100, 125000);
+                                var ret = cs.num_range(v, 1, 1000000);
                                 if (0 == ret) {
                                     f(_this.$t('qos.msg1'));
                                 } else if (1 == ret) {
                                     f(_this.$t('qos.msg3'));
                                 } else if (2 == ret) {
-                                    f(_this.$t('qos.msg5') + '(100-125000)');
+                                    f(_this.$t('qos.msg5') + '(1-1000000)');
                                 } else {
                                     f();
                                 }
@@ -176,13 +176,13 @@
                     totalDownlinkSpeed:[
                         { validator:function(r, v, f) {
                             if('1' == _this.formValidate.limitType) {
-                                var ret = cs.num_range(v, 100, 125000);
+                                var ret = cs.num_range(v, 1, 1000000);
                                 if (0 == ret) {
                                     f(_this.$t('qos.msg2'));
                                 } else if (1 == ret) {
                                     f(_this.$t('qos.msg4'));
                                 } else if (2 == ret) {
-                                    f(_this.$t('qos.msg6') + '(100-125000)');
+                                    f(_this.$t('qos.msg6') + '(1-1000000)');
                                 } else {
                                     f();
                                 }
@@ -194,13 +194,13 @@
                     singleUplinkSpeed:[
                         { validator:function(r, v, f) {
                             if('2' == _this.formValidate.limitType) {
-                                var ret = cs.num_range(v, 100, 125000);
+                                var ret = cs.num_range(v, 1, 1000000);
                                 if (0 == ret) {
                                     f(_this.$t('qos.msg28'));
                                 } else if (1 == ret) {
                                     f(_this.$t('qos.msg30'));
                                 } else if (2 == ret) {
-                                    f(_this.$t('qos.msg32') + '(100-125000)');
+                                    f(_this.$t('qos.msg32') + '(1-1000000)');
                                 } else {
                                     f();
                                 }
@@ -212,13 +212,13 @@
                     singleDownlinkSpeed:[
                         { validator:function(r, v, f) {
                             if('2' == _this.formValidate.limitType) {
-                                var ret = cs.num_range(v, 100, 125000);
+                                var ret = cs.num_range(v, 1, 1000000);
                                 if (0 == ret) {
                                     f(_this.$t('qos.msg29'));
                                 } else if (1 == ret) {
                                     f(_this.$t('qos.msg31'));
                                 } else if (2 == ret) {
-                                    f(_this.$t('qos.msg33') + '(100-125000)');
+                                    f(_this.$t('qos.msg33') + '(1-1000000)');
                                 } else {
                                     f();
                                 }
@@ -246,13 +246,13 @@
                     upBandwidth:[
                         { validator:function(r, v, f) {
                             if('2' == _this.formValidate.limitType && (_this.addStatus == true || '' != _this.formValidate.upBandwidth)) {
-                                var ret = cs.num_range(v, 100, 125000);
+                                var ret = cs.num_range(v, 1, 1000000);
                                 if (0 == ret) {
                                     f(_this.$t('qos.msg34'));
                                 } else if (1 == ret) {
                                     f(_this.$t('qos.msg36'));
                                 } else if (2 == ret) {
-                                    f(_this.$t('qos.msg38') + '(100-125000)');
+                                    f(_this.$t('qos.msg38') + '(1-1000000)');
                                 } else {
                                     f();
                                 }
@@ -264,13 +264,13 @@
                     downBandwidth:[
                         { validator:function(r, v, f) {
                             if('2' == _this.formValidate.limitType && (_this.addStatus == true || '' != _this.formValidate.downBandwidth)) {
-                                var ret = cs.num_range(v, 100, 125000);
+                                var ret = cs.num_range(v, 1, 1000000);
                                 if (0 == ret) {
                                     f(_this.$t('qos.msg35'));
                                 } else if (1 == ret) {
                                     f(_this.$t('qos.msg37'));
                                 } else if (2 == ret) {
-                                    f(_this.$t('qos.msg39') + '(100-125000)');
+                                    f(_this.$t('qos.msg39') + '(1-1000000)');
                                 } else {
                                     f();
                                 }
@@ -388,11 +388,11 @@
                         }
                         _this.addStatus = false;
                         if (0 == data.rescode) {
-                            _this.$Message.success({content:'规则添加成功！',onClose:function(){
+                            _this.$Message.success({content:_this.$t('qos.msg42'),onClose:function(){
                                 location.href = location.href;
                             }});
                         } else {
-                            _this.$Message.error('规则添加失败！'+_this.$t('errorcode.'+data.rescode));
+                            _this.$Message.error(_this.$t('qos.msg42')+ ' ' +_this.$t('errorcode.'+data.rescode));
                         }
                     });
                 })
@@ -412,8 +412,8 @@
                             data.Down = _this.formValidate.singleDownlinkSpeed;
                         }
 
-                        var upRet = cs.num_range(data.Up,100,125000);
-                        var downRet = cs.num_range(data.Down,100,125000);
+                        var upRet = cs.num_range(data.Up,1,1000000);
+                        var downRet = cs.num_range(data.Down,1,1000000);
                         if(0 == upRet || 1 == upRet || 2 == upRet || 0 == downRet || 1 == downRet || 2 == downRet){
                             return false;
                         }

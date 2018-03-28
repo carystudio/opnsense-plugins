@@ -43,7 +43,7 @@
                             <Col span="4" offset="1"><Button long @click="showClientList">{{ $t('static_dhcp.scan') }}</Button></Col>
                         </Row>
                     </FormItem>
-                    <FormItem :label="$t('static_dhcp.description')">
+                    <FormItem :label="$t('static_dhcp.description')" prop="description">
                         <Input v-model="formValidate.description" ></Input>
                     </FormItem>
                     <!-- btn -->
@@ -150,6 +150,19 @@
                             }else if (ret == 3) {
                                 f(_this.$t('static_dhcp.msg5'));
                             }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    description:[
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if(_s == 1) {
+                                f(_this.$t('static_dhcp.msg13'));
+                            }else{
+                                if(v.length > 32){
+                                    f(_this.$t('static_dhcp.msg12'));
+                                }
                                 f();
                             }
                         },trigger: 'blur' }
@@ -268,7 +281,7 @@
             showClientList:function () {
                 var _this = this;
                 this.showModel = true;
-                var postData = {"action":"getArpInfo", "data":{}};
+                var postData = {"action":"getArpInfo", "data":{"except":"gateway"}};
                 uiPost.getArpInfo(postData,function(data) {
                     _this.arpData = data.data;
                     for(var i in _this.arpData){
