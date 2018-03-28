@@ -52,7 +52,7 @@
             <Button size="small" @click="tableSelect(true)" type="error">{{ $t('account.delete') }}</Button>
             </Col>
             <Col>
-            <Table border ref="tableSelect" :columns="accountListColumns" :data="accountListData"></Table>
+            <Table border ref="tableSelect" :columns="accountListColumns" :data="accountListData" :no-data-text="$t('common.no_data')"></Table>
             </Col>
         </Row>
     </div>

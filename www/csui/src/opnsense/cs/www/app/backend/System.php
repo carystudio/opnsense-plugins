@@ -70,6 +70,7 @@ class System extends Csbackend
 
         if (!empty($config['system']['timeservers'])) {
             $pconfig['timeservers_prefer'] = !empty($a_ntpd['prefer']) ? explode(' ', $a_ntpd['prefer']) : array();
+            $pconfig['timeservers_noselect'] = !empty($a_ntpd['noselect']) ? explode(' ', $a_ntpd['noselect']) : array();
             $pconfig['timeservers_host'] = explode(' ', $config['system']['timeservers']);
         }
 
@@ -107,8 +108,9 @@ class System extends Csbackend
                 if (empty($a_ntpd['prefer'])) {
                     unset($a_ntpd['prefer']);
                 }
-
-
+                if (!empty($a_ntpd['noselect'])) {
+                    unset($a_ntpd['noselect']);
+                }
 
 
                 write_config();
@@ -123,6 +125,8 @@ class System extends Csbackend
                 if (!empty($a_ntpd['prefer'])) {
                     unset($a_ntpd['prefer']);
                 }
+                $a_ntpd['noselect'] = !empty($ntpServer) ? trim($ntpServer) : null;
+
                 write_config();
                 /* time zone change first */
                 system_timezone_configure();

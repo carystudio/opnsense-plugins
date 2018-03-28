@@ -44,7 +44,7 @@
                     </FormItem>
                     <!-- btn -->
                     <FormItem>
-                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('common.apply') }}</Button>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading" :no-data-text="$t('common.no_data')">{{ $t('common.apply') }}</Button>
                     </FormItem>
                 </Form>
             </Card>

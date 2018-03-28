@@ -98,6 +98,7 @@ var messages = {
             "unencrypted":"Unencrypted",
             "restore_set_title":"Restore Factory Settings",
 
+            "enabled":"Enable",
             "beacon":"Beacon Interval",
             "broad_ssid":"Broadcast SSID",
             "isolation":"WiFi isolation",
@@ -193,6 +194,11 @@ var messages = {
             "msg18":"Sure you want to delete the firmware version?",
             "msg19":"Invalid file format, please choose again!Supported formats：{0}",
             "msg20":"Are you sure you need to restore the factory settings?",
+
+            "msg21":"The password length range is 8~32 bytes",
+            "msg22":"The password can not be empty",
+            "msg23":"The password is invalid and contains invalid characters",
+            "msg24":"A number with a maximum number of users 0~64",
 
             "tip1":"Warm hint: @:central.upload needs to be connected to the U disk. Please use the U disk."
         },
@@ -1676,7 +1682,8 @@ var messages = {
             off:"OFF",
             ok:'ok',
             confirm:'confirm',
-            cancel:'cancel'
+            cancel:'cancel',
+            "no_data":"No Data"
         },
         message: {hello: 'test'}
     },
@@ -1777,6 +1784,7 @@ var messages = {
             "unencrypted":"不加密",
             "restore_set_title":"恢复出厂设置",
 
+            "enabled":"启用",
             "beacon":"信标间隔",
             "broad_ssid":"广播SSID",
             "isolation":"WiFi隔离",
@@ -1875,6 +1883,11 @@ var messages = {
             "msg18":"确定要删除该固件版本吗？",
             "msg19":"无效的文件格式，请重新选择！,支持的格式有：{0}",
             "msg20":"您确定需要恢复出厂设置？",
+
+            "msg21":"密码长度范围为8~32字节",
+            "msg22":"密码不能为空",
+            "msg23":"密码无效，包含了无效的字符",
+            "msg24":"最大用户数为0~64的数字",
 
             "tip1":"温馨提示:@:central.upload需要接U盘。请接U盘使用！"
 
@@ -3351,7 +3364,8 @@ var messages = {
             off:"关",
             ok:'确定',
             confirm:'确定',
-            cancel:'取消'
+            cancel:'取消',
+            "no_data":"暂无数据"
         },
         message: {hello: '测试'}
     }

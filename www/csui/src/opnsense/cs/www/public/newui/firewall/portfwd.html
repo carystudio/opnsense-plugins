@@ -80,7 +80,7 @@
             <Button size="small" @click="tableSelect(true)" type="error">{{ $t('static_dhcp.delete') }}</Button>
             </Col>-->
             <Col>
-            <Table border ref="tableSelect" :columns="portfwdColumns" :data="portfwdData"></Table>
+            <Table border ref="tableSelect" :columns="portfwdColumns" :data="portfwdData" :no-data-text="$t('common.no_data')"></Table>
             </Col>
         </Row>
     </div>
@@ -89,7 +89,7 @@
             :title="$t('portfwd.modal_title')"
             @on-ok="ok"
             @on-cancel="cancel">
-        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable">
+        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable" :no-data-text="$t('common.no_data')">
             <!--<div slot="footer" style="display: none;"></div>-->
         </Table>
     </Modal>

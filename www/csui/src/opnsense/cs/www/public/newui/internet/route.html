@@ -54,7 +54,7 @@
         </row>
         <Row>
             <Col>
-            <Table border ref="tableSelect" :columns="staticRouteColumns" :data="staticRouteData"></Table>
+            <Table border ref="tableSelect" :columns="staticRouteColumns" :data="staticRouteData" :no-data-text="$t('common.no_data')"></Table>
             </Col>
         </Row>
     </div>
@@ -63,7 +63,7 @@
             :title="$t('route.modal_title')"
             @on-ok="ok"
             @on-cancel="cancel">
-        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable"></Table>
+        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable" :no-data-text="$t('common.no_data')"></Table>
     </Modal>
     <!-- 这个不能删除，用于底部显示 -->
     <slot name="footer"></slot>

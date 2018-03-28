@@ -61,7 +61,7 @@
             <Button size="small" @click="tableSelect(true)" type="error">{{ $t('static_dhcp.delete') }}</Button>
             </Col>
             <Col>
-            <Table border ref="tableSelect" :columns="staticDhcpColumns" :data="staticDhcpData"></Table>
+            <Table border ref="tableSelect" :columns="staticDhcpColumns" :data="staticDhcpData" :no-data-text="$t('common.no_data')"></Table>
             </Col>
         </Row>
     </div>
@@ -70,7 +70,7 @@
             :title="$t('static_dhcp.modal_title')"
             @on-ok="ok"
             @on-cancel="cancel">
-        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable"></Table>
+        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable" :no-data-text="$t('common.no_data')"></Table>
     </Modal>
     <!-- 这个不能删除，用于底部显示 -->
     <slot name="footer"></slot>

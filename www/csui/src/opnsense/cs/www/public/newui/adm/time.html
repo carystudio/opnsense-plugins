@@ -30,7 +30,7 @@
                   <Button type="primary" @click="submitLocaltime" >{{ $t('time.manntpsyncwithhost') }}</Button>
                 </FormItem>
                 <FormItem :label="$t('time.timezone')">
-                    <Select v-model="formValidate.timezone" >
+                    <Select v-model="formValidate.timezone" :key="$t('time.timezone')">
                         <Option value="Pacific/Kwajalein">(UTC-12:00) {{$t('time.ntp25')}}</Option>
                         <Option value="Pacific/Midway">(UTC-11:00) {{$t('time.ntp1')}}</Option>
                         <Option value="Pacific/Honolulu">(UTC-10:00) {{ $t('time.ntp2') }}</Option>
@@ -182,10 +182,10 @@ var cs_main = {
 
                 _this.formValidate.timezone = config.timezone;
 
-                if(config.timeservers_prefer.length <= 0){
-                    _this.formValidate.ntpEnabled = false;
-                }else{
+                if(config.timeservers_noselect.length <= 0){
                     _this.formValidate.ntpEnabled = true;
+                }else{
+                    _this.formValidate.ntpEnabled = false;
                 }
 //                _this.formValidate.ntpServerIp1 = config.timeservers_host[0];
 //                _this.formValidate.ntpServerIp2 = config.timeservers_host[1];

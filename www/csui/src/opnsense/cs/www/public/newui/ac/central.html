@@ -38,7 +38,7 @@
                     <br>
                     <Row>
                         <Col>
-                        <Table border ref="tableSelect" :columns="centralColumns" :data="centralData" @on-selection-change="centralTable"></Table>
+                        <Table border ref="tableSelect" :columns="centralColumns" :data="centralData" @on-selection-change="centralTable" :no-data-text="$t('common.no_data')"></Table>
                         </Col>
                     </Row>
                 </Row>
@@ -100,13 +100,13 @@
             </FormItem>
             <FormItem :label="$t('central.broad_ssid')" prop="hidessid">
                 <i-switch v-model="formSetinfo.hidessid" size="large" >
-                    <span slot="open">{{ $t('central.apply') }}</span>
+                    <span slot="open">{{ $t('central.enabled') }}</span>
                     <span slot="close">{{ $t('central.disable') }}</span>
                 </i-switch>
             </FormItem>
             <FormItem :label="$t('central.isolation')" prop="wifi_quarantine">
                 <i-switch v-model="formSetinfo.wifi_quarantine" size="large" >
-                    <span slot="open">{{ $t('central.apply') }}</span>
+                    <span slot="open">{{ $t('central.enabled') }}</span>
                     <span slot="close">{{ $t('central.disable') }}</span>
                 </i-switch>
             </FormItem>
@@ -167,7 +167,7 @@
             </div>
             <div v-show="wlanset != '1'">
                 <FormItem :label="$t('central.band5')" prop="band5">
-                    <Select v-model="formSetinfo.band5">
+                    <Select v-model="band5">
                         <Option value="2">802.11A</Option>
                         <Option value="8">802.11A/N</Option>
                         <Option value="14">802.11A/N/AC</Option>
@@ -177,10 +177,11 @@
                     <Select v-model="formSetinfo.channel5" :key="$t('central.channels',['5G'])">
                         <Option value="0">{{ $t('central.auto_select') }}</Option>
                         <Option v-for="i in channel5Arr" :key="i" :value="i">{{ i }}</Option>
+                        <Option v-show="channelsStatus165" :key="165" value="165">165</Option>
                     </Select>
                 </FormItem>
                 <FormItem :label="$t('central.bandwidth5')" prop="band_width5">
-                    <Select v-model="formSetinfo.band_width5">
+                    <Select v-model="band_width5">
                         <Option value="0">20M</Option>
                         <Option value="1">20M/40M</Option>
                         <Option value="2">80M</Option>
@@ -241,7 +242,7 @@
             <br>
             <Row>
                 <Col>
-                <Table border :columns="columns" :data="firmData"></Table>
+                <Table border :columns="columns" :data="firmData" :no-data-text="$t('common.no_data')"></Table>
                 </Col>
             </Row>
             <br>
@@ -286,13 +287,16 @@
                 selectData:[],
                 apname:[],
                 ledStateInfo:[],
-                channel5Arr:['36','40','44','48','149','153','157','161','165'],
+                channel5Arr:['36','40','44','48','149','153','157','161'],
 
                 ledStatus:false,
                 wlanState:false,
                 wlanset:'3',
                 showModel:false,
                 securityMode2:false,
+                channelsStatus165:false,
+                band_width5:'2',
+                band5:'14',
                 /*formSetinfo: {
                     apname: '',
                     ssid2: '',
@@ -406,7 +410,7 @@
                     country5g:"CN",
                     security2: '',
                     securityMode2: '0',
-                    hidessid:false,
+                    hidessid:true,
                     wifi_quarantine:false,
                     maxusernumber:'32',
                     vlanid:'0',
@@ -846,6 +850,24 @@
                 }else{
                     this.formSetinfo.securityMode2 = '0'
                 }
+            },
+            band_width5:function () {
+                var _this = this;
+                _this.formSetinfo.band_width5 = _this.band_width5;
+                if('0' == _this.band_width5 && '2' != _this.band5){
+                    _this.channelsStatus165 = true;
+                }else{
+                    _this.channelsStatus165 = false;
+                }
+            },
+            band5:function () {
+                var _this = this;
+                _this.formSetinfo.band5 = _this.band5;
+                if('0' == _this.band_width5 && '2' != _this.band5){
+                    _this.channelsStatus165 = true;
+                }else{
+                    _this.channelsStatus165 = false;
+                }
             }
         },
         methods: {
@@ -1071,7 +1093,7 @@
                 }
                 data.ssid = _this.formSetinfo.ssid2;
                 data.encryption = _this.formSetinfo.securityMode2;
-                if('1' == _this.formSetinfo.securityMode2 && '' != _this.formSetinfo.security2 ){
+                if('1' == _this.formSetinfo.securityMode2){
                     var res = cs.string(_this.formSetinfo.security2);
                     if(99 != res || _this.formSetinfo.security2.length < 8 || _this.formSetinfo.security2.length > 63){
                         _this.$Message.error(_this.$t('central.msg12'));
@@ -1081,6 +1103,7 @@
                 }else{
                     data.wlanKey = '';
                 }
+
                 if(true == _this.formSetinfo.hidessid){
                     data.hedden = '0';
                 }else{
@@ -1091,8 +1114,9 @@
                 }else{
                     data.noforward = '0';
                 }
-                if(99 != cs.num(_this.formSetinfo.maxusernumber)){
-                    _this.$Message.error(_this.$t('central.msg13'));
+
+                if(99 != cs.num_range(_this.formSetinfo.maxusernumber,0,64)){
+                    _this.$Message.error(_this.$t('central.msg24'));
                     return false;
                 }
                 data.maxstanum = _this.formSetinfo.maxusernumber;

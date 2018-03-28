@@ -111,6 +111,7 @@
                 nics:{},
                 interfaces:{},
                 tmpLanIp:'',
+                oldLanIp:'',
                 formValidate: {
                     lanIp:'',
                     lanNetmask:'',
@@ -204,6 +205,7 @@
 
                     _this.netSelCardDinding = _this.interfaces[0].Nic;
                     _this.formValidate.lanIp = _this.interfaces[0].Ip;
+                    _this.oldLanIp = _this.interfaces[0].Ip;
                     _this.tmpLanIp = _this.formValidate.lanIp;
                     _this.formValidate.lanNetmask = _this.interfaces[0].Netmask;
                     _this.formValidate.dhcp = (_this.interfaces[0].DhcpSvrEnable=="1")?true:false;
@@ -289,6 +291,9 @@
 
                         uiPost.setLanInfo(postData,function (data) {
                             _this.$Spin.hide();   //关闭加载动画
+                            if(_this.oldLanIp != _this.tmpLanIp){
+                                location.href = 'http://'+_this.tmpLanIp+'/newui/internet/lan.html';
+                            }
                             if (9999 == data.rescode){
                                 cs.loginOut();
                             }

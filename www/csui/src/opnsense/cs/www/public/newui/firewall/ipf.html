@@ -77,7 +77,7 @@
             <Button size="small" @click="tableSelect(true)" type="error"  :loading="delAllIpfLoading">{{ $t('ipf.delete') }}</Button>
             </Col>
             <Col>
-            <Table border ref="tableSelect" :columns="ipfColumns" :data="ipfData"></Table>
+            <Table border ref="tableSelect" :columns="ipfColumns" :data="ipfData" :no-data-text="$t('common.no_data')"></Table>
             </Col>
         </Row>
     </div>
@@ -86,7 +86,7 @@
             :title="$t('ipf.modal_title')"
             @on-ok="ok"
             @on-cancel="cancel">
-        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable"></Table>
+        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable" :no-data-text="$t('common.no_data')"></Table>
     </Modal>
     <!-- 这个不能删除，用于底部显示 -->
     <slot name="footer"></slot>
@@ -293,7 +293,7 @@
                         if(_this.ipfData.length) {
                             for(var i=0; i<_this.ipfData.length; i++){
                                 var temp = _this.ipfData[i].portRange.split('-');
-                                if(_this.formValidate.ip == _this.ipfData[i].ip){
+                                if(_this.formValidate.ip == _this.ipfData[i].Ip){
                                     if(_this.formValidate.dToPort != ""){
                                         if(
                                                 _this.formValidate.dFromPort == Number(temp[0]) ||
@@ -302,25 +302,30 @@
                                                 _this.formValidate.dFromPort == Number(temp[1])
                                         ){
                                             _this.$Message.error(_this.$t('ipf.msg8'));
+                                            _this.addIpfLoading = false;
                                             return false;
                                         }
                                         if(_this.formValidate.dFromPort < Number(temp[0]) &&
                                                 _this.formValidate.dToPort > Number(temp[1])){
                                             _this.$Message.error(_this.$t('ipf.msg8'));
+                                            _this.addIpfLoading = false;
                                             return false;
                                         }
                                         if(_this.formValidate.dFromPort > Number(temp[0]) &&
                                                 _this.formValidate.dFromPort < Number(temp[1])){
                                             _this.$Message.error(_this.$t('ipf.msg8'));
+                                            _this.addIpfLoading = false;
                                             return false;
                                         }
                                     }else{
                                         if(_this.formValidate.dFromPort == Number(temp[0]) || _this.formValidate.dFromPort == Number(temp[1])){
                                             _this.$Message.error(_this.$t('ipf.msg8'));
+                                            _this.addIpfLoading = false;
                                             return false;
                                         }
                                         if(_this.formValidate.dFromPort > Number(temp[0]) && _this.formValidate.dFromPort < Number(temp[1])){
                                             _this.$Message.error(_this.$t('ipf.msg8'));
+                                            _this.addIpfLoading = false;
                                             return false;
                                         }
                                     }

@@ -23,7 +23,7 @@
             <Button size="small" @click="tableSelect(true)" type="error">{{$t('loginuser.offline')}}</Button>
             </Col>
             <Col>
-            <Table border ref="tableSelect" :columns="loginUserListColumns" :data="loginUserListData"></Table>
+            <Table border ref="tableSelect" :columns="loginUserListColumns" :data="loginUserListData" :no-data-text="$t('common.no_data')"></Table>
             </Col>
         </Row>
     </div>
