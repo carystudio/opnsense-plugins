@@ -479,7 +479,6 @@ class Network extends Csbackend
                             $config['dnsmasq']['hosts'][$idx]['ip'] = $lan['ipaddr'];
                             $dnsmasq_restart = true;
                         }
-                        break ;
                     }
                 }
             }

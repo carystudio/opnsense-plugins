@@ -378,7 +378,10 @@ var messages = {
             "msg41":"IP address is invalid!",
 
             "msg42":"Rules add success!",
-            "msg43":"Rule add failure!"
+            "msg43":"Rule add failure!",
+            "msg44":"IP address is invalid, please enter the legitimate IP address!",
+            "msg45":"Single IP upload bandwidth is invalid, please enter the correct bandwidth!",
+            "msg46":"Single IP download bandwidth is invalid, please enter the correct bandwidth!"
         },
         "opmode":{
             "title":"Operation Mode",
@@ -1416,7 +1419,8 @@ var messages = {
             "msg8":"The Server port is invalid, the value is out of range({0}-{1})!",
             "msg9":"Please cannot be empty,please try again!",
             "msg10":"Password can only contain the following special character:!@#^&*()+_-={}[]|:.?",
-            "msg11":" can't be empty!"
+            "msg11":" can't be empty!",
+            "force_note":"WeChat's mandatory attention needs to set completion page URL to "
         },
         "localaccount":{
             "title":"Local Account",
@@ -2085,7 +2089,10 @@ var messages = {
             "msg41":"IP地址无效！",
 
             "msg42":"规则添加成功！",
-            "msg43":"规则添加失败！"
+            "msg43":"规则添加失败！",
+            "msg44":"IP地址无效，请输入合法的IP地址！",
+            "msg45":"单IP上传带宽无效，请输入正确的带宽！",
+            "msg46":"单IP下载带宽无效，请输入正确的带宽！"
         },
         "opmode":{
             "title":"系统模式",
@@ -3117,7 +3124,8 @@ var messages = {
             "msg8":"服务器端口无效，它的值已超出范围 ({0}-{1})！",
             "msg9":"密码不能为空！",
             "msg10":"密码只允许包含特殊字符:!@#^&*()+_-={}[]|:.?",
-            "msg11":"不能为空！"
+            "msg11":"不能为空！",
+            "force_note":"开启强制关注需要在微信公众平台-微信连WiFi-商家主页管理-连接完成页配置，把完成页URL设置为："
         },
         "localaccount":{
             "title":"本地账号",

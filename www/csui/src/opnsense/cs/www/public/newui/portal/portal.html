@@ -84,16 +84,18 @@
                                 <Input v-model="formValidate.secretkey" :maxlength="40"></Input>
                             </FormItem>
                             <FormItem :label="$t('portal.attention')" prop="attention">
-                                <Select v-model="formValidate.attention" >
+                                <Select v-model="formValidate.attention" :key="$t('portal.attention')">
                                     <Option value="0">{{$t('portal.force')}}</Option>
                                     <Option value="1">{{$t('portal.no_coercion')}}</Option>
                                 </Select>
+                                <span>{{$t('portal.force_note')}}</span>
+                                <span>"http://wclogin.local.totolink.cn:8000/api/captiveportal/weixinforce"</span>
                             </FormItem>
                         </div>
                         <hr>
                         <br>
                         <FormItem :label="$t('portal.login_page')" prop="LoginPageStatus">
-                            <Select v-model="formValidate.LoginPageStatus" >
+                            <Select v-model="formValidate.LoginPageStatus" :key="$t('portal.login_page')">
                                 <Option value="0">{{$t('portal.default')}}</Option>
                                 <Option value="1">{{$t('portal.custom')}}</Option>
                             </Select>

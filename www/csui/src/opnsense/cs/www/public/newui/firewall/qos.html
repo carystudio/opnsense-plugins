@@ -156,6 +156,7 @@
                 var _this = this;
                 return{
                     totalUplinkSpeed:[
+                        { required: true, message: this.$t('qos.msg15'), trigger: 'blur' },
                         { validator:function(r, v, f) {
                             if('1' == _this.formValidate.limitType) {
                                 var ret = cs.num_range(v, 1, 1000000);
@@ -372,29 +373,50 @@
                 var _this = this;
                 _this.addLoading = true;
 
-                this.$refs[name].validate(function(valid){
-                    _this.addStatus = false;
-                    _this.addStatus = true;
-
-                    var data = {};
-                    data.Ip = _this.formValidate.ipAddr;
-                    data.Up = _this.formValidate.upBandwidth;
-                    data.Down = _this.formValidate.downBandwidth;
-                    var postVar = {"action":"addQosCustom", "data":data};
-                    console.log(postVar);
-                    uiPost.addQosCustom(postVar,function(data){
-                        if (9999 == data.rescode){
-                            cs.loginOut();
-                        }
+                _this.$refs[name].validate(function(valid){
+                    console.log(valid);
+                    if(valid){
                         _this.addStatus = false;
-                        if (0 == data.rescode) {
-                            _this.$Message.success({content:_this.$t('qos.msg42'),onClose:function(){
-                                location.href = location.href;
-                            }});
-                        } else {
-                            _this.$Message.error(_this.$t('qos.msg42')+ ' ' +_this.$t('errorcode.'+data.rescode));
+                        _this.addStatus = true;
+
+                        var data = {};
+                        data.Ip = _this.formValidate.ipAddr;
+                        data.Up = _this.formValidate.upBandwidth;
+                        data.Down = _this.formValidate.downBandwidth;
+                        if(99 != cs.ip(_this.formValidate.ipAddr)){
+                            _this.$Message.error(_this.$t('qos.msg44'));
+                            _this.addLoading = false;
+                            return false;
                         }
-                    });
+                        if( 99 != cs.num_range(_this.formValidate.upBandwidth,1,1000000)){
+                            _this.$Message.error(_this.$t('qos.msg45'));
+                            _this.addLoading = false;
+                            return false;
+                        }
+                        if( 99 != cs.num_range(_this.formValidate.downBandwidth,1,1000000)){
+                            _this.$Message.error(_this.$t('qos.msg46'));
+                            _this.addLoading = false;
+                            return false;
+                        }
+
+                        var postVar = {"action":"addQosCustom", "data":data};
+                        console.log(postVar);
+                        uiPost.addQosCustom(postVar,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            _this.addStatus = false;
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('qos.msg42'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            } else {
+                                _this.$Message.error(_this.$t('qos.msg42')+ ' ' +_this.$t('errorcode.'+data.rescode));
+                            }
+                        });
+                    }else{
+                        _this.addLoading = false;
+                    }
                 })
             },
             handleSubmit: function (name) {
