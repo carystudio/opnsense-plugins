@@ -100,6 +100,10 @@
     word-wrap: break-word;
 }
 
+.ivu-form .ivu-form-item.ivu-form-item-error{
+    margin-bottom: 32px;
+}
+
 /* I don't know why, but I can use this to solve the problem */
 .ivu-menu-horizontal{line-height: 58px;}
 .demo-spin-icon-load{
