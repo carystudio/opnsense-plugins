@@ -21,7 +21,7 @@
                 <Alert>
                     {{ $t('localaccount.help_edit') }}
                 </Alert>
-                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <Form ref="formValidate" :model="formValidate" :label-width="globalConfig.labelWith" label-position="left">
                     <FormItem :label="$t('localaccount.username')" prop="username">
                         <Input v-model="formValidate.username" :maxlength="20" readonly></Input>
                     </FormItem>
@@ -188,7 +188,6 @@
                                 },
                                 on: {
                                     click:function () {
-                                        console.log('------------编辑--------------');
                                         _this.edit = '1';
                                         _this.formValidate.username = params.row.Username;
                                         _this.formValidate.password = '';
@@ -199,7 +198,6 @@
                                         }else{
                                             _this.formValidate.relogin = false;
                                         }
-                                        console.log(params);
                                     }
                                 }
                             }, _this.$t('localaccount.edit')),
@@ -212,12 +210,24 @@
                                 },
                                 on: {
                                     "on-ok": function(){
-                                        console.log('-----------delete--------------');
+                                        if("WeChatUser" == params.row.Username){
+                                            _this.$Message.error({content:_this.$t('localaccount.msg6'),duration:5});
+                                            return false;
+                                        }
                                         var postData = {"action":"delPortalUser","data":{"Username":params.row.Username}};
-                                        uiPost.delPortalUser(postData,function(){
-                                            _this.$Message.success({content:_this.$t('account.msg11'),onClose:function(){
-                                                location.href = location.href;
-                                            }});
+                                        uiPost.delPortalUser(postData,function(data){
+                                            if (9999 == data.rescode){
+                                                cs.loginOut();
+                                            }
+                                            if (0 == data.rescode) {
+                                                _this.$Message.success({
+                                                    content: _this.$t('account.msg11'), onClose: function () {
+                                                        location.href = location.href;
+                                                    }
+                                                });
+                                            }else{
+                                                _this.$Message.error({content:_this.$t('localaccount.msg4')+ _this.$t('errorcode.'+data.rescode),duration:5});
+                                            }
                                         });
                                     }
                                 }
@@ -238,8 +248,6 @@
             var _this = this;
             var postData = {"action":"getPortalUsers", "data":{"pagenum":"1"}};
             uiPost.getPortalUsers(postData,function(data) {
-                console.log('------------------------');
-                console.log(data);
                 if (9999 == data.rescode){
                     cs.loginOut();
                 }
@@ -272,8 +280,14 @@
                         /*删除全部*/
                         for(var i=0; i<getSelection.length; i++)
                         {
+                            if(1 == getSelection.length && "WeChatUser" == getSelection[i].Username){
+                                _this.$Message.error({content:_this.$t('localaccount.msg6'),duration:5});
+                                return false;
+                            }
+                            if("WeChatUser" == getSelection[i].Username){
+                                continue;
+                            }
                             var postData = {"action":"delPortalUser","data":{"Username":getSelection[i].Username}};
-                            console.log(postData);
                             uiPost.delPortalUser(postData,function(){
                                 _this.$Message.success({content:_this.$t('account.msg11'),onClose:function(){
                                     location.href = location.href;
@@ -281,7 +295,7 @@
                             });
                         }
                     }else{
-                        this.$Message.error(this.$t('account.msg8'));
+                        _this.$Message.error({content:_this.$t('account.msg8'),duration:5});
                     }
                 }else{
                     this.$refs.tableSelect.selectAll(status);
@@ -299,11 +313,11 @@
                     if(_this.formValidate.page != ""){
                         page.pagenum = _this.formValidate.page;
                     }else{
-                        _this.$Message.error(_this.$t('localaccount.msg1'));
+                        _this.$Message.error({content:_this.$t('localaccount.msg1'),duration:5});
                         return false;
                     }
                     if(_this.formValidate.page <1 || _this.formValidate.page > _this.formValidate.pagecnt){
-                        _this.$Message.error(_this.$t('localaccount.msg2'));
+                        _this.$Message.error({content:_this.$t('localaccount.msg2'),duration:5});
                         return false;
                     }
                 }
@@ -339,7 +353,14 @@
                 }else{
                     postVar.enable = "0";
                 }
-                uiPost.setssServer(postVar);
+                uiPost.setssServer(postVar,function (data) {
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 != data.rescode) {
+                        this.$Message.error({content:this.$t('localaccount.msg5')+ _this.$t('errorcode.'+data.rescode),duration:5});
+                    }
+                });
             },
             handleSubmit: function(name) {
                 var _this = this;
@@ -360,7 +381,6 @@
                         var postData = {"action":"updatePortalUser", "data":data};
                         console.log(postData);
                         uiPost.updatePortalUser(postData,function(data){
-                            console.log(data);
                             if (9999 == data.rescode){
                                 cs.loginOut();
                             }
@@ -368,7 +388,7 @@
                                 _this.$Message.success(_this.$t('localaccount.save_success'));
                                 location.href = location.href;
                             } else {
-                                _this.$Message.error(_this.$t('localaccount.save_fail')+_this.$t('errorcode.'+data.rescode));
+                                _this.$Message.error({content:_this.$t('localaccount.save_fail')+ _this.$t('errorcode.'+data.rescode),duration:5});
                             }
                             _this.applyLoading = false;
                         });
@@ -379,11 +399,8 @@
             },
             searchByName:function () {
                 var _this = this;
-                console.log('---------searchByName-----------');
                 var postData = {"action":"getPortalUsers", "data":{}};
                 uiPost.getPortalUsers(postData,function(data) {
-                    console.log('------------------------');
-                    console.log(data);
                     if (9999 == data.rescode){
                         cs.loginOut();
                     }
@@ -406,13 +423,12 @@
                             break;
                         }
                         if( tempUser.length <= 0 ){
-                            _this.$Message.error(_this.$t('localaccount.msg3'));
+                            _this.$Message.error({content:_this.$t('localaccount.msg3'),duration:5});
                             return false;
                         }
                         _this.localUserListData = tempUser;
-                        console.log(_this.localUserListData);
                     }else {
-                        _this.$Message.error(_this.$t('localaccount.msg3'));
+                        _this.$Message.error({content:_this.$t('localaccount.msg3'),duration:5});
                     }
                 });
             }

@@ -383,7 +383,7 @@ var cs_main = {
 						});
 					}
 				} else {
-					_this.$Message.error(_this.$t('reboot_schedule.set_fail')+_this.$t('errorcode.'+data.rescode));
+					_this.$Message.error({content:_this.$t('reboot_schedule.set_fail')+_this.$t('errorcode.'+data.rescode),duration:5});
 				}
 			});
 		},

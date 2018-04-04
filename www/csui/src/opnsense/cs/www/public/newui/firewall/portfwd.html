@@ -35,10 +35,8 @@
                     <hr>-->
                     <br>
                     <FormItem :label="$t('portfwd.specified_interface')" prop="interface">
-                        <Select v-model="formValidate.interface" >
-                            <!--<Option v-for="item in interface" :value="item">{{item}}</Option>-->
-                            <Option value="WAN1">WAN1</Option>
-                            <Option value="WAN2" v-show="wan2Interface == '1'">WAN2</Option>
+                        <Select v-model="formValidate.interface" :key="$t('portfwd.specified_interface')">
+                            <Option v-for="item in interface" :value="item">{{item}}</Option>
                         </Select>
                     </FormItem>
                     <FormItem :label="$t('portfwd.protocol')">
@@ -117,7 +115,6 @@
                 addPortfwdLoading:false,
 
 
-                wan2Interface:'0',
                 formValidate: {
 //                    status:false,
                     interface:'WAN1',
@@ -148,7 +145,8 @@
                     }
                 ],
                 arpData: [],
-                portfwdData: []
+                portfwdData: [],
+                interface:[]
             }
         },
         computed:{
@@ -271,7 +269,6 @@
             var _this = this;
             var postData = {"action":"getStatusInfo"};
             uiPost.getStatusInfo(postData,function(data){
-
                 if (9999 == data.rescode){
                     cs.loginOut();
                 }
@@ -279,11 +276,8 @@
                     var interfaceData = data.data.interface;
                     $.each(interfaceData,function(index, el) {
                         if (el){
-                            if('LAN1' != index.toUpperCase()){
-                                if('WAN2' == index.toUpperCase()){
-                                    _this.wan2Interface = '1';
-                                }
-
+                            if('WAN' == index.toUpperCase().substring(0,3)){
+                                _this.interface.push(index.toUpperCase());
                             }
                         }
                     });
@@ -312,11 +306,11 @@
                         if(_this.portfwdData.length){
                             for(var i=0; i<_this.portfwdData.length; i++){
                                 if(_this.formValidate.fromPort == _this.portfwdData[i].lanPortFrom){
-                                    _this.$Message.error(_this.$t('portfwd.msg8'));
+                                    _this.$Message.error({content:_this.$t('portfwd.msg8'),duration:5});
                                     return false;
                                 }
                                 if(_this.formValidate.wanfromPort == _this.portfwdData[i].wanPortFrom){
-                                    _this.$Message.error(_this.$t('portfwd.msg8'));
+                                    _this.$Message.error({content:_this.$t('portfwd.msg8'),duration:5});
                                     return false;
                                 }
                             }
@@ -340,7 +334,7 @@
                                     location.href = location.href;
                                 }});
                             } else {
-                                _this.$Message.error(_this.$t('portfwd.msg16')+_this.$t('errorcode.'+data.rescode));
+                                _this.$Message.error({content:_this.$t('portfwd.msg16')+_this.$t('errorcode.'+data.rescode),duration:5});
                             }
                             _this.addPortfwdLoading = false;
                         });
@@ -354,6 +348,9 @@
                 _this.showModel = true;
                 var postData = {"action":"getArpInfo", "data":{}};
                 uiPost.getArpInfo(postData,function(data) {
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
                     _this.arpData = data.data;
                     for(var i in _this.arpData){
                         _this.arpData[i].idx = ''+( Number(i) + 1 );
@@ -376,7 +373,14 @@
                     postVar.enable = "0";
                 }
                 postVar.addEffect = "1";
-                uiPost.setPortForwardRules(postVar);
+                uiPost.setPortForwardRules(postVar,function (data) {
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 != data.rescode) {
+                        _this.$Message.error({content:_this.$t('portfwd.msg19')+_this.$t('errorcode.'+data.rescode),duration:5});
+                    }
+                });
             },
             selectTable:function (obj) {
                 this.ip = obj.ip;
@@ -394,9 +398,9 @@
                     }
                     if (0 == data.rescode) {
                         _this.portfwdData.splice(obj.index, 1);
-                        _this.$Message.success('删除成功！');
+                        _this.$Message.success(_this.$t('portfwd.msg17'));
                     } else {
-                        _this.$Message.error('删除失败！'+_this.$t('errorcode.'+data.rescode));
+                        _this.$Message.error({content:_this.$t('portfwd.msg18')+_this.$t('errorcode.'+data.rescode),duration:5});
                     }
                 });
 
@@ -411,14 +415,21 @@
                         {
                             postVar[getSelection[i].delRuleName] = i;
                         }
-                        uiPost.delPortForwardRules(postVar,function(){
-                            _this.$Message.success({content:_this.$t('portfwd.msg13'),onClose:function(){
-                                location.href = location.href;
-                            }});
+                        uiPost.delPortForwardRules(postVar,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({
+                                    content: _this.$t('portfwd.msg13'), onClose: function () {
+                                        location.href = location.href;
+                                    }
+                                });
+                            }
 
                         });
                     }else{
-                        this.$Message.error(this.$t('portfwd.msg11'));
+                        _this.$Message.error({content:_this.$t('portfwd.msg11'),duration:5});
                     }
                 }else{
                     this.$refs.tableSelect.selectAll(status);

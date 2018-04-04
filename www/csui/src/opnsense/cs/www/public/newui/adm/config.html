@@ -48,6 +48,8 @@
                         <Poptip
                                 confirm
                                 :title="$t('config.msg4')"
+                                :ok-text="$t('common.confirm')"
+                                :cancel-text="$t('common.cancel')"
                                 @on-ok="restoreOk">
                             <Button>{{ $t('config.restore') }}</Button>
                         </Poptip>
@@ -56,6 +58,8 @@
                         <Poptip
                                 confirm
                                 :title="$t('config.msg5')"
+                                :ok-text="$t('common.confirm')"
+                                :cancel-text="$t('common.cancel')"
                                 @on-ok="rebootOk">
                             <Button>{{ $t('config.reboot') }}</Button>
                         </Poptip>
@@ -116,19 +120,6 @@
         },
         created: function() {
             var _this = this;
-            /*uiPost.SystemSettings(function(data){
-                _this.operationMode = data.operationMode;
-                _this.meshEnabled = data.meshEnabled;
-                if (data.exportAction != '') {
-                    _this.saveAction = data.exportAction;
-                }
-                if (data.importAction != '') {
-                    _this.upload.action = data.importAction;
-                }
-                if (data.maxSize!='') {
-                    _this.upload.maxSize = parseInt(data.maxSize);
-                }
-            })*/
         },
         methods: {
             saveConfigFile:function() {
@@ -141,15 +132,23 @@
                     if (9999 == data.rescode){
                         cs.loginOut();
                     }
+                    if (0 != data.rescode) {
+                        _this.$Modal.remove();
+                        _this.$Message.error({content:_this.$t('config.msg7')+' '+_this.$t('errorcode.'+data.rescode),duration:5,onClose:function(){
+                            location.href = location.href
+                        }});
+                    }
                 });
 
                 _this.$Modal.success({
                     loading:true,
                     render: function(h) {
                         return h('div',[
-                            _this.$t('common.loading'),
+                            _this.$t('config.recovery_factory_setting'),
                             h('Progress',{
-                                attrs:{ percent:_this.percent }
+                                attrs:{
+                                    percent:_this.percent
+                                }
                             })
                         ])
                     }
@@ -166,25 +165,34 @@
                 var _this = this;
                 var postVar = {"action":"reboot"};
                 uiPost.sysReboot(postVar,function(data) {
-                    _this.$Modal.success({
-                        loading:true,
-                        render: function(h) {
-                            return h('div',[
-                                _this.$t('common.loading'),
-                                h('Progress',{
-                                    attrs:{ percent:_this.percent }
-                                })
-                            ])
-                        }
-                    });
-                    var percentTimer = setInterval(function(){
-                        if (_this.percent>=100) {
-                            clearInterval(percentTimer);
-                            location.href = location.href;
-                        }
-                        _this.percent++;
-                    },cs.getTimer(120));
-                })
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 != data.rescode) {
+                        _this.$Modal.remove();
+                        _this.$Message.error({content:_this.$t('config.msg8')+' '+_this.$t('errorcode.'+data.rescode),duration:5,onClose:function(){
+                            location.href = location.href
+                        }});
+                    }
+                });
+                _this.$Modal.success({
+                    loading:true,
+                    render: function(h) {
+                        return h('div',[
+                            _this.$t('config.reboot_setting'),
+                            h('Progress',{
+                                attrs:{ percent:_this.percent }
+                            })
+                        ])
+                    }
+                });
+                var percentTimer = setInterval(function(){
+                    if (_this.percent>=100) {
+                        clearInterval(percentTimer);
+                        location.href = location.href;
+                    }
+                    _this.percent++;
+                },cs.getTimer(120));
             },
             removeFile:function () {
                 this.upload.fileStatus = false;
@@ -194,13 +202,23 @@
                 _this.loadingStatus = true;
                 var postData = {"action":"updataConfig"};
 
-                uiPost.updataConfig(postData);
+                uiPost.updataConfig(postData,function (data) {
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 != data.rescode) {
+                        _this.$Modal.remove();
+                        _this.$Message.error({content:_this.$t('config.msg9')+' '+_this.$t('errorcode.'+data.rescode),duration:5,onClose:function(){
+                            location.href = location.href
+                        }});
+                    }
+                });
 
                 _this.$Modal.success({
                     loading:true,
                     render: function(h) {
                         return h('div',[
-                            _this.$t('common.loading'),
+                            _this.$t('config.set_config'),
                             h('Progress',{
                                 attrs:{ percent:_this.percent }
                             })

@@ -54,6 +54,9 @@ Vue.component('cs-header', {
     }
   },
   created:function(){
+    if ('/newui/index.html' == location.pathname) {
+      localStorage.setItem('cs-menu-hahahahah','1');
+    }
     this.currentLang = localStorage.getItem('lang') ? localStorage.getItem('lang') : 'en';
   },
   computed:{
@@ -135,7 +138,7 @@ Vue.component('cs-left', {
   data:function() {
     return {
       globalConfig:globalConfig,
-      menus:menu,
+      menus:menu
     }
   },
   computed:{

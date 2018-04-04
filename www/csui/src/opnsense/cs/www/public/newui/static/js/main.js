@@ -42,6 +42,9 @@
                     localStorage.setItem('lang',data.defaultLang);
                     _this.$i18n.locale = data.defaultLang;
                 }
+                if (9999 == data.rescode && '/newui/login.html' != location.pathname){
+                    cs.loginOut();
+                }
             });
             /*uiPost.getInitConfig(function(data){
                 localStorage.setItem('globalConfig',JSON.stringify(data));

@@ -326,7 +326,7 @@
             },
             wanData: function() {
                 var temp = this.interface;
-                var dataObj = {};
+                var dataObj = [];
                 for (var i in temp) {
                     if (i.substring(0, 3) == "wan") {
                         dataObj[i] = [
@@ -603,9 +603,10 @@
                     {
                         _this.system = data.data.system;
                         _this.interface = data.data.interface;
+                        console.log('------------------_this.interface----------------');
+                        console.log(_this.interface);
                         _this.niclist = data.data.niclist;
                         _this.packages = data.data.packages;
-                        console.log( _this.interface);
                         var idx = 0;
                         for(var i in _this.interface){
                             var _wan = '';
@@ -616,11 +617,12 @@
                             if(i.substring(0,3) == "wan"){
                                 _this.interface[i].interface = 'WAN';
                                 _this.extInfo[idx] = _this.interface[i];
-                                _this.extInfo[idx].idx = idx+1;
+                                _this.extInfo[idx].idx = i.substring(3,4);
                                 _this.extInfo[idx].idName = "load_charts"+(idx+1);
                                 idx++;
                             }
                         }
+                        console.log(_this.interface);
                     }
                 });
             },1000);

@@ -392,6 +392,29 @@ class Portal extends Csbackend
                 if(file_exists('/usr/local/opnsense/cs/tmp/portal_server')){
                     unlink('/usr/local/opnsense/cs/tmp/portal_server');
                 }
+
+                $db = PortalHelper::getDbConn();
+                $res = $db->query("select * from cp_clients where deleted='0'");
+
+                while ($row = $res->fetchArray(SQLITE3_ASSOC)) {
+                    if(!empty($row['sessionid'])){
+                        $ret = $db->exec("update cp_clients set deleted=1 where sessionid='".$row['sessionid']."'");
+                        if(!$ret){
+                            continue;
+                        }
+                        $backend = new Backend();
+                        $statusRAW = $backend->configdpRun(
+                            "captiveportal disconnect",
+                            array('0',$row['sessionid'], 'json')
+                        );
+                        $status = json_decode($statusRAW, true);
+                        if ($status != null) {
+                            self::getLogger("captiveportal")->info(
+                                "LOGOUT " . $row['username'] .  " (".$row['ip_address'].") zone 0"
+                            );
+                        }
+                    }
+                }
             }
             $config['OPNsense']['captiveportal']['zones']['zone'] = $portal;
             self::updatePortalLanAlias($portal);

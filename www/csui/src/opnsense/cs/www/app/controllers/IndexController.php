@@ -28,6 +28,11 @@ class IndexController extends BaseController
 
 	public function getlangcfgAction(){
 		$result = System::getLangConfig();
+		if(!$this->session->has('username')){
+			$result['rescode'] = 9999;
+		}else{
+			$result['rescode'] = 0;
+		}
 		echo json_encode($result);
 	}
 

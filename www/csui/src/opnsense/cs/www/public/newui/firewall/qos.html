@@ -406,12 +406,13 @@
                                 cs.loginOut();
                             }
                             _this.addStatus = false;
+                            _this.addLoading = false;
                             if (0 == data.rescode) {
                                 _this.$Message.success({content:_this.$t('qos.msg42'),onClose:function(){
                                     location.href = location.href;
                                 }});
                             } else {
-                                _this.$Message.error(_this.$t('qos.msg42')+ ' ' +_this.$t('errorcode.'+data.rescode));
+                                _this.$Message.error({content:_this.$t('qos.msg43')+_this.$t('errorcode.'+data.rescode),duration:5});
                             }
                         });
                     }else{
@@ -451,7 +452,7 @@
                                     location.href = location.href;
                                 }});
                             } else {
-                                _this.$Message.success('Fail! '+ _this.$t('errorcode.'+data.rescode));
+                                _this.$Message.error({content:'Fail! '+_this.$t('errorcode.'+data.rescode),duration:5});
                             }
                             _this.applyLoading = false;
                         });
@@ -479,9 +480,17 @@
                 var data = {};
                 data.Ip = obj.row.Ip;
                 var postVar = {"action":"delQosCustom", "data":data};
-                console.log(obj);
-                uiPost.delQosCustom(postVar,function(){
-                    _this.qosListsData.splice(obj.Ip, 1);
+                uiPost.delQosCustom(postVar,function(data){
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 == data.rescode) {
+                        _this.$Message.success({content:_this.$t('qos.msg47'),onClose:function(){
+                            location.href = location.href;
+                        }});
+                    } else {
+                        _this.$Message.error({content:_this.$t('qos.msg48')+_this.$t('errorcode.'+data.rescode),duration:5});
+                    }
                 });
             },
             tableSelect:function(status){
@@ -494,13 +503,20 @@
                         {
                             postVar[getSelection[i].delRuleName] = i;
                         }
-                        uiPost.delIpQosRules(postVar,function(){
-                            _this.$Message.success({content:_this.$t('qos.msg27'),onClose:function(){
-                                location.href = location.href;
-                            }});
+                        uiPost.delIpQosRules(postVar,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({
+                                    content: _this.$t('qos.msg27'), onClose: function () {
+                                        location.href = location.href;
+                                    }
+                                });
+                            }
                         });
                     }else{
-                        this.$Message.error(this.$t('qos.msg25'));
+                        _this.$Message.error({content:_this.$t('qos.msg25'),duration:5});
                     }
                 }else{
                     this.$refs.tableSelect.selectAll(status);

@@ -48,9 +48,9 @@
             </Col>
         </Row>
         <Row>
-            <Col class="cs-btn-del">
+            <!--<Col class="cs-btn-del">
             <Button size="small" @click="tableSelect(true)" type="error">{{ $t('account.delete') }}</Button>
-            </Col>
+            </Col>-->
             <Col>
             <Table border ref="tableSelect" :columns="accountListColumns" :data="accountListData" :no-data-text="$t('common.no_data')"></Table>
             </Col>
@@ -86,7 +86,13 @@
                 },
                 accountListData:[],
                 pptpData:[],
-                l2tpData:[]
+                l2tpData:[],
+                pptpEnable:'0',
+                pptpStart:'',
+                pptpEnd:'',
+                l2tpEnable:'0',
+                l2tpStart:'',
+                lwtpEnd:''
             }
         },
         computed:{
@@ -187,9 +193,9 @@
                                             cs.loginOut();
                                         }
                                         if (0 != data.rescode) {
-                                            _this.$Message.error('删除失败！'+_this.$t('errorcode.'+data.rescode));
+                                            _this.$Message.error({content:_this.$t('account.msg6')+ _this.$t('errorcode.'+data.rescode),duration:5});
                                         }else{
-                                            _this.$Message.error('删除成功！');
+                                            _this.$Message.success(_this.$t('account.msg11'));
                                             location.href = location.href;
                                         }
                                     });
@@ -209,6 +215,28 @@
         },
         created:function() {
             var _this = this;
+            var getPptpRange = {"action":"getPptpdStatus"};
+            uiPost.getPptpdStatus(getPptpRange,function(data) {
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    _this.pptpEnable = data.data.Enable;
+                    _this.pptpStart = data.data.ClientIpStart;
+                    _this.pptpEnd = data.data.ClientIpEnd;
+                }
+            });
+            var getL2tpRange = {"action":"getL2tpStatus"};
+            uiPost.getL2tpStatus(getL2tpRange,function(data) {
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    _this.l2tpEnable = data.data.Enable;
+                    _this.l2tpStart = data.data.ClientIpStart;
+                    _this.l2tpEnd = data.data.ClientIpEnd;
+                }
+            });
             /*获取PPTP用户配置信息*/
             var postPptpData = {"action":"getPptpdUsers","data":{}};
             uiPost.getPptpdUsers(postPptpData,function(data) {
@@ -227,11 +255,8 @@
                         }
                         if (0 == data.rescode) {
                             _this.l2tpData = data.data;
-                            console.log(_this.l2tpData);
-
                             //PPTP为空
                             if(_this.pptpData.length<=0){
-                                console.log('------------accountListData = L2TP------------');
                                 _this.accountListData = _this.l2tpData;
                                 for(var i=0;i<_this.accountListData.length;i++){
                                     _this.accountListData[i].idx = i+1;
@@ -240,7 +265,6 @@
                             }
                             //L2TP为空
                             if(_this.l2tpData.length<=0){
-                                console.log('------------accountListData = PPTP------------');
                                 _this.accountListData = _this.pptpData;
                                 for(var i=0;i<_this.accountListData.length;i++){
                                     _this.accountListData[i].idx = i+1;
@@ -250,7 +274,6 @@
                             //两种都存在
                             var tempData = [];
                             if((_this.l2tpData.length) > 0 && (_this.pptpData.length) > 0){
-                                console.log('---------accountListData = both -----------');
                                 var count = _this.l2tpData.length + _this.pptpData.length;
                                 for(var i=0;i< count;i++){
                                     console.log(i);
@@ -294,9 +317,9 @@
                                     cs.loginOut();
                                 }
                                 if (0 != data.rescode) {
-                                     _this.$Message.error('删除失败！'+_this.$t('errorcode.'+data.rescode));
+                                    _this.$Message.error({content:_this.$t('account.msg6')+ _this.$t('errorcode.'+data.rescode),duration:5});
                                  }else{
-                                 _this.$Message.success('删除成功！');
+                                    _this.$Message.success(_this.$t('account.msg11'));
                                      location.href = location.href;
                                  }
                             });
@@ -310,7 +333,7 @@
 //                            }});
 //                        });
                     }else{
-                        this.$Message.error(this.$t('account.msg8'));
+                        _this.$Message.error({content:_this.$t('account.msg8'),duration:5});
                     }
                 }else{
                     this.$refs.tableSelect.selectAll(status);
@@ -327,9 +350,26 @@
             },
             handleSubmit: function(name) {
                 var _this = this;
-                _this.applyLoading = true;
                 _this.$refs[name].validate(function(valid){
                     if (valid) {
+                        if(_this.formValidate.ipAddr){
+                            if(_this.formValidate.serverMode == '2' && '1' == _this.pptpEnable){
+                                //0 yes 1 no  si >= s2
+                                if(1 == cs.ip_gt_eq(_this.formValidate.ipAddr,_this.pptpStart) || 1 == cs.ip_gt_eq(_this.pptpEnd,_this.formValidate.ipAddr)){
+                                    _this.$Message.error({content:_this.$t('account.msg7')+_this.pptpStart + ' -- ' + _this.pptpEnd ,duration:5});
+                                    return false;
+                                }
+                            }
+
+                            if(_this.formValidate.serverMode == '1' && '1' == _this.l2tpEnable){
+                                //0 yes 1 no  si >= s2
+                                if(1 == cs.ip_gt_eq(_this.formValidate.ipAddr,_this.l2tpStart) || 1 == cs.ip_gt_eq(_this.l2tpEnd,_this.formValidate.ipAddr)){
+                                    _this.$Message.error({content:_this.$t('account.msg10')+_this.l2tpStart + ' -- ' + _this.l2tpEnd ,duration:5});
+                                    return false;
+                                }
+                            }
+                        }
+
                         var postData = {};
                         var postVar = {};
                         postVar['Username'] = _this.formValidate.username;
@@ -341,14 +381,21 @@
                         if(_this.formValidate.serverMode == '3'){
                             postData = {"action":"addL2tpUser", "data":postVar};
                         }
+                        _this.applyLoading = true;
                         uiPost.addlocalServerUser(postData,function(data){
-                            _this.$Message.success({content:'Success!',onClose:function(){
-                                _this.applyLoading = false;
-                            }});
-                            var percentTimer = setInterval(function(){
-                                clearInterval(percentTimer);
-                                location.href=location.href;
-                            },cs.getTimer(10));
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            _this.applyLoading = false;
+                            if (0 == data.rescode) {
+                                _this.$Message.success({
+                                    content: 'Success!', onClose: function () {
+                                        location.href = location.href;
+                                    }
+                                });
+                            }else{
+                                _this.$Message.error({content:'Fail! '+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
                         });
                     } else {
                         _this.applyLoading = false;

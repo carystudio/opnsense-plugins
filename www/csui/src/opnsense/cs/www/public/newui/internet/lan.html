@@ -251,23 +251,23 @@
 
                 if (1 == this.formValidate.dhcp) {
                     if(cs.ip_range(this.formValidate.dhcpStart,this.formValidate.dhcpEnd) == 0){
-                        this.$Message.error(this.$t('lan.msg7'));
+                        this.$Message.error({content:_this.$t('lan.msg7'),duration:5});
                         return false;
                     }
                     if(this.formValidate.dhcpStart == this.formValidate.lanIp || this.formValidate.dhcpEnd == this.formValidate.lanIp){
-                        this.$Message.error(this.$t('lan.msg10'));
+                        this.$Message.error({content:_this.$t('lan.msg10'),duration:5});
                         return false;
                     }
                     if(0 == cs.ip_subnet(this.formValidate.lanIp,this.formValidate.lanNetmask,this.formValidate.dhcpStart)){
-                        this.$Message.error(this.$t('lan.msg12'));
+                        this.$Message.error({content:_this.$t('lan.msg12'),duration:5});
                         return false;
                     }
                     if(0 == cs.ip_subnet(this.formValidate.lanIp,this.formValidate.lanNetmask,this.formValidate.dhcpEnd)){
-                        this.$Message.error(this.$t('lan.msg13'));
+                        this.$Message.error({content:_this.$t('lan.msg13'),duration:5});
                         return false;
                     }
                     if(1 == cs.ip_subnet(this.formValidate.lanIp,this.formValidate.lanNetmask,this.wanIp)){
-                        this.$Message.error(this.$t('lan.msg14'));
+                        this.$Message.error({content:_this.$t('lan.msg14'),duration:5});
                         return false;
                     }
                 }

@@ -126,6 +126,15 @@
                                     f(_this.$t('l2tp.msg4'));
                                 }
                             }else{
+                                var _start = cs.ip2int(_this.formValidate.ipStart);
+                                var _end = cs.ip2int(v);
+                                if(_start > _end){
+                                    f(_this.$t('l2tp.msg12'));
+                                }
+                                if((_end - _start > 200)){
+                                    f(_this.$t('l2tp.msg13'));
+                                }
+                                f();
                                 f();
                             }
                         },trigger: 'blur' }
@@ -215,9 +224,17 @@
         },
         methods:{
             submitStatus:function(){
+                var _this = this;
                 if(false == this.formValidate.status){
                     var postVar = {"action":"setL2tpStatus","data":{"Enable":"0"}};
-                    uiPost.setL2tpStatus(postVar);
+                    uiPost.setL2tpStatus(postVar,function (data) {
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        if (0 != data.rescode) {
+                            _this.$Message.error({content:_this.$t('l2tp.msg10')+ _this.$t('errorcode.'+data.rescode),duration:5});
+                        }
+                    });
                 }
             },
             handleSubmit: function(name) {
@@ -252,7 +269,7 @@
                                     location.href=location.href;
                                 },cs.getTimer(200));
                             } else {
-                                _this.$Message.error(_this.$t('l2tp.msg10')+_this.$t('errorcode.'+data.rescode));
+                                _this.$Message.error({content:_this.$t('l2tp.msg10')+ _this.$t('errorcode.'+data.rescode),duration:5});
                                 _this.applyLoading = false;
                             }
                         });

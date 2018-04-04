@@ -133,6 +133,14 @@
                                     f(_this.$t('pptp.msg4'));
                                 }
                             }else{
+                                var _start = cs.ip2int(_this.formValidate.startIpAddr);
+                                var _end = cs.ip2int(v);
+                                if(_start > _end){
+                                    f(_this.$t('pptp.msg11'));
+                                }
+                                if((_end - _start > 200)){
+                                    f(_this.$t('pptp.msg12'));
+                                }
                                 f();
                             }
                         },trigger: 'blur' }
@@ -232,11 +240,23 @@
         },
         methods:{
             submitStatus:function(){
+                var _this = this;
                 var data = {};
                 if(false == this.formValidate.status){
                     data.Enable = '0';
                     var postData = {"action":"setPptpdStatus", "data":data};
-                    uiPost.setPptpdStatus(postData);
+                    uiPost.setPptpdStatus(postData,function (data) {
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        if (0 != data.rescode) {
+                            _this.$Message.error({
+                                content: _this.$t('pptp.set_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5, onClose: function () {
+                                    _this.applyLoading = false;
+                                }
+                            });
+                        }
+                    });
                 }
             },
             handleSubmit: function(name) {
@@ -271,7 +291,7 @@
                                 }, cs.getTimer(200));
                             }else{
                                 _this.$Message.error({
-                                    content: _this.$t('pptp.set_fail')+' '+_this.$t('errorcode.'+data.rescode), onClose: function () {
+                                    content: _this.$t('pptp.set_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5, onClose: function () {
                                         _this.applyLoading = false;
                                     }
                                 });

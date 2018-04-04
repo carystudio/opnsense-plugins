@@ -135,7 +135,7 @@
                     var fwData = data.data;
                     if (fwData) {
                         _this.version = fwData.Version;
-                        _this.buildTime = fwData.Build_date;
+                        _this.buildTime = fwData.Build_date.substring(0,4)+'-'+fwData.Build_date.substring(4,6)+'-'+fwData.Build_date.substring(6,8);
                     }
                     if (fwData.Fw_version == "") {
                         _this.fwVersion = _this.$t('firmware.nothing');
@@ -154,7 +154,7 @@
                         _this.fwbuiltTimeStatus = false;
                     }else{
                         _this.fwbuiltTimeStatus = true;
-                        _this.fwbuiltTime = fwData.Fw_build_date;
+                        _this.fwbuiltTime = fwData.Fw_build_date.substring(0,4)+'-'+fwData.Fw_build_date.substring(4,6)+'-'+fwData.Fw_build_date.substring(6,8);
                     }
                 }
             });
@@ -198,7 +198,7 @@
                             _this.percent++;
                         },cs.getTimer(wtime));
                     } else {
-                        _this.$Message.error(_this.$t('firmware.upgrade_fail') + _this.$t('errorcode.'+data.rescode));
+                        _this.$Message.error({content:_this.$t('firmware.upgrade_fail')+_this.$t('errorcode.'+data.rescode),duration:5});
                     }
                 });
             },

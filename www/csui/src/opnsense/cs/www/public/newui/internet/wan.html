@@ -794,7 +794,7 @@ var cs_main = {
                                 location.href = location.href;
                             }});
                         }else{
-                            _this.$Message.error(_this.$t('wan.msg27')+ ' ' +_this.$t('errorcode.'+data.rescode));
+                            _this.$Message.error({content:_this.$t('wan.msg27')+_this.$t('errorcode.'+data.rescode),duration:5});
                         }
                     });
                     /*var time = 30;
@@ -837,7 +837,16 @@ var cs_main = {
                         data.Nic = _this.interface[i].Nic;
                         var postVar = {"action":"delInterfaceBind","data":data};
                         uiPost.delInterfaceBind(postVar,function(data) {
-                            location.href = location.href;
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('wan.msg30'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            }else{
+                                _this.$Message.error({content:_this.$t('wan.msg31')+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
                         });
                     }
                 }
@@ -865,7 +874,7 @@ var cs_main = {
                 if (0 == data.rescode) {
                     location.href = location.href;
                 }else{
-                    alert('绑定失败！'+_this.$t('errorcode.'+data.rescode));
+                    _this.$Message.error({content:_this.$t('wan.msg29')+ _this.$t('errorcode.'+data.rescode),duration:5});
                 }
             });
         },

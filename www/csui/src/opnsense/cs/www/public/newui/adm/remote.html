@@ -180,7 +180,7 @@
                                     location.href = location.href;
                                 }});
                             } else {
-                                _this.$Message.error(_this.$t('remote.fail')+_this.$t('errorcode.'+data.rescode));
+                                _this.$Message.error({content:_this.$t('remote.fail')+_this.$t('errorcode.'+data.rescode),duration:5});
                             }
                         });
                        /* var postVar = {};

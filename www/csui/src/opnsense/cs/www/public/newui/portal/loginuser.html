@@ -103,7 +103,6 @@
                                 },
                                 on: {
                                     click:function () {
-                                        console.log('------------下线--------------');
                                         var data = {};
                                         data.Sessionid = params.row.Sessionid;
                                         var postData = {"action":"delPortalSession", "data":data};
@@ -111,15 +110,13 @@
                                             if (9999 == data.rescode){
                                                 cs.loginOut();
                                             }
-                                            console.log(data);
                                             if (0 == data.rescode) {
                                                 _this.$Message.success(_this.$t('loginuser.offline_success'));
                                                 location.href = location.href;
                                             } else {
-                                                _this.$Message.error(_this.$t('loginuser.offline_fail')+_this.$t('errorcode.'+data.rescode));
+                                                _this.$Message.error({content:_this.$t('loginuser.offline_fail')+ _this.$t('errorcode.'+data.rescode),duration:5});
                                             }
                                         });
-                                        console.log(params);
                                     }
                                 }
                             }, _this.$t('loginuser.offline'))
@@ -132,8 +129,6 @@
             var _this = this;
             var postData = {"action":"getPortalSessions", "data":{}};
             uiPost.getPortalSessions(postData,function(data) {
-                console.log('------------------------');
-                console.log(data);
                 if (9999 == data.rescode){
                     cs.loginOut();
                 }
@@ -165,14 +160,14 @@
                                     cs.loginOut();
                                 }
                                 if (0 == data.rescode) {
-                                    _this.$Message.success('下线成功！');
+                                    _this.$Message.success(_this.$t('loginuser.offline_success'));
                                 } else {
-                                    _this.$Message.error('下线失败！'+_this.$t('errorcode.'+data.rescode));
+                                    _this.$Message.error({content:_this.$t('loginuser.offline_fail')+ _this.$t('errorcode.'+data.rescode),duration:5});
                                 }
                             });
                         }
                     }else{
-                        this.$Message.error(this.$t('loginuser.msg1'));
+                        _this.$Message.error({content:_this.$t('loginuser.msg1'),duration:5});
                     }
                 }else{
                     this.$refs.tableSelect.selectAll(status);

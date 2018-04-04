@@ -144,7 +144,7 @@
                     </Select>
                 </FormItem>
                 <FormItem :label="$t('central.channels',['2.4G'])" prop="channel2">
-                    <Select v-model="formSetinfo.channel2" :key="$t('central.channels',['2.4G'])">
+                    <Select v-model="formSetinfo.channel2" :key="$t('central.channels',['2.4G'])" placement="top">
                         <Option value="0">{{ $t('central.auto_select') }}</Option>
                         <Option v-for="i in 13" :key="i" :value="i">{{ i }}</Option>
                     </Select>
@@ -156,7 +156,7 @@
                     </Select>
                 </FormItem>
                 <FormItem :label="$t('central.tx_powers',['2.4G'])" prop="tx_power2">
-                    <Select v-model="formSetinfo.tx_power2">
+                    <Select v-model="formSetinfo.tx_power2" placement="top">
                         <Option v-for="i in txPower" :key="i" :value="i">{{ i+'%' }}</Option>
                     </Select>
                 </FormItem>
@@ -174,7 +174,7 @@
                     </Select>
                 </FormItem>
                 <FormItem :label="$t('central.channels',['5G'])" prop="channel5">
-                    <Select v-model="formSetinfo.channel5" :key="$t('central.channels',['5G'])">
+                    <Select v-model="formSetinfo.channel5" :key="$t('central.channels',['5G'])" placement="top">
                         <Option value="0">{{ $t('central.auto_select') }}</Option>
                         <Option v-for="i in channel5Arr"  :value="i">{{ i }}</Option>
                         <Option v-show="channelsStatus165" value="165">165</Option>
@@ -189,7 +189,7 @@
                 </FormItem>
 
                 <FormItem :label="$t('central.tx_powers',['5G'])" prop="tx_power5">
-                    <Select v-model="formSetinfo.tx_power5">
+                    <Select v-model="formSetinfo.tx_power5" placement="top">
                         <Option v-for="i in txPower" :key="i" :value="i">{{ i+'%'}}</Option>
                     </Select>
                 </FormItem>
@@ -608,7 +608,6 @@
 
                                         var postVar ={"action":"setApLedState","data":data};
                                         uiPost.setApLedState(postVar,function(data){
-                                            console.log(data);
                                             if (9999 == data.rescode){
                                                 cs.loginOut();
                                             }
@@ -618,7 +617,7 @@
                                                 }
                                                 });
                                             } else {
-                                                _this.$Message.error(_this.$t('central.modify_fail')+_this.$t('errorcode.'+data.rescode));
+                                                _this.$Message.error({content:_this.$t('central.modify_fail')+_this.$t('errorcode.'+data.rescode),duration:5});
                                             }
                                         });
                                     }
@@ -796,7 +795,7 @@
                                                             }
                                                             });
                                                         } else {
-                                                            _this.$Message.error(_this.$t("central.modify_fail")+_this.$t('errorcode.'+data.rescode));
+                                                            _this.$Message.error({content:_this.$t('central.modify_fail')+_this.$t('errorcode.'+data.rescode),duration:5});
                                                         }
 
                                                     });
@@ -883,7 +882,6 @@
                 data.type = "exec";
                 var postData = {"action":"scanAp","data":data};
                 uiPost.scanAp(postData,function(data){
-                    console.log(data);
                     if (9999 == data.rescode){
                         cs.loginOut();
                     }
@@ -897,6 +895,9 @@
                             data.type = "scan";
                             var postVar = {"action":"scanAp","data":data};
                             uiPost.scanAp(postVar,function(data){
+                                if (9999 == data.rescode){
+                                    cs.loginOut();
+                                }
                                 _this.centralData = data.data;
                                 _this.apscanLoading = false;
                             });
@@ -913,6 +914,7 @@
                 _this.showModel = false;
             },
             modifyApIp:function (data) {
+                var _this = this;
                 var postVar ={"action":"setApIp","data":data};
                 uiPost.setApIp(postVar);
                 var time = 12;
@@ -982,15 +984,7 @@
                                 }
                                 _this.formSetinfo.maxusernumber    = data.WLAN_STATUS.stanum;
                                 _this.formSetinfo.vlanid    = data.WLAN_STATUS.vlanid;
-                            }/*else{
-                                _this.formSetinfo.ssid2    = '';
-                                _this.formSetinfo.securityMode2    = '0';
-                                _this.formSetinfo.security2    = '';
-                                _this.formSetinfo.hidessid    = false;
-                                _this.formSetinfo.wifi_quarantine    = false;
-                                _this.formSetinfo.maxusernumber    = '';
-                                _this.formSetinfo.vlanid    = '';
-                            }*/
+                            }
 
                             if(data.WIFI0_STATUS){
 //                            _this.formSetinfo.wlanset    = data.WIFI0_STATUS.vlanid;
@@ -999,14 +993,7 @@
                                 _this.formSetinfo.channel2    = data.WIFI0_STATUS.channel;
                                 _this.formSetinfo.band_width2    = data.WIFI0_STATUS.htmode;
                                 _this.formSetinfo.tx_power2    = data.WIFI0_STATUS.txpower;
-                            }/*else{
-//                            _this.formSetinfo.wlanset    = '3';
-                                _this.formSetinfo.band2    = '';
-                                _this.formSetinfo.country2g    = 'CN';
-                                _this.formSetinfo.channel2    = '';
-                                _this.formSetinfo.band_width2    = '';
-                                _this.formSetinfo.tx_power2    = '';
-                            }*/
+                            }
 
                             if(data.WIFI1_STATUS){
                                 _this.formSetinfo.band5    = data.WIFI1_STATUS.wirelessmode;
@@ -1015,13 +1002,7 @@
                                 _this.formSetinfo.channel5    = data.WIFI1_STATUS.channel;
                                 _this.formSetinfo.band_width5    = data.WIFI1_STATUS.htmode;
                                 _this.formSetinfo.tx_power5    = data.WIFI1_STATUS.txpower;
-                            }/*else{
-                                _this.formSetinfo.band5    = '';
-                                _this.formSetinfo.country5g    = 'CN';
-                                _this.formSetinfo.channel5    = '';
-                                _this.formSetinfo.band_width5    = '';
-                                _this.formSetinfo.tx_power5    = '';
-                            }*/
+                            }
 
                             if('1' == temp[0].aptype){
                                 _this.wlanset    = '1';
@@ -1046,7 +1027,7 @@
                     _this.formSetinfo.securityMode2    = '0';
                     _this.securityMode2 = false;
                     _this.formSetinfo.security2    = '';
-                    _this.formSetinfo.hidessid    = false;
+                    _this.formSetinfo.hidessid    = true;
                     _this.formSetinfo.wifi_quarantine    = false;
                     _this.formSetinfo.maxusernumber    = '32';
                     _this.formSetinfo.vlanid    = '0';
@@ -1065,10 +1046,6 @@
                     _this.formSetinfo.tx_power5    = '100';
 
                     this.multipleHide = true;
-//                    for(var i in this.formSetinfo)
-//                    {
-//                        this.formSetinfo[i] = '';
-//                    }
                 }
                 this.setinfo = true;
             },
@@ -1091,10 +1068,10 @@
 
                 var res = cs.ssid(_this.formSetinfo.ssid2);
                 if(0 == res){
-                    _this.$Message.error(_this.$t('central.msg10'));
+                    _this.$Message.error({content:_this.$t('central.msg10'),duration:5});
                     return false;
                 }else if(99 != res){
-                    _this.$Message.error(_this.$t('central.msg11'));
+                    _this.$Message.error({content:_this.$t('central.msg11'),duration:5});
                     return false;
                 }
                 data.ssid = _this.formSetinfo.ssid2;
@@ -1102,7 +1079,7 @@
                 if('1' == _this.formSetinfo.securityMode2){
                     var res = cs.string(_this.formSetinfo.security2);
                     if(99 != res || _this.formSetinfo.security2.length < 8 || _this.formSetinfo.security2.length > 63){
-                        _this.$Message.error(_this.$t('central.msg12'));
+                        _this.$Message.error({content:_this.$t('central.msg12'),duration:5});
                         return false;
                     }
                     data.wlanKey = _this.formSetinfo.security2;
@@ -1122,17 +1099,17 @@
                 }
 
                 if(99 != cs.num_range(_this.formSetinfo.maxusernumber,0,64)){
-                    _this.$Message.error(_this.$t('central.msg24'));
+                    _this.$Message.error({content:_this.$t('central.msg24'),duration:5});
                     return false;
                 }
                 data.maxstanum = _this.formSetinfo.maxusernumber;
 
                 if(99 != cs.num(_this.formSetinfo.vlanid)){
-                    _this.$Message.error(_this.$t('central.msg25'));
+                    _this.$Message.error({content:_this.$t('central.msg25'),duration:5});
                     return false;
                 }
-                if('0' != _this.formSetinfo.vlanid && 4094 != _this.formSetinfo.vlanid && cs.num_range(_this.formSetinfo.vlanid,0,4094) ){
-                    _this.$Message.error(_this.$t('central.msg14'));
+                if(99 != cs.num_range(_this.formSetinfo.vlanid,0,4094) ){
+                    _this.$Message.error({content:_this.$t('central.msg14'),duration:5});
                     return false;
                 }
                 data.vlanid = _this.formSetinfo.vlanid;
@@ -1155,16 +1132,24 @@
                 var postData = { "action": "setQuick","data":data };
 
                 uiPost.setQuick(postData,function(data){
-                    _this.$Message.success({content: _this.$t('central.set_success'), onClose: function () {
-                        location.href = location.href;
+                    if (9999 == data.rescode){
+                        cs.loginOut();
                     }
-                    });
+                    if (0 == data.rescode) {
+                        _this.$Message.success({
+                            content: _this.$t('central.set_success'), onClose: function () {
+                                location.href = location.href;
+                            }
+                        });
+                    }else{
+                        _this.$Message.error({content:_this.$t('central.set_fail')+_this.$t('errorcode.'+data.rescode),duration:5});
+                    }
                 });
             },
             letctlClick: function(){
                 var temp = this.selectData;
                 if (temp.length <= 0) {
-                    this.$Message.error(this.$t('central.msg1'));
+                    this.$Message.error({content:_this.$t('central.msg1'),duration:5});
                     return false;
                 }
                 this.letctl = true;
@@ -1182,7 +1167,7 @@
                 var idArr = [];
                 var data = {};
                 for(var i in temp){
-                    idArr[i] = temp[i].id
+                    idArr[i] = temp[i].id;
                 }
 
                 data.id = idArr.join(',');
@@ -1190,32 +1175,18 @@
 
                 var postVar ={"action":"setApLedState","data":data};
                 uiPost.setApLedState(postVar,function(data){
-                    _this.letctl = false;
-                    _this.$Message.success({content: _this.$t('central.set_success'), onClose: function () {
-                        location.href = location.href;
+                    if (9999 == data.rescode){
+                        cs.loginOut();
                     }
-                    });
+                    _this.letctl = false;
+                    if (0 == data.rescode) {
+                        _this.$Message.success({
+                            content: _this.$t('central.set_success'), onClose: function () {
+                                location.href = location.href;
+                            }
+                        });
+                    }
                 });
-
-
-                /*var postVar ={"topicurl":"setting/setApLedState"};
-                 postVar.Ledstate = index + '';
-                 postVar.Action = 'setledState';
-
-                 postVar.APMACLIST = [];
-                 postVar.APIPLIST = [];
-                 var selectData = this.selectData;
-                 for(var i=0; i<selectData.length; i++)
-                 {
-                 postVar.APMACLIST.push(selectData[i].apMac);
-                 postVar.APIPLIST.push(selectData[i].ipaddr);
-                 }
-
-                 uiPost.QuickSetting(postVar,function(){
-                 // location.href = location.href;
-                 _this.$Message.success(_this.$t('central.set_success'));
-                 _this.letctl = false;
-                 });*/
             },
             rebootClick: function(){
                 var _this = this;
@@ -1234,9 +1205,16 @@
 
                 var postVar ={"action":"setApReboot","data":data};
                 uiPost.setApReboot(postVar,function(data){
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
                     // location.href = location.href;
-                    _this.$Message.success(_this.$t('central.set_success'));
-                    _this.reboot = false;
+                    if (0 == data.rescode) {
+                        _this.$Message.success(_this.$t('central.set_success'));
+                        _this.reboot = false;
+                    }else{
+                        _this.$Message.error({content:_this.$t('central.set_fail')+_this.$t('errorcode.'+data.rescode),duration:5});
+                    }
                 });
 
 
@@ -1256,34 +1234,22 @@
                         }
                         tmpData['apmac'] = tmpData.join(',');
                         if('' == tmpData['apmac'].length) {
-                            _this.$Message.error(_this.$t('central.msg15'));
+                            _this.$Message.error({content:_this.$t('central.msg15'),duration:5});
                             return;
                         }
                         data.apmac = tmpData['apmac'];
-                        console.log('---------------setApIp----------------');
                         var postVar ={"action":"setApIp","data":data};
-                        uiPost.setApIp(postVar);
-                        var time = 12;
-                        _this.$Modal.success({
-                            loading:true,
-                            render: function(h) {
-                                return h('div',[
-                                    _this.$t('common.loading'),
-                                    h('Progress',{
-                                        attrs:{ percent:_this.percent }
-                                    })
-                                ])
+                        _this.$Spin.show();  //加载动画
+                        uiPost.setApIp(postVar,function (data) {
+                            _this.$Spin.hide();   //关闭加载动画
+                            if (9999 == data.rescode){
+                                cs.loginOut();
                             }
+                            location.href = location.href;
                         });
-                        var percentTimer = setInterval(function(){
-                            if (_this.percent>=100) {
-                                clearInterval(percentTimer);
-                                location.href = location.href;
-                            }
-                            _this.percent++;
-                        },cs.getTimer(time));
+
                     }else{
-                        _this.$Message.error(_this.$t('central.msg16'));
+                        _this.$Message.error({content:_this.$t('central.msg16'),duration:5});
                     }
                 }else{
                     _this.$refs.tableSelect.selectAll(status);
@@ -1292,11 +1258,11 @@
             timingRebootOk: function(){
                 var _this = this;
                 if (this.letctlAuthpwd == '') {
-                    this.$Message.error(this.$t('central.msg2'));
+                    _this.$Message.error({content:_this.$t('central.msg2'),duration:5});
                     return false;
                 }
                 if (this.timingRebootSelect == '-1') {
-                    this.$Message.error(this.$t('central.msg3'));
+                    _this.$Message.error({content:_this.$t('central.msg3'),duration:5});
                     return false;
                 }
 
@@ -1331,7 +1297,7 @@
                 var _this = this ;
                 var temp = this.selectData;
                 if (temp.length <= 0) {
-                    this.$Message.error(this.$t('central.msg1'));
+                    _this.$Message.error({content:_this.$t('central.msg1'),duration:5});
                     return false;
                 }
                 var data = [];
@@ -1341,8 +1307,14 @@
 
                 var postVar ={"action":"setApRestore","data":data};
                 uiPost.setApRestore(postVar,function(data){
-                    // location.href = location.href;
-                    _this.$Message.success(_this.$t('central.set_success'));
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 == data.rescode) {
+                        _this.$Message.success(_this.$t('central.set_success'));
+                    }else{
+                        _this.$Message.error({content:_this.$t('central.set_fail'),duration:5});
+                    }
                     _this.reboot = false;
                 });
             },
@@ -1375,6 +1347,9 @@
                 }
                 var postData = {"action":"getApUpgradeInfo","data":data};
                 uiPost.getApUpgradeInfo(postData,function(data){
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
                     for (var j in data.data){
                         _this.firmData=data.data;
                     }
@@ -1398,6 +1373,9 @@
                 var postVar ={"action":"setApUpgrade","data":data};
                 uiPost.setApUpgrade(postVar,function(data){
                     // location.href = location.href;
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
                     _this.$Message.success(_this.$t('central.set_success'));
                     _this.firmware = false;
                 });

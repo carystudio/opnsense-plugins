@@ -177,6 +177,19 @@ class L2tp extends Csbackend
                     $config['l2tp']['dns2'] = $data['Dns2'];
                 }
                 $config['l2tp']['paporchap'] = $data['AuthType'];
+
+                $serverStart = sprintf("%u", ip2long($data['ClientIpStart']));
+                $serverEnd = sprintf("%u", ip2long($data['ClientIpEnd']));
+                if(isset($config['l2tp']['user']) && is_array($config['l2tp']['user'])) {//检查是否已存在
+                    foreach ($config['l2tp']['user'] as $key=>$user){
+                        $userIp = sprintf("%u", ip2long($user['ip']));
+                        if($serverStart > $userIp || $serverEnd < $userIp){
+                            unset($config['l2tp']['user'][$key]['ip']);
+                        }
+                    }
+                    l2tp_users_sort();
+                }
+
             }else{
                 $config['l2tp']['mode'] = 'off';
                 if(isset($config['interfaces']['l2tp'])){

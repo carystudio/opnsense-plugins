@@ -104,6 +104,10 @@
     margin-bottom: 32px;
 }
 
+body .ivu-modal .ivu-select-dropdown{
+    position: fixed !important;
+}
+
 /* I don't know why, but I can use this to solve the problem */
 .ivu-menu-horizontal{line-height: 58px;}
 .demo-spin-icon-load{

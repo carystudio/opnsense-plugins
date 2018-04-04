@@ -125,19 +125,24 @@ var cs_main = {
         var _this = this;
           var postData={"action":"setAcReset"};
         uiPost.AcRestore(postData,function(data) {
-            var time=data.wtime;
-            var lan_ip=data.lan_ip;
-            _this.$Modal.success({
-              loading:true,
-              render: function(h) {
-                return h('div',[
-                  _this.$t('common.loading'),
-                  h('Progress',{
-                    attrs:{ percent:_this.percent }
-                  })
-                ])
-              },
-            });
+            if (9999 == data.rescode){
+                cs.loginOut();
+            }
+            if (0 == data.rescode) {
+                var time = data.wtime;
+                var lan_ip = data.lan_ip;
+                _this.$Modal.success({
+                    loading: true,
+                    render: function (h) {
+                        return h('div', [
+                            _this.$t('common.loading'),
+                            h('Progress', {
+                                attrs: {percent: _this.percent}
+                            })
+                        ])
+                    }
+                });
+            }
             var percentTimer = setInterval(function(){
               if (_this.percent>=100) {
                 clearInterval(percentTimer);
@@ -163,11 +168,11 @@ var cs_main = {
           _this.$Spin.hide();   //关闭加载动画
           console.log(data);
           if('Success' == data.result){
-              _this.$Message.success({content:'数据库更新成功!',onClose:function(){
+              _this.$Message.success({content:_this.$t('database.msg6'),onClose:function(){
                   location.href = location.href;
               }});
           }else{
-              _this.$Message.error({content:'数据库更新失败!',onClose:function(){
+              _this.$Message.error({content:_this.$t('database.msg7'),onClose:function(){
                   location.href = location.href;
               }});
           }

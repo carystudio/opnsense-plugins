@@ -234,28 +234,28 @@ var cs_main = {
 //            console.log(_this.formValidate.ntpEnabled);
             var temp;
             if (0 == cs.string(this.formValidate.ntpServerIp1)) {
-                this.$Message.error(_this.$t('time.msg1'));
+                _this.$Message.error({content:_this.$t('time.msg1'),duration:5});
                 return false;
             } else if (1 == cs.string(this.formValidate.ntpServerIp1)) {
-                this.$Message.error(_this.$t('time.msg4'));
+                _this.$Message.error({content:_this.$t('time.msg4'),duration:5});
                 return false;
             } else {
                 temp = this.formValidate.ntpServerIp1;
             }
             if (0 == cs.string(this.formValidate.ntpServerIp2)) {
-                this.$Message.error(_this.$t('time.msg2'));
+                _this.$Message.error({content:_this.$t('time.msg2'),duration:5});
                 return false;
             } else if (1 == cs.string(this.formValidate.ntpServerIp2)) {
-                this.$Message.error(_this.$t('time.msg4'));
+                _this.$Message.error({content:_this.$t('time.msg4'),duration:5});
                 return false;
             } else {
                 temp += "*" + this.formValidate.ntpServerIp2;
             }
             if (0 == cs.string(this.formValidate.ntpServerIp3)) {
-                this.$Message.error(_this.$t('time.msg2'));
+                _this.$Message.error({content:_this.$t('time.msg2'),duration:5});
                 return false;
             } else if (1 == cs.string(this.formValidate.ntpServerIp3)) {
-                this.$Message.error(_this.$t('time.msg4'));
+                _this.$Message.error({content:_this.$t('time.msg4'),duration:5});
                 return false;
             } else {
                 temp += "*" + this.formValidate.ntpServerIp3;
@@ -285,7 +285,7 @@ var cs_main = {
                         location.href = location.href;
                     },2000);
                 } else {
-                    _this.$Message.error(_this.$t('time.modify_fail')+_this.$t('errorcode.'+data.rescode));
+                    _this.$Message.error({content:_this.$t('time.modify_fail')+_this.$t('errorcode.'+data.rescode),duration:5});
                 }
             });
 

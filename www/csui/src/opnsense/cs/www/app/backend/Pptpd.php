@@ -171,6 +171,19 @@ class Pptpd extends Csbackend
                     $config['pptpd']['dns2'] = $data['Dns2'];
                 }
                 $config['pptpd']['req128'] = $data['Encrypt'];
+
+                $serverStart = sprintf("%u", ip2long($data['ClientIpStart']));
+                $serverEnd = sprintf("%u", ip2long($data['ClientIpEnd']));
+                if(isset($config['pptpd']['user']) && is_array($config['pptpd']['user'])) {//检查是否已存在
+                    foreach ($config['pptpd']['user'] as $key=>$user){
+                        $userIp = sprintf("%u", ip2long($user['ip']));
+                        if($serverStart > $userIp || $serverEnd < $userIp){
+                            unset($config['pptpd']['user'][$key]['ip']);
+                        }
+                    }
+                    self::pptpd_users_sort();
+                }
+
             }else{
                 $config['pptpd']['mode'] = 'off';
             }

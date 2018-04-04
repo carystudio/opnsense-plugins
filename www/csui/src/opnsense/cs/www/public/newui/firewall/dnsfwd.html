@@ -290,7 +290,7 @@
                                     location.href = location.href;
                                 }});
                             } else {
-                                _this.$Message.error(_this.$t('dnsfwd.msg19')+_this.$t('errorcode.'+data.rescode));
+                                _this.$Message.error({content:_this.$t('dnsfwd.msg19')+_this.$t('errorcode.'+data.rescode),duration:5});
                             }
                             _this.addDnsfwdLoading = false;
                         });
@@ -330,7 +330,7 @@
                     if (0 == data.rescode) {
                         _this.$Message.success(_this.$t('dnsfwd.msg20'));
                     } else {
-                        _this.$Message.error(_this.$t('dnsfwd.msg21')+_this.$t('errorcode.'+data.rescode));
+                        _this.$Message.error({content:_this.$t('dnsfwd.msg21')+_this.$t('errorcode.'+data.rescode),duration:5});
                     }
                 });
             },
@@ -342,8 +342,13 @@
                 var data = {};
                 data.Domain = obj.row.Domain;
                 var postData = {"action":"delDnsOverwrite","data":data};
-                uiPost.delDnsOverwrite(postData,function(){
-                    _this.dnsfwdData.splice(obj.index, 1);
+                uiPost.delDnsOverwrite(postData,function(data){
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 == data.rescode) {
+                        _this.dnsfwdData.splice(obj.index, 1);
+                    }
                 });
                /* var postVar = {};
                 postVar[obj.row.delRuleName] = obj.index;
@@ -361,14 +366,23 @@
                         {
                             postVar[getSelection[i].delRuleName] = i;
                         }
-                        uiPost.delPortForwardRules(postVar,function(){
-                            _this.$Message.success({content:_this.$t('dnsfwd.msg13'),onClose:function(){
-                                location.href = location.href;
-                            }});
+                        uiPost.delPortForwardRules(postVar,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({
+                                    content: _this.$t('dnsfwd.msg13'), onClose: function () {
+                                        location.href = location.href;
+                                    }
+                                });
+                            }else{
+                                _this.$Message.error({content:_this.$t('dnsfwd.msg24')+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
 
                         });
                     }else{
-                        this.$Message.error(this.$t('dnsfwd.msg11'));
+                        _this.$Message.error({content:_this.$t('dnsfwd.msg11'),duration:5});
                     }
                 }else{
                     this.$refs.tableSelect.selectAll(status);

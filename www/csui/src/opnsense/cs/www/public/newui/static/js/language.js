@@ -79,9 +79,9 @@ var messages = {
             "err_wrong":" is wrong.",
             "login_btn":"LOGIN",
             "login_success":"Login Success!",
-            "login_fail":"Error incorrect username or password!",
+            "login_fail":"Error incorrect password!",
             "logout_confirm":"Are you sure you want to quit?",
-            "logout_msg":"After the successful exit will automatically return to the landing page!",
+            "logout_msg":"After the successful exit will automatically return to the landing page!"
         },
         "central":{
             "title":"Centralize Management",
@@ -168,6 +168,7 @@ var messages = {
             "user_outline":"outline",
             "reboot_btn":"reboot",
             "set_success":"Set up success!",
+            "set_fail":"Fail to set up! ",
             "msg1":"Please choose AP ",
             "msg2":"Management password cannot be empty!",
             "msg3":"Configuration unmodified!",
@@ -381,7 +382,9 @@ var messages = {
             "msg43":"Rule add failure!",
             "msg44":"IP address is invalid, please enter the legitimate IP address!",
             "msg45":"Single IP upload bandwidth is invalid, please enter the correct bandwidth!",
-            "msg46":"Single IP download bandwidth is invalid, please enter the correct bandwidth!"
+            "msg46":"Single IP download bandwidth is invalid, please enter the correct bandwidth!",
+            "msg47":"Delete success!",
+            "msg48":"Delete failed!"
         },
         "opmode":{
             "title":"Operation Mode",
@@ -477,7 +480,13 @@ var messages = {
             "msg3":"The correct upgrade file should be no more than {0}, please confirm that the correct upgrade file has been selected!",
             "msg4":"Do you really want to load factory default?",
             "msg5":"Do you really want to reboot the device?",
-            "msg6":"Please select the correct configuration file!"
+            "msg6":"Please select the correct configuration file!",
+            "recovery_factory_setting":"System recovery factory setting, please later!",
+            "msg7":"Restore factory setting failed!",
+            "reboot_setting":"In the system restart, please later!",
+            "msg8":"Reboot the failure!",
+            "msg9":"Update configuration failed!",
+            "set_config":"In the update configuration, please later!"
         },
         "wan":{
             "title":"WAN Setting",
@@ -561,7 +570,10 @@ var messages = {
             "msg25":"DNS server is not legal!",
             "msg26":"Set up success!",
             "msg27":"Fail to set up!",
-            "msg28":"Cloned MAC address is invalid!"
+            "msg28":"Cloned MAC address is invalid!",
+            "msg29":"Bindings fail!",
+            "msg30":"Delete the WAN port successfully!",
+            "msg31":"Delete the WAN port failed!"
         },
         "lan":{
             "title":"LAN Setting",
@@ -703,7 +715,9 @@ var messages = {
             "msg7":"The Wins server address is not valid!",
             "msg8":"First choice NDS can't be empty!！",
             "msg9":"First choice DNS is illegal!",
-            "msg10":"Alternative DNS is illegal!"
+            "msg10":"Alternative DNS is illegal!",
+            "msg11":"The starting IP address must be less than equal to the end of the IP address!",
+            "msg12":"The number of addresses is not more than 200"
         },
         "l2tp":{
             "title":"PPTP Server",
@@ -729,7 +743,9 @@ var messages = {
             "msg8":"Alternative DNS is invalid!",
             "msg9":"The Wins server address is not valid!",
             "msg10":"Fail",
-            "msg11":"First choice DNS can't be empty!"
+            "msg11":"First choice DNS can't be empty!",
+            "msg12":"The starting IP address must be less than equal to the end of the IP address!",
+            "msg13":"The number of addresses is not more than 200"
         },
         "account":{
             "title":"Account Management",
@@ -749,7 +765,10 @@ var messages = {
             "msg2":"The username is invalid and contains invalid characters",
             "msg3":"The password can not be empty",
             "msg4":"The password is invalid and contains invalid characters",
-            "msg5":"IP address is invalid"
+            "msg5":"IP address is invalid",
+            "msg6":"Delete failed!",
+            "msg7":"PPTP specifies that the user's IP must be in the range of PPTP address pool: ",
+            "msg10":"L2TP specifies that the user's IP must be in the range of L2TP address pool: "
         },
         "ipf":{
             "title":"IP/Port Filtering",
@@ -789,7 +808,8 @@ var messages = {
             "msg16":"Delete failure!",
             "msg17":"Add successful!",
             "msg18":"Add failure!",
-            "msg19":"The description cannot exceed 32 characters!"
+            "msg19":"The description cannot exceed 32 characters!",
+            "msg20":"Fail to set up!"
         },
         "macf":{
             "title":"MAC Filtering",
@@ -874,7 +894,10 @@ var messages = {
             "msg13":"Delete successfully!",
             "msg14":"Internal  Port cannot be empty,please try again!",
             "msg15":"Add success!",
-            "msg16":"Add fail!"
+            "msg16":"Add fail!",
+            "msg17":"Delete success!",
+            "msg18":"Delete failed!",
+            "msg19":"Fail to set up! "
         },
         "dnsfwd":{
             "title":"DNS Forwarding",
@@ -919,7 +942,8 @@ var messages = {
             "msg20":"Success!",
             "msg21":"Failure!",
             "msg22":"Description cannot contain full width and Chinese character!",
-            "msg23":"The description cannot exceed 32 characters!"
+            "msg23":"The description cannot exceed 32 characters!",
+            "msg24":"Delete failed!"
         },
         "dmz":{
             "title":"DMZ",
@@ -1454,7 +1478,10 @@ var messages = {
             "save_fail":"Save failure!",
             "msg1":"Please enter the number of pages jumping to the page!",
             "msg2":"Please enter the correct number of pages!",
-            "msg3":"The user does not exist!"
+            "msg3":"The user does not exist!",
+            "msg4":"Delete failed! ",
+            "msg5":"Fail to set up! ",
+            "msg6":"Sorry, WeChatUser users can't be deleted!"
         },
         "addaccounts":{
             "title":"Add Local Account",
@@ -1790,7 +1817,7 @@ var messages = {
             "err_wrong":"错误！",
             "login_btn":"登录",
             "login_success":"登录成功！",
-            "login_fail":"用户名或密码错误！",
+            "login_fail":"密码错误！",
             "logout_confirm":"你确定要退出吗？",
             "logout_msg":"成功退出后将会自动回到登陆页面！"
         },
@@ -1879,6 +1906,7 @@ var messages = {
             "user_outline":"离线",
             "reboot_btn":"重启",
             "set_success":"设置成功！",
+            "set_fail":"设置失败！",
             "msg1":"请选择AP",
             "msg2":"管理密码不能为空！",
             "msg3":"配置未修改！",
@@ -2092,7 +2120,9 @@ var messages = {
             "msg43":"规则添加失败！",
             "msg44":"IP地址无效，请输入合法的IP地址！",
             "msg45":"单IP上传带宽无效，请输入正确的带宽！",
-            "msg46":"单IP下载带宽无效，请输入正确的带宽！"
+            "msg46":"单IP下载带宽无效，请输入正确的带宽！",
+            "msg47":"删除成功！",
+            "msg48":"删除失败！"
         },
         "opmode":{
             "title":"系统模式",
@@ -2187,7 +2217,13 @@ var messages = {
             "msg3":"正确的升级文件应该不大于{0}，请确认已选择正确升级文件！",
             "msg4":"您确定要恢复出厂设置？",
             "msg5":"您确定要重启设备？",
-            "msg6":"请选择正确的配置文件！"
+            "msg6":"请选择正确的配置文件！",
+            "recovery_factory_setting":"系统恢复出厂设置中，请稍后！",
+            "msg7":"恢复出厂设置失败！",
+            "reboot_setting":"系统重启中，请稍后！",
+            "msg8":"重启失败！",
+            "msg9":"更新配置失败！",
+            "set_config":"更新配置中，请稍后！"
         },
         "wan":{
             "title":"广域网设置",
@@ -2272,7 +2308,10 @@ var messages = {
             "msg25":"DNS服务器不合法！",
             "msg26":"设置成功！",
             "msg27":"设置失败！",
-            "msg28":"克隆MAC地址无效！"
+            "msg28":"克隆MAC地址无效！",
+            "msg29":"绑定失败！",
+            "msg30":"删除WAN端口成功！",
+            "msg31":"删除WAN端口失败！"
         },
         "lan":{
             "title":"局域网设置",
@@ -2374,7 +2413,7 @@ var messages = {
             "msg15":"该IP地址已经存在了，请更换其它IP地址的再试！",
             "msg16":"网关地址无效！",
             "msg17":"描述不能超过32个字符！",
-            "msg18":"描述不能包含全角字符和中文字符！",
+            "msg18":"描述不能包含全角字符和中文字符！"
         },
         "pptp":{
             "title":"PPTP服务器",
@@ -2407,7 +2446,9 @@ var messages = {
             "msg7":"Wins服务器地址无效！",
             "msg8":"首选NDS不能为空！",
             "msg9":"首选DNS不合法！",
-            "msg10":"备选DNS不合法！"
+            "msg10":"备选DNS不合法！",
+            "msg11":"起始IP地址必须小于等于结束IP地址！",
+            "msg12":"地址范围个数不能超过200个"
         },
         "l2tp":{
             "title":"L2TP服务器",
@@ -2433,7 +2474,9 @@ var messages = {
             "msg8":"备选DNS无效！",
             "msg9":"Wins服务器地址无效！",
             "msg10":"设置失败！",
-            "msg11":"首选DNS不能为空！"
+            "msg11":"首选DNS不能为空！",
+            "msg12":"起始IP地址必须小于等于结束IP地址！",
+            "msg13":"地址范围个数不能超过200个"
         },
         "account":{
             "title":"账号管理",
@@ -2453,7 +2496,10 @@ var messages = {
             "msg2":"用户名无效，包含了无效的字符",
             "msg3":"密码不能为空",
             "msg4":"密码无效，包含了无效的字符",
-            "msg5":"IP地址无效"
+            "msg5":"IP地址无效",
+            "msg6":"删除失败！",
+            "msg7":"PPTP指定用户的IP必须在PPTP地址池范围内：",
+            "msg10":"L2TP指定用户的IP必须在L2TP地址池范围内："
         },
         "ipf":{
             "title":"IP/端口过滤",
@@ -2493,7 +2539,8 @@ var messages = {
             "msg16":"删除失败！",
             "msg17":"添加成功！",
             "msg18":"添加失败！",
-            "msg19":"描述不能超过32个字符！"
+            "msg19":"描述不能超过32个字符！",
+            "msg20":"设置失败！"
         },
         "macf":{
             "title":"MAC 过滤",
@@ -2578,7 +2625,10 @@ var messages = {
             "msg13":"删除成功！",
             "msg14":"内部端口不能为空，请重试！",
             "msg15":"添加成功！",
-            "msg16":"添加失败！"
+            "msg16":"添加失败！",
+            "msg17":"删除成功！",
+            "msg18":"删除失败！",
+            "msg19":"设置失败！"
         },
         "dnsfwd":{
             "title":"DNS转发",
@@ -2623,7 +2673,8 @@ var messages = {
             "msg20":"应用成功！",
             "msg21":"应用失败！",
             "msg22":"描述不能包含全角字符和中文字符！",
-            "msg23":"描述不能超过32个字符！"
+            "msg23":"描述不能超过32个字符！",
+            "msg24":"删除失败！"
         },
         "dmz":{
             "title":"DMZ",
@@ -3159,7 +3210,10 @@ var messages = {
             "save_fail":"保存失败！",
             "msg1":"请输入跳到的页数！",
             "msg2":"请输入正确的页数！",
-            "msg3":"不存在该用户！"
+            "msg3":"不存在该用户！",
+            "msg4":"删除失败！",
+            "msg5":"设置失败！",
+            "msg6":"对不起，WeChatUser用户不能被删除！"
         },
         "addaccounts":{
             "title":"添加本地账号",

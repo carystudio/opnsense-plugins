@@ -184,7 +184,6 @@ class System extends Csbackend
             if(is_array($data) && isset($data['version']) && isset($data['system'])){
                 $config = $data;
                 write_config();
-                echo "Success";
                 mwexec('/sbin/shutdown -r +3sec');
             }
         }catch(AppException $aex){
@@ -374,6 +373,11 @@ class System extends Csbackend
     }
 
     public static function loadDefSettings(){
+        $DbFile = "/var/captiveportal/captiveportal.sqlite";
+        if(file_exists($DbFile)){
+            unlink($DbFile);
+        }
+
         reset_factory_defaults(false);
 
         return 0;

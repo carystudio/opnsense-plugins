@@ -279,7 +279,7 @@
                                 if(
                                         _this.formValidate.routeIp == _this.staticRouteData[i].Ip
                                 ) {
-                                    _this.$Message.error(_this.$t('route.msg15'));
+                                    _this.$Message.error({content:_this.$t('route.msg15'),duration:5});
                                     return false;
                                 }
                             }
@@ -293,16 +293,14 @@
                         var postData = {"action":"addStaticRoute", "data":data};
                         console.log(postData);
                         uiPost.addStaticRoute(postData,function(data){
-                            console.log('------------------------------');
-                            console.log(data);
                             if (9999 == data.rescode){
                                 cs.loginOut();
                             }
                             if (0 == data.rescode) {
-                                _this.$Message.error(_this.$t('route.add_success'));
+                                _this.$Message.success(_this.$t('route.add_success'));
                                 location.href = location.href;
                             } else {
-                                _this.$Message.error(_this.$t('route.add_fail')+_this.$t('errorcode.'+data.rescode));
+                                _this.$Message.error({content:_this.$t('route.add_fail')+_this.$t('errorcode.'+data.rescode),duration:5});
                             }
                         });
                     }
@@ -316,11 +314,15 @@
                 this.showModel = true;
                 var postData = {"action":"getArpInfo", "data":{}};
                 uiPost.getArpInfo(postData,function(data) {
-                    _this.arpData = data.data;
-                    for(var i in _this.arpData){
-                        _this.arpData[i].idx = ''+( Number(i) + 1 );
+                    if (9999 == data.rescode){
+                        cs.loginOut();
                     }
-
+                    if (0 == data.rescode) {
+                        _this.arpData = data.data;
+                        for (var i in _this.arpData) {
+                            _this.arpData[i].idx = '' + ( Number(i) + 1 );
+                        }
+                    }
                     _this.arpLoading = false;
                 });
             },
@@ -349,12 +351,14 @@
                 data.Netmask = obj.row.Netmask;
 
                 var postData = {"action":"delStaticRoute","data":data};
-                console.log('===============postData===============');
-                console.log(postData);
-                console.log('==================================');
                 /*删除单个*/
-                uiPost.delStaticRoute(postData,function(){
-                    _this.staticRouteData.splice(obj.index, 1);
+                uiPost.delStaticRoute(postData,function(data){
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 == data.rescode) {
+                        _this.staticRouteData.splice(obj.index, 1);
+                    }
                 });
             },
             tableSelect:function(status){

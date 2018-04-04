@@ -304,30 +304,30 @@
                                                 _this.formValidate.dToPort == Number(temp[0]) ||
                                                 _this.formValidate.dFromPort == Number(temp[1])
                                         ){
-                                            _this.$Message.error(_this.$t('ipf.msg8'));
+                                            _this.$Message.error({content:_this.$t('ipf.msg8'),duration:5});
                                             _this.addIpfLoading = false;
                                             return false;
                                         }
                                         if(_this.formValidate.dFromPort < Number(temp[0]) &&
                                                 _this.formValidate.dToPort > Number(temp[1])){
-                                            _this.$Message.error(_this.$t('ipf.msg8'));
+                                            _this.$Message.error({content:_this.$t('ipf.msg8'),duration:5});
                                             _this.addIpfLoading = false;
                                             return false;
                                         }
                                         if(_this.formValidate.dFromPort > Number(temp[0]) &&
                                                 _this.formValidate.dFromPort < Number(temp[1])){
-                                            _this.$Message.error(_this.$t('ipf.msg8'));
+                                            _this.$Message.error({content:_this.$t('ipf.msg8'),duration:5});
                                             _this.addIpfLoading = false;
                                             return false;
                                         }
                                     }else{
                                         if(_this.formValidate.dFromPort == Number(temp[0]) || _this.formValidate.dFromPort == Number(temp[1])){
-                                            _this.$Message.error(_this.$t('ipf.msg8'));
+                                            _this.$Message.error({content:_this.$t('ipf.msg8'),duration:5});
                                             _this.addIpfLoading = false;
                                             return false;
                                         }
                                         if(_this.formValidate.dFromPort > Number(temp[0]) && _this.formValidate.dFromPort < Number(temp[1])){
-                                            _this.$Message.error(_this.$t('ipf.msg8'));
+                                            _this.$Message.error({content:_this.$t('ipf.msg8'),duration:5});
                                             _this.addIpfLoading = false;
                                             return false;
                                         }
@@ -362,7 +362,7 @@
                                     location.href = location.href;
                                 }});
                             } else {
-                                _this.$Message.error(_this.$t('ipf.msg18')+_this.$t('errorcode.'+data.rescode));
+                                _this.$Message.error({content:_this.$t('ipf.msg18')+_this.$t('errorcode.'+data.rescode),duration:5});
                             }
                         });
                     }else{
@@ -400,7 +400,14 @@
                     postVar.enable = "0";
                 }
                 postVar.addEffect = "1";
-                uiPost.setIpPortFilterRules(postVar);
+                uiPost.setIpPortFilterRules(postVar,function (data) {
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 != data.rescode) {
+                        _this.$Message.error({content:_this.$t('ipf.msg20')+_this.$t('errorcode.'+data.rescode),duration:5});
+                    }
+                });
             },
             selectTable:function (obj) {
                 this.ip = obj.ip;
@@ -410,10 +417,17 @@
                 var data = [];
                 data[0] = obj.row.Id;
                 var postVar = {"action":"delFilter", "data":{"Id":data}};
-                uiPost.delFilter(postVar,function(){
-                    _this.$Message.success({content:_this.$t('ipf.msg13'),onClose:function(){
-                        _this.ipfData.splice(obj.index, 1);
-                    }});
+                uiPost.delFilter(postVar,function(data){
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 == data.rescode) {
+                        _this.$Message.success({
+                            content: _this.$t('ipf.msg13'), onClose: function () {
+                                _this.ipfData.splice(obj.index, 1);
+                            }
+                        });
+                    }
                 });
             },
             tableSelect:function(status){
@@ -438,11 +452,11 @@
                                     location.href = location.href;
                                 }});
                             } else {
-                                alert(_this.$t('ipf.msg16')+_this.$t('errorcode.'+data.rescode));
+                                _this.$Message.error({content:_this.$t('ipf.msg16')+_this.$t('errorcode.'+data.rescode),duration:5});
                             }
                         });
                     }else{
-                        this.$Message.error(this.$t('ipf.msg11'));
+                        _this.$Message.error({content:_this.$t('ipf.msg11'),duration:5});
                     }
                 }else{
                     this.$refs.tableSelect.selectAll(status);

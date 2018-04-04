@@ -331,6 +331,26 @@ cs.prototype.ip_range = function (s1,s2){
 };
 
 /**
+ * 判断IP地址1是否大于等于IP地址2
+ * @Author   Yexk       <yexk@carystudio.com>
+ * @DateTime 2017-10-26
+ * @param    {String}   s1                    IP地址1
+ * @param    {String}   s2                    IP地址2
+ * @return   {Number}
+ * 0: 是 <br/>
+ * 1: 否
+ */
+cs.prototype.ip_gt_eq = function (s1,s2){
+	if (undefined == s1 || undefined == s2) {
+		return 1;
+	}
+	var ip1=s1.replace(/\.\d{1,3}$/,".");
+	var ip2=s2.replace(/\.\d{1,3}$/,".");
+	if (ip1>=ip2) return 0;
+	return 1;
+};
+
+/**
  * 判断两个ip地址是否相同
  * @Author   Yexk       <yexk@carystudio.com>
  * @DateTime 2017-10-26

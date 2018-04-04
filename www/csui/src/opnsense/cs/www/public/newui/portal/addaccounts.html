@@ -165,7 +165,7 @@
                                 _this.$Message.success(_this.$t('addaccounts.add_success'));
                                 location.href = location.href;
                             } else {
-                                _this.$Message.error(_this.$t('addaccounts.add_fail')+ _this.$t('errorcode.'+data.rescode));
+                                _this.$Message.error({content:_this.$t('addaccounts.add_fail')+ _this.$t('errorcode.'+data.rescode),duration:5});
                             }
                             _this.applyLoading = false;
                         });
