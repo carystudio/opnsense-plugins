@@ -17,7 +17,6 @@ class Portal extends Csbackend
     protected static $ERRORCODE = array(
         'Portal_100'=>'开启参数不正确',
         'Portal_101'=>'服务类型不正确',
-        'Portal_101'=>'服务类型不正确',
         'Portal_102'=>'空闲断开时间不正确（1-300）',
         'Portal_103'=>'登录页面上传失败',
         'Portal_104'=>'IP白名单不正确',
@@ -395,22 +394,24 @@ class Portal extends Csbackend
 
                 $db = PortalHelper::getDbConn();
                 $res = $db->query("select * from cp_clients where deleted='0'");
-
+                $loginUser = array();
+                $i = 0;
                 while ($row = $res->fetchArray(SQLITE3_ASSOC)) {
-                    if(!empty($row['sessionid'])){
-                        $ret = $db->exec("update cp_clients set deleted=1 where sessionid='".$row['sessionid']."'");
-                        if(!$ret){
-                            continue;
-                        }
+                    $loginUser[$i] = $row;
+                    $i++;
+                }
+                $db->close();
+                foreach ($loginUser as $key=>$val){
+                    if(!empty($val['sessionid'])){
                         $backend = new Backend();
                         $statusRAW = $backend->configdpRun(
                             "captiveportal disconnect",
-                            array('0',$row['sessionid'], 'json')
+                            array('0',$val['sessionid'], 'json')
                         );
                         $status = json_decode($statusRAW, true);
                         if ($status != null) {
                             self::getLogger("captiveportal")->info(
-                                "LOGOUT " . $row['username'] .  " (".$row['ip_address'].") zone 0"
+                                "LOGOUT " . $val['username'] .  " (".$val['ip_address'].") zone 0"
                             );
                         }
                     }
@@ -663,14 +664,11 @@ class Portal extends Csbackend
             if(!$session) {
                 throw new AppException('Portal_500');
             }
-            $res = $db->exec("update cp_clients set deleted=1 where sessionid='$sessionid'");
-            if(!$res){
-                throw new AppException('Portal_501');
-            }
+            $db->close();
             $backend = new Backend();
             $statusRAW = $backend->configdpRun(
                 "captiveportal disconnect",
-                array('0', $session['sessionId'], 'json')
+                array('0', $session['sessionid'], 'json')
             );
             $status = json_decode($statusRAW, true);
             if ($status != null) {
