@@ -318,8 +318,10 @@ class WebapiController extends BaseController
             }else if("delApUpgradeFile" == $action){
                 $this->checkData($para);
                 $result['rescode'] = Accontrol::delApUpgradeFile($para['data']);
-            }else if("updataConfig" == $action){
+            }else if("updataConfig" == $action) {
                 System::updataConfig();
+            }else if('getOpenvpnStatus'==$action){
+                $result['rescode'] = Openvpn::getStatus();
             }else if('test' == $action){
                 $result['rescode'] = Dns::getErrors();
             }else{
