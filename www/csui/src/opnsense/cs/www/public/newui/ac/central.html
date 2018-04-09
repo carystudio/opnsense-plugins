@@ -176,7 +176,7 @@
                 <FormItem :label="$t('central.channels',['5G'])" prop="channel5">
                     <Select v-model="formSetinfo.channel5" :key="$t('central.channels',['5G'])" placement="top">
                         <Option value="0">{{ $t('central.auto_select') }}</Option>
-                        <Option v-for="i in channel5Arr"  :value="i">{{ i }}</Option>
+                        <Option v-for="i in channel5Arr" :key="i" :value="i">{{ i }}</Option>
                         <Option v-show="channelsStatus165" value="165">165</Option>
                     </Select>
                 </FormItem>
