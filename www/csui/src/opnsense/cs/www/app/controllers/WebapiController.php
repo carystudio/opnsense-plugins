@@ -320,8 +320,21 @@ class WebapiController extends BaseController
                 $result['rescode'] = Accontrol::delApUpgradeFile($para['data']);
             }else if("updataConfig" == $action) {
                 System::updataConfig();
-            }else if('getOpenvpnStatus'==$action){
-                $result['rescode'] = Openvpn::getStatus();
+            }else if('getOpenvpnSvrStatus'==$action){
+                $result['rescode'] = Openvpn::getSvrStatus();
+            }else if('setOpenvpnSvrStatus'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Openvpn::setSvrStatus($para['data']);
+            }else if('getOpenvpnClientStatus'==$action){
+                $result['rescode'] = Openvpn::getClientStatus();
+            }else if('setOpenvpnClientStatus'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Openvpn::setClientStatus($para['data']);
+            }else if('getOpenvpnUsers'==$action){
+                $result['rescode'] = Openvpn::getUsers();
+            }else if('addOpenvpnUser'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Openvpn::addUser($para['data']);
             }else if('test' == $action){
                 $result['rescode'] = Dns::getErrors();
             }else{

@@ -148,7 +148,7 @@ class Util
             return false;
         }
         foreach ($networks as $network) {
-            if ($ipproto == 'ipv4') {
+            if ('ipv4' == $ipproto) {
                 if(!openvpn_validate_cidr_ipv4($network, $allow_hosts)){
                     return false;
                 }
