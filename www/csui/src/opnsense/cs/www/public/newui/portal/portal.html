@@ -365,6 +365,7 @@
         },
         methods:{
             submitStatus:function(){
+                var _this = this;
                 if(false == this.formValidate.status){
                     var postVar = {"action":"setPortalStatus","data":{"Enable":"0"}};
                     uiPost.setPortalStatus(postVar,function (data) {

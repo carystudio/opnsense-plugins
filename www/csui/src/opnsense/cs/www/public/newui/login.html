@@ -16,7 +16,7 @@
 <div id="app"></div>
 
 <script type="text/x-template" id="main">
-    <div class="main" style="padding:200px 0;" @keyup.enter="handleSubmit('formInline')">
+    <div class="main" style="padding:200px 0;">
         <Row>
             <Col :xs="24" :sm="{span:6,offset:9}">
             <h1>{{ $t("login.title") }}</h1>
@@ -26,11 +26,13 @@
                 <FormItem v-show="false">
                     <Input type="text" v-model="newui" name="newui" ></Input>
                 </FormItem>
-                <FormItem prop="password">
-                    <Input :type="loginPwd" @on-focus="pwdFocus()" @on-blur="pwdBlur()"  v-model="formInline.password" name="password">
-                    <span slot="prepend"> {{ $t("login.pass") }} </span>
-                    </Input>
-                </FormItem>
+                <div @keyup.enter="handleSubmit('formInline')">
+                    <FormItem prop="password">
+                        <Input :type="loginPwd" @on-focus="pwdFocus()" @on-blur="pwdBlur()"  v-model="formInline.password" name="password">
+                        <span slot="prepend"> {{ $t("login.pass") }} </span>
+                        </Input>
+                    </FormItem>
+                </div>
                 <FormItem>
                     <Button long type="primary" @click="handleSubmit('formInline')">{{ $t("login.login_btn") }}</Button>
                 </FormItem>

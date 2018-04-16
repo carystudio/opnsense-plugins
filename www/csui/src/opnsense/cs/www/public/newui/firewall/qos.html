@@ -448,11 +448,11 @@
                                 cs.loginOut();
                             }
                             if (0 == data.rescode) {
-                                _this.$Message.success({content:'Success!',onClose:function(){
+                                _this.$Message.success({content:_this.$t('qos.success'),onClose:function(){
                                     location.href = location.href;
                                 }});
                             } else {
-                                _this.$Message.error({content:'Fail! '+_this.$t('errorcode.'+data.rescode),duration:5});
+                                _this.$Message.error({content:_this.$t('qos.fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
                             }
                             _this.applyLoading = false;
                         });

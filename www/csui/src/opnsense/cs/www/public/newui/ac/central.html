@@ -176,7 +176,7 @@
                 <FormItem :label="$t('central.channels',['5G'])" prop="channel5">
                     <Select v-model="formSetinfo.channel5" :key="$t('central.channels',['5G'])" placement="top">
                         <Option value="0">{{ $t('central.auto_select') }}</Option>
-                        <Option v-for="i in channel5Arr"  :value="i">{{ i }}</Option>
+                        <Option v-for="i in channel5Arr" :key="i" :value="i">{{ i }}</Option>
                         <Option v-show="channelsStatus165" value="165">165</Option>
                     </Select>
                 </FormItem>
@@ -529,7 +529,7 @@
             },
             centralColumns: function() {
                 var _this = this;
-                let columns = [];
+                var columns = [];
                 columns.push({
                     type: 'expand',
                     width: 30,
@@ -1426,16 +1426,9 @@
                     location.href = location.href;
                 }});
             },
-		    handleBeforeUpload (file) {
+		    handleBeforeUpload:function(file) {
                 var _this = this;
                 var filename=file.name;
-                /*var name2 = filename.split(".");
-                var filetype = name2[3];
-                console.log(this.upload.format.join('、'));return false;
-                if(filetype != this.upload.format.join('、')){
-                    this.$Message.error({content:this.$t('central.msg19',[this.upload.format.join('、')]),duration: 5});
-                    return false;
-                }*/
                 var name1 = filename.split("_");
                 var csid = name1[1];
                 var apdata = _this.centralData;
@@ -1457,7 +1450,7 @@
                     return true;
                 }
             },
-            remove (index) {
+            remove:function (index) {
                 this.firmData.splice(index, 1);
             }
         }

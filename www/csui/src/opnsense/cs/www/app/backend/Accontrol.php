@@ -362,6 +362,7 @@ class Accontrol extends Csbackend
 
                 $pdo->commit();
             }
+            $res = 0;
         } catch (AppException $aex) {
             $res = $aex->getMessage();
         } catch (Exception $ex) {

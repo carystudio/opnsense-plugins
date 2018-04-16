@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.vpn'),$t('menu.ipsec')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row v-show="addAndEdit && !addAndEditPhase2">
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <Card>
+                    <p slot="title">
+                        {{$t('ipsec.conven_info')}}
+                    </p>
+                    <FormItem :label="$t('ipsec.status')">
+                        <i-switch v-model="formValidate.disabled" size="large" >
+                            <span slot="open">{{$t('common.enabled')}}</span>
+                            <span slot="close">{{$t('common.disabled')}}</span>
+                        </i-switch>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.connect_mode')">
+                        <Select v-model="formValidate.auto" :key="$t('ipsec.connect_mode')">
+                            <Option v-for="(v,i) in autoArr" :key="autoArr[i].value" :value="autoArr[i].value">{{autoArr[i].descr}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.exchange_key_ver')">
+                        <Select v-model="formValidate.iketype" :key="$t('ipsec.exchange_key_ver')">
+                            <Option v-for="(v,i) in iketype" :key="iketype[i].value" :value="iketype[i].value">{{iketype[i].descr}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.internet_protocol')">
+                        <Select v-model="formValidate.protocol" :key="$t('ipsec.internet_protocol')">
+                            <Option v-for="(v,i) in protocol" :key="protocol[i].value" :value="protocol[i].value">{{protocol[i].descr}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.interface')">
+                        <Select v-model="formValidate.interface" :key="$t('ipsec.interface')">
+                            <Option v-for="(v,i) in interface" :key="interface[i].interface" :value="interface[i].interface">{{interface[i].name}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.remote_gateway')" prop="remoteGateway">
+                        <Input v-model="formValidate.remoteGateway"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.describe')" prop="descr">
+                        <Input v-model="formValidate.descr" :maxlength="40"></Input>
+                    </FormItem>
+                </Card>
+                <br />
+                <Card>
+                    <p slot="title">
+                        {{$t('ipsec.proposal_phase1_auth')}}
+                    </p>
+                    <FormItem :label="$t('ipsec.auth_mode')">
+                        <Select v-model="formValidate.authenticationMethod" :key="$t('ipsec.auth_mode')">
+                            <Option v-for="(v,i) in authenticationMethod" :key="authenticationMethod[i].value" :value="authenticationMethod[i].value">{{authenticationMethod[i].descr}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.nego_mode')" v-show="formValidate.iketype == 'ikev1'">
+                        <Select v-model="formValidate.mode" :key="$t('ipsec.nego_mode')">
+                            <Option v-for="(v,i) in mode" :key="mode[i].value" :value="mode[i].value">{{mode[i].descr}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.loge')">
+                        <Select v-model="formValidate.myidType" :key="$t('ipsec.loge')">
+                            <Option value="myaddress">{{$t('ipsec.my_ipaddr')}}</Option>
+                            <Option value="address">{{$t('ipsec.ipaddr')}}</Option>
+                            <Option value="fqdn">{{$t('ipsec.fqdn')}}</Option>
+                            <Option value="user_fqdn">{{$t('ipsec.user_fqdn')}}</Option>
+                            <Option value="asn1dn">{{$t('ipsec.asn1dn')}}</Option>
+                            <Option value="keyid tag">{{$t('ipsec.keyid_tag')}}</Option>
+                            <Option value="dyn_dns">{{$t('ipsec.dyn_dns')}}</Option>
+                        </Select>
+                        <FormItem prop="myidData" v-show="formValidate.myidType != 'myaddress' ">
+                            <Input v-model="formValidate.myidData"></Input>
+                        </FormItem>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.peer_loge')">
+                        <Select v-model="formValidate.peeridType" :key="$t('ipsec.peer_loge')">
+                            <Option value="peeraddress">{{$t('ipsec.peer_ipaddr')}}</Option>
+                            <Option value="address">{{$t('ipsec.ipaddr')}}</Option>
+                            <Option value="fqdn">{{$t('ipsec.fqdn')}}</Option>
+                            <Option value="user_fqdn">{{$t('ipsec.user_fqdn')}}</Option>
+                            <Option value="asn1dn">{{$t('ipsec.asn1dn')}}</Option>
+                            <Option value="keyid tag">{{$t('ipsec.keyid_tag')}}</Option>
+                        </Select>
+                        <FormItem prop="peeridData" v-show="formValidate.peeridType != 'peeraddress'">
+                            <Input v-model="formValidate.peeridData"></Input>
+                        </FormItem>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.pskey')" v-show="formValidate.authenticationMethod == 'pre_shared_key'" prop="pskey">
+                        <Input v-model="formValidate.pskey"></Input>
+                    </FormItem>
+                    <!--<FormItem label="我的证书" v-show="formValidate.authenticationMethod == 'rsasig'">
+                        <Input v-model="formValidate.certref"></Input>
+                    </FormItem>
+                    <FormItem label="我的证书颁发机构" v-show="formValidate.authenticationMethod == 'rsasig'">
+                        <Input v-model="formValidate.caref"></Input>
+                    </FormItem>-->
+                    <FormItem :label="$t('ipsec.my_cert_auth')" v-show="formValidate.authenticationMethod == 'rsasig'" prop="ca">
+                        <Input v-model="formValidate.ca" type="textarea"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.cert_data')" v-show="formValidate.authenticationMethod == 'rsasig'" prop="cert">
+                        <Input v-model="formValidate.cert" type="textarea"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.private_key_data')" v-show="formValidate.authenticationMethod == 'rsasig'" prop="prv">
+                        <Input v-model="formValidate.prv" type="textarea"></Input>
+                    </FormItem>
+                </Card>
+                <br />
+                <Card>
+                    <p slot="title">
+                        {{$t('ipsec.proposal_phase1_algorithm')}}
+                    </p>
+                    <FormItem :label="$t('ipsec.ealgo')">
+                        <Select v-model="formValidate.ealgo" :key="$t('ipsec.ealgo')">
+                            <Option v-for="(v,i) in ealgo" :key="ealgo[i].value" :value="ealgo[i].value">{{ealgo[i].descr}}</Option>
+                        </Select>
+                        <Select v-model="formValidate.ealgoKeylen" v-show="formValidate.ealgo == 'aes' || formValidate.ealgo == 'camellia' || formValidate.ealgo == 'blowfish'" :key="$t('ipsec.ealgo')">
+                            <Option v-for="(v,i) in ealgoKeylen" :key="ealgoKeylen[i].value" :value="ealgoKeylen[i].value">{{ealgoKeylen[i].descr}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.hash_algorithm')">
+                        <Select v-model="formValidate.hashAlgorithm" :key="$t('ipsec.hash_algorithm')">
+                            <Option v-for="(v,i) in hashAlgorithm" :key="hashAlgorithm[i].value" :value="hashAlgorithm[i].value">{{hashAlgorithm[i].descr}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.dhgroup')">
+                        <Select v-model="formValidate.dhgroup" :key="$t('ipsec.dhgroup')">
+                            <Option v-for="(v,i) in dhgroup" :key="dhgroup[i].value" :value="dhgroup[i].value">{{dhgroup[i].descr}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.lifetime')" prop="lifetime">
+                        <Input v-model="formValidate.lifetime" :maxlength="20"><span slot="append">{{$t('ipsec.sec')}}</span></Input>
+                    </FormItem>
+                </Card>
+                <br />
+                <Card>
+                    <p slot="title">
+                        {{$t('ipsec.advance_option')}}
+                    </p>
+                    <FormItem :label="$t('ipsec.repeat_key')">
+                        <i-switch v-model="formValidate.rekeyEnable" size="large" >
+                            <span slot="open">{{$t('common.enabled')}}</span>
+                            <span slot="close">{{$t('common.disabled')}}</span>
+                        </i-switch>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.reauth')">
+                        <i-switch v-model="formValidate.reauthEnable" size="large" >
+                            <span slot="open">{{$t('common.enabled')}}</span>
+                            <span slot="close">{{$t('common.disabled')}}</span>
+                        </i-switch>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.tunnel_isolation')">
+                        <i-switch v-model="formValidate.tunnelIsolation" size="large" >
+                            <span slot="open">{{$t('common.enabled')}}</span>
+                            <span slot="close">{{$t('common.disabled')}}</span>
+                        </i-switch>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.nat_traversal')">
+                        <Select v-model="formValidate.natTraversal" :key="$t('ipsec.nat_traversal')">
+                            <Option value="off">{{$t('common.disabled')}}</Option>
+                            <Option value="on">{{$t('common.enabled')}}</Option>
+                            <Option value="force">{{$t('ipsec.force')}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem label="MOBIKE">
+                        <i-switch v-model="formValidate.mobike" size="large" >
+                            <span slot="open">{{$t('common.enabled')}}</span>
+                            <span slot="close">{{$t('common.disabled')}}</span>
+                        </i-switch>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.dpd_check')">
+                        <i-switch v-model="formValidate.dpdEnable" size="large" >
+                            <span slot="open">{{$t('common.enabled')}}</span>
+                            <span slot="close">{{$t('common.disabled')}}</span>
+                        </i-switch>
+                        <div v-show="formValidate.dpdEnable">
+                            <Input v-model="formValidate.dpdDelay"><span slot="append">{{$t('ipsec.sec')}}</span></Input>
+                            {{$t('ipsec.dpd_delay_note')}}
+                            <Input v-model="formValidate.dpdMaxfail"></Input>
+                            {{$t('ipsec.dpd_maxfail_note')}}
+                        </div>
+                    </FormItem>
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">  {{$t('ipsec.save')}}</Button>
+                    </FormItem>
+                </Card>
+            </Form>
+            </Col>
+        </Row>
+
+        <Row v-show="addAndEditPhase2 && !addAndEdit">
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Form ref="formValidatePhase2" :model="formValidatePhase2" :rules="ruleValidatePhase2" :label-width="globalConfig.labelWith" label-position="left">
+                <Card>
+                    <p slot="title">
+                        {{$t('ipsec.conven_info')}}
+                    </p>
+                    <FormItem :label="$t('ipsec.status')">
+                        <i-switch v-model="formValidatePhase2.disabled" size="large" >
+                            <span slot="open">{{$t('common.enabled')}}</span>
+                            <span slot="close">{{$t('common.disabled')}}</span>
+                        </i-switch>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.mode')">
+                        <Select v-model="formValidatePhase2.mode" :key="$t('ipsec.mode')">
+                            <Option value="tunnel">Tunnel IPv4</Option>
+                            <!--<Option value="tunnel6">Tunnel IPv6</Option>-->
+                            <Option value="transport">Transport</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.describe')" prop="descr">
+                        <Input v-model="formValidatePhase2.descr" :maxlength="40"></Input>
+                    </FormItem>
+                </Card>
+                <br />
+                <Card v-show="formValidatePhase2.mode != 'transport'">
+                    <p slot="title">
+                        {{$t('ipsec.local_network')}}
+                    </p>
+                    <FormItem :label="$t('ipsec.type')">
+                        <Select v-model="formValidatePhase2.localidType" :key="$t('ipsec.type')">
+                            <Option value="address">{{$t('ipsec.address')}}</Option>
+                            <Option value="network">{{$t('ipsec.network')}}</Option>
+                            <Option v-for="(v,i) in interface" :key="interface[i].interface" :value="interface[i].interface">{{interface[i].name}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.address')" v-show="formValidatePhase2.localidType == 'address' || formValidatePhase2.localidType == 'network'">
+                        <Input v-model="formValidatePhase2.localidAddress" :maxlength="28"></Input>
+                        /
+                        <Select v-model="formValidatePhase2.localidNetbits" :key="$t('ipsec.address')" :disabled="formValidatePhase2.localidType == 'address'">
+                            <Option v-for="i in 32" v-show="i>=8" :key="i" :value="i">{{i}}</Option>
+                        </Select>
+                    </FormItem>
+                </Card>
+                <br />
+                <Card v-show="formValidatePhase2.mode != 'transport'">
+                    <p slot="title">
+                        {{$t('ipsec.remote_subnet')}}
+                    </p>
+                    <FormItem :label="$t('ipsec.type')">
+                        <Select v-model="formValidatePhase2.remoteidType" :key="$t('ipsec.type')">
+                            <Option value="address">{{$t('ipsec.address')}}</Option>
+                            <Option value="network">{{$t('ipsec.network')}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.address')">
+                        <Input v-model="formValidatePhase2.remoteidAddress" :maxlength="28"></Input>
+                        /
+                        <Select v-model="formValidatePhase2.remoteidNetbits" :key="$t('ipsec.address')" :disabled="formValidatePhase2.remoteidType == 'address'">
+                            <Option v-for="i in 32" v-show="i>=8" :key="i" :value="i">{{i}}</Option>
+                        </Select>
+                    </FormItem>
+                </Card>
+                <br />
+                <Card>
+                    <p slot="title">
+                        {{$t('ipsec.phase2_proposal_sa')}}
+                    </p>
+                    <FormItem :label="$t('ipsec.agreement')">
+                        <Select v-model="formValidatePhase2.protocol" :key="$t('ipsec.agreement')">
+                            <Option value="esp">ESP</Option>
+                            <Option value="ah">AH</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.ealgo')">
+                        <Col>
+                            <Checkbox v-model="formValidatePhase2.ealgos['aes']">AES</Checkbox>
+                        </Col>
+                        <Col>
+                            <Select v-model="formValidatePhase2.keylenAes" :key="$t('ipsec.ealgo')">
+                                <Option value="auto">{{$t('ipsec.auto')}}</Option>
+                                <Option value="256">256 {{$t('ipsec.bit')}}</Option>
+                                <Option value="192">192 {{$t('ipsec.bit')}}</Option>
+                                <Option value="128">128 {{$t('ipsec.bit')}}</Option>
+                            </Select>
+                        </Col>
+                        <Col>
+                            <Checkbox v-model="formValidatePhase2.ealgos['aes128gcm16']">aes128gcm16</Checkbox>
+                        </Col>
+                        <Col>
+                            <Checkbox v-model="formValidatePhase2.ealgos['aes192gcm16']">aes192gcm16</Checkbox>
+                        </Col>
+                        <Col>
+                            <Checkbox v-model="formValidatePhase2.ealgos['aes256gcm16']">aes256gcm16</Checkbox>
+                        </Col>
+                        <Col>
+                            <Checkbox v-model="formValidatePhase2.ealgos['blowfish']">Blowfish</Checkbox>
+                        </Col>
+                        <Col>
+                            <Select v-model="formValidatePhase2.keylenBlowfish" :key="$t('ipsec.ealgo')">
+                                <Option value="auto">{{$t('ipsec.auto')}}</Option>
+                                <Option value="256">256 {{$t('ipsec.bit')}}</Option>
+                                <Option value="192">192 {{$t('ipsec.bit')}}</Option>
+                                <Option value="128">128 {{$t('ipsec.bit')}}</Option>
+                            </Select>
+                        </Col>
+                        <Col>
+                            <Checkbox v-model="formValidatePhase2.ealgos['3des']">3DES</Checkbox>
+                        </Col>
+                        <Col>
+                            <Checkbox v-model="formValidatePhase2.ealgos['cast128']">CAST128</Checkbox>
+                        </Col>
+                        <Col>
+                            <Checkbox v-model="formValidatePhase2.ealgos['des']">DES</Checkbox>
+                        </Col>
+                        <Col>
+                            <Checkbox v-model="formValidatePhase2.ealgos['null']">NULL {{$t('ipsec.unencryption')}}</Checkbox>
+                        </Col>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.hash_algorithm')">
+                        <Select v-model="formValidatePhase2.hashAlgorithmOption" :key="$t('ipsec.hash_algorithm')" multiple>
+                            <Option value="hmac_md5">MD5</Option>
+                            <Option value="hmac_sha1">SHA1</Option>
+                            <Option value="hmac_sha256">SHA256</Option>
+                            <Option value="hmac_sha384">SHA384</Option>
+                            <Option value="hmac_sha512">SHA512</Option>
+                            <Option value="aesxcbc">AES-XCBC</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.pfsgroup')">
+                        <Select v-model="formValidatePhase2.pfsgroup" :key="$t('ipsec.pfsgroup')">
+                            <Option value="0">{{$t('ipsec.off')}}</Option>
+                            <Option value="1">1 (768 {{$t('ipsec.bit')}})</Option>
+                            <Option value="2">2 (1024 {{$t('ipsec.bit')}})</Option>
+                            <Option value="5">5 (1536 {{$t('ipsec.bit')}})</Option>
+                            <Option value="14">14 (2048 {{$t('ipsec.bit')}})</Option>
+                            <Option value="15">15 (3072 {{$t('ipsec.bit')}})</Option>
+                            <Option value="16">16 (4096 {{$t('ipsec.bit')}})</Option>
+                            <Option value="17">17 (6144 {{$t('ipsec.bit')}})</Option>
+                            <Option value="18">18 (8192 {{$t('ipsec.bit')}})</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.lifetime')" prop="lifetime">
+                        <Input v-model="formValidatePhase2.lifetime" :maxlength="20"><span slot="append">{{$t('ipsec.sec')}}</span></Input>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.auto_ping_host')" prop="pinghost">
+                        <Input v-model="formValidatePhase2.pinghost" :maxlength="28"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('ipsec.manual_spd')">
+                        <Input v-model="formValidatePhase2.spd"></Input>
+                    </FormItem>
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmitPhase2('formValidatePhase2')" :loading="applyPhase2Loading">{{$t('ipsec.save')}}</Button>
+                    </FormItem>
+                </Card>
+            </Form>
+            </Col>
+        </Row>
+
+        <div v-show="!addAndEdit && !addAndEditPhase2">
+            <Alert>
+                {{ $t('ipsec.help') }}
+            </Alert>
+            <Row>
+                <Button type="primary" @click="addRule"> {{ $t('ipsec.add') }}</Button>
+                <Button type="primary" @click="showStatus"> {{ $t('ipsec.summary_status') }}</Button>
+            </Row>
+            <br />
+            <Row>
+                <Col>
+                    <Table border :columns="ipsecColumns" :data="ipsecData" :no-data-text="$t('common.no_data')"></Table>
+                </Col>
+            </Row>
+        </div>
+    </div>
+    <Modal
+            v-model="phase2List"
+            :title="$t('ipsec.phase2_list')"
+            :width="800"
+    >
+        <Form :label-width="120" label-position="left">
+            <Col>
+                <Table border :columns="ipsecPhase2Columns" :data="ipsecPhase2Data" :no-data-text="$t('common.no_data')"></Table>
+            </Col>
+        </Form>
+        <div slot="footer">
+        </div>
+    </Modal>
+    <Modal
+            v-model="showStatusList"
+            :title="$t('ipsec.summary_status_list')"
+            :width="1000"
+    >
+        <Form :label-width="120" label-position="left">
+            <Col>
+            <Table border :columns="ipsecStatusColumns" :data="ipsecStatusData" :no-data-text="$t('common.no_data')"></Table>
+            </Col>
+        </Form>
+        <div slot="footer">
+        </div>
+    </Modal>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/plugin/jquery.base64.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+                applyPhase2Loading:false,
+                addAndEdit:false,
+                addAndEditPhase2:false,
+                phase2List:false,
+                showStatusList:false,
+                iketype:[
+                    {"value":"ikev1","descr":"V1"},
+                    {"value":"ikev2","descr":"V2"}
+                ],
+                protocol:[
+                    {"value":"inet","descr":"IPv4"}
+//                    {"value":"inet6","descr":"IPv6"}
+                ],
+                interface:[],
+                authenticationMethod:[
+                    { "value":"rsasig","descr":"Mutual RSA"},
+                    { "value":"pre_shared_key","descr":"Mutual PSK"}
+                ],
+                mode:[
+                    { "value":"main","descr":"Main"},
+                    { "value":"aggressive","descr":"Aggressive"}
+                ],
+                ealgo:[
+                    { "value":"aes","descr":"AES"},
+                    { "value":"aes128gcm16","descr":"128 bit AES-GCM with 128 bit ICV"},
+                    { "value":"aes192gcm16","descr":"192 bit AES-GCM with 128 bit ICV"},
+                    { "value":"aes256gcm16","descr":"256 bit AES-GCM with 128 bit ICV"},
+                    { "value":"camellia","descr":"Camellia"},
+                    { "value":"blowfish","descr":"Blowfish"},
+                    { "value":"3des","descr":"3DES"},
+                    { "value":"cast128","descr":"CAST128"},
+                    { "value":"des","descr":"DES"}
+                ],
+                ealgoKeylen:[
+                    { "value":"128","descr":"128"},
+                    { "value":"192","descr":"192"},
+                    { "value":"256","descr":"256"}
+                ],
+                hashAlgorithm:[
+                    { "value":"md5","descr":"MD5"},
+                    { "value":"sha1","descr":"SHA1"},
+                    { "value":"sha256","descr":"SHA256"},
+                    { "value":"sha384","descr":"SHA384"},
+                    { "value":"sha512","descr":"SHA512"},
+                    { "value":"aesxcbc","descr":"AES-XCBC"}
+                ],
+                dhgroup:[
+                    { "value":"1","descr":"1 (768 bit)"},
+                    { "value":"2","descr":"2 (1024 bit)"},
+                    { "value":"5","descr":"5 (1536 bit)"},
+                    { "value":"14","descr":"14 (2048 bit)"},
+                    { "value":"15","descr":"15 (3072 bit)"},
+                    { "value":"16","descr":"16 (4096 bit)"},
+                    { "value":"17","descr":"17 (6144 bit)"},
+                    { "value":"18","descr":"18 (8192 bit)"},
+                    { "value":"19","descr":"19 (256 bit elliptic curve)"},
+                    { "value":"20","descr":"20 (384 bit elliptic curve)"},
+                    { "value":"21","descr":"21 (521 bit elliptic curve)"},
+                    { "value":"22","descr":"22 (1024(sub 160) bit)"},
+                    { "value":"23","descr":"23 (2048(sub 224) bit)"},
+                    { "value":"24","descr":"24 (2048(sub 256) bit)"}
+                ],
+                phase2Mode: {
+                    "tunnel":"IPv4 tunnel",
+                    "tunnel6":"IPv6 tunnel",
+                    "transport":"Transport"
+                },
+                phase2Ealgos:{
+                    aes:"AES",
+                    aes128gcm16:"aes128gcm16",
+                    aes192gcm16:"aes192gcm16",
+                    aes256gcm16:"aes256gcm16",
+                    blowfish:"Blowfish",
+                    '3des':"3DES",
+                    cast128:"CAST128",
+                    des:"DES",
+                    'null':"NULL "+ _this.$t('ipsec.unencryption')
+                },
+                phase2Hash:{
+                    "hmac_md5":"MD5",
+                    "hmac_sha1":"SHA1",
+                    "hmac_sha256":"SHA256",
+                    "hmac_sha384":"SHA384",
+                    "hmac_sha512":"SHA512",
+                    "aesxcbc":"AES-XCBC"
+                },
+                phase2Psgroup:{
+                    "0":"off",
+                    "1":"1 (768 bit)",
+                    "2":"2 (1024 bit)",
+                    "5":"5 (1536 bit)",
+                    "14":"14 (2048 bit)",
+                    "15":"15 (3072 bit)",
+                    "16":"16 (4096 bit)",
+                    "17":"17 (6144 bit)",
+                    "18":"18 (8192 bit)"
+                },
+                formValidate:{
+                    disabled:true,
+                    auto:'default',
+                    iketype:'ikev1',
+                    protocol:'inet',
+                    interface:'wan',
+                    remoteGateway:'',
+                    descr:'',
+                    authenticationMethod:'rsasig',
+                    ca:'',
+                    cert:'',
+                    prv:'',
+                    mode:'main',
+                    myidType:'myaddress',
+                    myidData:'',
+                    peeridType:'peeraddress',
+                    peeridData:'',
+                    pskey:'',
+                    ealgo:'aes',
+                    ealgoKeylen:'256',
+                    hashAlgorithm:'md5',
+                    dhgroup:'24',
+                    lifetime:'',
+                    rekeyEnable:true,
+                    reauthEnable:true,
+                    natTraversal:'on',
+                    mobike:true,
+                    tunnelIsolation:false,
+                    dpdEnable:false,
+                    dpdDelay:'',
+                    dpdMaxfail:'',
+                    p1index:'',
+                    ikeid:''
+                },
+                formValidatePhase2:{
+                    disabled:true,
+                    mode:'tunnel',
+                    descr:'',
+                    localidType:'lan',
+                    localidAddress:'',
+                    localidNetbits:32,
+                    remoteidAddress:'',
+                    remoteidType:'address',
+                    remoteidNetbits:32,
+                    protocol:'esp',
+                    ealgos:{
+                        aes:true,
+                        aes128gcm16:false,
+                        aes192gcm16:false,
+                        aes256gcm16:false,
+                        blowfish:true,
+                        '3des':true,
+                        cast128:true,
+                        des:false,
+                        'null':false
+                    },
+                    keylenAes:'auto',
+                    keylenBlowfish:'auto',
+                    hashAlgorithmOption:['hmac_md5','hmac_sha1'],
+                    pfsgroup:'0',
+                    lifetime:'',
+                    pinghost:'',
+                    spd:'',
+                    uniqid:'',
+                    ikeid:''
+                },
+                ipsecData:[],
+                ipsecPhase2Data:[],
+                ipsecStatusData:[]
+            }
+        },
+        computed:{
+            autoArr:function () {
+                var _this = this;
+                return [
+                    {"value":"default","descr":_this.$t("ipsec.default")},
+                    {"value":"add","descr":_this.$t('ipsec.response_only')},
+                    {"value":"route","descr":_this.$t('ipsec.start_circul')},
+                    {"value":"start","descr":_this.$t('ipsec.atonce_start')}
+                ]
+            },
+            ruleValidate: function(){
+                var _this = this;
+                return {
+                    remoteGateway: [
+                        { required: true, message: _this.$t('ipsec.msg7'), trigger: 'blur' },
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s == 0) {
+                                f(_this.$t('ipsec.msg7'));
+                            }else if(_s != 99 && 0 == _s){
+                                f(_this.$t('ipsec.msg8'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    descr:[
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if(0 == _s){
+                                f(_this.$t('ipsec.msg9'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    myidData:[
+                        { validator:function(r, v, f) {
+                            console.log('-------check myidData---------');
+                            if('myaddress' != _this.formValidate.myidType){
+                                if('address' == _this.formValidate.myidType){
+                                    var _s = cs.ip(v);
+                                    if(0 == _s){
+                                        f(_this.$t('ipsec.msg15'));
+                                    }else  if(99 != _s){
+                                        f(_this.$t('ipsec.msg16'));
+                                    }
+                                }else{
+                                    if(v.length <= 0){
+                                        f(_this.$t('ipsec.msg15'));
+                                    }
+                                }
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    peeridData:[
+                        { validator:function(r, v, f) {
+                            if('peeraddress' != _this.formValidate.peeridType){
+                                if('address' == _this.formValidate.peeridType){
+                                    var _s = cs.ip(v);
+                                    if(0 == _s){
+                                        f(_this.$t('ipsec.msg15'));
+                                    }else  if(99 != _s){
+                                        f(_this.$t('ipsec.msg17'));
+                                    }
+                                }else{
+                                    if(v.length <= 0){
+                                        f(_this.$t('ipsec.msg15'));
+                                    }
+                                }
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    pskey:[
+                        { validator:function(r, v, f) {
+                            if('pre_shared_key' == _this.formValidate.authenticationMethod){
+                                var _s = cs.string(v);
+                                if(0 == _s){
+                                    f(_this.$t('ipsec.msg19'));
+                                }
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    ca:[
+                        { validator:function(r, v, f) {
+                            if('rsasig' == _this.formValidate.authenticationMethod){
+                                var _s = cs.string(v);
+                                if(0 == _s){
+                                    f(_this.$t('ipsec.msg10'));
+                                }
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    cert:[
+                        { validator:function(r, v, f) {
+                            if('rsasig' == _this.formValidate.authenticationMethod) {
+                                var _s = cs.string(v);
+                                if (0 == _s) {
+                                    f(_this.$t('ipsec.msg11'));
+                                }
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    prv:[
+                        { validator:function(r, v, f) {
+                            if('rsasig' == _this.formValidate.authenticationMethod) {
+                                var _s = cs.string(v);
+                                if (0 == _s) {
+                                    f(_this.$t('ipsec.msg12'));
+                                }
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    lifetime:[
+                        { validator:function(r, v, f) {
+                            var _s = cs.num(v);
+                            if(0 == _s){
+                                f(_this.$t('ipsec.msg13'));
+                            }else if(1 == _s){
+                                f(_this.$t('ipsec.msg14'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ]
+                }
+            },
+            ruleValidatePhase2:function () {
+                var _this = this;
+                return {
+                    descr:[
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if(0 == _s){
+                                f(_this.$t('ipsec.msg2'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    lifetime:[
+                        { validator:function(r, v, f) {
+                            if(v.length > 0){
+                                var _s = cs.num(v);
+                                if(1 == _s){
+                                    f(_this.$t('ipsec.msg4'));
+                                }
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    pinghost:[
+                        { validator:function(r, v, f) {
+                            console.log(v);
+                            if(v.length > 0){
+                                var _s = cs.ip(v);
+                                if(99 != _s && 0 != _s){
+                                    f(_this.$t('ipsec.msg18'));
+                                }
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ]/*,
+                    spd:[
+                        { validator:function(r, v, f) {
+                            if(v.length == 0){
+                                f(_this.$t('ipsec.msg6'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ]*/
+                }
+            },
+            ipsecColumns:function () {
+                var _this = this;
+                return [/*{
+                    type: 'expand',
+                    width: 30,
+                    render: function(h, params) {
+                        console.log('---------------expand--------------');
+                        console.log(params);
+
+                        return h('Row',[
+                            h('Col',{props:{span:6}},[h('p',"连接" + ': ' + params.row.descr )]),
+                            h('Col',{props:{span:6}},[h('p',"版本" + ': '+ params.row.iketype )]),
+                            h('Col',{props:{span:6}},[h('p',"本地ID" + ': ' + '' )]),
+                            h('Col',{props:{span:6}},[h('p','本地IP'+ ': ' + '' )]),
+                            h('Col',{props:{span:24}},[h('br')]),
+                            h('Col',{props:{span:6}},[h('p',"远程ID" + ': '+ params.row['remote-gateway'] )]),
+                            h('Col',{props:{span:6}},[h('p',"远程IP" + ': ' + params.row['remote-gateway'] )]),
+                            h('Col',{props:{span:6}},[h('p',"本地认证" + ': '+ 'public key' )]),
+                            h('Col',{props:{span:6}},[h('p',"远程认证" + ': '+ 'public key' )]),
+                            h('Col',{props:{span:24}},[h('br')]),
+                            h('Col',{props:{span:6}},[h('p',"本地子网" + ': '+ params.row['remote-gateway'] )]),
+                            h('Col',{props:{span:6}},[h('p',"SPI(s)" + ': ' + params.row['remote-gateway'] )]),
+                            h('Col',{props:{span:6}},[h('p',"远程子网" + ': '+ 'public key' )]),
+                            h('Col',{props:{span:6}},[h('p',"状态" + ': '+ 'public key' )])
+                        ]);
+                    }
+                }, */ {
+                    title: 'ID',
+                    key: 'idx',
+                    width:'60'
+                },{
+                    title: _this.$t('ipsec.type'),
+                    key: 'phase1Type',
+                    sortable: true
+                }, {
+                    title: _this.$t('ipsec.remote_gateway'),
+                    key: 'phase1RemoteGw',
+                    sortable: true
+                }, {
+                    title: _this.$t('ipsec.mode'),
+                    key: 'phase1Mode',
+                    sortable: true
+                },{
+                    title: _this.$t('ipsec.phase1_proposal'),
+                    key: 'phase1Proposal',
+                    width:"120",
+                    sortable: true
+                },{
+                    title: _this.$t('ipsec.auth'),
+                    key: 'phase1Auth',
+                    sortable: true
+                },{
+                    title: _this.$t('ipsec.describe'),
+                    key: 'phase1Descr',
+                    sortable: true
+                }, {
+                    title: _this.$t('ipsec.operation'),
+                    key: 'operation',
+                    align: 'center',
+                    render: function(h, params) {
+                        return [
+                            h('Icon', {
+                                props: {
+                                    type: "edit"
+                                },
+                                style: {
+                                    cursor: 'pointer',
+//                                    color:'#898989',
+                                    marginRight: '5px'
+                                },
+                                nativeOn: {
+                                    click:function () {
+                                        console.log(params);
+                                        console.log("------------edit------------------");
+                                        _this.addAndEdit = true;
+                                        _this.addAndEditPhase2 = false;
+                                        _this.formValidate.p1index = params.row.p1index;
+
+                                        if('yes' == params.row.disabled){
+                                            _this.formValidate.disabled = false;
+                                        }
+                                        if(!params.row.auto){
+                                            _this.formValidate.auto = 'default';
+                                        }else{
+                                            _this.formValidate.auto = params.row.auto;
+                                        }
+
+                                        _this.formValidate.iketype = params.row.iketype;
+                                        _this.formValidate.protocol = params.row.protocol;
+                                        _this.formValidate.interface = params.row.interface;
+                                        _this.formValidate.remoteGateway = params.row['remote-gateway'];
+                                        _this.formValidate.descr = params.row.descr;
+                                        _this.formValidate.authenticationMethod = params.row.authentication_method;
+
+                                        if('rsasig' == _this.formValidate.authenticationMethod){
+                                            _this.formValidate.ca = $.base64.decode(params.row.ca);
+                                            _this.formValidate.cert = $.base64.decode(params.row.cert);
+                                            _this.formValidate.prv = $.base64.decode(params.row.prv);
+//                                            _this.formValidate.certref = params.row.certref;
+//                                            _this.formValidate.caref = params.row.caref;
+                                        }
+
+                                        _this.formValidate.mode = params.row.mode;
+                                        _this.formValidate.myidType = params.row.myid_type;
+                                        _this.formValidate.myidData = params.row.myid_data;
+                                        _this.formValidate.peeridType = params.row.peerid_type;
+                                        _this.formValidate.peeridData = params.row.peerid_data;
+                                        _this.formValidate.pskey = params.row['pre-shared-key'];
+                                        _this.formValidate.ealgo = params.row['encryption-algorithm'].name;
+                                        _this.formValidate.ealgoKeylen = params.row['encryption-algorithm'].keylen;
+                                        _this.formValidate.hashAlgorithm = params.row['hash-algorithm'];
+                                        _this.formValidate.dhgroup = params.row.dhgroup;
+                                        _this.formValidate.lifetime = params.row.lifetime;
+                                        if('1' == params.row.rekey_enable){
+                                            _this.formValidate.rekeyEnable = false;
+                                        }else{
+                                            _this.formValidate.rekeyEnable = true;
+                                        }
+
+                                        if('1' == params.row.reauth_enable){
+                                            _this.formValidate.reauthEnable = false;
+                                        }else{
+                                            _this.formValidate.reauthEnable = true;
+                                        }
+
+                                        if('on' == params.row.mobike){
+                                            _this.formValidate.mobike = false;
+                                        }else {
+                                            _this.formValidate.mobike = true;
+                                        }
+                                        if('1' == params.row.tunnel_isolation){
+                                           _this.formValidate.tunnelIsolation = true;
+                                        }else{
+                                            _this.formValidate.tunnelIsolation = false;
+                                        }
+                                        _this.formValidate.natTraversal = params.row.nat_traversal;
+                                        if(params.row.dpd_delay && params.row.dpd_maxfail){
+                                            _this.formValidate.dpdEnable = true;
+                                            _this.formValidate.dpdDelay = params.row.dpd_delay;
+                                            _this.formValidate.dpdMaxfail = params.row.dpd_maxfail;
+                                        }
+                                        _this.formValidate.ikeid = params.row.ikeid;
+                                    }
+                                }
+                            }),
+                            h('Icon', {
+                                props: {
+                                    type: 'plus-round'
+                                },
+                                style: {
+                                    cursor: 'pointer',
+//                                    color:'#57a3f3',
+                                    marginRight: '5px'
+                                },
+                                nativeOn: {
+                                    click:function () {
+                                        console.log(params);
+                                        console.log("------------add------------------");
+                                        _this.addAndEditPhase2 = true;
+                                        _this.addAndEdit = false;
+                                        _this.formValidatePhase2.ikeid = params.row.ikeid;
+                                    }
+                                }
+                            }),
+                            h('Icon', {
+                                props: {
+                                    type: 'ios-list-outline'
+                                },
+                                style: {
+                                    cursor: 'pointer',
+//                                    color:'#57a3f3',
+                                    marginRight: '5px'
+                                },
+                                nativeOn: {
+                                    click:function () {
+                                        console.log(params);
+                                        console.log("------------phase2 status------------------");
+                                        _this.phase2List = true;
+                                        var postData = {"action":"getIpsecPhase2","data":{"ikeid":params.row.ikeid}};
+                                        uiPost.getIpsecPhase2(postData,function(data){
+                                            if (9999 == data.rescode){
+                                                cs.loginOut();
+                                            }
+                                            if (0 == data.rescode) {
+                                                _this.ipsecPhase2Data = data.data;
+                                                console.log(_this.ipsecPhase2Data);
+                                                for(var i in _this.ipsecPhase2Data){
+                                                    _this.ipsecPhase2Data[i].phase2Idx = Number(i)+1;
+                                                    _this.ipsecPhase2Data[i].phase2Type = _this.ipsecPhase2Data[i].protocol.toUpperCase()+' '+ _this.phase2Mode[_this.ipsecPhase2Data[i].mode];
+                                                    _this.ipsecPhase2Data[i].phase2LocalSubnet = _this.ipsecPhase2Data[i].localid_type.toUpperCase();
+                                                    if(_this.ipsecPhase2Data[i].remoteid_netbits){
+                                                        _this.ipsecPhase2Data[i].phase2RemoteSubnet = _this.ipsecPhase2Data[i].remoteid_address+'/'+_this.ipsecPhase2Data[i].remoteid_netbits;
+                                                    }else{
+                                                        _this.ipsecPhase2Data[i].phase2RemoteSubnet = _this.ipsecPhase2Data[i].remoteid_address;
+                                                    }
+                                                     _this.ipsecPhase2Data[i].phase2EncrypProtocol = '';
+                                                    for(var x in _this.ipsecPhase2Data[i].ealgos){
+                                                        if("aes" == _this.ipsecPhase2Data[i].ealgos[x]){
+                                                            var keylenAes = _this.ipsecPhase2Data[i].keylen_aes == 'auto'?'('+_this.$t('ipsec.auto')+")":('(' + _this.ipsecPhase2Data[i].keylen_aes + ' bit)');
+                                                            _this.ipsecPhase2Data[i].phase2EncrypProtocol += ' ' + _this.phase2Ealgos[_this.ipsecPhase2Data[i].ealgos[x]] + keylenAes;
+                                                        }else if("blowfish" == _this.ipsecPhase2Data[i].ealgos[x]){
+                                                            var keylenBlowfish = _this.ipsecPhase2Data[i].keylen_blowfish == 'auto'?'('+_this.$t('ipsec.auto')+")":('(' + _this.ipsecPhase2Data[i].keylen_blowfish + ' bit)');
+                                                            _this.ipsecPhase2Data[i].phase2EncrypProtocol += ' ' +_this.phase2Ealgos[_this.ipsecPhase2Data[i].ealgos[x]] + keylenBlowfish;
+                                                        }else{
+                                                            _this.ipsecPhase2Data[i].phase2EncrypProtocol = ' ' +_this.phase2Ealgos[_this.ipsecPhase2Data[i].ealgos[x]] + keylenBlowfish;
+                                                        }
+                                                    }
+
+                                                    for(var x in _this.ipsecPhase2Data[i].ealgos){
+                                                        if("aes" == _this.ipsecPhase2Data[i].ealgos[x]){
+                                                            var keylenAes = _this.ipsecPhase2Data[i].keylen_aes == 'auto'?_this.$t('ipsec.auto'):('(' + _this.ipsecPhase2Data[i].keylen_aes + ' bit)');
+                                                            _this.ipsecPhase2Data[i].phase2EncrypProtocol += ' ' + _this.phase2Ealgos[_this.ipsecPhase2Data[i].ealgos[x]] + keylenAes;
+                                                        }else if("blowfish" == _this.ipsecPhase2Data[i].ealgos[x]){
+                                                            var keylenBlowfish = _this.ipsecPhase2Data[i].keylen_blowfish == 'auto'?_this.$t('ipsec.auto'):('(' + _this.ipsecPhase2Data[i].keylen_blowfish + ' bit)');
+                                                            _this.ipsecPhase2Data[i].phase2EncrypProtocol += ' ' +_this.phase2Ealgos[_this.ipsecPhase2Data[i].ealgos[x]] + keylenBlowfish;
+                                                        }else{
+                                                            _this.ipsecPhase2Data[i].phase2EncrypProtocol = ' ' +_this.phase2Ealgos[_this.ipsecPhase2Data[i].ealgos[x]] + keylenBlowfish;
+                                                        }
+                                                    }
+
+                                                    _this.ipsecPhase2Data[i].phase2AuthenProtocol = '';
+                                                    for(var x in _this.ipsecPhase2Data[i]['hash-algorithm-option']){
+                                                        _this.ipsecPhase2Data[i].phase2AuthenProtocol += _this.phase2Hash[_this.ipsecPhase2Data[i]['hash-algorithm-option'][x]] + ',';
+                                                    }
+                                                    _this.ipsecPhase2Data[i].phase2AuthenProtocol = _this.ipsecPhase2Data[i].phase2AuthenProtocol.substr(0,_this.ipsecPhase2Data[i].phase2AuthenProtocol.length-1);
+
+                                                    if(_this.ipsecPhase2Data[i]['pfsgroup'] && 0 != _this.ipsecPhase2Data[i]['pfsgroup']){
+                                                        _this.ipsecPhase2Data[i].phase2Pfs = _this.$t('ipsec.group') +_this.phase2Psgroup[_this.ipsecPhase2Data[i]['pfsgroup']];
+                                                    }else{
+                                                        _this.ipsecPhase2Data[i].phase2Pfs = _this.phase2Psgroup[0];
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }),
+                            h('Poptip',{
+                                props: {
+                                    confirm: true,
+                                    title: _this.$t('account.msg9'),
+                                    "ok-text":_this.$t('common.ok'),
+                                    "cancel-text":_this.$t('common.cancel')
+                                },
+                                style: {
+                                    marginRight: '5px'
+                                },
+                                on: {
+                                    "on-ok": function(){
+                                        console.log(params);
+                                        console.log('---------------delete ok--------------');
+                                        var postData = {"action":"delIpsecPhase1","data":{"ikeid":params.row.ikeid}};
+                                        _this.$Spin.show();   //加载动画
+                                        uiPost.delIpsecPhase1(postData,function(data){
+                                            if (9999 == data.rescode){
+                                                cs.loginOut();
+                                            }
+                                            _this.$Spin.hide();   //关闭加载动画
+                                            if (0 == data.rescode) {
+                                                _this.$Message.success({content:_this.$t('ipsec.delete_success'),onClose:function(){
+                                                    location.href = location.href;
+                                                }});
+                                            }else{
+                                                _this.$Message.error({content:_this.$t('ipsec.delete_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                                            }
+                                        });
+                                    }
+                                }
+                            }, [
+                                h('Icon', {
+                                    props: {
+                                        type: 'ios-trash-outline'
+                                    },
+                                    style: {
+                                        cursor: 'pointer',
+//                                        color:'#f50',
+                                        marginRight: '5px'
+                                    }
+                                })
+                            ])
+                        ]
+                    }
+                }];
+            },
+            ipsecPhase2Columns:function () {
+                var _this = this;
+                return [
+                    {
+                        title: 'ID',
+                        key: 'phase2Idx',
+                        width: "60"
+                    },
+                    {
+                        title: _this.$t('ipsec.type'),
+                        key: 'phase2Type',
+                        sortable: true
+                    }, {
+                        title: _this.$t('ipsec.local_subnet'),
+                        key: 'phase2LocalSubnet',
+                        sortable: true
+                    },
+                    {
+                        title: _this.$t('ipsec.remote_subnet'),
+                        key: 'phase2RemoteSubnet',
+                        sortable: true
+                    },
+                    {
+                        title: _this.$t('ipsec.encryp_protocol'),
+                        key: 'phase2EncrypProtocol',
+                        sortable: true
+                    },
+                    {
+                        title: _this.$t('ipsec.authent_protocol'),
+                        key: 'phase2AuthenProtocol',
+                        sortable: true
+                    },
+                    {
+                        title: "PFS",
+                        key: 'phase2Pfs',
+                        sortable: true
+                    },
+                    {
+                        title: _this.$t('ipsec.operation'),
+                        key: 'operation',
+                        align: 'center',
+                        render: function (h, params) {
+                            return [
+                                h('Icon', {
+                                    props: {
+                                        type: "edit"
+                                    },
+                                    style: {
+                                        cursor: 'pointer',
+//                                    color:'#898989',
+                                        marginRight: '5px'
+                                    },
+                                    nativeOn: {
+                                        click:function () {
+                                            console.log(params);
+                                            console.log("------------phase2 edit------------------");
+                                            _this.addAndEdit = false;
+                                            _this.addAndEditPhase2 = true;
+//                                            _this.formValidate.p1index = params.row.p1index;
+                                            _this.phase2List = false;
+
+                                            if('yes' ==params.row.disabled){
+                                                _this.formValidatePhase2.disabled = false;
+                                            }
+                                            _this.formValidatePhase2.mode = params.row.mode;
+                                            _this.formValidatePhase2.descr = params.row.descr;
+                                            _this.formValidatePhase2.ikeid = params.row.ikeid;
+                                            _this.formValidatePhase2.localidType = params.row.localid_type;
+                                            if(_this.formValidatePhase2.localidType == 'address' || _this.formValidatePhase2.localidType == 'network'){
+                                                _this.formValidatePhase2.localidAddress = params.row.localid_address;
+                                                _this.formValidatePhase2.localidNetbits = params.row.localid_netbits;
+                                            }
+                                            _this.formValidatePhase2.remoteidType = params.row.remoteid_type;
+                                            _this.formValidatePhase2.remoteidAddress = params.row.remoteid_address;
+                                            if(params.row.remoteid_netbits){
+                                                _this.formValidatePhase2.remoteidNetbits = params.row.remoteid_netbits;
+                                            }
+                                            _this.formValidatePhase2.protocol = params.row.protocol;
+
+                                            for(var i in _this.formValidatePhase2.ealgos){
+                                                if($.inArray(i,params.row.ealgos) >= 0 ){
+                                                    _this.formValidatePhase2.ealgos[i] = true;
+                                                }else{
+                                                    _this.formValidatePhase2.ealgos[i] = false;
+                                                }
+                                            }
+
+                                            if(params.row.keylen_aes){
+                                                _this.formValidatePhase2.keylenAes = params.row.keylen_aes;
+                                            }else{
+                                                _this.formValidatePhase2.keylenAes = 'auto';
+                                            }
+
+                                            if(params.row.keylen_blowfish){
+                                                _this.formValidatePhase2.keylenBlowfish = params.row.keylen_blowfish;
+                                            }else{
+                                                _this.formValidatePhase2.keylenBlowfish = 'auto';
+                                            }
+
+                                            _this.formValidatePhase2.hashAlgorithmOption = params.row['hash-algorithm-option'];
+                                            _this.formValidatePhase2.pfsgroup = params.row.pfsgroup;
+                                            if(params.row.lifetime){
+                                                _this.formValidatePhase2.lifetime = params.row.lifetime;
+                                            }
+                                            if(params.row.pinghost){
+                                                _this.formValidatePhase2.pinghost = params.row.pinghost;
+                                            }
+                                            _this.formValidatePhase2.spd = params.row.spd;
+                                            _this.formValidatePhase2.uniqid = params.row.uniqid;
+                                        }
+                                    }
+                                }),
+                                h('Poptip',{
+                                    props: {
+                                        confirm: true,
+                                        title: _this.$t('account.msg9'),
+                                        "ok-text":_this.$t('common.ok'),
+                                        "cancel-text":_this.$t('common.cancel')
+                                    },
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    on: {
+                                        "on-ok": function(){
+                                            console.log(params);
+                                            console.log('---------------delete ok--------------');
+                                            var data = {};
+                                            data.ikeid = params.row.ikeid;
+                                            data.uniqid = params.row.uniqid;
+                                            var postData = {"action":"delIpsecPhase2","data":data};
+                                            _this.$Spin.show();   //关闭加载动画
+                                            uiPost.delIpsecPhase2(postData,function(data){
+                                                if (9999 == data.rescode){
+                                                    cs.loginOut();
+                                                }
+                                                _this.$Spin.hide();   //关闭加载动画
+                                                if (0 == data.rescode) {
+                                                    _this.$Message.success({content:_this.$t('ipsec.delete_success'),onClose:function(){
+                                                        location.href = location.href;
+                                                    }});
+                                                }else{
+                                                    _this.$Message.error({content:_this.$t('ipsec.delete_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                                                }
+                                            });
+                                        }
+                                    }
+                                }, [
+                                    h('Icon', {
+                                        props: {
+                                            type: 'ios-trash-outline'
+                                        },
+                                        style: {
+                                            cursor: 'pointer',
+//                                            color:'#f50',
+                                            marginRight: '5px'
+                                        }
+                                    })
+                                ])
+                            ]
+                        }
+                    }
+                ]
+            },
+            ipsecStatusColumns:function () {
+                var _this = this;
+                return [
+                    {
+                        type: 'expand',
+                        width: 30,
+                        render: function(h, params) {
+                            console.log('---------------expand--------------');
+                            console.log(params);
+                            if(params.row.sas.length <= 0) {
+                                return h('Row', [
+
+                                ]);
+                            }else{
+                                return h('Row', [
+                                    h('Col', {props: {span: 6}}, [h('p', _this.$t('ipsec.local_subnet') + ': ' + params.row['remote-gateway'])]),
+                                    h('Col', {props: {span: 6}}, [h('p', "SPI(s)" + ': ' + params.row['remote-gateway'])]),
+                                    h('Col', {props: {span: 6}}, [h('p', _this.$t('ipsec.remote_subnet') + ': ' + 'public key')]),
+                                    h('Col', {props: {span: 6}}, [h('p', _this.$t('ipsec.staStatus') + ': ' + 'public key')])
+                                ]);
+                            }
+                        }
+                    },
+                    {
+                        title: _this.$t('ipsec.connect'),
+                        key: 'staConnect',
+                        sortable: true
+                    },
+                    {
+                        title: _this.$t('ipsec.version'),
+                        key: 'staVersion',
+                        sortable: true
+                    }, {
+                        title: _this.$t('ipsec.local_id'),
+                        key: 'staLocalId',
+                        sortable: true
+                    },
+                    {
+                        title: _this.$t('ipsec.local_ip'),
+                        key: 'staLocalIp',
+                        sortable: true
+                    },
+                    {
+                        title: _this.$t('ipsec.remote_id'),
+                        key: 'staRemoteId',
+                        sortable: true
+                    },
+                    {
+                        title: _this.$t('ipsec.remote_ip'),
+                        key: 'staRemoteIp',
+                        sortable: true
+                    },
+                    {
+                        title: _this.$t('ipsec.local_auth'),
+                        key: 'staLocalAuth',
+                        sortable: true
+                    },
+                    {
+                        title: _this.$t('ipsec.remote_auth'),
+                        key: 'staRemoteAuth',
+                        sortable: true
+                    },
+                    {
+                        title: _this.$t('ipsec.staStatus'),
+                        key: 'staStatus',
+                        align: 'center',
+                        render: function (h, params) {
+                            if(params.row.sas.length <= 0){
+                                return [
+                                    h('Icon', {
+                                        props: {
+                                            type: "play"
+                                        },
+                                        style: {
+                                            cursor: 'pointer',
+//                                    color:'#898989',
+                                            marginRight: '5px'
+                                        },
+                                        nativeOn: {
+                                            click:function () {
+                                                console.log('-------------Please begin your play!---------------------');
+                                                console.log(params);
+                                                var data = {};
+                                                data.connid = params.row.staConnect;
+                                                var postVar = {"action":"ipsecDisconnect","data":data};
+                                                uiPost.ipsecDisconnect(postVar,function (data) {
+                                                    if (9999 == data.rescode){
+                                                        cs.loginOut();
+                                                    }
+                                                    location.href = location.href;
+                                                });
+                                            }
+                                        }
+                                    })
+                                ]
+                            }else{
+                                return [
+                                    h('Icon', {
+                                        props: {
+                                            type: "pause"
+                                        },
+                                        style: {
+                                            cursor: 'pointer',
+//                                    color:'#898989',
+                                            marginRight: '5px'
+                                        },
+                                        nativeOn: {
+                                            click:function () {
+                                                var data = {};
+                                                data.connid = params.row.staConnect;
+                                                var postVar = {"action":"ipsecConnect","data":data};
+                                                uiPost.ipsecConnect(postVar,function (data) {
+                                                    if (9999 == data.rescode){
+                                                        cs.loginOut();
+                                                    }
+                                                    location.href = location.href;
+                                                });
+                                            }
+                                        }
+                                    })
+                                ]
+                            }
+
+                        }
+                    }
+                ]
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postVar = {"action":"getLanWanInf","data":[]};
+            _this.$Spin.show();  //加载动画
+            uiPost.getLanWanInf(postVar,function(data){
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    _this.interface = data.data;
+                    var postData = {"action":"getIpsecPhase1","data":[]};
+                    uiPost.getIpsecPhase1(postData,function(data){
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        _this.$Spin.hide();   //关闭加载动画
+                        if (0 == data.rescode) {
+                            _this.ipsecData = data.data;
+                            for(var i in _this.ipsecData){
+                                _this.ipsecData[i].idx = Number(i)+1;
+                                for(var x in _this.protocol){
+                                    if(_this.ipsecData[i].protocol == _this.protocol[x].value){
+                                        _this.ipsecData[i].phase1Type = _this.protocol[x].descr;
+                                        break;
+                                    }
+                                }
+                                for(var x in _this.iketype){
+                                    if(_this.ipsecData[i].iketype == _this.iketype[x].value){
+                                        _this.ipsecData[i].phase1Type += ' '+_this.iketype[x].descr;
+                                        break;
+                                    }
+                                }
+                                for(var x in _this.interface){
+                                    if(_this.ipsecData[i].interface == _this.interface[x].interface){
+                                        _this.ipsecData[i].phase1RemoteGw = _this.interface[x].name+' ' +_this.ipsecData[i]['remote-gateway'];
+                                        break;
+                                    }
+                                }
+
+                                for(var x in _this.mode){
+                                    if(_this.ipsecData[i].mode == _this.mode[x].value){
+                                        _this.ipsecData[i].phase1Mode = _this.mode[x].descr;
+                                        break;
+                                    }
+                                }
+
+                                for(var x in _this.ealgo){
+                                    if(_this.ipsecData[i]['encryption-algorithm'].name == _this.ealgo[x].value){
+                                        _this.ipsecData[i].phase1Proposal = _this.ealgo[x].descr;
+                                        if(_this.ipsecData[i]['encryption-algorithm'].keylen){
+                                            _this.ipsecData[i].phase1Proposal += '('+_this.ipsecData[i]['encryption-algorithm'].keylen+' bit)'
+                                        }
+                                        break;
+                                    }
+                                }
+
+                                for(var x in _this.hashAlgorithm){
+                                    if(_this.ipsecData[i]['hash-algorithm'] == _this.hashAlgorithm[x].value){
+                                        _this.ipsecData[i].phase1Proposal += ' + '+_this.hashAlgorithm[x].descr;
+                                        break;
+                                    }
+                                }
+
+                                for(var x in _this.dhgroup){
+                                    if(_this.ipsecData[i].dhgroup == _this.dhgroup[x].value){
+                                        _this.ipsecData[i].phase1Proposal += _this.$t('ipsec.dh_group')+_this.dhgroup[x].descr;
+                                        break;
+                                    }
+                                }
+
+                                for(var x in _this.authenticationMethod){
+                                    if(_this.ipsecData[i].authentication_method == _this.authenticationMethod[x].value){
+                                        _this.ipsecData[i].phase1Auth = _this.authenticationMethod[x].descr;
+                                        break;
+                                    }
+                                }
+                                _this.ipsecData[i].phase1Descr = _this.ipsecData[i].descr;
+                            }
+                        }
+                    });
+                }
+            });
+
+            var postData = {"action":"getIpsecStatus","data":{}};
+            uiPost.getIpsecStatus(postData,function(data){
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    var data = data.data;
+                    var tmpArr = {};
+                    for(var i in data){
+                        tmpArr = data[i];
+                        tmpArr.staConnect = i;
+                        tmpArr.staVersion = data[i].version;
+                        tmpArr.staLocalId = data[i]['local-id'];
+                        tmpArr.staLocalIp = data[i]['local-addrs'];
+                        tmpArr.staRemoteId = data[i]['remote-id'];
+                        tmpArr.staRemoteIp = data[i]['remote-addrs'];
+                        tmpArr.staLocalAuth = data[i]['local-class'];
+                        tmpArr.staRemoteAuth = data[i]['remote-class'];
+                        tmpArr.staStatus = data[i].routed;
+                        _this.ipsecStatusData.push(tmpArr);
+                    }
+                }
+            });
+        },
+        methods:{
+            handleSubmit: function(name) {
+                var _this = this;
+                this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        var postVar = {};
+                        if(false == _this.formValidate.disabled){
+                            postVar.disabled = 'yes';
+                        }
+                        if('default' == _this.formValidate.auto){
+                            postVar.auto = '';
+                        }else{
+                            postVar.auto = _this.formValidate.auto;
+                        }
+                        postVar.iketype =  _this.formValidate.iketype;
+                        postVar.protocol = _this.formValidate.protocol;
+                        postVar.interface = _this.formValidate.interface;
+                        postVar['remote-gateway'] = _this.formValidate.remoteGateway;
+                        postVar.descr = _this.formValidate.descr;
+                        postVar.authentication_method = _this.formValidate.authenticationMethod;
+                        if('rsasig' == postVar.authentication_method){
+                            postVar.ca = $.base64.encode(_this.formValidate.ca);
+                            postVar.cert = $.base64.encode(_this.formValidate.cert);
+                            postVar.prv = $.base64.encode(_this.formValidate.prv);
+//                            postVar.certref = _this.formValidate.certref;
+//                            postVar.caref = _this.formValidate.caref;
+                        }
+                        if('ikev1' == _this.formValidate.iketype && !_this.formValidate.mode){
+                            _this.$Message.error({content:_this.$t('ipsec.msg1'),duration:5});
+                            return false;
+                        }
+
+                        postVar.mode = _this.formValidate.mode;
+                        postVar.myid_type = _this.formValidate.myidType;
+                        postVar.myid_data = _this.formValidate.myidData;
+                        postVar.peerid_type = _this.formValidate.peeridType;
+                        postVar.peerid_data = _this.formValidate.peeridData;
+                        postVar['pre-shared-key'] = _this.formValidate.pskey;
+                        postVar.ealgo = _this.formValidate.ealgo;
+                        if(_this.formValidate.ealgo == 'aes' || _this.formValidate.ealgo == 'camellia' || _this.formValidate.ealgo == 'blowfish'){
+                            postVar.ealgo_keylen = _this.formValidate.ealgoKeylen;
+                        }
+                        postVar['hash-algorithm'] = _this.formValidate.hashAlgorithm;
+                        postVar.dhgroup = _this.formValidate.dhgroup;
+                        postVar.lifetime = _this.formValidate.lifetime;
+                        postVar.nat_traversal = _this.formValidate.natTraversal;
+                        if(_this.formValidate.dpdEnable == true){
+                            postVar.dpd_enable = 'yes';
+                        }
+                        postVar.dpd_delay = _this.formValidate.dpdDelay;
+                        postVar.dpd_maxfail = _this.formValidate.dpdMaxfail;
+                        if(_this.formValidate.p1index || (!_this.formValidate.p1index && '0' == _this.formValidate.p1index+'') ){
+                            postVar.p1index = _this.formValidate.p1index;
+                        }
+
+                        if(_this.formValidate.rekeyEnable == false){
+                            postVar.rekey_enable = 'yes';
+                        }
+
+                        if(_this.formValidate.reauthEnable == false){
+                            postVar.reauth_enable = 'yes';
+                        }
+
+                        if(_this.formValidate.mobike == false){
+                            postVar.mobike = 'on';
+                        }
+
+                        if( _this.formValidate.tunnelIsolation == true){
+                            postVar.tunnel_isolation = 'yes';
+                        }
+
+                        if('' != _this.formValidate.ikeid){
+                            postVar.ikeid = _this.formValidate.ikeid;
+                        }
+
+                        var postData = {"action":"setIpsecPhase1","data":postVar};
+                        console.log(postData);
+                        _this.applyLoading = true;
+                        uiPost.setIpsecPhase1(postData,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            _this.applyLoading = false;
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('ipsec.set_success'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            }else{
+                                _this.$Message.error({content:_this.$t('ipsec.set_fail')+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
+                        });
+                    }
+                });
+            },
+            handleSubmitPhase2:function (name) {
+                var _this = this;
+                this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        var postVar = {};
+                        if(false == _this.formValidatePhase2.disabled){
+                            postVar.disabled = 'yes';
+                        }
+                        postVar.mode = _this.formValidatePhase2.mode;
+                        postVar.descr = _this.formValidatePhase2.descr;
+                        postVar.localid_type = _this.formValidatePhase2.localidType;
+                        if(_this.formValidatePhase2.localidType == 'address' || _this.formValidatePhase2.localidType == 'network'){
+                            postVar.localid_address = _this.formValidatePhase2.localidAddress;
+                            postVar.localid_netbits = _this.formValidatePhase2.localidNetbits;
+                        }
+                        postVar.remoteid_type = _this.formValidatePhase2.remoteidType;
+                        postVar.remoteid_address = _this.formValidatePhase2.remoteidAddress;
+                        postVar.remoteid_netbits = _this.formValidatePhase2.remoteidNetbits;
+                        postVar.protocol = _this.formValidatePhase2.protocol;
+                        var ealgos = [];
+                        for(var i in _this.formValidatePhase2.ealgos){
+                            if(false == _this.formValidatePhase2.ealgos[i]){
+                                continue;
+                            }
+                            ealgos.push(i);
+                        }
+                        postVar.ealgos = ealgos;
+                        postVar.keylen_aes = _this.formValidatePhase2.keylenAes;
+                        postVar.keylen_blowfish = _this.formValidatePhase2.keylenBlowfish;
+                        postVar['hash-algorithm-option'] = _this.formValidatePhase2.hashAlgorithmOption;
+                        postVar.pfsgroup = _this.formValidatePhase2.pfsgroup;
+                        if(_this.formValidatePhase2.lifetime){
+                            postVar.lifetime = _this.formValidatePhase2.lifetime;
+                        }
+
+                        if('' != _this.formValidatePhase2.pinghost){
+                            postVar.pinghost = _this.formValidatePhase2.pinghost;
+                        }
+                        if('' != _this.formValidatePhase2.spd){
+                            postVar.spd = _this.formValidatePhase2.spd;
+                        }
+                        postVar.ikeid = _this.formValidatePhase2.ikeid;
+                        if(_this.formValidatePhase2.uniqid){
+                            postVar.uniqid = _this.formValidatePhase2.uniqid;
+                        }
+
+                        var postData = {"action":"setIpsecPhase2","data":postVar};
+                        _this.applyPhase2Loading = true;
+                        uiPost.setIpsecPhase2(postData,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            _this.applyPhase2Loading = false;
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('ipsec.set_success'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            }else{
+                                _this.$Message.error({content:_this.$t('ipsec.set_fail')+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
+                        });
+                    }
+                })
+            },
+            addRule:function () {
+                var _this = this;
+                _this.addAndEdit = true;
+                _this.addAndEditPhase2 = false;
+            },
+            showStatus:function () {
+                var _this = this;
+                _this.showStatusList = true;
+                console.log('-------------showStatus------------');
+                console.log(_this.ipsecStatusData);
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

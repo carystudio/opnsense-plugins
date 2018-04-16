@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.service'),$t('menu.dynamicdns')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    {{ $t('dynamicdns.help') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('dynamicdns.status')">
+                        <i-switch v-model="formValidate.enable" size="large">
+                            <span slot="open">{{ $t('common.on') }}</span>
+                            <span slot="close">{{ $t('common.off') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <FormItem :label="$t('dynamicdns.service_type')">
+                        <Select v-model="formValidate.type" >
+                            <Option value="3322">3322</Option>
+                            <Option value="citynetwork">City Network</Option>
+                            <Option value="cloudflare">CloudFlare</Option>
+                            <Option value="custom">Custom</Option>
+                            <!--<Option value="custom-v6">Custom (v6)</Option>-->
+                            <Option value="dhs">DHS</Option>
+                            <Option value="dnsexit">DNSexit</Option>
+                            <Option value="dnsomatic">DNS-O-Matic</Option>
+                            <Option value="duckdns">Duck DNS</Option>
+                            <Option value="dyndns">DynDNS (dynamic)</Option>
+                            <Option value="dyndns-custom">DynDNS (custom)</Option>
+                            <Option value="dyndns-static">DynDNS (static)</Option>
+                            <Option value="dyns">DyNS</Option>
+                            <Option value="easydns">easyDNS</Option>
+                            <Option value="eurodns">EuroDNS</Option>
+                            <Option value="freedns">freeDNS</Option>
+                            <Option value="googledomains">Google Domains</Option>
+                            <Option value="gratisdns">GratisDNS</Option>
+                            <Option value="he-net">HE.net</Option>
+                            <Option value="he-net-tunnelbroker">HE.net Tunnelbroker</Option>
+                            <!--<Option value="he-net-v6">HE.net (v6)</Option>-->
+                            <Option value="loopia">Loopia</Option>
+                            <Option value="namecheap">Namecheap</Option>
+                            <Option value="noip">No-IP</Option>
+                            <Option value="noip-free">No-IP (free)</Option>
+                            <Option value="ods">ODS.org</Option>
+                            <Option value="opendns">OpenDNS</Option>
+                            <Option value="oray">Oray</Option>
+                            <Option value="ovh-dynhost">OVH DynHOST</Option>
+                            <Option value="regfish">regfish</Option>
+                            <!--<Option value="regfish-v6">regfish (v6)</Option>-->
+                            <Option value="route53">Route 53</Option>
+                            <!--<Option value="route53-v6">Route 53 (v6)</Option>-->
+                            <Option value="selfhost">SelfHost</Option>
+                            <Option value="strato">STRATO</Option>
+                            <Option value="zoneedit">ZoneEdit</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('dynamicdns.interface_monitor')">
+                        <Select v-model="formValidate.interface" >
+                            <Option v-for="i in interface" :key="i.interface" :value="i.interface">{{i.name}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('dynamicdns.interface_send')" v-show="formValidate.type == 'custom' || formValidate.type == 'custom-v6'">
+                        <Select v-model="formValidate.requestif" >
+                            <Option v-for="i in interface" :key="i.interface" :value="i.interface">{{i.name}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('dynamicdns.host')" prop="host">
+                        <Input v-model="formValidate.host"></Input>
+                    </FormItem>
+                    <FormItem label="MX" v-show="formValidate.type != 'custom' && formValidate.type != 'custom-v6'">
+                        <Input v-model="formValidate.mx"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('dynamicdns.wildcards')">
+                        <i-switch v-model="formValidate.wildcard" size="large">
+                            <span slot="open">{{ $t('common.on') }}</span>
+                            <span slot="close">{{ $t('common.off') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <FormItem :label="$t('dynamicdns.verbose_log')">
+                        <i-switch v-model="formValidate.verboselog" size="large">
+                            <span slot="open">{{ $t('common.on') }}</span>
+                            <span slot="close">{{ $t('common.off') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <div v-show="formValidate.type == 'custom' || formValidate.type == 'custom-v6'">
+                        <FormItem :label="$t('dynamicdns.force_ipv4')">
+                            <i-switch v-model="formValidate.curlIpresolveV4" size="large">
+                                <span slot="open">{{ $t('common.on') }}</span>
+                                <span slot="close">{{ $t('common.off') }}</span>
+                            </i-switch>
+                        </FormItem>
+                        <FormItem :label="$t('dynamicdns.verify_ssl_peer')">
+                            <i-switch v-model="formValidate.curlSslVerifypeer" size="large">
+                                <span slot="open">{{ $t('common.on') }}</span>
+                                <span slot="close">{{ $t('common.off') }}</span>
+                            </i-switch>
+                        </FormItem>
+                    </div>
+                    <FormItem :label="$t('dynamicdns.username')" prop="username">
+                        <Input v-model="formValidate.username"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('dynamicdns.password')" prop="password">
+                        <Input v-model="formValidate.password" type="password"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('dynamicdns.zoneid')" v-show="formValidate.type == 'route53'">
+                        <Input v-model="formValidate.zoneid"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('dynamicdns.update_url')" prop="updateurl" v-show="formValidate.type == 'custom' || formValidate.type == 'custom-v6'">
+                        <Input v-model="formValidate.updateurl"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('dynamicdns.result_match')" v-show="formValidate.type == 'custom' || formValidate.type == 'custom-v6'">
+                        <Input v-model="formValidate.resultmatch" type="textarea" :rows="5"></Input>
+                    </FormItem>
+                    <FormItem label="TTL" v-show="formValidate.type == 'route53'">
+                        <Input v-model="formValidate.ttl"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('dynamicdns.descr')">
+                        <Input v-model="formValidate.descr"></Input>
+                    </FormItem>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('common.save') }}</Button>
+                    </FormItem>
+                </Form>
+            </Card>
+            </Col>
+        </Row>
+        <br />
+        <Row>
+           <!-- <Alert>
+                本页面用于显示动态DNS列表。
+            </Alert>
+            <Row>
+                <Button type="primary" @click="addDydns">{{ $t('common.add') }}</Button>
+            </Row>
+            <br />-->
+            <Row>
+                <Table border :columns="dyDnsColumns" :data="dyDnsData" :no-data-text="$t('common.no_data')"></Table>
+            </Row>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+                interface:[],
+                addDydnsFlag:false,
+                formValidate: {
+                    enable:true,
+                    type:"3322",
+                    interface:"wan",
+                    requestif:"wan",
+                    host:"",
+                    mx:"",
+                    wildcard:false,
+                    verboselog:false,
+                    curlIpresolveV4:false,
+                    curlSslVerifypeer:false,
+                    username:"",
+                    password:"",
+                    zoneid:"",
+                    updateurl:"",
+                    resultmatch:"",
+                    ttl:"",
+                    descr:"",
+                    id:""
+                },
+                dyDnsData:[]
+            }
+        },
+        computed:{
+            ruleValidate:function () {
+                var _this = this;
+                return {
+                    host:[
+                        { required: true, message: _this.$t('dynamicdns.msg1'), trigger: 'blur' },
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(0 == _s){
+                                f(_this.$t('dynamicdns.msg1'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    username:[
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if(0 == _s){
+                                f(_this.$t('dynamicdns.msg2'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    password:[
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if(0 == _s){
+                                f(_this.$t('dynamicdns.msg3'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    updateurl:[
+                        { validator:function(r, v, f) {
+                            if(_this.formValidate.type == 'custom' || _this.formValidate.type == 'custom-v6'){
+                                var _s = cs.string(v);
+                                if(0 == _s){
+                                    f(_this.$t('dynamicdns.msg4'));
+                                }
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ]
+                };
+            },
+            dyDnsColumns:function () {
+                var _this = this;
+                return [
+                    {
+                        type: 'index',
+                        align: 'center',
+                        width:"60"
+                    }, {
+                        title: _this.$t('dynamicdns.interface'),
+                        key: 'interface',
+                        align: 'center',
+                        render: function (h, params) {
+                            var info = [];
+                            if('1' == params.row.enable){
+                                info.push(
+                                    h('Col',{props:{span:6,offset:4}},[h('Icon', {
+                                        props: {
+                                            type: "play"
+                                        },
+                                        style: {
+                                            cursor: 'pointer',
+                                            marginRight: '5px',
+                                            color:'#3AB655'
+                                        },
+                                        nativeOn: {
+                                            click:function () {
+                                                console.log('-------------play to pause--------------------');
+                                                console.log(params);
+                                                _this.updataDydns(params);
+                                            }
+                                        }
+                                    })])
+                                )
+                            }else{
+                                info.push(
+                                    h('Col',{props:{span:6,offset:4}},[
+                                        h('Icon', {
+                                            props: {
+                                                type: "pause"
+                                            },
+                                            style: {
+                                                cursor: 'pointer',
+                                                marginRight: '5px',
+                                                color:'#F50'
+                                            },
+                                            nativeOn: {
+                                                click:function () {
+                                                    console.log('-------------pause to play--------------------');
+                                                    console.log(params);
+                                                    _this.updataDydns(params);
+                                                }
+                                            }
+                                        })
+                                    ])
+                                )
+                            }
+                            info.push(h('Col',{props:{span:6}},[h('p',params.row.interface)]));
+                            return [
+                                h('Row',info)
+                            ]
+                        }
+                    }, {
+                        title: _this.$t('dynamicdns.service'),
+                        key: 'type',
+                        align: 'center',
+                        sortable: true
+                    }, {
+                        title: _this.$t('dynamicdns.hostname'),
+                        key: 'host',
+                        align: 'center',
+                        sortable: true
+                    }, {
+                        title: _this.$t('dynamicdns.cached_ip'),
+                        key: 'cached_ip',
+                        align: 'center',
+                        sortable: true
+                    }, {
+                        title: _this.$t('dynamicdns.descr'),
+                        key: 'descr',
+                        align: 'center',
+                        sortable: true
+                    }, {
+                        title: _this.$t('dynamicdns.operation'),
+                        key: 'id',
+                        sortable: true,
+                        render: function (h, params) {
+                            return [
+                                h('Button', {
+                                    props: {
+                                        type: 'info',
+                                        size: 'small'
+                                    },
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    on: {
+                                        click:function () {
+                                            _this.addDydnsFlag = true;
+                                            _this.formValidate.id = params.row.id;
+                                            if('1' == params.row.enable){
+                                                _this.formValidate.enable = true;
+                                            }else{
+                                                _this.formValidate.enable = false;
+                                            }
+                                            _this.formValidate.type = params.row.type;
+                                            _this.formValidate.interface = params.row.interface;
+                                            _this.formValidate.requestif = params.row.requestif;
+                                            _this.formValidate.host = params.row.host;
+                                            _this.formValidate.mx = params.row.mx;
+                                            if('1' == params.row.wildcard){
+                                                _this.formValidate.wildcard = true;
+                                            }else{
+                                                _this.formValidate.wildcard = false;
+                                            }
+                                            if('1' == params.row.verboselog){
+                                                _this.formValidate.verboselog = true;
+                                            }else{
+                                                _this.formValidate.verboselog = false;
+                                            }
+                                            if('1' == params.row.curl_ipresolve_v4){
+                                                _this.formValidate.curlIpresolveV4 = true;
+                                            }else{
+                                                _this.formValidate.curlIpresolveV4 = false;
+                                            }
+                                            if('1' == params.row.curl_ssl_verifypeer){
+                                                _this.formValidate.curlSslVerifypeer = true;
+                                            }else{
+                                                _this.formValidate.curlSslVerifypeer = false;
+                                            }
+                                            _this.formValidate.username = params.row.username;
+                                            _this.formValidate.password = params.row.password;
+                                            _this.formValidate.zoneid = params.row.zoneid;
+                                            _this.formValidate.updateurl = params.row.updateurl;
+                                            _this.formValidate.resultmatch = params.row.resultmatch;
+                                            _this.formValidate.ttl = params.row.ttl;
+                                            _this.formValidate.descr = params.row.descr;
+                                        }
+                                    }
+                                }, _this.$t('dynamicdns.edit')),
+                                h('Poptip',{
+                                    props: {
+                                        confirm: true,
+                                        title: _this.$t('account.msg9'),
+                                        "ok-text":_this.$t('common.ok'),
+                                        "cancel-text":_this.$t('common.cancel')
+                                    },
+                                    on: {
+                                        "on-ok": function(){
+                                            var postVar = {"action":"delDyndns","data":{"id":params.row.id}};
+                                            _this.$Spin.show();   //加载动画
+                                            uiPost.delDyndns(postVar,function(data) {
+                                                if (9999 == data.rescode) {
+                                                    cs.loginOut();
+                                                }
+                                                _this.$Spin.hide();   //关闭加载动画
+                                                if (0 == data.rescode) {
+                                                    _this.$Message.success({content:_this.$t('dynamicdns.delete_success'),onClose:function(){
+                                                        location.href = location.href;
+                                                    }});
+                                                }else{
+                                                    _this.$Message.error({content:_this.$t('dynamicdns.delete_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                                                }
+                                            });
+                                        }
+                                    }
+                                }, [
+                                    h('Button', {
+                                        props: {
+                                            type: 'error',
+                                            size: 'small'
+                                        }
+                                    },_this.$t('dynamicdns.delete'))
+                                ])
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        created:function() {
+            var _this = this;
+            /*获取接口*/
+            var postVar = {"action":"getLanWanInf","data":[]};
+            _this.$Spin.show();   //加载动画
+            uiPost.getLanWanInf(postVar,function(data) {
+                if (9999 == data.rescode) {
+                    cs.loginOut();
+                }
+                _this.$Spin.hide();   //关闭加载动画
+                if (0 == data.rescode) {
+                    _this.interface = data.data;
+                }
+            });
+
+            /*获取列表数据*/
+            var postVar = {"action":"getDyndnsList","data":[]};
+            uiPost.getDyndnsList(postVar,function(data) {
+                if (9999 == data.rescode) {
+                    cs.loginOut();
+                }
+                console.log(data);
+                if (0 == data.rescode) {
+                    _this.dyDnsData = data.data;
+                    for (var i in _this.dyDnsData){
+                        if(!_this.dyDnsData[i].cached_ip){
+                            _this.dyDnsData[i].cached_ip = "N/A"
+                        }
+                    }
+                }
+            });
+        },
+        methods:{
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        var postVar= {};
+                        if(true == _this.formValidate.enable){
+                            postVar.enable = "yes";
+                        }
+                        postVar.type = _this.formValidate.type;
+                        postVar.interface = _this.formValidate.interface;
+                        postVar.requestif = _this.formValidate.requestif;
+                        postVar.host = _this.formValidate.host;
+                        postVar.mx = _this.formValidate.mx;
+                        if(true == _this.formValidate.wildcard){
+                            postVar.wildcard = "yes";
+                        }
+                        if(true == _this.formValidate.verboselog){
+                            postVar.verboselog = "yes";
+                        }
+                        if(true == _this.formValidate.curlIpresolveV4){
+                            postVar.curl_ipresolve_v4 = "yes";
+                        }
+                        if(true == _this.formValidate.curlSslVerifypeer){
+                            postVar.curl_ssl_verifypeer = "yes";
+                        }
+                        postVar.username = _this.formValidate.username;
+                        postVar.password = _this.formValidate.password;
+                        postVar.zoneid = _this.formValidate.zoneid;
+                        postVar.updateurl = _this.formValidate.updateurl;
+                        postVar.resultmatch = _this.formValidate.resultmatch;
+                        postVar.ttl = _this.formValidate.ttl;
+                        postVar.descr = _this.formValidate.descr;
+                        if(_this.formValidate.id){
+                            postVar.id = _this.formValidate.id;
+                        }
+
+                        var postData = {"action":"setDyndns","data":postVar};
+                        _this.applyLoading = true;
+                        uiPost.setDyndns(postData,function(data) {
+                            if (9999 == data.rescode) {
+                                cs.loginOut();
+                            }
+                            _this.applyLoading = false;
+                            console.log(data);
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('dynamicdns.set_success'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            }else{
+                                _this.$Message.error({content:_this.$t('dynamicdns.set_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
+                        });
+                    } else {
+                        _this.applyLoading = false;
+                    }
+                })
+            },
+            addDydns:function () {
+                var _this = this;
+                _this.addDydnsFlag = true;
+            },
+            updataDydns:function (params) {
+                var _this = this;
+                var postVar= {};
+
+                postVar.id = params.row.id;
+                if('1' != params.row.enable){
+                    postVar.enable = "yes";
+                }
+                postVar.type = params.row.type;
+                postVar.interface = params.row.interface;
+                postVar.requestif = params.row.requestif;
+                postVar.host = params.row.host;
+                postVar.mx = params.row.mx;
+
+                if('1' == params.row.wildcard){
+                    postVar.wildcard = "yes";
+                }
+                if('1' == params.row.verboselog){
+                    postVar.verboselog = "yes";
+                }
+                if('1' == params.row.curl_ipresolve_v4){
+                    postVar.curl_ipresolve_v4 = "yes";
+                }
+                if('1' == params.row.curl_ssl_verifypeer){
+                    postVar.curl_ssl_verifypeer = "yes";
+                }
+
+                postVar.username = params.row.username;
+                postVar.password = params.row.password;
+                postVar.zoneid = params.row.zoneid;
+                postVar.updateurl = params.row.updateurl;
+                postVar.resultmatch = params.row.resultmatch;
+                postVar.ttl = params.row.ttl;
+                postVar.descr = params.row.descr;
+
+
+                var postData = {"action":"setDyndns","data":postVar};
+                _this.$Spin.show();   //加载动画
+                uiPost.setDyndns(postData,function(data) {
+                    if (9999 == data.rescode) {
+                        cs.loginOut();
+                    }
+                    _this.$Spin.hide();   //关闭加载动画
+                    if (0 == data.rescode) {
+                        _this.$Message.success({content:_this.$t('dynamicdns.set_success'),onClose:function(){
+                            location.href = location.href;
+                        }});
+                    }else{
+                        _this.$Message.error({content:_this.$t('dynamicdns.set_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                    }
+                });
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

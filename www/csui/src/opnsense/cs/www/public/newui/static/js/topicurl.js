@@ -6592,6 +6592,102 @@ uiPost.prototype.doLogin = function(postVar,callback){
         this.url = '/webapi';
         return this.post(postVar,callback);
     };
+    uiPost.prototype.getOpenvpnSvrStatus = function(postVar,callback){
+        this.topicurl = 'getOpenvpnSvrStatus';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setIpsecPhase1 = function(postVar,callback){
+        this.topicurl = 'setIpsecPhase1';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setOpenvpnSvrStatus = function(postVar,callback){
+        this.topicurl = 'setOpenvpnSvrStatus';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getIpsecPhase1 = function(postVar,callback){
+        this.topicurl = 'getIpsecPhase1';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getOpenvpnEncryInfo = function(postVar,callback){
+        this.topicurl = 'getOpenvpnEncryInfo';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getIpsecPhase2 = function(postVar,callback){
+        this.topicurl = 'getIpsecPhase2';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getLanWanInf = function(postVar,callback){
+        this.topicurl = 'getLanWanInf';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setIpsecPhase2 = function(postVar,callback){
+        this.topicurl = 'setIpsecPhase2';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getIpsecStatus = function(postVar,callback){
+        this.topicurl = 'getIpsecStatus';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.delIpsecPhase1 = function(postVar,callback){
+        this.topicurl = 'delIpsecPhase1';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.delIpsecPhase2 = function(postVar,callback){
+        this.topicurl = 'delIpsecPhase2';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.ipsecConnect = function(postVar,callback){
+        this.topicurl = 'ipsecConnect';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.ipsecDisconnect = function(postVar,callback){
+        this.topicurl = 'ipsecDisconnect';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getDyndnsList = function(postVar,callback){
+        this.topicurl = 'getDyndnsList';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setDyndns = function(postVar,callback){
+        this.topicurl = 'setDyndns';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.delDyndns = function(postVar,callback){
+        this.topicurl = 'delDyndns';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
 
 	obj.uiPost = new uiPost();
 })(window);

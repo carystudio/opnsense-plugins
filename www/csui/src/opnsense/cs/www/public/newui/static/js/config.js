@@ -27,7 +27,7 @@ var globalConfig = {
     "defaultLang":"en",
     "currentMode":"GW",
     "currentModeMenu":{
-        "BR":['/internet/wan','/firewall/qos','/firewall','/internet/static_dhcp','/internet/dhcp_detect'],
+        "BR":['/internet/wan','/firewall/qos','/firewall','/internet/static_dhcp','/internet/dhcp_detect']
     },
     "xs":24,
     "lg":{span:18,offset:3},
@@ -296,6 +296,48 @@ var menu = [
         "lang": "qos",
         "display":true,
         "sub": false
+    },
+    {
+        "id":"14",
+        "href": "/newui/vpn",
+        "icon": "paper-airplane",
+        "lang": "vpn",
+        "display":true,
+        "sub": [
+            {
+                "id":"14-1",
+                "href": "/newui/vpn/openservers",
+                "lang": "openservers",
+                "display":false
+            },
+            {
+                "id":"14-2",
+                "href": "/vpn/openclients",
+                "lang": "openclients",
+                "display":false
+            },
+            {
+                "id":"14-3",
+                "href": "/newui/vpn/ipsec",
+                "lang": "ipsec",
+                "display":true
+            }
+        ]
+    },
+    {
+        "id":"15",
+        "href": "/newui/service",
+        "icon": "ios-cog",
+        "lang": "service",
+        "display":true,
+        "sub": [
+            {
+                "id":"15-1",
+                "href": "/newui/service/dynamicdns",
+                "lang": "dynamicdns",
+                "display":true
+            }
+        ]
     },
     {
         "id":"8",

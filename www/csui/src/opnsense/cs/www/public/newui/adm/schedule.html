@@ -97,11 +97,11 @@ var cs_main = {
 			applyLoading:false,
 			arpLoading:true,
 
-			days:'31',
+			days:31,
 			formValidate: {
 				status:true,
 				month:'0',
-				date:'0',
+				date:0,
 				week:'0',
 				time:'00:00'
 			},
@@ -112,13 +112,11 @@ var cs_main = {
 		var _this = this;
 		var postData = {"action":"getRebootSched"};
 		uiPost.getRebootSched(postData,function(data){
-			console.log(data);
 			if (9999 == data.rescode){
 				cs.loginOut();
 			}
 			if (0 == data.rescode) {
 				var data = data.data;
-				console.log(data);
 				if ('0' != data.Enable) {
 					_this.formValidate.status = true;
 					if(undefined == data.TimeMonth){
@@ -127,9 +125,9 @@ var cs_main = {
 						_this.formValidate.month = data.TimeMonth;
 					}
 					if(undefined == data.TimeDate){
-						_this.formValidate.date = '0';
+						_this.formValidate.date = 0;
 					}else{
-						_this.formValidate.date = data.TimeDate;
+						_this.formValidate.date = Number(data.TimeDate);
 					}
 					if(undefined == data.TimeWeek){
 						_this.formValidate.week = '0';
@@ -203,100 +201,100 @@ var cs_main = {
 			var _this = this;
 			return [
 				{
-					value:'0',
+					value:0,
 					lable:_this.$t('reboot_schedule.all')
 				},{
-					value:"1",
+					value:1,
 					lable:_this.$t('reboot_schedule.one_day')
 				},{
-					value:"2",
+					value:2,
 					lable:_this.$t('reboot_schedule.two_day')
 				},{
-					value:"3",
+					value:3,
 					lable:_this.$t('reboot_schedule.three_day')
 				},{
-					value:"4",
+					value:4,
 					lable:_this.$t('reboot_schedule.four_day')
 				},{
-					value:"5",
+					value:5,
 					lable:_this.$t('reboot_schedule.five_day')
 				},{
-					value:"6",
+					value:6,
 					lable:_this.$t('reboot_schedule.six_day')
 				},{
-					value:"7",
+					value:7,
 					lable:_this.$t('reboot_schedule.seven_day')
 				},{
-					value:"8",
+					value:8,
 					lable:_this.$t('reboot_schedule.eight_day')
 				},{
-					value:"9",
+					value:9,
 					lable:_this.$t('reboot_schedule.nine_day')
 				},{
-					value:"10",
+					value:10,
 					lable:_this.$t('reboot_schedule.ten_day')
 				},{
-					value:"11",
+					value:11,
 					lable:_this.$t('reboot_schedule.eleven_day')
 				},{
-					value:"12",
+					value:12,
 					lable:_this.$t('reboot_schedule.twelve_day')
 				},{
-					value:"13",
+					value:13,
 					lable:_this.$t('reboot_schedule.thirteen_day')
 				},{
-					value:"14",
+					value:14,
 					lable:_this.$t('reboot_schedule.fourteen_day')
 				},{
-					value:"15",
+					value:15,
 					lable:_this.$t('reboot_schedule.fifteen_day')
 				},{
-					value:"16",
+					value:16,
 					lable:_this.$t('reboot_schedule.sixteen_day')
 				},{
-					value:"17",
+					value:17,
 					lable:_this.$t('reboot_schedule.seveteen_day')
 				},{
-					value:"18",
+					value:18,
 					lable:_this.$t('reboot_schedule.eighteen_day')
 				},{
-					value:"19",
+					value:19,
 					lable:_this.$t('reboot_schedule.nineteen_day')
 				},{
-					value:"20",
+					value:20,
 					lable:_this.$t('reboot_schedule.twenty_day')
 				},{
-					value:"21",
+					value:21,
 					lable:_this.$t('reboot_schedule.twenty_one_day')
 				},{
-					value:"22",
+					value:22,
 					lable:_this.$t('reboot_schedule.twenty_two_day')
 				},{
-					value:"23",
+					value:23,
 					lable:_this.$t('reboot_schedule.twenty_three_day')
 				},{
-					value:"24",
+					value:24,
 					lable:_this.$t('reboot_schedule.twenty_four_day')
 				},{
-					value:"25",
+					value:25,
 					lable:_this.$t('reboot_schedule.twenty_five_day')
 				},{
-					value:"26",
+					value:26,
 					lable:_this.$t('reboot_schedule.twenty_six_day')
 				},{
-					value:"27",
+					value:27,
 					lable:_this.$t('reboot_schedule.twenty_sevne_day')
 				},{
-					value:"28",
+					value:28,
 					lable:_this.$t('reboot_schedule.twenty_eight_day')
 				},{
-					value:"29",
+					value:29,
 					lable:_this.$t('reboot_schedule.twenty_nine_day')
 				},{
-					value:"30",
+					value:30,
 					lable:_this.$t('reboot_schedule.thirty_day')
 				},{
-					value:"31",
+					value:31,
 					lable:_this.$t('reboot_schedule.thirty_one_day')
 				}
 			];
@@ -408,7 +406,7 @@ var cs_main = {
 			var day = d.getDate();	//取某月的天数
 			_this.days = day;
 			if(day < _this.formValidate.date){
-				_this.formValidate.date = day+'';
+				_this.formValidate.date = day;
 			}
 		}
     }

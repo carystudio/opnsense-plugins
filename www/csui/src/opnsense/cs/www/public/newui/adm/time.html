@@ -323,6 +323,7 @@ var cs_main = {
           this.formValidate.date = currentDate;
           var postVar = {};
           postVar.host_time = this.formValidate.date;
+          this.formValidate.ntpEnabled = false;
           /*uiPost.NTPSyncWithHost(postVar,function(){
               location.href = location.href;
           });*/
