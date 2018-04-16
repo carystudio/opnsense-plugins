@@ -325,6 +325,21 @@ var menu = [
         ]
     },
     {
+        "id":"15",
+        "href": "/newui/service",
+        "icon": "ios-cog",
+        "lang": "service",
+        "display":true,
+        "sub": [
+            {
+                "id":"15-1",
+                "href": "/newui/service/dynamicdns",
+                "lang": "dynamicdns",
+                "display":true
+            }
+        ]
+    },
+    {
         "id":"8",
         "href": "/newui/firewall",
         "icon": "fireball",

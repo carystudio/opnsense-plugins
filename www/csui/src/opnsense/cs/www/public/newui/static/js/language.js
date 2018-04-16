@@ -72,7 +72,9 @@ var messages = {
             server:"Local Server",
             pptp:"PPTP Server",
             l2tp:"L2TP Server",
-            account:"Account Management"
+            account:"Account Management",
+            service:"Service",
+            dynamicdns:"Dynamic DNS"
         },
         login:{
             "title":"USER LOGIN",
@@ -779,6 +781,39 @@ var messages = {
             "msg6":"Delete failed!",
             "msg7":"PPTP specifies that the user's IP must be in the range of PPTP address pool: ",
             "msg10":"L2TP specifies that the user's IP must be in the range of L2TP address pool: "
+        },
+        "dynamicdns":{
+            "help":"This page is used to set up dynamic DNS.",
+            "status":"On/Off",
+            "service_type":"Service type",
+            "interface_monitor":"Interface to monitor",
+            "interface_send":"Interface to send update from",
+            "host":"Hostname",
+            "wildcards":"Wildcards",
+            "verbose_log":"Verbose logging",
+            "force_ipv4":"Force IPv4 resolving",
+            "verify_ssl_peer":"Verify SSL peer",
+            "username":"Username",
+            "password":"Password",
+            "zoneid":"Zone ID",
+            "update_url":"Update URL",
+            "result_match":"Result Match",
+            "descr":"Description",
+            "interface":"Interface",
+            "service":"Service",
+            "hostname":"Hostname",
+            "cached_ip":"Cached IP",
+            "operation":"Operation",
+            "edit":"Edit",
+            "delete":"Delete",
+            "delete_success":"Delete success!",
+            "delete_fail":"Delete failed!",
+            "set_success":"Set up success!",
+            "set_fail":"Fail to set up!",
+            "msg1":"The host name is not empty!",
+            "msg2":"The username is not empty!",
+            "msg3":"The password cannot be empty!",
+            "msg4":"Update URL can't be empty!"
         },
         "ipf":{
             "title":"IP/Port Filtering",
@@ -2008,12 +2043,36 @@ var messages = {
             "IPSEC_502":"Delete the failure!",
 
 
-            "OVPN_216":""
+
+            "OVPN_216":"",
+
+
+            "DDNS_100":"The open parameter is incorrect!",
+            "DDNS_101":"The service type parameter is incorrect!",
+            "DDNS_102":"The interface parameters are not correct!",
+            "DDNS_103":"Send updates from the interface is not correct!",
+            "DDNS_104":"The host name is not empty!",
+            "DDNS_105":"The MX parameter is not correct!",
+            "DDNS_106":"The parameter of the wildcard is not correct!",
+            "DDNS_107":"The verbose log parameter is not correct!",
+            "DDNS_108":"The username is not empty!",
+            "DDNS_109":"The password can not be empty!",
+            "DDNS_110":"The description cannot be more than 60 characters!",
+            "DDNS_111":"Update URL can not be empty!",
+            "DDNS_112":"Mandatory IPv4 parsing parameters are incorrect!",
+            "DDNS_113":"SSL to the end check parameter is incorrect!",
+
+            "DDNS_120":"The parameters of the area ID are not correct!",
+
+            "DDNS_200":"The parameter is wrong!",
+            "DDNS_201":"The data does not exist or has been deleted!"
         },
         common:{
             "enabled":"Enabled",
             "disabled":"Disabled",
             "apply":"Apply",
+            "add":"Add",
+            "save":"Save",
             "loading":"setting ...",
             "upload":"Uploading...",
             on:"ON",
@@ -2099,7 +2158,9 @@ var messages = {
             server:"本地服务器",
             pptp:"PPTP服务器",
             l2tp:"L2TP服务器",
-            account:"账号管理"
+            account:"账号管理",
+            service:"服务",
+            dynamicdns:"动态DNS"
         },
         login:{
             "title":"用户登录",
@@ -2799,6 +2860,39 @@ var messages = {
             "msg6":"删除失败！",
             "msg7":"PPTP指定用户的IP必须在PPTP地址池范围内：",
             "msg10":"L2TP指定用户的IP必须在L2TP地址池范围内："
+        },
+        "dynamicdns":{
+            "help":"本页面用于设置动态DNS。",
+            "status":"开关",
+            "service_type":"服务类型",
+            "interface_monitor":"接口监视",
+            "interface_send":"从接口发送更新",
+            "host":"主机名",
+            "wildcards":"通配符",
+            "verbose_log":"verbose日志",
+            "force_ipv4":"强制IPv4解析",
+            "verify_ssl_peer":"SSL对端验证",
+            "username":"用户名",
+            "password":"密码",
+            "zoneid":"区域ID",
+            "update_url":"更新URL",
+            "result_match":"结果匹配",
+            "descr":"描述",
+            "interface":"接口",
+            "service":"服务",
+            "hostname":"主机名",
+            "cached_ip":"缓存的IP",
+            "operation":"操作",
+            "edit":"编辑",
+            "delete":"删除",
+            "delete_success":"删除成功！",
+            "delete_fail":"删除失败！",
+            "set_success":"设置成功！",
+            "set_fail":"设置失败！",
+            "msg1":"主机名不能为空！",
+            "msg2":"用户名不能为空！",
+            "msg3":"密码不能为空！",
+            "msg4":"更新URL不能为空！"
         },
         "ipf":{
             "title":"IP/端口过滤",
@@ -4051,13 +4145,36 @@ var messages = {
             "IPSEC_502":"删除失败！",
 
 
-            "OVPN_216":""
+            "OVPN_216":"",
+
+
+            "DDNS_100":"开启参数不正确！",
+            "DDNS_101":"服务类型参数不正确！",
+            "DDNS_102":"接口参数不正确！",
+            "DDNS_103":"从接口发送更新参数不正确！",
+            "DDNS_104":"主机名不能为空！",
+            "DDNS_105":"MX参数不正确！",
+            "DDNS_106":"通配符参数不正确！",
+            "DDNS_107":"verbose日志参数不正确！",
+            "DDNS_108":"用户名不能为空！",
+            "DDNS_109":"密码不能为空！",
+            "DDNS_110":"描述不能超过60字符！",
+            "DDNS_111":"更新URL不能为空！",
+            "DDNS_112":"强制IPv4解析参数不正确！",
+            "DDNS_113":"SSL对端校验参数不正确！",
+
+            "DDNS_120":"区域ID参数不正确！",
+
+            "DDNS_200":"参数错误！",
+            "DDNS_201":"该数据不存在或已删除！"
 
         },
         common:{
             enabled:"启用",
             disabled:"禁用",
             apply:"应用",
+            add:"添加",
+            save:"保存",
             "loading":"正在设置...",
             "upload":"正在上传...",
             on:"开",
