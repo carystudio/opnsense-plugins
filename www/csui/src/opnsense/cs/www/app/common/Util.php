@@ -161,4 +161,16 @@ class Util
 
         return true;
     }
+
+    public static function check0and1($val){
+        if(!is_numeric($val)){
+            return false;
+        }
+        $val = intval($val);
+        if(0 != $val && 1 != $val){
+            return false;
+        }
+
+        return true;
+    }
 }

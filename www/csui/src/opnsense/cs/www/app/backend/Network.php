@@ -1560,4 +1560,17 @@ class Network extends Csbackend
 
         return $result;
     }
+
+    public static function getLanWanInf(){
+        global $config;
+
+        $result = array();
+        foreach($config['interfaces'] as $inf=>$interface){
+            if(strpos($interface['descr'], 'lan')===0 || strpos($interface['descr'], 'wan')===0){
+                $result[] = array('interface'=>$inf, 'name'=>$interface['descr']);
+            }
+        }
+
+        return $result;
+    }
 }
