@@ -308,18 +308,24 @@ var menu = [
                 "id":"14-1",
                 "href": "/newui/vpn/openservers",
                 "lang": "openservers",
-                "display":false
+                "display":true
             },
             {
                 "id":"14-2",
-                "href": "/vpn/openclients",
+                "href": "/newui/vpn/openclients",
                 "lang": "openclients",
-                "display":false
+                "display":true
             },
             {
                 "id":"14-3",
                 "href": "/newui/vpn/ipsec",
                 "lang": "ipsec",
+                "display":true
+            },
+            {
+                "id":"14-4",
+                "href": "/newui/vpn/account",
+                "lang": "account",
                 "display":true
             }
         ]

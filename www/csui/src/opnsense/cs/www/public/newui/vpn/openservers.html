@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb"  :breadcrumb="[$t('menu.vpn'),$t('menu.openservers')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row :gutter="26">
+            <!-- content start -->
+            <Col  :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" >
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+            <!--<Form label-position="left" :label-width="200" :model="formValidate" :rules="ruleValidate">-->
+                    <Alert>
+                        {{ $t('openvpn.help') }}
+                    </Alert>
+
+            <!--<div v-if="formValidate.status == true">-->
+                <Card>
+                    <p slot="title">
+                        <Icon type="information-circled"></Icon>
+                        {{$t('openvpn.convention_info')}}
+                    </p>
+                    <FormItem :label="$t('openvpn.on_and_off')" prop="on_and_off">
+                        <i-switch v-model="formValidate.status" size="large">
+                            <span slot="open">{{ $t('common.enabled') }}</span>
+                            <span slot="close">{{ $t('common.disabled') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.Server_mode')">
+                        <Select v-model="formValidate.mode"  @on-change="modeStatus">
+                            <Option v-for="mode in serversModeOption" :value="mode.value" :key="mode.value"> {{ mode.option }}</Option>
+                        </Select>
+                    </FormItem>
+
+                    <FormItem :label="$t('openvpn.protocol')">
+                        <Select v-model="formValidate.protocol">
+                            <Option v-for="treaty in treatyOption" :value="treaty.value" :key="treaty.value"> {{ treaty.option }}</Option>
+                        </Select>
+                        <!--<Select v-model="formValidate.protocol">
+                            <Option value="UDP">UDP</Option>
+                            <Option value="TCP">TCP</Option>
+                        </Select>-->
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.device_mode')">
+                        <i-select v-model="formValidate.dev_mode">
+                            <Option value="tun" selected="selected">tun</Option>
+                            <Option value="tap">tap</Option>
+                        </i-select>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.port')" prop="port">
+                        <Select v-model="formValidate.interface">
+                            <Option v-for="port in portOption" :value="port.interface" :key="port.interface"> {{ port.name }}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.local_port')" prop="local_port">
+                        <Input v-model="formValidate.local_port"  :maxlength="32"></Input>
+                    </FormItem>
+                </Card>
+                <br>
+                <Card>
+                    <p slot="title">
+                        <Icon type="information-circled"></Icon>
+                        {{ $t('openvpn.encrypt_set') }}
+                    </p>
+                    <div v-if="p2p_shared_key == false">
+                        <!--TLS认证-->
+                        <FormItem :label="$t('openvpn.TLS_certification')" prop="TLS_certification">
+                            <Checkbox v-model="formValidate.tlsauth_enable"> *{{ $t('openvpn.msg1') }}</Checkbox>
+                            <div v-if="formValidate.tlsauth_enable == true" >
+                                <Checkbox v-model="formValidate.autotls_enable"> *{{ $t('openvpn.msg2') }}</Checkbox>
+                                <FormItem v-if="formValidate.autotls_enable != true" prop="tls">
+                                    <Input v-model="formValidate.tls" type="textarea" :rows="4" :placeholder="$t('openvpn.msg3')"></Input>
+                                </FormItem>
+                            </div>
+                        </FormItem>
+                        <!--对等证书颁发机构-->
+                        <FormItem :label="$t('openvpn.awarding_bodies')" prop="ca">
+                            <Input v-model="formValidate.ca" type="textarea" :rows="3"></Input>
+                        </FormItem>
+
+                       <!-- <FormItem :label="$t('openvpn.Certificate_revocation_list')">
+                            <Select v-model="formValidate.revocation_list">
+                                <Option v-for="revocation_list in revocationListOption" :value="revocation_list.value" :key="revocation_list.value"> {{ revocation_list.option }}</Option>
+                            </Select>
+                        </FormItem>-->
+                        <!--服务器证书-->
+                        <FormItem :label="$t('openvpn.server_id')" prop="cert">
+                            <Input v-model="formValidate.cert" type="textarea" :rows="3"></Input>
+                        </FormItem>
+                        <FormItem :label="$t('openvpn.keys_data')" prop="prv">
+                            <Input v-model="formValidate.prv" type="textarea" :rows="3"></Input>
+                        </FormItem>
+                        <FormItem :label="$t('openvpn.DH_par_len')">
+                            <Select v-model="formValidate.dh_length">
+                                <Option v-for="par_len in parLenOption" :value="par_len.value" :key="par_len.value"> {{ par_len.option }}</Option>
+                            </Select>
+                        </FormItem>
+                        <FormItem :label="$t('openvpn.certificate_deep')">
+                            <Select v-model="formValidate.cert_depth">
+                                <Option v-for="certificate_deep in certificateDeepOption" :value="certificate_deep.value" :key="certificate_deep.value"> {{ certificate_deep.option }}</Option>
+                            </Select>
+                        </FormItem>
+                    </div>
+                    <div v-if="p2p_shared_key == true">
+                        <FormItem :label="$t('openvpn.autokey_enable')" prop="autokey_enable">
+                            <Checkbox v-model="formValidate.autokey_enable"> * {{ $t('openvpn.msg34') }} </Checkbox>
+                            <FormItem v-if="formValidate.autokey_enable == false">
+                                <Input v-model="formValidate.shared_key" type="textarea" :rows="4" :placeholder="$t('openvpn.msg35')"></Input>
+                            </FormItem>
+                        </FormItem>
+                    </div>
+                    <FormItem :label="$t('openvpn.tkip')">
+                        <Select v-model="formValidate.crypto">
+                            <Option v-for="(item,idx) in tkipOption" :value="idx" :key="idx"> {{ item }}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.md5_approve')">
+                        <Select v-model="formValidate.digest">
+                            <Option v-for="(item,idx) in md5_approve" :value="idx" :key="idx"> {{ item }}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.hardware_encryption')">
+                        <Select v-model="formValidate.engine">
+                            <Option v-for="(item,idx) in hardware_encryption" :value="idx" :key="idx"> {{ item }}</Option>
+                        </Select>
+                    </FormItem>
+                    <!--<div v-if="server_tls_user == true">
+                        <FormItem :label="$t('openvpn.strictusercn')" prop="strictusercn">
+                            <Checkbox v-model="formValidate.strictusercn"> * $t('openvpn.msg36') </Checkbox>
+                        </FormItem>
+                    </div>-->
+                </Card>
+                <br>
+                <Card>
+                    <p slot="title">
+                        <Icon type="information-circled"></Icon>
+                        {{ $t('openvpn.tunnel_set') }}
+                    </p>
+                    <FormItem :label="$t('openvpn.ipv4_tunnel_set')" prop="ipv4_tunnel_set">
+                        <Input v-model="formValidate.tunnel_network"></Input>
+                    </FormItem>
+                    <!--<FormItem :label="$t('openvpn.ipv6_tunnel_set')" prop="ipv6_tunnel_set">
+                        <Input v-model="formValidate.tunnel_networkv6"></Input>
+                    </FormItem>-->
+                    <!--<FormItem :label="$t('openvpn.redirect_gateway')" prop="redirect_gateway">
+                        <Checkbox v-model="formValidate.redirect_gateway"> *{{ $t('openvpn.msg4') }}</Checkbox>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.ipv4_local_network')" v-if="redirect_gateway == false" prop="ipv4_local_network">
+                        <Input v-model="formValidate.local_network"></Input>
+                    </FormItem>-->
+                    <FormItem :label="$t('openvpn.ipv4_local_network')" prop="ipv4_local_network">
+                        <Input v-model="formValidate.local_network"></Input>
+                    </FormItem>
+                    <!--<FormItem :label="$t('openvpn.ipv6_local_network')" v-if="redirect_gateway == false" prop="ipv6_local_network">
+                        <Input v-model="formValidate.local_networkv6"></Input>
+                    </FormItem>-->
+                    <FormItem :label="$t('openvpn.ipv4_remote_network')" prop="ipv4_remote_network">
+                        <Input v-model="formValidate.remote_network"></Input>
+                    </FormItem>
+                    <!--<FormItem :label="$t('openvpn.ipv6_remote_network')" prop="ipv6_remote_network">
+                        <Input v-model="formValidate.remote_networkv6"></Input>
+                    </FormItem>-->
+                    <FormItem :label="$t('openvpn.concurrent_link')" prop="maxclients">
+                        <Input v-model="formValidate.maxclients"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.compress')">
+                        <i-select v-model="formValidate.compression">
+                            <Option value="" selected="selected">{{ $t('openvpn.msg27') }}</Option>
+                            <Option value="no">{{ $t('openvpn.msg28') }}</Option>
+                            <Option value="adaptive">{{ $t('openvpn.msg29') }}</Option>
+                            <Option value="yes">{{ $t('openvpn.msg30') }}</Option>
+                        </i-select>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.server_type')" prop="server_type">
+                        <Checkbox v-model="formValidate.passtos"> *{{ $t('openvpn.msg5') }} </Checkbox>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.client2client')" prop="client2client">
+                        <Checkbox v-model="formValidate.client2client"> *{{ $t('openvpn.msg37') }} </Checkbox>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.copy_url')" prop="copy_url">
+                        <Checkbox v-model="formValidate.duplicate_cn"> * {{ $t('openvpn.msg6') }}</Checkbox>
+                    </FormItem>
+                    <!--<FormItem :label="$t('openvpn.off_ipv6')" prop="off_ipv6">
+                        <Checkbox v-model="formValidate.no_tun_ipv6"> *{{ $t('openvpn.msg7') }} </Checkbox>
+                    </FormItem>-->
+                </Card>
+                <br>
+                <Card>
+                    <p slot="title">
+                        <Icon type="information-circled"></Icon>
+                        {{ $t('openvpn.client_set') }}
+                    </p>
+                    <FormItem :label="$t('openvpn.dynamic_ip')" prop="dynamic_ip">
+                        <Checkbox v-model="formValidate.dynamic_ip"> * {{ $t('openvpn.msg8') }}</Checkbox>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.ip_pool')" prop="ip_pool">
+                        <Checkbox v-model="formValidate.pool_enable"> *{{ $t('openvpn.msg9') }} </Checkbox>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.topology')" prop="topology">
+                        <Checkbox v-model="formValidate.topology_subnet"> </Checkbox>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.dns_def_area')" prop="dns_def_area">
+                        <Checkbox v-model="formValidate.dns_domain_enable"> *{{ $t('openvpn.msg10') }}</Checkbox>
+                        <FormItem v-show="formValidate.dns_domain_enable == true" prop="dns_domain">
+                            <Input v-model="formValidate.dns_domain" :placeholder="$t('openvpn.msg11')"></Input>
+                        </FormItem>
+                    </FormItem>
+
+                    <FormItem :label="$t('openvpn.dns_server')" prop="dns_server">
+                        <Checkbox v-model="formValidate.dns_server_enable"> *{{ $t('openvpn.msg12') }}</Checkbox>
+                        <div v-if="formValidate.dns_server_enable == true">
+                            {{ $t('openvpn.server') }} 1:
+                            <FormItem prop="dns_server1">
+                                <Input v-model="formValidate.dns_server1"></Input>
+                            </FormItem>
+
+                            {{ $t('openvpn.server') }} 2:
+                            <FormItem prop="dns_server2">
+                                <Input v-model="formValidate.dns_server2"></Input>
+                            </FormItem>
+                            {{ $t('openvpn.server') }} 3:
+                            <FormItem prop="dns_server3">
+                                <Input v-model="formValidate.dns_server3"></Input>
+                            </FormItem>
+                            {{ $t('openvpn.server') }} 4:
+                            <FormItem prop="dns_server4">
+                                <Input v-model="formValidate.dns_server4"></Input>
+                            </FormItem>
+                        </div>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.force_dns_up')" prop="force_dns_up">
+                        <Checkbox v-model="formValidate.push_register_dns"></Checkbox>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.time_server')" prop="time_server">
+                        <Checkbox v-model="formValidate.ntp_server_enable"> *{{ $t('openvpn.msg13') }}</Checkbox>
+                        <div v-if="formValidate.ntp_server_enable == true">
+                            {{ $t('openvpn.server') }} 1:
+                            <FormItem prop="ntp_server1">
+                                <Input v-model="formValidate.ntp_server1"></Input>
+                            </FormItem>
+                            {{ $t('openvpn.server') }} 2:
+                            <FormItem prop="ntp_server2">
+                                <Input v-model="formValidate.ntp_server2"></Input>
+                            </FormItem>
+                        </div>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.netbios_opt')" prop="netbios_opt">
+                        <Checkbox v-model="formValidate.netbios_enable"> *{{ $t('openvpn.msg14') }}</Checkbox>
+                        <div v-if="formValidate.netbios_enable == true">
+                            {{ $t('openvpn.node_type') }} :
+                            <i-select v-model="formValidate.netbios_ntype">
+                                <Option value="0">node</Option>
+                                <Option value="1">b-node</Option>
+                                <Option value="2">p-node</Option>
+                                <Option value="4">m-node</Option>
+                                <Option value="5">h-node</Option>
+                            </i-select>
+                            {{ $t('openvpn.scope_id') }} :
+                            <Input v-model="formValidate.netbios_scope"></Input>
+                        </div>
+                    </FormItem>
+                    <FormItem v-if="formValidate.netbios_enable == true" :label="$t('openvpn.wins_server')" prop="wins_server" >
+                        <Checkbox v-model="formValidate.wins_server_enable"> *{{ $t('openvpn.msg15') }}</Checkbox>
+                        <div v-if="formValidate.wins_server_enable == true">
+                            {{ $t('openvpn.server') }} 1:
+                            <FormItem prop="wins_server1">
+                                <Input v-model="formValidate.wins_server1"></Input>
+                            </FormItem>
+                            {{ $t('openvpn.server') }} 2:
+                            <FormItem prop="wins_server2">
+                                <Input v-model="formValidate.wins_server2"></Input>
+                            </FormItem>
+                        </div>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.client_adm_port')" prop="client_adm_port">
+                        <Checkbox v-model="formValidate.client_mgmt_port_enable"> *{{ $t('openvpn.msg16') }}</Checkbox>
+                        <div v-if="formValidate.client_mgmt_port_enable == true">
+                            <FormItem prop="client_mgmt_port">
+                                <Input v-model="formValidate.client_mgmt_port"></Input>
+                            </FormItem>
+                        </div>
+                    </FormItem>
+                </Card>
+                <br>
+                <Card>
+                    <p slot="title">
+                        <Icon type="information-circled"></Icon>
+                        {{ $t('openvpn.expert_set') }}
+                    </p>
+                    <FormItem :label="$t('openvpn.advanced')" prop="advanced">
+                        <Input v-model="formValidate.custom_options" type="textarea" :rows="4" :placeholder="$t('openvpn.msg17')"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('openvpn.verbosity_level')">
+                        <Select v-model="formValidate.verbosity_level">
+                            <Option v-for="verbosity_level in verbosityLevelOption" :value="verbosity_level.value" :key="verbosity_level.value"> {{ verbosity_level.option }}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem v-if="server_tls == false" :label="$t('openvpn.reneg-sec')" prop="reneg_sec">
+                        <Input v-model="formValidate.reneg_sec"><span slot="append">{{ $t('openvpn.sec') }}</span></Input>
+                    </FormItem>
+                    <br>
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('openvpn.save') }}</Button>
+                    </FormItem>
+                </Card>
+            <!--</div>-->
+            </Form>
+            </Col>
+            <!-- content end -->
+        </Row>
+    </div>
+
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/plugin/jquery.base64.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    return {
+        globalConfig:globalConfig,
+        applyLoading: false,
+        server_tls: false,
+        p2p_shared_key: false,
+        server_tls_user: false,
+        tkipOption:{},
+        md5_approve:{},
+        hardware_encryption:{},
+        portOption:[],
+
+        formValidate:{
+            tlsauth_enable: false,
+            autotls_enable: true,
+            redirect_gateway: false,
+            dns_domain_enable: false,
+            dns_server_enable: false,
+            ntp_server_enable: false,
+            netbios_enable: false,
+            wins_server_enable: false,
+            client_mgmt_port_enable: false,
+            autokey_enable: true,
+            status: false,
+            strictusercn:'',
+            shared_key: '',
+            protocol: '',
+            dev_mode: '',
+            interface: '',
+            local_port: '',
+            tls: '',
+            ca: '',
+            cert: '',
+            prv: '',
+            revocation_list: '',
+            dh_length: '',
+            crypto: '',
+            digest: '',
+            engine: '',
+            cert_depth: '',
+            tunnel_network: '',
+            tunnel_networkv6: '',
+            local_network: '',
+            local_networkv6: '',
+            remote_network: '',
+            remote_networkv6: '',
+            maxclients: '',
+            compression: '',
+            passtos: '',
+            client2client: '',
+            duplicate_cn: '',
+            no_tun_ipv6: '',
+            dynamic_ip: '',
+            pool_enable: '',
+            topology_subnet: '',
+            dns_domain: '',
+            dns_server1: '',
+            dns_server2: '',
+            dns_server3: '',
+            dns_server4: '',
+            push_register_dns: '',
+            ntp_server1: '',
+            ntp_server2: '',
+            netbios_ntype: '',
+            netbios_scope: '',
+            wins_server1: '',
+            wins_server2: '',
+            client_mgmt_port: '',
+            custom_options: '',
+            verbosity_level: '',
+            reneg_sec: 0,
+            staNum:0,
+            multiAp1:'',
+            multiAp2:'',
+            apNum:''
+        }
+
+      }
+    },
+    computed:{
+        ruleValidate:function (){
+            var _this = this;
+            return {
+                local_port: [
+                    { validator:function(r, v, f) {
+                        var _s = cs.num(v);
+                        if(0 == _s){
+                            f(_this.$t('openvpn.msg38'));
+                        }else if(1 == _s){
+                            f(_this.$t('openvpn.msg39'));
+                        }else if(v >65535 || v<=0){
+                            f(_this.$t('openvpn.msg40'));
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                tls: [
+                    { validator:function(r, v, f) {
+                        if (_this.formValidate.tlsauth_enable == true){
+                            if(_this.formValidate.autotls_enable ==false){
+                                var _s = cs.string(v);
+                                if(0 == _s){
+                                    f(_this.$t('openvpn.msg41'));
+                                }
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                ca: [
+                    { validator:function(r, v, f) {
+                        var _s = cs.string(v);
+                        if(0 == _s){
+                            f(_this.$t('openvpn.msg42'));
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                cert: [
+                    { validator:function(r, v, f) {
+                        var _s = cs.string(v);
+                        if(0 == _s){
+                            f(_this.$t('openvpn.msg43'));
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                prv: [
+                    { validator:function(r, v, f) {
+                        var _s = cs.string(v);
+                        if(0 == _s){
+                            f(_this.$t('openvpn.msg44'));
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                maxclients: [
+                    { validator:function(r, v, f) {
+                        var _s = cs.num(v);
+                        if(0 == _s){
+                            f(_this.$t('openvpn.msg45'));
+                        }else if(_this.formValidate.maxclients <1 || _this.formValidate.maxclients>1024){
+                            f(_this.$t('openvpn.msg46'));
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                dns_domain: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.dns_domain_enable == true){
+                            var _s = cs.num(v);
+                            if(0 == _s){
+                                f(_this.$t('openvpn.msg47'));
+                            }else if(1 == _s){
+                                f(_this.$t('openvpn.msg48'));
+                            }else if(v >65535 || v<=0){
+                                f(_this.$t('openvpn.msg49'));
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                dns_server1: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.dns_server_enable == true){
+                            if(v && v.length > 0){
+                                var _s = cs.ip(v);
+                                if(99 != _s && 0 != _s){
+                                    f(_this.$t('openvpn.msg50'));
+                                }
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                dns_server2: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.dns_server_enable == true){
+                            if(v && v.length > 0){
+                                var _s = cs.ip(v);
+                                if(99 != _s && 0 != _s){
+                                    f(_this.$t('openvpn.msg51'));
+                                }
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                dns_server3: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.dns_server_enable == true){
+                            if(v && v.length > 0){
+                                var _s = cs.ip(v);
+                                if(99 != _s && 0 != _s){
+                                    f(_this.$t('openvpn.msg52'));
+                                }
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                dns_server4: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.dns_server_enable == true){
+                            if(v && v.length > 0){
+                                var _s = cs.ip(v);
+                                if(99 != _s && 0 != _s){
+                                    f(_this.$t('openvpn.msg53'));
+                                }
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                ntp_server1: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.ntp_server_enable == true){
+                            if(v && v.length > 0){
+                                var _s = cs.ip(v);
+                                if(99 != _s && 0 != _s){
+                                    f(_this.$t('openvpn.msg54'));
+                                }
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                ntp_server2: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.ntp_server_enable == true){
+                            if(v && v.length > 0){
+                                var _s = cs.ip(v);
+                                if(99 != _s && 0 != _s){
+                                    f(_this.$t('openvpn.msg55'));
+                                }
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                wins_server1: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.netbios_enable == true){
+                            if(_this.formValidate.wins_server_enable == true){
+                                if( v && v.length > 0){
+                                    var _s = cs.ip(v);
+                                    if(99 != _s && 0 != _s){
+                                        f(_this.$t('openvpn.msg56'));
+                                    }
+                                }
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                wins_server2: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.netbios_enable == true){
+                            if(_this.formValidate.wins_server_enable == true){
+                                if( v && v.length > 0){
+                                    var _s = cs.ip(v);
+                                    if(99 != _s && 0 != _s){
+                                        f(_this.$t('openvpn.msg57'));
+                                    }
+                                }
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                client_mgmt_port: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.client_mgmt_port_enable == true){
+                            var _s = cs.num(v);
+                            if(0 == _s){
+                                f(_this.$t('openvpn.msg58'));
+                            }else if(1 == _s){
+                                f(_this.$t('openvpn.msg59'));
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                reneg_sec: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.mode != 'server_tls'){
+                            var _s = cs.num(v);
+                            if(1 == _s){
+                                f(_this.$t('openvpn.msg60'));
+                            }else if(0 == _s){
+                                f(_this.$t('openvpn.msg61'));
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ]
+            }
+        },
+        serversModeOption:function(){
+            var _this = this;
+            return [
+                {
+                    option: _this.$t('openvpn.remote_access_1'),
+                    value: 'server_tls'
+                },{
+                    option: _this.$t('openvpn.remote_access_2'),
+                    value: 'server_user'
+                },{
+                    option: _this.$t('openvpn.remote_access_3'),
+                    value: 'server_tls_user'
+                }
+            ]
+        },
+        treatyOption:function(){
+            var _this = this;
+            return [
+                {option: 'UDP', value: 'UDP'},
+                {option: 'TCP', value: 'TCP'}
+            ]
+        },
+        revocationListOption:function () {
+            return[{
+
+            }]
+        },
+        parLenOption:function () {
+            return[{
+                    option: '1024',
+                    value: '1024'
+                }, {
+                    option: '2048',
+                    value: '2048'
+                }, {
+                    option: '4096',
+                    value: '4096'
+                }
+            ]
+        },
+        certificateDeepOption:function () {
+            var _this = this;
+            return[/*{
+                option:_this.$t('openvpn.msg21'),
+                value:''
+            },*/{
+                option:_this.$t('openvpn.msg22'),
+                value:'1'
+            },{
+                option:_this.$t('openvpn.msg23'),
+                value:'2'
+            },{
+                option:_this.$t('openvpn.msg24'),
+                value:'3'
+            },{
+                option:_this.$t('openvpn.msg25'),
+                value:'4'
+            },{
+                option:_this.$t('openvpn.msg26'),
+                value:'5'
+            }]
+        },
+        verbosityLevelOption:function () {
+            var _this =this;
+            return[{
+                option:_this.$t('openvpn.msg31'),
+                value:'0'
+            },{
+                option:_this.$t('openvpn.msg32'),
+                value:'1'
+            },{
+                option:'2',
+                value:'2'
+            },{
+                option:_this.$t('openvpn.msg33'),
+                value:'3'
+            },{
+                option:'4',
+                value:'4'
+            },{
+                option:'5',
+                value:'5'
+            },{
+                option:'6',
+                value:'6'
+            },{
+                option:'7',
+                value:'7'
+            },{
+                option:'8',
+                value:'8'
+            },{
+                option:'9',
+                value:'9'
+            },{
+                option:'10',
+                value:'10'
+            },{
+                option:'11',
+                value:'11'
+            }]
+        }
+    },
+    created:function() {
+        var _this = this;
+
+        var postVar = {"action":"getLanWanInf","data":[]};
+        _this.$Spin.show();  //加载动画
+        uiPost.getLanWanInf(postVar,function(data){
+            console.log(data.data);
+            if (9999 == data.rescode){
+                cs.loginOut();
+            }
+            _this.$Spin.hide();   //关闭加载动画
+            if (0 == data.rescode){
+                _this.portOption = data.data;
+            }
+        });
+
+        var psotData2 =  {"action":"getOpenvpnEncryInfo","data":{}};
+        uiPost.getOpenvpnEncryInfo(psotData2,function (data) {
+            if (9999 == data.rescode){
+                cs.loginOut();
+            }
+            if (0 == data.rescode){
+                _this.tkipOption = data.data.cipherList;
+                _this.md5_approve = data.data.digestList;
+                _this.hardware_encryption = data.data.engineList;
+            }
+        });
+
+        var postData = {"action":"getOpenvpnSvrStatus","data":{}};
+        uiPost.getOpenvpnSvrStatus(postData,function(data){
+            console.log(data);
+            if (9999 == data.rescode){
+                cs.loginOut();
+            }
+            if (0 == data.rescode) {
+                if ('1' == data.data.disable || 'yes' == data.data.disable){
+                    _this.formValidate.status = false;
+                }else {
+                    _this.formValidate.status = true;
+                }
+
+                _this.formValidate.ca =  $.base64.decode(data.data.ca);   //对等证书颁发机构
+                console.log("-------------------------start2--------------------------------");
+                _this.formValidate.cert = $.base64.decode(data.data.cert);  //服务器证书
+                _this.formValidate.prv = $.base64.decode(data.data.prv);  //私有密钥数据
+                _this.formValidate.cert_depth = data.data.cert_depth;  //证书深度
+                if ('yes' == data.data.client2client){
+                    _this.formValidate.client2client = true;         //内部客户端通信
+                }
+                if (data.data.client_mgmt_port && '' != data.data.client_mgmt_port ){
+                    _this.formValidate.client_mgmt_port_enable =true;
+                    _this.formValidate.client_mgmt_port = data.data.client_mgmt_port;
+                }
+                _this.formValidate.compression = data.data.compression;     //压缩
+                _this.formValidate.crypto = data.data.crypto;    //加密算法
+                _this.formValidate.custom_options = data.data.custom_options;    //高级
+                _this.formValidate.dev_mode = data.data.dev_mode;      //设备模式
+                _this.formValidate.dh_length = data.data.dh_length;  //DH参数长度
+                _this.formValidate.digest = data.data.digest;    //认证摘要算法
+                _this.formValidate.dns_domain = data.data.dns_domain;
+                if ('yes' == data.data.dns_domain_enable){
+                    _this.formValidate.dns_domain_enable = true;
+                }
+                if ('yes' == data.data.dns_server_enable){
+                    _this.formValidate.dns_server_enable = true;
+                }
+                for( var i=1; i<=4 ;i++){
+                    if(data.data['dns_server'+i]){
+                        for(var j=i; j<=4; j++){
+                            _this.formValidate["dns_server"+j] = data.data['dns_server'+j];
+                        }
+                    }
+                }
+                if ('yes' == data.data.duplicate_cn){
+                    _this.formValidate.duplicate_cn = true;
+                }
+                if ('yes' == data.data.dynamic_ip){
+                    _this.formValidate.dynamic_ip = true;    //动态ip
+                }
+                _this.formValidate.engine = data.data.engine;    //硬件加密
+                _this.formValidate.interface = data.data.interface;     //接口
+                if (data.data.local_network){
+                    _this.formValidate.redirect_gateway = false;
+                    _this.formValidate.local_network = data.data.local_network;
+                }
+                if (data.data.local_networkv6){
+                    _this.formValidate.redirect_gateway = false;
+                    _this.formValidate.local_networkv6 = data.data.local_networkv6;
+                }
+                _this.formValidate.local_port = data.data.local_port;    //本地端口
+                _this.formValidate.maxclients = data.data.maxclients;    // 并发连接
+                _this.formValidate.mode = data.data.mode;      //服务器模式
+                _this.modeStatus();
+                if ('yes'== data.data.netbios_enable){
+                    _this.formValidate.netbios_enable = true;
+                }
+                _this.formValidate.netbios_ntype = data.data.netbios_ntype;
+                _this.formValidate.netbios_scope = data.data.netbios_scope;
+
+                if ('yes' == data.data.no_tun_ipv6){
+                    _this.formValidate.no_tun_ipv6 = true;
+                }
+                if ('yes' == data.data.pool_enable){
+                    _this.formValidate.pool_enable = true;       //地址池
+                }
+                _this.formValidate.protocol = data.data.protocol;  //协议
+                if ('yes' == data.data.push_register_dns){
+                    _this.formValidate.push_register_dns = true;
+                }
+                _this.formValidate.remote_network = data.data.remote_network;
+                _this.formValidate.remote_networkv6 = data.data.remote_networkv6;
+                _this.formValidate.reneg_sec = data.data["reneg-sec"];
+
+                if (data.data.tls){
+                    _this.formValidate.tlsauth_enable = true;
+                    _this.formValidate.autotls_enable = false;
+                    _this.formValidate.tls = data.data.tls;
+                }
+
+                if ('yes' == data.data.topology_subnet){
+                    _this.formValidate.topology_subnet = true;
+                }
+                if ('yes' == data.data.passtos){
+                    _this.formValidate.passtos = true;
+                }
+                _this.formValidate.tunnel_network = data.data.tunnel_network;   //IPv4隧道网络
+                _this.formValidate.tunnel_networkv6 = data.data.tunnel_networkv6;   //IPv6隧道网络
+                _this.formValidate.verbosity_level = String(data.data.verbosity_level);  // 冗余级别
+                if (data.data.wins_server1){
+                    _this.formValidate.wins_server_enable = true;
+                    _this.formValidate.wins_server1 =data.data.wins_server1;
+                }
+                if (data.data.wins_server2){
+                    _this.formValidate.wins_server_enable = true;
+                    _this.formValidate.wins_server2 =data.data.wins_server2;
+                }
+                /*判断增加的数据*/
+                if (data.data.ntp_server1){
+                    _this.formValidate.ntp_server_enable = true;
+                    _this.formValidate.ntp_server1 = data.data.ntp_server1;
+                }
+                if (data.data.ntp_server2){
+                    _this.formValidate.ntp_server_enable = true;
+                    _this.formValidate.ntp_server2 = data.data.ntp_server2;
+                }
+                if (data.autotls_enable == 'yes'){
+                    _this.formValidate.autotls_enable = true;
+                }
+                if (data.tlsauth_enable == 'yes'){
+                    _this.formValidate.tlsauth_enable = true;
+                }
+
+
+                /*if ('' == data.data.tls){
+                    _this.formValidate.autotls_enable = true;
+                }else {
+                    _this.formValidate.tlsauth_enable = true;
+                    _this.formValidate.autotls_enable = false;
+                    _this.formValidate.tls = data.data.tls;
+                }
+
+                if ('' != data.data.dns_server1 && data.data.dns_server1){
+                    _this.formValidate.dns_server = true;
+                    _this.formValidate.dns_server1 = data.data.dns_server1;
+                }
+                if ('' != data.data.dns_server2 && data.data.dns_server2){
+                    _this.formValidate.dns_server = true;
+                    _this.formValidate.dns_server2 = data.data.dns_server2;
+                }
+                if ('' != data.data.dns_server3 && data.data.dns_server3){
+                    _this.formValidate.dns_server = true;
+                    _this.formValidate.dns_server3 = data.data.dns_server3;
+                }
+                if ('' != data.data.dns_server4 && data.data.dns_server4){
+                    _this.formValidate.dns_server = true;
+                    _this.formValidate.dns_server4 = data.data.dns_server4;
+                }
+
+                */
+            }
+        });
+    },
+    methods:{
+        enable (index) {
+            console.log(index);
+            type:'default'
+        },
+        show (index) {
+
+        },
+        remove (index) {
+            this.data6.splice(index, 1);
+        },
+        modeStatus:function (){
+            if ('server_tls' != this.formValidate.mode){
+                this.server_tls = false;
+            }else {
+                this.server_tls = true;
+            }
+            if ('p2p_shared_key' == this.formValidate.mode){
+                this.p2p_shared_key = true;
+            }else {
+                this.p2p_shared_key = false;
+            }
+            if ('server_tls_user' == this.formValidate.mode){
+                this.server_tls_user = true;
+            }else {
+                this.server_tls_user = false;
+            }
+        },
+        handleSubmit: function (name) {
+            var _this = this;
+            this.$refs[name].validate(function(valid){
+                if (valid){
+                    var data = {};
+                    if (_this.formValidate.status == false){
+                        data.disable = 'yes';
+                    }
+                    data.mode = _this.formValidate.mode;
+                    data.protocol = _this.formValidate.protocol;
+                    data.dev_mode = _this.formValidate.dev_mode;
+                    data.interface = _this.formValidate.interface;
+                    data.local_port = _this.formValidate.local_port;
+                    if (_this.formValidate.tlsauth_enable == true && _this.formValidate.autotls_enable == false){
+                        data.tls = _this.formValidate.tls;
+                    }
+                    data.ca = $.base64.encode(_this.formValidate.ca);
+                    data.cert = $.base64.encode(_this.formValidate.cert);
+                    data.prv = $.base64.encode(_this.formValidate.prv);
+                    data.dh_length = _this.formValidate.dh_length;
+                    data.cert_depth = _this.formValidate.cert_depth;
+
+                    if('server_tls_user' == _this.formValidate.mode){
+                        data.strictusercn = _this.formValidate.strictusercn;
+                    }
+                    data.crypto = _this.formValidate.crypto;
+                    data.digest = _this.formValidate.digest;
+                    data.engine = _this.formValidate.engine;
+                    data.tunnel_network = _this.formValidate.tunnel_network;
+                    data.tunnel_networkv6 = _this.formValidate.tunnel_networkv6;
+                    data.local_network = _this.formValidate.local_network;
+                    data.local_networkv6 = _this.formValidate.local_networkv6;
+                    data.remote_network = _this.formValidate.remote_network;
+                    data.remote_networkv6 = _this.formValidate.remote_networkv6;
+                    data.maxclients = _this.formValidate.maxclients;
+                    data.compression = _this.formValidate.compression;
+                    if (_this.formValidate.passtos == true){
+                        data.passtos = 'yes';
+                    }
+                    if (_this.formValidate.client2client == true){
+                        data.client2client = 'yes';
+                    }
+                    if (_this.formValidate.duplicate_cn == true){
+                        data.duplicate_cn = 'yes';
+                    }
+                    if (_this.formValidate.no_tun_ipv6 == true){
+                        data.no_tun_ipv6 = 'yes';
+                    }
+
+                    if (_this.formValidate.dynamic_ip == true){
+                        data.dynamic_ip = 'yes';
+                    }
+                    if (_this.formValidate.pool_enable == true){
+                        data.pool_enable = 'yes';
+                    }
+                    if(_this.formValidate.topology_subnet == true){
+                        data.topology_subnet ='yes';
+                    }
+                    if(_this.formValidate.dns_domain_enable == true){
+                        data.dns_domain_enable = 'yes';
+                    }
+                    data.dns_domain = _this.formValidate.dns_domain;
+
+                    if(_this.formValidate.dns_server_enable == true){
+                        data.dns_server_enable = 'yes';
+                    }
+                    data.dns_server1 = _this.formValidate.dns_server1;
+                    data.dns_server2 = _this.formValidate.dns_server2;
+                    data.dns_server3 = _this.formValidate.dns_server3;
+                    data.dns_server4 = _this.formValidate.dns_server4;
+
+                    if (_this.formValidate.push_register_dns == true){
+                        data.push_register_dns = 'yes';
+                    }
+                    if (_this.formValidate.ntp_server_enable == true){
+                        data.ntp_server1 = _this.formValidate.ntp_server1;
+                        data.ntp_server2 = _this.formValidate.ntp_server2;
+                    }
+
+                    if(_this.formValidate.netbios_enable == true){
+                        data.netbios_enable = 'yes';
+                    }
+                    data.netbios_ntype = _this.formValidate.netbios_ntype;
+                    data.netbios_scope = _this.formValidate.netbios_scope;
+
+                    /*if(_this.formValidate.wins_server_enable == true){
+                     data.wins_server_enable = 'yes';
+                     }*/
+                    data.wins_server1 = _this.formValidate.wins_server1;
+                    data.wins_server2 = _this.formValidate.wins_server2;
+
+                    if(_this.formValidate.client_mgmt_port_enable ==true){
+                        data.client_mgmt_port = _this.formValidate.client_mgmt_port;
+                    }
+
+
+                    data.custom_options = _this.formValidate.custom_options;
+                    data.verbosity_level = _this.formValidate.verbosity_level;
+                    if (_this.formValidate.mode != 'server_tls'){
+                        data["reneg-sec"] = _this.formValidate.reneg_sec;
+                    }else{
+                        data["reneg-sec"] = 0;
+                    }
+
+                    var postData = {"action":"setOpenvpnSvrStatus","data":data};
+                    console.log(postData);
+                    _this.applyLoading = true;
+                    uiPost.setOpenvpnSvrStatus(postData,function(data){
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        if (0 == data.rescode) {
+                            _this.$Message.success({content:_this.$t('openvpn.success'),onClose:function(){
+//                        location.href = location.href;
+                            }});
+                        } else {
+                            _this.$Message.error({content:_this.$t('openvpn.fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                        }
+                        _this.applyLoading = false;
+                        });
+                }
+            });
+        }
+    }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>
