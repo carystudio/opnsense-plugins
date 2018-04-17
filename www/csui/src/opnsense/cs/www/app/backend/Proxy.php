@@ -370,6 +370,14 @@ EOF;
                     !Util::check0and1($data['general']['cache']['local']['cache_windows_updates'])){
                     throw new AppException('PROXY_110');
                 }
+                //cache local disabled, set default value
+                $data['general']['cache']['local']['enabled'] = '0';
+                $data['general']['cache']['local']['directory'] = '/var/squid/cache';
+                $data['general']['cache']['local']['maximum_object_size'] = '';
+                $data['general']['cache']['local']['size'] = 100;
+                $data['general']['cache']['local']['l1'] = 16;
+                $data['general']['cache']['local']['l2'] = 256;
+
                 if(!isset($data['general']['traffic']['enabled']) ||
                     !Util::check0and1($data['general']['traffic']['enabled'])){
                     throw new AppException('PROXY_111');
@@ -486,9 +494,27 @@ EOF;
                         }
                     }
                 }
+                //ftp proxy disabled, set default value
+                $data['forward']['ftpInterfaces'] = '';
+                $data['forward']['ftpPort'] = 2121;
+                $data['forward']['ftpTransparentMode'] = 0;
+
                 $data['forward']['authentication'] = array('realm'=>'CSG2000P proxy authentication',
                     'credentialsttl'=>2,'children'=>'5');
-
+                $data['forward']['icap'] = array(
+                    'enable'=>0,
+                    'RequestURL'=>'icap://[::1]:1344/avscan',
+                    'ResponseURL'=>'icap://[::1]:1344/avscan',
+                    'SendClientIP'=>1,
+                    'SendUsername'=>0,
+                    'EncodeUsername'=>0,
+                    'UsernameHeader'=>'X-Username',
+                    'EnablePreview'=>1,
+                    'PreviewSize'=>1024,
+                    'OptionsTTL'=>60,
+                    'exclude'=>''
+                );
+                
                 $config['OPNsense']['proxy'] = $data;
             }
 
