@@ -39,12 +39,15 @@ class Openvpn extends Csbackend
             ,compression,passtos,no_tun_ipv6,route_no_pull,route_no_exec,verbosity_level,tls,shared_key,ca,cert,prv";
 
      const SERVER_MODE = array('server_tls', 'server_user', 'server_tls_user');
+     const CLIENT_MODE = array('p2p_tls', 'p2p_shared_key');
 
      const PROXY_AUTHTYPE = array('none', 'basic', 'ntlm');
      const VPNID_SVR = 1;
      const VPNID_CLIENT = 2;
      const OVPN_SERVER_DESCR = 'CSG2000P_OVPN_SERVER';
      const USER_GROUP = 'openvpn';
+     const USER_RELATE_PREFIX = 'openvpn user:';
+     const USER_DESCR = 'openvpn user';
 
 
 
@@ -316,7 +319,7 @@ class Openvpn extends Csbackend
                     throw new AppException('OVPN_200');
                 }
             }
-            if (!in_array($data['mode'], array('p2p_tls'))) {
+            if (!in_array($data['mode'], self::CLIENT_MODE)) {
                 throw new AppException('OVPN_201');
             }
             if (!in_array($data['protocol'], array('TCP', 'UDP'))) {
@@ -816,12 +819,8 @@ class Openvpn extends Csbackend
                     }
                     $csc['block'] = 'yes';
                 }
-                $csc['description'] = 'openvpn user:'.$data['Username'];
+                $csc['description'] = Openvpn::USER_RELATE_PREFIX.$data['Username'];
                 if(!empty($user_config['tunnel_network']) && !Util::checkCidr($user_config['tunnel_network'], false, 'ipv4')){
-                    throw new AppException('OVPN_304');
-                }
-                list($ip, $mask) = explode('/', $user_config['tunnel_network']);
-                if($mask>30 || $mask<1){
                     throw new AppException('OVPN_304');
                 }
                 $csc['tunnel_network'] = $user_config['tunnel_network'];
@@ -877,7 +876,7 @@ class Openvpn extends Csbackend
                 $config['openvpn']['openvpn-csc'][] = $csc;
             }
             foreach($config['cert'] as $idx=>$cert){
-                if(Cert::CSG2000P_CA_REFID == $cert['caref'] && 'openvpn user:'.$data['Username'] == $cert['desct']){
+                if(Cert::CSG2000P_CA_REFID == $cert['caref'] && Openvpn::USER_RELATE_PREFIX.$data['Username'] == $cert['desct']){
                     throw new AppException('OVPN_311');
                     break;
                 }
@@ -913,7 +912,7 @@ class Openvpn extends Csbackend
             $user = array(
                 'name'=> $data['Username'],
                 'scope'=>'user',
-                'descr'=>'openvpn user',
+                'descr'=>Openvpn::USER_DESCR,
                 'expires'=>'',
                 'authorizedkeys'=>'',
                 'ipsecpsk'=>'',
@@ -946,9 +945,19 @@ class Openvpn extends Csbackend
         try {
             $deluser = false;
             foreach($config['system']['user'] as $idx=>$user){
-                if($user['name'] == $data['Username'] && 'openvpn user' == $user['descr']){
+                if($user['name'] == $data['Username'] && Openvpn::USER_DESCR == $user['descr']){
                     $deluser = $config['system']['user'][$idx];
                     unset($config['system']['user'][$idx]);
+                    foreach($config['cert'] as $idx=>$cert){
+                        if(Openvpn::USER_RELATE_PREFIX.$user['name'] == $cert['descr']){
+                            unset($config['cert'][$idx]);
+                        }
+                    }
+                    foreach($config['openvpn']['openvpn-csc'] as $idx=>$csc){
+                        if(Openvpn::USER_RELATE_PREFIX.$user['name'] == $csc['description']){
+                            unset($config['openvpn']['openvpn-csc'][$idx]);
+                        }
+                    }
                 }
             }
             if(false === $deluser){

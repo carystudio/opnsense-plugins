@@ -337,6 +337,9 @@ class WebapiController extends BaseController
             }else if('addOpenvpnUser'==$action) {
                 $this->checkData($para);
                 $result['rescode'] = Openvpn::addUser($para['data']);
+            }else if('delOpenvpnUser'==$action) {
+                $this->checkData($para);
+                $result['rescode'] = Openvpn::delUser($para['data']);
             }else if('exportOvpnClientConf'==$action){
                 $this->checkData($para);
                 Openvpn::exportClientConf($para['data']);
