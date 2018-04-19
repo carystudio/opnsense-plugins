@@ -321,6 +321,12 @@ var menu = [
                 "href": "/newui/vpn/ipsec",
                 "lang": "ipsec",
                 "display":true
+            },
+            {
+                "id":"14-4",
+                "href": "/newui/vpn/account",
+                "lang": "account",
+                "display":true
             }
         ]
     },

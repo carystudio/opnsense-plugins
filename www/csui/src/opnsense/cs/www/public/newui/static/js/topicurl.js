@@ -6688,6 +6688,18 @@ uiPost.prototype.doLogin = function(postVar,callback){
         this.url = '/webapi';
         return this.post(postVar,callback);
     };
+    uiPost.prototype.getOpenvpnUsers = function(postVar,callback){
+        this.topicurl = 'getOpenvpnUsers';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.exportOvpnClientConf = function(postVar,callback){
+        this.topicurl = 'exportOvpnClientConf';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
 
 	obj.uiPost = new uiPost();
 })(window);

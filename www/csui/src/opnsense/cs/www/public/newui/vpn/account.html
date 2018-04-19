@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.vpn'),$t('menu.account')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <Card>
+                    <Alert>
+                        {{ $t('account.help') }}
+                    </Alert>
+                    <FormItem :label="$t('account.auth_type')">
+                        <Select v-model="formValidate.serverMode" >
+                            <!--<Option value="1">PPPOE</Option>-->
+                            <Option value="2">PPTP</Option>
+                            <Option value="3">L2TP</Option>
+                            <Option value="4">OpenVPN</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('account.account')" prop="username">
+                        <Input v-model="formValidate.username"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('account.password')" prop="password">
+                        <Input v-model="formValidate.password"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('account.specifyIp')" prop="ipAddr" v-show="'4' != formValidate.serverMode">
+                        <Input v-model="formValidate.ipAddr"></Input>
+                    </FormItem>
+
+                    <FormItem :label="$t('account.specific_client')" v-show="formValidate.serverMode == '4'">
+                        <i-switch  v-model="formValidate.openVpnEnable" size="large" >
+                            <span slot="open">{{$t('common.enabled')}}</span>
+                            <span slot="close">{{$t('common.disabled')}}</span>
+                        </i-switch>
+                    </FormItem>
+
+
+                    <div v-show="formValidate.serverMode == '4' && true == formValidate.openVpnEnable">
+                        <FormItem :label="$t('account.connection_block')">
+                            <i-switch v-model="formValidate.block" size="large" >
+                                <span slot="open">{{$t('common.enabled')}}</span>
+                                <span slot="close">{{$t('common.disabled')}}</span>
+                            </i-switch>
+                        </FormItem>
+                        {{$t('account.tunnel_set')}}
+                        <hr>
+                        <br>
+                        <FormItem :label="'IPv4' + $t('account.tunnel_network')" prop="tunnelNetwork">
+                            <Input v-model="formValidate.tunnelNetwork"></Input>
+                        </FormItem>
+                        <FormItem :label="'IPv6' + $t('account.tunnel_network')" v-show="false">
+                            <Input v-model="formValidate.tunnel_networkv6"></Input>
+                        </FormItem>
+                        <FormItem :label="'IPv4' + $t('account.local_network')">
+                            <Input v-model="formValidate.localNetwork"></Input>
+                        </FormItem>
+                        <FormItem :label="'IPv6' + $t('account.local_network')" v-show="false">
+                            <Input v-model="formValidate.local_networkv6"></Input>
+                        </FormItem>
+                        <FormItem :label="'IPv4' + $t('account.remote_network')">
+                            <Input v-model="formValidate.remoteNetwork"></Input>
+                        </FormItem>
+                        <FormItem :label="'IPv6' + $t('account.remote_network')" v-show="false">
+                            <Input v-model="formValidate.remote_networkv6"></Input>
+                        </FormItem>
+                        <FormItem :label="$t('account.redirect_gateway')">
+                            <i-switch v-model="formValidate.gwredir" size="large" >
+                                <span slot="open">{{$t('common.enabled')}}</span>
+                                <span slot="close">{{$t('common.disabled')}}</span>
+                            </i-switch>
+                        </FormItem>
+                        {{$t('account.client_settings')}}
+                        <hr>
+                        <br>
+                        <FormItem :label="$t('account.server_definitions')">
+                            <i-switch v-model="formValidate.pushReset" size="large" >
+                                <span slot="open">{{$t('common.enabled')}}</span>
+                                <span slot="close">{{$t('common.disabled')}}</span>
+                            </i-switch>
+                        </FormItem>
+                        <FormItem :label="$t('account.dns_default_domain')">
+                            <i-switch v-model="formValidate.dnsDomainEnable" size="large" >
+                                <span slot="open">{{$t('common.enabled')}}</span>
+                                <span slot="close">{{$t('common.disabled')}}</span>
+                            </i-switch>
+                            <FormItem v-show="formValidate.dnsDomainEnable">
+                                <Input v-model="formValidate.dnsDomain"></Input>
+                            </FormItem>
+                        </FormItem>
+                        <FormItem :label="$t('account.dns_servers')">
+                            <i-switch v-model="formValidate.dnsServerEnable" size="large" >
+                                <span slot="open">{{$t('common.enabled')}}</span>
+                                <span slot="close">{{$t('common.disabled')}}</span>
+                            </i-switch>
+                            <FormItem :label="$t('account.dns_servers1')" v-show="formValidate.dnsServerEnable" prop="dnsServer1">
+                                <Input v-model="formValidate.dnsServer1"></Input>
+                            </FormItem>
+                            <FormItem :label="$t('account.dns_servers2')" v-show="formValidate.dnsServerEnable" prop="dnsServer2">
+                                <Input v-model="formValidate.dnsServer2"></Input>
+                            </FormItem>
+                            <FormItem :label="$t('account.dns_servers3')" v-show="formValidate.dnsServerEnable" prop="dnsServer3">
+                                <Input v-model="formValidate.dnsServer3"></Input>
+                            </FormItem>
+                            <FormItem :label="$t('account.dns_servers4')" v-show="formValidate.dnsServerEnable" prop="dnsServer4">
+                                <Input v-model="formValidate.dnsServer4"></Input>
+                            </FormItem>
+                        </FormItem>
+                        <FormItem :label="$t('account.ntp_servers')">
+                            <i-switch v-model="formValidate.ntpServerEnable" size="large" >
+                                <span slot="open">{{$t('common.enabled')}}</span>
+                                <span slot="close">{{$t('common.disabled')}}</span>
+                            </i-switch>
+                            <FormItem :label="$t('account.ntp_servers1')" v-show="formValidate.ntpServerEnable" prop="ntpServer1">
+                                <Input v-model="formValidate.ntpServer1"></Input>
+                            </FormItem>
+                            <FormItem :label="$t('account.ntp_servers2')" v-show="formValidate.ntpServerEnable" prop="ntpServer2">
+                                <Input v-model="formValidate.ntpServer2"></Input>
+                            </FormItem>
+                        </FormItem>
+                        <FormItem :label="$t('account.netbios_options')" v-show="false">
+                            <i-switch v-model="formValidate.netbiosEnable" size="large" >
+                                <span slot="open">{{$t('common.enabled')}}</span>
+                                <span slot="close">{{$t('common.disabled')}}</span>
+                            </i-switch>
+                        </FormItem>
+                        <FormItem :label="$t('account.node_type')" v-show="formValidate.netbiosEnable">
+                            <Select v-model="formValidate.netbiosNtype">
+                                <Option value="0" >none</Option>
+                                <Option value="1" >b-node</Option>
+                                <Option value="2" >p-node</Option>
+                                <Option value="4" >m-node</Option>
+                                <Option value="5" >h-node</Option>
+                            </Select>
+                        </FormItem>
+                        <FormItem label="Scope ID" v-show="formValidate.netbiosEnable">
+                            <Input v-model="formValidate.netbiosScope"></Input>
+                        </FormItem>
+                        <FormItem :label="$t('account.wins_server')" v-show="false">
+                            <i-switch v-model="formValidate.winsServerEnable" size="large" >
+                                <span slot="open">{{$t('common.enabled')}}</span>
+                                <span slot="close">{{$t('common.disabled')}}</span>
+                            </i-switch>
+                            <FormItem :label="$t('account.wins_server1')" v-show="formValidate.winsServerEnable" prop="winsServer1">
+                                <Input v-model="formValidate.winsServer1"></Input>
+                            </FormItem>
+                            <FormItem :label="$t('account.wins_server2')" v-show="formValidate.winsServerEnable" prop="winsServer2">
+                                <Input v-model="formValidate.winsServer2"></Input>
+                            </FormItem>
+                        </FormItem>
+                        <FormItem :label="$t('account.advanced')">
+                            <Input v-model="formValidate.customOptions" type="textarea" :rows="5"></Input>
+                        </FormItem>
+                    </div>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('account.add') }}</Button>
+                    </FormItem>
+                </Card>
+            </Form>
+            <br>
+            </Col>
+        </Row>
+        <Row>
+            <!--<Col class="cs-btn-del">
+            <Button size="small" @click="tableSelect(true)" type="error">{{ $t('account.delete') }}</Button>
+            </Col>-->
+            <Col>
+            <Table border ref="tableSelect" :columns="accountListColumns" :data="accountListData" :no-data-text="$t('common.no_data')"></Table>
+            </Col>
+        </Row>
+        <!--<Form ref="formInline" :model="formInline" method="POST" action="/webapi" hidden>-->
+            <!--<Input v-model="formInline.action" name="action"></Input>-->
+            <!--<Input v-model="formInline.data.username" name="data[username]"></Input>-->
+        <!--</Form>-->
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+                formInline: {
+                    action:'',
+                    data:{
+                        username:''
+                    }
+                },
+                formValidate: {
+                    serverMode:'2',
+                    username:'',
+                    password:'',
+                    ipAddr:'',
+                    openVpnEnable:false,
+                    block:false,
+                    tunnelNetwork:'',
+                    tunnel_networkv6:'',
+                    localNetwork:"",
+                    local_networkv6:'',
+                    remoteNetwork:'',
+                    remote_networkv6:'',
+                    gwredir:false,
+                    pushReset:false,
+                    dnsDomainEnable:false,
+                    dnsDomain:'',
+                    dnsServerEnable:false,
+                    dnsServer1:'',
+                    dnsServer2:'',
+                    dnsServer3:'',
+                    dnsServer4:'',
+                    ntpServerEnable:false,
+                    ntpServer1:'',
+                    ntpServer2:'',
+                    netbiosEnable:false,
+                    netbiosNtype:'0',
+                    netbiosScope:'',
+                    winsServerEnable:false,
+                    winsServer1:'',
+                    winsServer2:'',
+                    customOptions:'',
+                    id:''
+                },
+                accountListData:[],
+                pptpData:[],
+                l2tpData:[],
+                openVpnData:[],
+                pptpEnable:'0',
+                pptpStart:'',
+                pptpEnd:'',
+                l2tpEnable:'0',
+                l2tpStart:'',
+                lwtpEnd:''
+            }
+        },
+        computed:{
+            ruleValidate:function(){
+                var _this = this;
+                return {
+                    username: [
+                        { required: true, message: this.$t('l2tp.msg1'), trigger: 'blur' },
+                        { validator:function(r, v, f) {
+                            var ret = cs.string(v);
+                            if (ret == 0) {
+                                f(_this.$t('account.msg1'));
+                            }else if(ret == 1){
+                                f(_this.$t('account.msg2'));
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    password: [
+                        { validator:function(r, v, f) {
+                            var ret = cs.string(v);
+                            if (ret == 0) {
+                                f(_this.$t('account.msg3'));
+                            }else if(ret == 1){
+                                f(_this.$t('account.msg4'));
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    ipAddr: [
+                        { validator:function(r, v, f) {
+                            if('' != _this.formValidate.ipAddr && '4' != _this.formValidate.serverMode){
+                                var ret = cs.ip(v);
+                                if (ret == 0 || ret == 1 || ret == 2 || ret == 3 || ret == 4) {
+                                    f(_this.$t('account.msg5'));
+                                }
+                                f();
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    tunnelNetwork:[
+                        { validator:function(r, v, f) {
+                            if('4' == _this.formValidate.serverMode && v.length > 0 ){
+                                if( -1 == v.indexOf("/")){
+                                    f(_this.$t('account.msg12'));
+                                }else {
+                                    var tmp = v.split("/");
+                                    var reg=/^(?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))$/;
+                                    if(!reg.test(tmp[0])){
+                                        f(_this.$t('account.msg12'));
+                                    }
+//                                    if(99 != cs.num_range(tmp[1],1,30)){
+//                                        f('IPv4隧道网络掩码长度为1~30');
+//                                    }
+                                }
+                                f();
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    dnsServer1:[
+                        { validator:function(r, v, f) {
+                            if('4' == _this.formValidate.serverMode && true == _this.formValidate.dnsServerEnable ){
+                                var _s = cs.ip(v);
+                                if(_s != 99 && _s != 0){
+                                    f(_this.$t('account.msg13'));
+                                }
+                                f();
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    dnsServer2:[
+                        { validator:function(r, v, f) {
+                            if('4' == _this.formValidate.serverMode && true == _this.formValidate.dnsServerEnable ){
+                                var _s = cs.ip(v);
+                                if(_s != 99 && _s != 0){
+                                    f(_this.$t('account.msg14'));
+                                }
+                                f();
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    dnsServer3:[
+                        { validator:function(r, v, f) {
+                            if('4' == _this.formValidate.serverMode && true == _this.formValidate.dnsServerEnable ){
+                                var _s = cs.ip(v);
+                                if(_s != 99 && _s != 0){
+                                    f(_this.$t('account.msg15'));
+                                }
+                                f();
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    dnsServer4:[
+                        { validator:function(r, v, f) {
+                            if('4' == _this.formValidate.serverMode && true == _this.formValidate.dnsServerEnable ){
+                                var _s = cs.ip(v);
+                                if(_s != 99 && _s != 0){
+                                    f(_this.$t('account.msg16'));
+                                }
+                                f();
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    ntpServer1:[
+                        { validator:function(r, v, f) {
+                            if('4' == _this.formValidate.serverMode && true == _this.formValidate.ntpServerEnable ){
+                                var _s = cs.ip(v);
+                                if(_s != 99 && _s != 0){
+                                    f(_this.$t('account.msg17'));
+                                }
+                                f();
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    ntpServer2:[
+                        { validator:function(r, v, f) {
+                            if('4' == _this.formValidate.serverMode && true == _this.formValidate.ntpServerEnable ){
+                                var _s = cs.ip(v);
+                                if(_s != 99 && _s != 0){
+                                    f(_this.$t('account.msg18'));
+                                }
+                                f();
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ]/*,
+                    winsServer1:[
+                        { validator:function(r, v, f) {
+                            if('4' == _this.formValidate.serverMode && true == _this.formValidate.winsServerEnable ){
+                                var _s = cs.ip(v);
+                                if(_s != 99 && _s != 0){
+                                    f('WINS服务器1必须是一个合法的IP地址');
+                                }
+                                f();
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    winsServer2:[
+                        { validator:function(r, v, f) {
+                            if('4' == _this.formValidate.serverMode && true == _this.formValidate.winsServerEnable ){
+                                var _s = cs.ip(v);
+                                if(_s != 99 && _s != 0){
+                                    f('WINS服务器2必须是一个合法的IP地址');
+                                }
+                                f();
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ]*/
+                }
+            },
+            accountListColumns: function() {
+                var _this = this;
+                return [{
+                    type: 'selection',
+                    key: 'Username',
+                    width:'60'
+                }, {
+                    title: 'ID',
+                    key: 'idx',
+                    align: 'center',
+                    width:"60"
+                }, {
+                    title: this.$t('account.account_type'),
+                    key: 'accountMode',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: this.$t('account.account'),
+                    key: 'Username',
+                    align: 'center',
+                    sortable: true
+                },{
+                    title: this.$t('account.password'),
+                    key: 'Password',
+                    align: 'center',
+                    sortable: true
+                },{
+                    title: this.$t('account.specifyIp'),
+                    key: 'Ip',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: this.$t('account.operation'),
+                    key: 'idx',
+                    align: 'center',
+                    render: function(h, params) {
+                        var tmp = [];
+                        if('OpenVPN' == params.row.accountMode){
+                            tmp.push(
+                                /*h('Button', {
+                                    props: {
+                                        type: 'info',
+                                        size: 'small'
+                                    },
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    on: {
+                                        click:function () {
+                                            console.log('---------------edit-----------------');
+                                            console.log(params);
+                                            if("OpenVPN" == params.row.accountMode){
+                                                _this.formValidate.serverMode = '4';
+                                            }else if("L2TP" == params.row.accountMode){
+                                                _this.formValidate.serverMode = '3';
+                                            }else{
+                                                _this.formValidate.serverMode = '2';
+                                            }
+
+                                            _this.formValidate.username = params.row.Username;
+                                            _this.formValidate.password = params.row.Password;
+
+                                            if(params.row.config){
+                                                _this.formValidate.openVpnEnable = true;
+
+                                                if('yes' == params.row.config.block){
+                                                    _this.formValidate.block = true;
+                                                }
+                                                if(params.row.config.tunnel_network){
+                                                    _this.formValidate.tunnelNetwork = params.row.config.tunnel_network;
+                                                }else{
+                                                    _this.formValidate.tunnelNetwork = '';
+                                                }
+                                                if(params.row.config.local_network){
+                                                    _this.formValidate.localNetwork = params.row.config.local_network;
+                                                }else{
+                                                    _this.formValidate.localNetwork = '';
+                                                }
+                                                if(params.row.config.remote_network){
+                                                    _this.formValidate.remoteNetwork = params.row.config.remote_network;
+                                                }else{
+                                                    _this.formValidate.remoteNetwork = '';
+                                                }
+                                                if('yes' == params.row.config.gwredir){
+                                                    _this.formValidate.gwredir = true;
+                                                }else{
+                                                    _this.formValidate.gwredir = false;
+                                                }
+                                                if('yes' == params.row.config.push_reset){
+                                                    _this.formValidate.pushReset = true;
+                                                }else{
+                                                    _this.formValidate.pushReset = false;
+                                                }
+                                                if(params.row.config.dns_domain){
+                                                    _this.formValidate.dnsDomain = params.row.config.dns_domain;
+                                                }else{
+                                                    _this.formValidate.dnsDomain = '';
+                                                }
+
+                                                if(params.row.config.dns_server1){
+                                                    _this.formValidate.dnsServer1 = params.row.config.dns_server1;
+                                                }else{
+                                                    _this.formValidate.dnsServer1 = '';
+                                                }
+                                                if(params.row.config.dns_server2){
+                                                    _this.formValidate.dnsServer2 = params.row.config.dns_server2;
+                                                }else{
+                                                    _this.formValidate.dnsServer2 = '';
+                                                }
+                                                if(params.row.config.dns_server3){
+                                                    _this.formValidate.dnsServer3 = params.row.config.dns_server3;
+                                                }else{
+                                                    _this.formValidate.dnsServer3 = '';
+                                                }
+                                                if(params.row.config.dns_server4){
+                                                    _this.formValidate.dnsServer4 = params.row.config.dns_server4;
+                                                }else{
+                                                    _this.formValidate.dnsServer4 = '';
+                                                }
+                                                if(_this.formValidate.dnsServer1 || _this.formValidate.dnsServer2 || _this.formValidate.dnsServer3 || _this.formValidate.dnsServer4){
+                                                    _this.formValidate.dnsServerEnable = true;
+                                                }else{
+                                                    _this.formValidate.dnsServerEnable = false;
+                                                }
+
+                                                if(params.row.config.ntp_server1){
+                                                    _this.formValidate.ntpServer1 = params.row.config.ntp_server1;
+                                                }else{
+                                                    _this.formValidate.ntpServer1 = '';
+                                                }
+                                                if(params.row.config.ntp_server2){
+                                                    _this.formValidate.ntpServer2 = params.row.config.ntp_server2;
+                                                }else{
+                                                    _this.formValidate.ntpServer2 = '';
+                                                }
+                                                if(params.row.config.ntp_server1 || params.row.config.ntp_server2){
+                                                    _this.formValidate.ntpServerEnable = true;
+                                                }else{
+                                                    _this.formValidate.ntpServerEnable = false;
+                                                }
+
+                                                if('yes' == params.row.config.netbios_enable){
+                                                    _this.formValidate.netbiosEnable = true;
+                                                }else{
+                                                    _this.formValidate.netbiosEnable = false;
+                                                }
+
+                                                if(params.row.config.custom_options){
+                                                    _this.formValidate.customOptions = params.row.config.custom_options;
+                                                }else{
+                                                    _this.formValidate.customOptions = '';
+                                                }
+//                                                if(params.row.config.id){
+//                                                    _this.formValidate.id = params.row.config.id;
+//                                                }else{
+//                                                    _this.formValidate.id = '';
+//                                                }
+                                            }else{
+                                                _this.formValidate.openVpnEnable = false;
+                                                _this.formValidate.block = false;
+                                                _this.formValidate.tunnelNetwork = '';
+                                                _this.formValidate.localNetwork = '';
+                                                _this.formValidate.remoteNetwork = '';
+                                                _this.formValidate.gwredir = false;
+                                                _this.formValidate.pushReset = false;
+                                                _this.formValidate.dnsDomain = '';
+                                                _this.formValidate.dnsServer1 = '';
+                                                _this.formValidate.dnsServer2 = '';
+                                                _this.formValidate.dnsServer3 = '';
+                                                _this.formValidate.dnsServer4 = '';
+                                                _this.formValidate.dnsServerEnable = false;
+                                                _this.formValidate.ntpServer1 = '';
+                                                _this.formValidate.ntpServer2 = '';
+                                                _this.formValidate.ntpServerEnable = false;
+                                                _this.formValidate.netbiosEnable = false;
+                                                _this.formValidate.customOptions = '';
+
+                                            }
+                                        }
+                                    }
+                                }, '编辑'),*/
+                                h('Button', {
+                                    props: {
+                                        type: 'info',
+                                        size: 'small'
+                                    },
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    on: {
+                                        click:function () {
+                                            console.log('---------------config-----------------');
+                                            console.log(params);
+                                            //TODO 导出配置暂未完成
+                                            var data = {};
+                                            data.action = 'exportOvpnClientConf';
+                                            data.data = JSON.stringify({"username":params.row.Username});
+                                            cs.post("/webapi",data);
+                                        }
+                                    }
+                                }, _this.$t('account.export_cfg'))
+                            );
+                        }
+
+                        tmp.push(
+                            h('Poptip',{
+                                props: {
+                                    confirm: true,
+                                    title: _this.$t('account.msg9'),
+                                    "ok-text":_this.$t('common.ok'),
+                                    "cancel-text":_this.$t('common.cancel')
+                                },
+                                on: {
+                                    "on-ok": function(){
+                                        var data = {};
+                                        var postData = {};
+                                        data.Username = params.row.Username;
+                                        if("PPTP" == params.row.accountMode){
+                                            postData = {"action":"delPptpdUser", "data":data};
+                                        }else if('L2TP' == params.row.accountMode){
+                                            postData = {"action":"delL2tpUser", "data":data};
+                                        }else{
+                                            postData = {"action":"delOpenvpnUser", "data":data};
+                                        }
+                                        uiPost.delLocalServerUsers(postData,function(data) {
+                                            if (9999 == data.rescode){
+                                                cs.loginOut();
+                                            }
+                                            if (0 != data.rescode) {
+                                                _this.$Message.error({content:_this.$t('account.msg6')+ _this.$t('errorcode.'+data.rescode),duration:5});
+                                            }else{
+                                                _this.$Message.success(_this.$t('account.msg11'));
+                                                location.href = location.href;
+                                            }
+                                        });
+                                    }
+                                }
+                            }, [
+                                h('Button', {
+                                    props: {
+                                        type: 'error',
+                                        size: 'small'
+                                    }
+                                }, _this.$t('account.delete'))
+                            ])
+                        );
+                        return tmp;
+                    }
+                }];
+            }
+        },
+        created:function() {
+            var _this = this;
+            var getPptpRange = {"action":"getPptpdStatus"};
+            _this.$Spin.show();   //加载动画
+            uiPost.getPptpdStatus(getPptpRange,function(data) {
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    _this.pptpEnable = data.data.Enable;
+                    _this.pptpStart = data.data.ClientIpStart;
+                    _this.pptpEnd = data.data.ClientIpEnd;
+                }
+            });
+            var getL2tpRange = {"action":"getL2tpStatus"};
+            uiPost.getL2tpStatus(getL2tpRange,function(data) {
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    _this.l2tpEnable = data.data.Enable;
+                    _this.l2tpStart = data.data.ClientIpStart;
+                    _this.l2tpEnd = data.data.ClientIpEnd;
+                }
+            });
+            /*获取PPTP用户配置信息*/
+            var postPptpData = {"action":"getPptpdUsers","data":{}};
+            uiPost.getPptpdUsers(postPptpData,function(data) {
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    _this.pptpData = data.data;
+
+                    /*获取L2TP用户配置信息*/
+                    var postL2tpData = {"action":"getL2tpUsers","data":{}};
+                    uiPost.getL2tpUsers(postL2tpData,function(data) {
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        if (0 == data.rescode) {
+                            _this.l2tpData = data.data;
+
+                            /*获取OpenVPN用户配置信息*/
+                            var postVpnData = {"action":"getOpenvpnUsers","data":{}};
+                            uiPost.getOpenvpnUsers(postVpnData,function(data) {
+                                if (9999 == data.rescode) {
+                                    cs.loginOut();
+                                }
+                                _this.$Spin.hide();   //加载动画
+                                if (0 == data.rescode) {
+                                    _this.openVpnData = data.data;
+
+                                    var tmp = [];
+                                    if(_this.pptpData){
+                                        for(var i=0;i<_this.pptpData.length;i++){
+                                            _this.pptpData[i].accountMode = 'PPTP';
+                                            tmp.push(_this.pptpData[i]);
+                                        }
+                                    }
+                                    if(_this.l2tpData){
+                                        for(var i=0;i<_this.l2tpData.length;i++){
+                                            _this.l2tpData[i].accountMode = 'L2TP';
+                                            tmp.push(_this.l2tpData[i]);
+                                        }
+                                    }
+                                    if(_this.openVpnData){
+                                        for(var i=0;i<_this.openVpnData.length;i++){
+                                            _this.openVpnData[i].accountMode = 'OpenVPN';
+                                            tmp.push(_this.openVpnData[i]);
+                                        }
+                                    }
+
+                                    for(var i in tmp){
+                                        tmp[i].idx = Number(i)+1;
+                                    }
+                                    _this.accountListData = tmp;
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+
+        },
+        methods:{
+            tableSelect:function(status){
+                var _this = this;
+                if (status) {
+                    var getSelection = this.$refs.tableSelect.getSelection();
+                    if (getSelection.length>0) {
+                        var macData = [];
+                        for(var i=0; i<getSelection.length; i++)
+                        {
+//                            macData[i] = getSelection[i].Username;
+                            var data = {};
+                            var postData = {};
+                            data.Username = getSelection[i].Username;
+                            if("PPTP" == getSelection[i].accountMode){
+                                postData = {"action":"delPptpdUser", "data":data};
+                            }else{
+                                postData = {"action":"delL2tpUser", "data":data};
+                            }
+                            uiPost.delLocalServerUsers(postData,function(data) {
+                                if (9999 == data.rescode){
+                                    cs.loginOut();
+                                }
+                                if (0 != data.rescode) {
+                                    _this.$Message.error({content:_this.$t('account.msg6')+ _this.$t('errorcode.'+data.rescode),duration:5});
+                                 }else{
+                                    _this.$Message.success(_this.$t('account.msg11'));
+                                     location.href = location.href;
+                                 }
+                            });
+                        }
+
+//                        var postData = {"action":"delStaticDhcp","data":{"Mac":macData}};
+//                        /*全选删除*/
+//                        uiPost.delStaticDhcp(postData,function(){
+//                            _this.$Message.success({content:_this.$t('account.msg11'),onClose:function(){
+//                                location.href = location.href;
+//                            }});
+//                        });
+                    }else{
+                        _this.$Message.error({content:_this.$t('account.msg8'),duration:5});
+                    }
+                }else{
+                    this.$refs.tableSelect.selectAll(status);
+                }
+            },
+            submitStatus:function(){
+                var postVar = {};
+                if(true == this.formValidate.status){
+                    postVar.enable = "1";
+                }else{
+                    postVar.enable = "0";
+                }
+                uiPost.setssServer(postVar);
+            },
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        if(_this.formValidate.ipAddr){
+                            if(_this.formValidate.serverMode == '2' && '1' == _this.pptpEnable){
+                                //0 yes 1 no  si >= s2
+                                if(1 == cs.ip_gt_eq(_this.formValidate.ipAddr,_this.pptpStart) || 1 == cs.ip_gt_eq(_this.pptpEnd,_this.formValidate.ipAddr)){
+                                    _this.$Message.error({content:_this.$t('account.msg7')+_this.pptpStart + ' -- ' + _this.pptpEnd ,duration:5});
+                                    return false;
+                                }
+                            }
+
+                            if(_this.formValidate.serverMode == '1' && '1' == _this.l2tpEnable){
+                                //0 yes 1 no  si >= s2
+                                if(1 == cs.ip_gt_eq(_this.formValidate.ipAddr,_this.l2tpStart) || 1 == cs.ip_gt_eq(_this.l2tpEnd,_this.formValidate.ipAddr)){
+                                    _this.$Message.error({content:_this.$t('account.msg10')+_this.l2tpStart + ' -- ' + _this.l2tpEnd ,duration:5});
+                                    return false;
+                                }
+                            }
+                        }
+
+                        var postData = {};
+                        var postVar = {};
+                        postVar['Username'] = _this.formValidate.username;
+                        postVar['Password'] = _this.formValidate.password;
+                        postVar['Ip'] = _this.formValidate.ipAddr;
+                        if(_this.formValidate.serverMode == '2'){
+                            postData = {"action":"addPptpdUser", "data":postVar};
+                        }
+                        if(_this.formValidate.serverMode == '3'){
+                            postData = {"action":"addL2tpUser", "data":postVar};
+                        }
+                        if(_this.formValidate.serverMode == '4'){
+                            var config = {};
+                            if(true == _this.formValidate.block){
+                                config.block = 'yes';
+                            }
+                            config.tunnel_network = _this.formValidate.tunnelNetwork;
+//                            config.tunnel_networkv6 = _this.formValidate.tunnel_networkv6;
+                            config.local_network = _this.formValidate.localNetwork;
+//                            config.local_networkv6 = _this.formValidate.local_networkv6;
+                            config.remote_network = _this.formValidate.remoteNetwork;
+//                            config.remote_networkv6 = _this.formValidate.remote_networkv6;
+                            if(true == _this.formValidate.gwredir){
+                                config.gwredir = 'yes';
+                            }
+                            if(true == _this.formValidate.pushReset){
+                                config.push_reset = 'yes';
+                            }
+                            config.dns_domain = _this.formValidate.dnsDomain;
+
+                            if(_this.formValidate.dnsServer1){
+                                config.dns_server1 = _this.formValidate.dnsServer1;
+                            }
+                            if(_this.formValidate.dnsServer2){
+                                config.dns_server2 = _this.formValidate.dnsServer2;
+                            }
+                            if(_this.formValidate.dnsServer3){
+                                config.dns_server3 = _this.formValidate.dnsServer3;
+                            }
+                            if(_this.formValidate.dnsServer4){
+                                config.dns_server4 = _this.formValidate.dnsServer4;
+                            }
+                            if(_this.formValidate.ntpServer1){
+                                config.ntp_server1 = _this.formValidate.ntpServer1;
+                            }
+                            if(_this.formValidate.ntpServer2){
+                                config.ntp_server2 = _this.formValidate.ntpServer2;
+                            }
+
+                            if(true == _this.formValidate.netbiosEnable){
+                                config.netbios_enable = 'yes';
+                            }
+                            config.netbios_ntype = _this.formValidate.netbiosNtype;
+                            config.netbios_scope = _this.formValidate.netbiosScope;
+                            if(true == _this.formValidate.winsServerEnable){
+                                config.wins_server_enable = 'yes';
+                            }
+//                            config.wins_server1 = _this.formValidate.winsServer1;
+//                            config.wins_server2 = _this.formValidate.winsServer2;
+
+                            config.custom_options = _this.formValidate.customOptions;
+                            if(_this.formValidate.id){
+                                config.id = _this.formValidate.id;
+                            }
+                            if(true == _this.formValidate.openVpnEnable){
+                                postVar.config = config;
+                            }
+                            postData = {"action":"addOpenvpnUser", "data":postVar};
+                        }
+                        _this.applyLoading = true;
+                        uiPost.addlocalServerUser(postData,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            _this.applyLoading = false;
+                            if (0 == data.rescode) {
+                                _this.$Message.success({
+                                    content: _this.$t('account.success'), onClose: function () {
+                                        location.href = location.href;
+                                    }
+                                });
+                            }else{
+                                _this.$Message.error({content:_this.$t('account.fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
+                        });
+                    } else {
+                        _this.applyLoading = false;
+                    }
+                })
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

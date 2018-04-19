@@ -567,5 +567,30 @@ cs.prototype.getAddrPool= function (ip,mask){
 	return arr;
 };
 
+/**
+ * 虚拟post提交
+ *
+ * @Author   Jeff       <Jeff@carystudio.com>
+ * @DateTime 2018-04-19
+ * @param    {String}   URL		提交路径
+ * @param    {String}   PARAMS		json数据
+ */
+cs.prototype.post= function (URL, PARAMS){
+	var temp = document.createElement("form");
+	temp.action = URL;
+	temp.method = "post";
+	temp.style.display = "none";
+	for (var x in PARAMS) {
+		var opt = document.createElement("textarea");
+		opt.name = x;
+		opt.value = PARAMS[x];
+		// alert(opt.name)
+		temp.appendChild(opt);
+	}
+	document.body.appendChild(temp);
+	temp.submit();
+	return temp;
+};
+
 obj.cs = new cs();
 })(window);
