@@ -31,7 +31,7 @@
                         </Select>
                     </FormItem>
                     <FormItem :label="$t('account.account')" prop="username">
-                        <Input v-model="formValidate.username"></Input>
+                        <Input v-model="formValidate.username" :disabled="editFlag"></Input>
                     </FormItem>
                     <FormItem :label="$t('account.password')" prop="password">
                         <Input v-model="formValidate.password"></Input>
@@ -166,7 +166,7 @@
                     </div>
                     <!-- btn -->
                     <FormItem>
-                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('account.add') }}</Button>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('common.apply') }}</Button>
                     </FormItem>
                 </Card>
             </Form>
@@ -208,6 +208,7 @@
             return {
                 globalConfig:globalConfig,
                 applyLoading:false,
+                editFlag:false,
                 formInline: {
                     action:'',
                     data:{
@@ -279,14 +280,17 @@
                     ],
                     password: [
                         { validator:function(r, v, f) {
-                            var ret = cs.string(v);
-                            if (ret == 0) {
-                                f(_this.$t('account.msg3'));
-                            }else if(ret == 1){
-                                f(_this.$t('account.msg4'));
-                            }else{
-                                f();
+                            if(_this.editFlag == false){
+                                var ret = cs.string(v);
+                                if (ret == 0) {
+                                    f(_this.$t('account.msg3'));
+                                }else if(ret == 1){
+                                    f(_this.$t('account.msg4'));
+                                }else{
+                                    f();
+                                }
                             }
+                            f();
                         },trigger: 'blur' }
                     ],
                     ipAddr: [
@@ -468,7 +472,7 @@
                         var tmp = [];
                         if('OpenVPN' == params.row.accountMode){
                             tmp.push(
-                                /*h('Button', {
+                                h('Button', {
                                     props: {
                                         type: 'info',
                                         size: 'small'
@@ -480,6 +484,7 @@
                                         click:function () {
                                             console.log('---------------edit-----------------');
                                             console.log(params);
+                                            _this.editFlag = true;
                                             if("OpenVPN" == params.row.accountMode){
                                                 _this.formValidate.serverMode = '4';
                                             }else if("L2TP" == params.row.accountMode){
@@ -524,7 +529,9 @@
                                                 }
                                                 if(params.row.config.dns_domain){
                                                     _this.formValidate.dnsDomain = params.row.config.dns_domain;
+                                                    _this.formValidate.dnsDomainEnable = true;
                                                 }else{
+                                                    _this.formValidate.dnsDomainEnable = false;
                                                     _this.formValidate.dnsDomain = '';
                                                 }
 
@@ -581,11 +588,6 @@
                                                 }else{
                                                     _this.formValidate.customOptions = '';
                                                 }
-//                                                if(params.row.config.id){
-//                                                    _this.formValidate.id = params.row.config.id;
-//                                                }else{
-//                                                    _this.formValidate.id = '';
-//                                                }
                                             }else{
                                                 _this.formValidate.openVpnEnable = false;
                                                 _this.formValidate.block = false;
@@ -594,6 +596,7 @@
                                                 _this.formValidate.remoteNetwork = '';
                                                 _this.formValidate.gwredir = false;
                                                 _this.formValidate.pushReset = false;
+                                                _this.formValidate.dnsDomainEnable = false;
                                                 _this.formValidate.dnsDomain = '';
                                                 _this.formValidate.dnsServer1 = '';
                                                 _this.formValidate.dnsServer2 = '';
@@ -609,7 +612,7 @@
                                             }
                                         }
                                     }
-                                }, '编辑'),*/
+                                }, _this.$t('account.edit')),
                                 h('Button', {
                                     props: {
                                         type: 'info',
@@ -620,9 +623,6 @@
                                     },
                                     on: {
                                         click:function () {
-                                            console.log('---------------config-----------------');
-                                            console.log(params);
-                                            //TODO 导出配置暂未完成
                                             var data = {};
                                             data.action = 'exportOvpnClientConf';
                                             data.data = JSON.stringify({"username":params.row.Username});
@@ -909,7 +909,7 @@
                             if(true == _this.formValidate.openVpnEnable){
                                 postVar.config = config;
                             }
-                            postData = {"action":"addOpenvpnUser", "data":postVar};
+                            postData = {"action":"setOpenvpnUser", "data":postVar};
                         }
                         _this.applyLoading = true;
                         uiPost.addlocalServerUser(postData,function(data){
