@@ -37,7 +37,7 @@
                         </i-switch>
                     </FormItem>
                     <FormItem :label="$t('openvpn.Server_mode')">
-                        <Select v-model="formValidate.mode"  @on-change="modeStatus">
+                        <Select v-model="formValidate.mode"  @on-change="modeStatus" :key="$t('openvpn.Server_mode')">
                             <Option v-for="mode in serversModeOption" :value="mode.value" :key="mode.value"> {{ mode.option }}</Option>
                         </Select>
                     </FormItem>
@@ -106,7 +106,7 @@
                             </Select>
                         </FormItem>
                         <FormItem :label="$t('openvpn.certificate_deep')">
-                            <Select v-model="formValidate.cert_depth">
+                            <Select v-model="formValidate.cert_depth" :key="$t('openvpn.certificate_deep')">
                                 <Option v-for="certificate_deep in certificateDeepOption" :value="certificate_deep.value" :key="certificate_deep.value"> {{ certificate_deep.option }}</Option>
                             </Select>
                         </FormItem>
@@ -174,8 +174,8 @@
                         <Input v-model="formValidate.maxclients"></Input>
                     </FormItem>
                     <FormItem :label="$t('openvpn.compress')">
-                        <i-select v-model="formValidate.compression">
-                            <Option value="" selected="selected">{{ $t('openvpn.msg27') }}</Option>
+                        <i-select v-model="formValidate.compression" :key="$t('openvpn.compress')">
+                            <Option value="none">{{ $t('openvpn.msg27') }}</Option>
                             <Option value="no">{{ $t('openvpn.msg28') }}</Option>
                             <Option value="adaptive">{{ $t('openvpn.msg29') }}</Option>
                             <Option value="yes">{{ $t('openvpn.msg30') }}</Option>
@@ -301,7 +301,7 @@
                         <Input v-model="formValidate.custom_options" type="textarea" :rows="4" :placeholder="$t('openvpn.msg17')"></Input>
                     </FormItem>
                     <FormItem :label="$t('openvpn.verbosity_level')">
-                        <Select v-model="formValidate.verbosity_level">
+                        <Select v-model="formValidate.verbosity_level" :key="$t('openvpn.verbosity_level')">
                             <Option v-for="verbosity_level in verbosityLevelOption" :value="verbosity_level.value" :key="verbosity_level.value"> {{ verbosity_level.option }}</Option>
                         </Select>
                     </FormItem>
@@ -385,7 +385,7 @@ var cs_main = {
             remote_network: '',
             remote_networkv6: '',
             maxclients: '',
-            compression: '',
+            compression: 'none',
             passtos: '',
             client2client: '',
             duplicate_cn: '',
@@ -792,7 +792,11 @@ var cs_main = {
                     _this.formValidate.client_mgmt_port_enable =true;
                     _this.formValidate.client_mgmt_port = data.data.client_mgmt_port;
                 }
-                _this.formValidate.compression = data.data.compression;     //压缩
+                if(!data.data.compression){
+                    _this.formValidate.compression = 'none';     //压缩
+                }else{
+                    _this.formValidate.compression = data.data.compression;     //压缩
+                }
                 _this.formValidate.crypto = data.data.crypto;    //加密算法
                 _this.formValidate.custom_options = data.data.custom_options;    //高级
                 _this.formValidate.dev_mode = data.data.dev_mode;      //设备模式
@@ -984,7 +988,11 @@ var cs_main = {
                     data.remote_network = _this.formValidate.remote_network;
                     data.remote_networkv6 = _this.formValidate.remote_networkv6;
                     data.maxclients = _this.formValidate.maxclients;
-                    data.compression = _this.formValidate.compression;
+                    if('none' == _this.formValidate.compression){
+                        _this.formValidate.compression = '';
+                    }else{
+                        data.compression = _this.formValidate.compression;
+                    }
                     if (_this.formValidate.passtos == true){
                         data.passtos = 'yes';
                     }

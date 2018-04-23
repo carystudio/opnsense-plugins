@@ -285,7 +285,7 @@ var menu = [
                 "id":"6-3",
                 "href": "/newui/server/account",
                 "lang": "account",
-                "display":true
+                "display":false
             }
         ]
     },

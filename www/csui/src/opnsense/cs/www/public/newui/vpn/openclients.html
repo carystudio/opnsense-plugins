@@ -43,8 +43,8 @@
                         <Input v-model="formValidate.description"></Input>
                     </FormItem>-->
                     <FormItem :label="$t('clients.mode')">
-                        <Select v-model="formValidate.mode"  @on-change="modeStatus">
-                            <Option value="p2p_tls" selected="selected">{{$t('clients.msg1')}}</Option>
+                        <Select v-model="formValidate.mode"  @on-change="modeStatus" :key="$t('clients.mode')">
+                            <Option value="p2p_tls">{{$t('clients.msg1')}}</Option>
                             <!--<Option value="p2p_shared_key">端对端（共享密钥）</Option>-->
                         </Select>
                     </FormItem>
@@ -94,7 +94,7 @@
                     </FormItem>
                     <FormItem :label="$t('clients.agent_options')">
                         {{$t('clients.proxy_authtype')}}
-                        <Select v-model="formValidate.proxy_authtype">
+                        <Select v-model="formValidate.proxy_authtype" :key="$t('clients.agent_options')">
                             <Option value="none">{{$t('clients.msg2')}}</Option>
                             <Option value="basic">{{$t('clients.msg3')}}</Option>
                             <Option value="ntlm">ntlm</Option>  <!--TODO 该原选项值为 basic -->
@@ -202,8 +202,8 @@
                         <Input v-model="formValidate.use_shaper"></Input>
                     </FormItem>
                     <FormItem :label="$t('clients.compression')">
-                        <i-select v-model="formValidate.compression">
-                            <Option value="" selected="selected">{{$t('clients.msg9')}}</Option>
+                        <i-select v-model="formValidate.compression" :key="$t('clients.compression')">
+                            <Option value="none">{{$t('clients.msg9')}}</Option>
                             <Option value="no">{{$t('clients.msg10')}}</Option>
                             <Option value="adaptive">{{$t('clients.msg11')}}</Option>
                             <Option value="yes">{{$t('clients.msg12')}}</Option>
@@ -232,7 +232,7 @@
                         <Input v-model="formValidate.custom_options" type="textarea" :rows="4"></Input>
                     </FormItem>
                     <FormItem :label="$t('clients.verbosity_level')">
-                        <Select v-model="formValidate.verbosity_level">
+                        <Select v-model="formValidate.verbosity_level" :key="$t('clients.verbosity_level')">
                             <Option value="0" >{{$t('clients.msg13')}}</Option>
                             <Option value="1" >{{$t('clients.msg14')}}</Option>
                             <Option value="2" >2</Option>
@@ -323,7 +323,7 @@ var cs_main = {
             remote_network:'',
             remote_networkv6:'',
             use_shaper:'',
-            compression:'',
+            compression:'none',
             passtos:'',
             no_tun_ipv6:'',
             route_no_pull:'',
@@ -526,7 +526,11 @@ var cs_main = {
                 }else {
                     _this.formValidate.disable = true;
                 }
-                _this.formValidate.compression = data.data.compression;
+                if(!data.data.compression){
+                    _this.formValidate.compression = 'none';
+                }else{
+                    _this.formValidate.compression = data.data.compression;
+                }
                 _this.formValidate.crypto = data.data.crypto;
                 _this.formValidate.custom_options = data.data.custom_options;
                 _this.formValidate.description = data.data.description;
@@ -637,7 +641,12 @@ var cs_main = {
                     data.remote_network = _this.formValidate.remote_network;
                     data.remote_networkv6 = _this.formValidate.remote_networkv6;*/
                     data.use_shaper = _this.formValidate.use_shaper;
-                    data.compression = _this.formValidate.compression;
+                    if('none' == _this.formValidate.compression){
+                        data.compression = '';
+                    }else{
+                        data.compression = _this.formValidate.compression;
+                    }
+
                     if(_this.formValidate.passtos == true){
                         data.passtos = 'yes';
                     }
