@@ -787,7 +787,7 @@ class Openvpn extends Csbackend
         return $openvpnUsers;
     }
 
-    public static function addUser($data){
+    public static function setUser($data){
         global $config;
 
         $result = 0;
@@ -800,8 +800,12 @@ class Openvpn extends Csbackend
             if(!isset($data['Username']) || strlen($data['Username'])<1){
                 throw new AppException('OVPN_300');
             }
-            if(!isset($data['Password']) || strlen($data['Password'])<1){
-                throw new AppException('OVPN_301');
+            $user_update_idx = false;
+            foreach($config['system']['user'] as $idx=>$tmp_user){
+                if($tmp_user['name'] == $data['Username'] && 'user' == $tmp_user['scope'] && $tmp_user['descr'] == Openvpn::USER_DESCR){
+                    $user_update_idx = $idx;
+                    break ;
+                }
             }
             $csc = false;
             if(isset($data['config'])){
@@ -813,7 +817,9 @@ class Openvpn extends Csbackend
                 }else{
                     $csc['common_name'] = $data['Username'];
                 }
-
+                if(!$user_update_idx && (!isset($data['Password']) || strlen($data['Password'])<1)){
+                    throw new AppException('OVPN_301');
+                }
                 if(isset($user_config['block'])){
                     if('yes' != $user_config['block']) {
                         throw new AppException('OVPN_303');
@@ -870,63 +876,12 @@ class Openvpn extends Csbackend
                 }
                 $csc['ovpn_servers'] = Openvpn::VPNID_SVR;
             }
-            if(false !== $csc){
-                if(!is_array($config['openvpn']['openvpn-csc'])){
-                    $config['openvpn']['openvpn-csc'] = array();
-                }
-                $config['openvpn']['openvpn-csc'][] = $csc;
-            }
-            foreach($config['cert'] as $idx=>$cert){
-                if(Cert::CSG2000P_CA_REFID == $cert['caref'] && Openvpn::USER_RELATE_PREFIX.$data['Username'] == $cert['desct']){
-                    throw new AppException('OVPN_311');
-                    break;
-                }
-            }
-            $cert = array();
-            $cert['refid'] = uniqid();
-            $cert['descr'] = 'openvpn user:'.$data['Username'];
-            $cert['caref'] = Cert::CSG2000P_CA_REFID;
 
-            $dn = array(
-                'countryName' => Cert::DN_COUNTRY,
-                'stateOrProvinceName' => Cert::DN_STATE,
-                'localityName' => Cert::DN_CITY,
-                'organizationName' => Cert::DN_ORG,
-                'emailAddress' => Cert::DN_EMAIL,
-                'commonName' => $data['Username']);
-
-            if (!cert_create(
-                $cert,
-                $cert['caref'],
-                2048,
-                3650,
-                $dn,
-                'sha256',
-                'usr_cert'
-            )) {
-                throw new AppException('OVPN_312');
+            if(false !== $user_update_idx){
+                self::updateUser($user_update_idx, $data, $csc);
+            }else{
+                self::addUser($data, $csc);
             }
-            if(!is_array($config['cert'])){
-                $config['cert'] = array();
-            }
-            $config['cert'][] = $cert;
-            $user = array(
-                'name'=> $data['Username'],
-                'scope'=>'user',
-                'descr'=>Openvpn::USER_DESCR,
-                'expires'=>'',
-                'authorizedkeys'=>'',
-                'ipsecpsk'=>'',
-                'otp_seed'=>'',
-                'cert'=>$cert['refid']
-            );
-            $user['uid']=$config['system']['nextuid']++;
-            local_user_set_password($user, $data['Password']);
-
-            $config['system']['user'][] = $user;
-
-            local_user_set($user);
-            local_user_set_groups($user, array('openvpn'));
 
             write_config();
             openvpn_configure_csc();
@@ -938,6 +893,98 @@ class Openvpn extends Csbackend
         }
 
         return $result;
+    }
+
+    private static function updateUser($user_idx, $data, $csc){
+        global $config;
+
+        if(false !== $csc){
+            if(!is_array($config['openvpn']['openvpn-csc'])){
+                $config['openvpn']['openvpn-csc'] = array();
+            }
+            $updated = false;
+            foreach($config['openvpn']['openvpn-csc'] as $idx=>$tmp_csc){
+                if($tmp_csc['common_name'] == $csc['common_name']){
+                    $config['openvpn']['openvpn-csc'][$idx] = $csc;
+                    $updated = true;
+                    break ;
+                }
+            }
+            if(!$updated){
+                $config['openvpn']['openvpn-csc'][] = $csc;
+            }
+        }else{
+            foreach($config['openvpn']['openvpn-csc'] as $idx=>$tmp_csc){
+                if($tmp_csc['common_name'] == $data['Username']){
+                    unset($config['openvpn']['openvpn-csc'][$idx]);
+                }
+            }
+        }
+        if(isset($data['Password']) && strlen($data['Password'])>0){
+            local_user_set_password($config['system']['user'][$user_idx], $data['Password']);
+        }
+    }
+
+    private static function addUser($data, $csc){
+        global $config;
+
+        if(false !== $csc){
+            if(!is_array($config['openvpn']['openvpn-csc'])){
+                $config['openvpn']['openvpn-csc'] = array();
+            }
+            $config['openvpn']['openvpn-csc'][] = $csc;
+        }
+        foreach($config['cert'] as $idx=>$cert){
+            if(Cert::CSG2000P_CA_REFID == $cert['caref'] && Openvpn::USER_RELATE_PREFIX.$data['Username'] == $cert['desct']){
+                throw new AppException('OVPN_311');
+                break;
+            }
+        }
+        $cert = array();
+        $cert['refid'] = uniqid();
+        $cert['descr'] = 'openvpn user:'.$data['Username'];
+        $cert['caref'] = Cert::CSG2000P_CA_REFID;
+
+        $dn = array(
+            'countryName' => Cert::DN_COUNTRY,
+            'stateOrProvinceName' => Cert::DN_STATE,
+            'localityName' => Cert::DN_CITY,
+            'organizationName' => Cert::DN_ORG,
+            'emailAddress' => Cert::DN_EMAIL,
+            'commonName' => $data['Username']);
+
+        if (!cert_create(
+            $cert,
+            $cert['caref'],
+            2048,
+            3650,
+            $dn,
+            'sha256',
+            'usr_cert'
+        )) {
+            throw new AppException('OVPN_312');
+        }
+        if(!is_array($config['cert'])){
+            $config['cert'] = array();
+        }
+        $config['cert'][] = $cert;
+        $user = array(
+            'name'=> $data['Username'],
+            'scope'=>'user',
+            'descr'=>Openvpn::USER_DESCR,
+            'expires'=>'',
+            'authorizedkeys'=>'',
+            'ipsecpsk'=>'',
+            'otp_seed'=>'',
+            'cert'=>$cert['refid']
+        );
+        $user['uid']=$config['system']['nextuid']++;
+        local_user_set_password($user, $data['Password']);
+
+        $config['system']['user'][] = $user;
+
+        local_user_set($user);
+        local_user_set_groups($user, array('openvpn'));
     }
 
     public static function delUser($data){

@@ -112,6 +112,10 @@ class WebapiController extends BaseController
                     Accontrol::setUploadFile($this->request);
                 }else if('saveConfigFile'==$action){
                     System::saveConfigFile($this->request);
+                }else if('exportOvpnClientConf'==$action) {
+                    $data = json_decode($_POST['data'], true);
+                    Openvpn::exportClientConf($data);
+                    return;
                 }
             }
             $para = json_decode($text, true);
@@ -334,16 +338,12 @@ class WebapiController extends BaseController
                 $result['rescode'] = Openvpn::setClientStatus($para['data']);
             }else if('getOpenvpnUsers'==$action){
                 $result['rescode'] = Openvpn::getUsers();
-            }else if('addOpenvpnUser'==$action) {
+            }else if('setOpenvpnUser'==$action) {
                 $this->checkData($para);
-                $result['rescode'] = Openvpn::addUser($para['data']);
+                $result['rescode'] = Openvpn::setUser($para['data']);
             }else if('delOpenvpnUser'==$action) {
                 $this->checkData($para);
                 $result['rescode'] = Openvpn::delUser($para['data']);
-            }else if('exportOvpnClientConf'==$action){
-                $this->checkData($para);
-                Openvpn::exportClientConf($para['data']);
-                return ;
             }else if('getOpenvpnEncryInfo' == $action){
                 $result['rescode'] = Openvpn::getEncryInfo();
             }else if('getIpsecPhase1'==$action){
