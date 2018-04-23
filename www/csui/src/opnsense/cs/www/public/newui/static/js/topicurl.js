@@ -6694,6 +6694,12 @@ uiPost.prototype.doLogin = function(postVar,callback){
         this.url = '/webapi';
         return this.post(postVar,callback);
     };
+    uiPost.prototype.exportOvpnClientConf = function(postVar,callback){
+        this.topicurl = 'exportOvpnClientConf';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
     uiPost.prototype.getOpenvpnClientStatus = function(postVar,callback){
         this.topicurl = 'getOpenvpnClientStatus';
         this.async = true; // true:异步，false:同步。
@@ -6702,6 +6708,12 @@ uiPost.prototype.doLogin = function(postVar,callback){
     };
     uiPost.prototype.setOpenvpnClientStatus = function(postVar,callback){
         this.topicurl = 'setOpenvpnClientStatus';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getProxy = function(postVar,callback){
+        this.topicurl = 'getProxy';
         this.async = true; // true:异步，false:同步。
         this.url = '/webapi';
         return this.post(postVar,callback);
