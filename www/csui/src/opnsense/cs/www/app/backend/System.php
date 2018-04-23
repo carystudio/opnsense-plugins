@@ -407,4 +407,16 @@ class System extends Csbackend
 
         return $data['language'];
     }
+
+    public static function getGroup($groupname){
+        global $config;
+
+        foreach($config['system']['group'] as $idx=>$group){
+            if($group['name'] == $groupname){
+                return $group;
+            }
+        }
+
+        return false;
+    }
 }

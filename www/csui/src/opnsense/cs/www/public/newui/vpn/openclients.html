@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb"  :breadcrumb="[$t('menu.vpn'),$t('menu.openclients')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col  :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" >
+                <Alert>
+                  {{ $t('clients.help') }}
+                </Alert>
+            </Col>
+        </Row>
+        <Row :gutter="26">
+            <!-- content start -->
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" >
+            <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                <Card>
+                    <p slot="title">
+                        <Icon type="information-circled"></Icon>
+                        {{$t('clients.convention_info')}}
+                    </p>
+
+                    <FormItem :label="$t('clients.disable')">
+                        <!--<Icon type="information-circled" color="#ff9900"></Icon>-->
+                        <i-switch v-model="formValidate.disable" size="large" >
+                            <span slot="open">{{$t('clients.open')}}</span>
+                            <span slot="close">{{$t('clients.close')}}</span>
+                        </i-switch>
+                    </FormItem>
+                    <!--<FormItem label="描述">
+                        <Input v-model="formValidate.description"></Input>
+                    </FormItem>-->
+                    <FormItem :label="$t('clients.mode')">
+                        <Select v-model="formValidate.mode"  @on-change="modeStatus">
+                            <Option value="p2p_tls" selected="selected">{{$t('clients.msg1')}}</Option>
+                            <!--<Option value="p2p_shared_key">端对端（共享密钥）</Option>-->
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('clients.protocol')">
+                        <Select v-model="formValidate.protocol">
+                            <Option value="UDP">UDP</Option>
+                            <Option value="TCP">TCP</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('clients.dev_mode')">
+                        <Select v-model="formValidate.dev_mode">
+                            <Option value="tun">tun</Option>
+                            <Option value="tap">tap</Option>
+                        </Select>
+                    </FormItem>
+                    <!--动态获取接口-->
+                    <FormItem :label="$t('clients.interface')">
+                        <Select v-model="formValidate.interface">
+                            <Option v-for="port in portOption" :value="port.interface" :key="port.interface"> {{ port.name }}</Option>
+                        </Select>
+                    </FormItem>
+
+                    <FormItem :label="$t('clients.remote_server')">
+                        <Row>
+                            <Col span="10">
+                            <FormItem :label="$t('clients.server_addr')" prop="server_addr">
+                                <Input v-model="formValidate.server_addr"></Input>
+                            </FormItem>
+                            </Col>
+                            <Col span="10" offset="1">
+                            <FormItem :label="$t('clients.server_port')" prop="server_port">
+                                <Input v-model="formValidate.server_port"></Input>
+                            </FormItem>
+                            </Col>
+                        </Row>
+                        <!--<Checkbox v-model="formValidate.remote_random"> *Select remote server at random</Checkbox>-->
+                    </FormItem>
+
+                    <FormItem :label="$t('clients.resolve_retry')">
+                        <Checkbox v-model="formValidate.resolve_retry"></Checkbox>
+                    </FormItem>
+                    <FormItem :label="$t('clients.proxy_addr')" prop="proxy_addr">
+                        <Input v-model="formValidate.proxy_addr"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('clients.proxy_port')" prop="proxy_port">
+                        <Input v-model="formValidate.proxy_port"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('clients.agent_options')">
+                        {{$t('clients.proxy_authtype')}}
+                        <Select v-model="formValidate.proxy_authtype">
+                            <Option value="none">{{$t('clients.msg2')}}</Option>
+                            <Option value="basic">{{$t('clients.msg3')}}</Option>
+                            <Option value="ntlm">ntlm</Option>  <!--TODO 该原选项值为 basic -->
+                        </Select>
+                        <div  v-show="'none' != formValidate.proxy_authtype">
+                            {{$t('clients.proxy_user')}}
+                            <FormItem prop="proxy_user">
+                                <Input v-model="formValidate.proxy_user"></Input>
+                            </FormItem>
+                            {{$t('clients.proxy_passwd')}}
+                            <FormItem prop="proxy_passwd">
+                                <Input v-model="formValidate.proxy_passwd" type="password"></Input>
+                            </FormItem>
+                        </div>
+                    </FormItem>
+                    <FormItem :label="$t('clients.local_port')" prop="local_port">
+                        <Input v-model="formValidate.local_port"></Input>
+                    </FormItem>
+                </Card>
+                <br>
+                <Card>
+                    <p slot="title">
+                        <Icon type="information-circled"></Icon>
+                        {{$t('clients.authentication_set')}}
+                    </p>
+                    <!--<FormItem label="用户名/放行">
+                        用户名
+                        <Input v-model="formValidate.auth_user"></Input>
+                        密码
+                        <Input v-model="formValidate.auth_pass" type="password"></Input>
+                    </FormItem>-->
+                    <FormItem :label="$t('clients.reneg_sec')" prop="reneg_sec">
+                        <Input v-model="formValidate.reneg_sec"><span slot="append">{{$t('clients.msg4')}}</span></Input>      <!--reneg-sec-->
+                    </FormItem>
+                </Card>
+                <br>
+                <Card>
+                    <p slot="title">
+                        <Icon type="information-circled"></Icon>
+                        {{$t('clients.encrypt_set')}}
+                    </p>
+                    <div v-if="'p2p_tls' == formValidate.mode">
+                        <FormItem :label="$t('clients.tlsauth_enable')" >
+                            <Checkbox v-model="formValidate.tlsauth_enable">{{$t('clients.msg5')}}</Checkbox>
+                            <div v-if="formValidate.tlsauth_enable == true" >
+                                <Checkbox v-model="formValidate.autotls_enable">{{$t('clients.msg6')}}</Checkbox>
+                                <FormItem v-if="formValidate.autotls_enable != true" prop="tls">
+                                    <Input v-model="formValidate.tls" type="textarea" :rows="4"></Input>
+                                </FormItem>
+                            </div>
+                        </FormItem>
+                        <FormItem :label="$t('clients.ca')" prop="ca">
+                            <Input v-model="formValidate.ca" type="textarea" :rows="3"></Input>
+                        </FormItem>
+                        <FormItem :label="$t('clients.cert')" prop="cert">
+                            <Input v-model="formValidate.cert" type="textarea" :rows="3"></Input>
+                        </FormItem>
+                        <FormItem :label="$t('clients.prv')" prop="prv">
+                            <Input v-model="formValidate.prv" type="textarea" :rows="3"></Input>
+                        </FormItem>
+                    </div>
+                    <div v-if="p2p_shared_key == true">
+                        <FormItem :label="$t('clients.autokey_enable')" prop="autokey_enable">
+                            <Checkbox v-model="formValidate.autokey_enable">{{$t('clients.msg7')}} </Checkbox>
+                            <FormItem v-if="formValidate.autokey_enable == false">
+                                <Input v-model="formValidate.shared_key" type="textarea" :rows="4" :placeholder="$t('clients.msg8')"></Input>
+                            </FormItem>
+                        </FormItem>
+                    </div>
+                    <FormItem :label="$t('clients.crypto')">
+                        <Select v-model="formValidate.crypto">
+                            <Option v-for="(item,idx) in cryptoOption" :value="idx" :key="idx"> {{ item }}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('clients.digest')">
+                        <Select v-model="formValidate.digest">
+                            <Option v-for="(item,idx) in digestOption" :value="idx" :key="idx"> {{ item }}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('clients.engine')">
+                        <Select v-model="formValidate.engine">
+                            <Option v-for="(item,idx) in engineOption" :value="idx" :key="idx"> {{ item }}</Option>
+                        </Select>
+                    </FormItem>
+                </Card>
+                <br>
+                <Card>
+                    <p slot="title">
+                        <Icon type="information-circled"></Icon>
+                        {{$t('clients.tunnel_setting')}}
+                    </p>
+                    <!--<FormItem label="IPv4隧道网络">
+                        <Input v-model="formValidate.tunnel_network"></Input>
+                    </FormItem>
+                    <FormItem label="IPv6隧道网络">
+                        <Input v-model="formValidate.tunnel_networkv6"></Input>
+                    </FormItem>
+                    <FormItem label="IPv4远程网络">
+                        <Input v-model="formValidate.remote_network"></Input>
+                    </FormItem>
+                    <FormItem label="IPv6远程网络">
+                        <Input v-model="formValidate.remote_networkv6"></Input>
+                    </FormItem>-->
+                    <FormItem :label="$t('clients.use_shaper')" prop="use_shaper">
+                        <Input v-model="formValidate.use_shaper"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('clients.compression')">
+                        <i-select v-model="formValidate.compression">
+                            <Option value="" selected="selected">{{$t('clients.msg9')}}</Option>
+                            <Option value="no">{{$t('clients.msg10')}}</Option>
+                            <Option value="adaptive">{{$t('clients.msg11')}}</Option>
+                            <Option value="yes">{{$t('clients.msg12')}}</Option>
+                        </i-select>
+                    </FormItem>
+                    <FormItem :label="$t('clients.passtos')" prop="passtos">
+                        <Checkbox v-model="formValidate.passtos"></Checkbox>
+                    </FormItem>
+                    <!--<FormItem label="禁用IPv6" prop="no_tun_ipv6">
+                        <Checkbox v-model="formValidate.no_tun_ipv6"> *{{ $t('openvpn.msg7') }} </Checkbox>
+                    </FormItem>-->
+                    <FormItem :label="$t('clients.route_no_pull')" prop="route_no_pull">
+                        <Checkbox v-model="formValidate.route_no_pull"></Checkbox>
+                    </FormItem>
+                    <FormItem :label="$t('clients.route_no_exec')" prop="route_no_exec">
+                        <Checkbox v-model="formValidate.route_no_exec"></Checkbox>
+                    </FormItem>
+                </Card>
+                <br>
+                <Card>
+                    <p slot="title">
+                        <Icon type="information-circled"></Icon>
+                        {{$t('clients.advanced')}}
+                </p>
+                    <FormItem :label="$t('clients.custom_options')" prop="custom_options">
+                        <Input v-model="formValidate.custom_options" type="textarea" :rows="4"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('clients.verbosity_level')">
+                        <Select v-model="formValidate.verbosity_level">
+                            <Option value="0" >{{$t('clients.msg13')}}</Option>
+                            <Option value="1" >{{$t('clients.msg14')}}</Option>
+                            <Option value="2" >2</Option>
+                            <Option value="3" >{{$t('clients.msg15')}}</Option>
+                            <Option value="4" >4</Option>
+                            <Option value="5" >5</Option>
+                            <Option value="6" >6</Option>
+                            <Option value="7" >7</Option>
+                            <Option value="8" >8</Option>
+                            <Option value="9" >9</Option>
+                            <Option value="10" >10</Option>
+                            <Option value="11" >11</Option>
+                        </Select>
+                    </FormItem>
+                    <br>
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('clients.save') }}</Button>
+                    </FormItem>
+                </Card>
+            </Form>
+            </Col>
+            <!-- content end -->
+        </Row>
+    </div>
+
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/plugin/jquery.base64.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    return {
+        globalConfig:globalConfig,
+        p2p_shared_key:false,
+        p2p_tls:false,
+        applyLoading:false,
+        cryptoOption:{},
+        digestOption:{},
+        engineOption:{},
+        portOption:[],
+
+        formValidate:{
+            disable:false,
+            description:'',
+            mode:'p2p_tls',
+            protocol:'',
+            dev_mode:'',
+            interface:'',
+            server_addr:'',
+            server_port:'',
+            remote_random:'',
+            resolve_retry:'',
+            proxy_addr:'',
+            proxy_port:'',
+            proxy_authtype:'none',
+            proxy_user:'',
+            proxy_passwd:'',
+            local_port:'',
+            auth_user:'',
+            auth_pass:'',
+            reneg_sec:'',
+            tlsauth_enable: false,
+            autotls_enable:'',
+            tls:'',
+            ca:'',
+            cert:'',
+            prv:'',
+            autokey_enable:'',
+            shared_key:'',
+            crypto:'',
+            digest:'',
+            engine:'',
+            tunnel_network:'',
+            tunnel_networkv6:'',
+            remote_network:'',
+            remote_networkv6:'',
+            use_shaper:'',
+            compression:'',
+            passtos:'',
+            no_tun_ipv6:'',
+            route_no_pull:'',
+            route_no_exec:'',
+            custom_options:'',
+            verbosity_level:'1'
+        }
+
+      }
+    },
+    computed:{
+        ruleValidate:function (){
+            var _this = this;
+            return {
+                server_addr: [
+                    { validator:function(r, v, f) {
+                        var _s = cs.string(v);
+                        if(0 == _s){
+                            f(_this.$t('clients.msg16'));
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                server_port: [
+                    { validator:function(r, v, f) {
+                        var _s = cs.num(v);
+                        if(0 == _s){
+                            f(_this.$t('clients.msg17'));
+                        }else if(1 == _s){
+                            f(_this.$t('clients.msg18'));
+                        }else if( v <1 || v >65535){
+                            f(_this.$t('clients.msg19'));
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                proxy_addr: [
+                    { validator:function(r, v, f) {
+                        var _s = cs.string(v);
+                        if(0 == _s){
+                            f(_this.$t('clients.msg20'));
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                proxy_port: [
+                    { validator:function(r, v, f) {
+                        var _s = cs.num(v);
+                        if(0 == _s){
+                            f(_this.$t('clients.msg21'));
+                        }else if(1 == _s){
+                            f(_this.$t('clients.msg22'));
+                        }else if( v <1 || v >65535){
+                            f(_this.$t('clients.msg23'));
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                proxy_user: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.proxy_authtype != 'none'){
+                            var _s = cs.string(v);
+                            if(0 == _s){
+                                f(_this.$t('clients.msg24'));
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                proxy_passwd: [
+                    { validator:function(r, v, f) {
+                        if(_this.formValidate.proxy_authtype != 'none'){
+                            var _s = cs.string(v);
+                            if(0 == _s){
+                                f(_this.$t('clients.msg25'));
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                local_port: [
+                { validator:function(r, v, f) {
+                    var _s = cs.num(v);
+                    if(0 == _s){
+                        f(_this.$t('clients.msg26'));
+                    }else if(1 == _s){
+                        f(_this.$t('clients.msg27'));
+                    }else if( v <1 || v >65535){
+                        f(_this.$t('clients.msg28'));
+                    }
+                    f();
+                },trigger: 'blur' }
+                ],
+                reneg_sec: [
+                { validator:function(r, v, f) {
+                    if(_this.formValidate.mode != 'server_tls'){
+                        var _s = cs.num(v);
+                        if(0 == _s){
+                            f(_this.$t('clients.msg29'));
+                        }else if(1 == _s){
+                            f(_this.$t('clients.msg30'));
+                        }
+                    }
+                    f();
+                },trigger: 'blur' }
+                ],
+                tls: [
+                    { validator:function(r, v, f) {
+                        if (_this.formValidate.tlsauth_enable == true){
+                            if(_this.formValidate.autotls_enable ==false){
+                                var _s = cs.string(v);
+                                if(0 == _s){
+                                    f(_this.$t('clients.msg31'));
+                                }
+                            }
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                ca: [
+                    { validator:function(r, v, f) {
+                        var _s = cs.string(v);
+                        if(0 == _s){
+                            f(_this.$t('clients.msg32'));
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                cert: [
+                    { validator:function(r, v, f) {
+                        var _s = cs.string(v);
+                        if(0 == _s){
+                            f(_this.$t('clients.msg33'));
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                prv: [
+                    { validator:function(r, v, f) {
+                        var _s = cs.string(v);
+                        if(0 == _s){
+                            f(_this.$t('clients.msg34'));
+                        }
+                        f();
+                    },trigger: 'blur' }
+                ],
+                use_shaper: [
+                { validator:function(r, v, f) {
+                    var _s = cs.num(v);
+                    if(0 == _s){
+                        f(_this.$t('clients.msg35'));
+                    }else if(1 == _s){
+                        f(_this.$t('clients.msg36'));
+                    }else if( v <100 || v >104857600){
+                        f(_this.$t('clients.msg37'));
+                    }
+                    f();
+                },trigger: 'blur' }
+            ]
+            }
+        }
+
+    },
+    created:function() {
+        var _this = this;
+        var postVar = {"action":"getLanWanInf","data":[]};
+        _this.$Spin.show();  //加载动画
+        uiPost.getLanWanInf(postVar,function(data){
+            if (9999 == data.rescode){
+                cs.loginOut();
+            }
+            _this.$Spin.hide();   //关闭加载动画
+            if (0 == data.rescode){
+                _this.portOption = data.data;
+            }
+        });
+
+        var psotData2 =  {"action":"getOpenvpnEncryInfo","data":{}};
+        uiPost.getOpenvpnEncryInfo(psotData2,function (data) {
+            if (9999 == data.rescode){
+                cs.loginOut();
+            }
+            if (0 == data.rescode){
+                _this.cryptoOption = data.data.cipherList;
+                _this.digestOption = data.data.digestList;
+                _this.engineOption = data.data.engineList;
+            }
+
+        });
+
+        var psotData =  {"action":"getOpenvpnClientStatus","data":{}};
+        uiPost.getOpenvpnClientStatus(psotData,function (data) {
+            console.log(data);
+            if (9999 == data.rescode){
+                cs.loginOut();
+            }
+            if (0 == data.rescode){
+                if ('1' == data.data.disable || 'yes' == data.data.disable){
+                    _this.formValidate.disable = false;
+                }else {
+                    _this.formValidate.disable = true;
+                }
+                _this.formValidate.compression = data.data.compression;
+                _this.formValidate.crypto = data.data.crypto;
+                _this.formValidate.custom_options = data.data.custom_options;
+                _this.formValidate.description = data.data.description;
+                _this.formValidate.dev_mode = data.data.dev_mode;
+                _this.formValidate.digest = data.data.digest;
+                _this.formValidate.engine = data.data.engine;
+                _this.formValidate.interface = data.data.interface;
+                _this.formValidate.mode = data.data.mode;
+                _this.modeStatus();
+                if ('yes' == data.data.no_tun_ipv6){
+                    _this.formValidate.no_tun_ipv6 = true;
+                }
+                _this.formValidate.protocol = data.data.protocol;
+                _this.formValidate.proxy_authtype = data.data.proxy_authtype;
+                if ('yes' == data.data.route_no_exec){
+                    _this.formValidate.route_no_exec = true;
+                }
+                if ('yes' == data.data.route_no_pull){
+                    _this.formValidate.route_no_pull = true;
+                }
+                _this.formValidate.server_addr = data.data.server_addr;
+                _this.formValidate.server_port = data.data.server_port;
+                _this.formValidate.verbosity_level = String(data.data.verbosity_level);
+                _this.formValidate.proxy_addr = data.data.proxy_addr;
+                _this.formValidate.proxy_port = data.data.proxy_port;
+                _this.formValidate.proxy_user = data.data.proxy_user;
+                _this.formValidate.proxy_passwd = data.data.proxy_passwd;
+                _this.formValidate.local_port = data.data.local_port;
+                _this.formValidate.reneg_sec = data.data['reneg-sec'];
+                if (data.data.tls){
+                    _this.formValidate.tlsauth_enable = true;
+                    _this.formValidate.autotls_enable = false;
+                    _this.formValidate.tls = data.data.tls;
+                }
+                if(data.data.ca){
+                    _this.formValidate.ca =  $.base64.decode(data.data.ca);   //对等证书颁发机构
+                }
+                if(data.data.cert){
+                    _this.formValidate.cert = $.base64.decode(data.data.cert);  //服务器证书
+                }
+                if(data.data.prv){
+                    _this.formValidate.prv = $.base64.decode(data.data.prv);  //私有密钥数据
+                }
+                _this.formValidate.use_shaper = data.data.use_shaper;
+                if('yes' == data.data.passtos ){
+                    _this.formValidate.passtos = true;
+                }
+                if('yes' == data.data.resolve_retry ){
+                    _this.formValidate.resolve_retry = true;
+                }
+            }
+        });
+    },
+    methods:{
+        modeStatus:function (){
+            if ('p2p_shared_key' == this.formValidate.mode){
+                this.p2p_shared_key = true;
+                this.p2p_tls = false;
+            }else {
+                this.p2p_shared_key = false;
+                this.p2p_tls = true;
+            }
+        },
+        handleSubmit: function (name){
+            var _this = this;
+            this.$refs[name].validate(function(valid){
+                if (valid){
+                    var data = {};
+                    if (_this.formValidate.disable == false){
+                        data.disable = 'yes';
+                    }
+                    data.mode = _this.formValidate.mode;
+                    if(_this.formValidate.mode == "p2p_tls"){
+                        if (_this.formValidate.tlsauth_enable == true && _this.formValidate.autotls_enable == false){
+                            data.tls = _this.formValidate.tls;
+                        }
+                        data.ca = $.base64.encode(_this.formValidate.ca);
+                        data.cert = $.base64.encode(_this.formValidate.cert);
+                        data.prv = $.base64.encode(_this.formValidate.prv);
+                    }else{
+                        if(_this.formValidate.autokey_enable == true){
+                            data.shared_key = _this.formValidate.shared_key;
+                        }
+                    }
+                    data.protocol = _this.formValidate.protocol;
+                    data.dev_mode = _this.formValidate.dev_mode;
+                    data.interface = _this.formValidate.interface;
+                    data.server_addr = _this.formValidate.server_addr;
+                    data.server_port = _this.formValidate.server_port;
+                   if(_this.formValidate.resolve_retry == true){
+                        data.resolve_retry = 'yes';
+                    }
+                    data.proxy_addr = _this.formValidate.proxy_addr;
+                    data.proxy_port = _this.formValidate.proxy_port;
+                    data.proxy_authtype = _this.formValidate.proxy_authtype;
+                    if(_this.formValidate.proxy_authtype = 'none'){
+                        data.proxy_user = _this.formValidate.proxy_user;
+                        data.proxy_passwd = _this.formValidate.proxy_passwd;
+                    }
+                    data.local_port = _this.formValidate.local_port;
+                    data["reneg-sec"] = _this.formValidate.reneg_sec;
+                    data.crypto = _this.formValidate.crypto;
+                    data.digest = _this.formValidate.digest;
+                    data.engine = _this.formValidate.engine;
+                    /*后台没有验证的数据*/
+                    /*data.tunnel_network = _this.formValidate.tunnel_network;
+                    data.tunnel_networkv6 = _this.formValidate.tunnel_networkv6;
+                    data.remote_network = _this.formValidate.remote_network;
+                    data.remote_networkv6 = _this.formValidate.remote_networkv6;*/
+                    data.use_shaper = _this.formValidate.use_shaper;
+                    data.compression = _this.formValidate.compression;
+                    if(_this.formValidate.passtos == true){
+                        data.passtos = 'yes';
+                    }
+                    if(_this.formValidate.route_no_pull == true){
+                        data.route_no_pull = 'yes';
+                    }
+                    if(_this.formValidate.route_no_exec == true){
+                        data.route_no_exec = 'yes';
+                    }
+                    data.custom_options = _this.formValidate.custom_options;
+                    data.verbosity_level = _this.formValidate.verbosity_level;
+
+                    var postData = {"action":"setOpenvpnClientStatus","data":data};
+                    console.log(postData);
+                    _this.applyLoading = true;
+                    uiPost.setOpenvpnClientStatus(postData,function(data){
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        if (0 == data.rescode) {
+                            _this.$Message.success({content:_this.$t('openvpn.success'),onClose:function(){
+//                        location.href = location.href;
+                            }});
+                        } else {
+                            _this.$Message.error({content:_this.$t('openvpn.fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                        }
+                        _this.applyLoading = false;
+                    });
+                }
+            });
+        },
+        getEncryptType:function (authMode) {
+            var _this = this;
+        }
+    }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

@@ -138,4 +138,39 @@ class Util
         return self::$client_ip;
     }
 
+    public static function checkCidr($value, $multiple = false, $ipproto = 'ipv4', $allow_hosts = false){
+        if (empty($value)) {
+            return false;
+        }
+        $networks = explode(',', $value);
+
+        if (!$multiple && (count($networks) > 1)) {
+            return false;
+        }
+        foreach ($networks as $network) {
+            if ('ipv4' == $ipproto) {
+                if(!openvpn_validate_cidr_ipv4($network, $allow_hosts)){
+                    return false;
+                }
+            } else {
+                if(!openvpn_validate_cidr_ipv6($network)){
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public static function check0and1($val){
+        if(!is_numeric($val)){
+            return false;
+        }
+        $val = intval($val);
+        if(0 != $val && 1 != $val){
+            return false;
+        }
+
+        return true;
+    }
 }

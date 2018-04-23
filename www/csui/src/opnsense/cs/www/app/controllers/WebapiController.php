@@ -112,6 +112,10 @@ class WebapiController extends BaseController
                     Accontrol::setUploadFile($this->request);
                 }else if('saveConfigFile'==$action){
                     System::saveConfigFile($this->request);
+                }else if('exportOvpnClientConf'==$action) {
+                    $data = json_decode($_POST['data'], true);
+                    Openvpn::exportClientConf($data);
+                    return;
                 }
             }
             $para = json_decode($text, true);
@@ -281,8 +285,10 @@ class WebapiController extends BaseController
                 $result['rescode'] = Network::delInterfaceBind($para['data']);
                 }else if('getNetInfo'==$action){
                 $result['rescode'] = Network::getNetInfo($para['data']);
-            }else if('getLinksData'==$action){
+            }else if('getLinksData'==$action) {
                 $result['rescode'] = Network::getLinksData($para['data']);
+            }else if('getLanWanInf' == $action){
+                $result['rescode'] = Network::getLanWanInf();
             }else if("scanAp" == $action){
                 $this->checkData($para);
                 $result['rescode'] = Accontrol::acScanAp($para['data']);
@@ -318,8 +324,72 @@ class WebapiController extends BaseController
             }else if("delApUpgradeFile" == $action){
                 $this->checkData($para);
                 $result['rescode'] = Accontrol::delApUpgradeFile($para['data']);
-            }else if("updataConfig" == $action){
+            }else if("updataConfig" == $action) {
                 System::updataConfig();
+            }else if('getOpenvpnSvrStatus'==$action){
+                $result['rescode'] = Openvpn::getSvrStatus();
+            }else if('setOpenvpnSvrStatus'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Openvpn::setSvrStatus($para['data']);
+            }else if('getOpenvpnClientStatus'==$action){
+                $result['rescode'] = Openvpn::getClientStatus();
+            }else if('setOpenvpnClientStatus'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Openvpn::setClientStatus($para['data']);
+            }else if('getOpenvpnUsers'==$action){
+                $result['rescode'] = Openvpn::getUsers();
+            }else if('setOpenvpnUser'==$action) {
+                $this->checkData($para);
+                $result['rescode'] = Openvpn::setUser($para['data']);
+            }else if('delOpenvpnUser'==$action) {
+                $this->checkData($para);
+                $result['rescode'] = Openvpn::delUser($para['data']);
+            }else if('getOpenvpnEncryInfo' == $action){
+                $result['rescode'] = Openvpn::getEncryInfo();
+            }else if('getIpsecPhase1'==$action){
+                $result['rescode'] = Ipsec::getPhase1();
+            }else if('setIpsecPhase1'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Ipsec::setPhase1($para['data']);
+            }else if('delIpsecPhase1'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Ipsec::delPhase1($para['data']);
+            }else if('getIpsecPhase2'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Ipsec::getPhase2($para['data']);
+            }else if('setIpsecPhase2'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Ipsec::setPhase2($para['data']);
+            }else if('delIpsecPhase2'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Ipsec::delPhase2($para['data']);
+            }else if('getIpsecStatus'==$action) {
+                $result['rescode'] = Ipsec::getStatus();
+            }else if('getIpsecLogs'==$action) {
+                Ipsec::getLogs();
+                return;
+            }else if('ipsecConnect' == $action){
+                $this->checkData($para);
+                $result['rescode'] = Ipsec::connect($para['data']);
+            }else if('ipsecDisconnect' == $action){
+                $this->checkData($para);
+                $result['rescode'] = Ipsec::disconnect($para['data']);
+            }else if('getDyndnsList'==$action){
+                $result['rescode'] = Dyndns::getDdnsList();
+            }else if('getDyndns'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Dyndns::getDdns($para['data']);
+            }else if('setDyndns'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Dyndns::setDdns($para['data']);
+            }else if('delDyndns'==$action) {
+                $this->checkData($para);
+                $result['rescode'] = Dyndns::delDdns($para['data']);
+            }else if('getProxy'==$action){
+                $result['rescode'] = Proxy::getConf();
+            }else if('setProxy'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Proxy::setConf($para['data']);
             }else if('test' == $action){
                 $result['rescode'] = Dns::getErrors();
             }else{

@@ -1395,10 +1395,13 @@ class updatedns
         $file = fopen($this->_debugFile, 'a');
         fwrite($file, $string);
         fclose($file);
-    }
+   }
 
     function _checkIP()
     {
+		if(is_ipaddr($this->_dnsIP)){
+			return $this->_dnsIP;
+		}
         $ip_address = get_dyndns_ip($this->_if, $this->_useIPv6 ? 6 : 4);
         if (!is_ipaddr($ip_address)) {
             if ($this->_dnsVerboseLog) {
