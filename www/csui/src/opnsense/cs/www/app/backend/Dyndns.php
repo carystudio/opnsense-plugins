@@ -175,6 +175,7 @@ class Dyndns extends Csbackend
                     throw new AppException('DDNS_120');
                 }
                 $config['dyndnses']['dyndns'][$data['id']] = $ddns;
+                $id = $data['id'];
             }else{
                 $config['dyndnses']['dyndns'][] = $ddns;
                 $id = count($config['dyndnses']['dyndns']) - 1;
@@ -187,7 +188,7 @@ class Dyndns extends Csbackend
 
             write_config();
             system_cron_configure();
-            dyndns_configure_client($ddns);
+            dyndns_configure_client($config['dyndnses']['dyndns'][$id]);
         }catch(AppException $aex){
             $result = $aex->getMessage();
         }catch(Exception $ex){

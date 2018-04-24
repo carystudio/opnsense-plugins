@@ -354,7 +354,7 @@ class updatedns
             curl_setopt($ch, CURLOPT_USERAGENT, $this->_UserAgent);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_INTERFACE, $this->_dnsRequestIfIP);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 120); // Completely empirical
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Completely empirical
         }
 
         switch ($this->_dnsService) {
