@@ -85,7 +85,7 @@ class Openvpn extends Csbackend
             $openvpnclient['disable'] = 1;
             $openvpnclient['custom_options'] = '';
             $openvpnclient['caref'] = Cert::OVPN_CLIENT_CA_REFID;
-            $openvpnclient['certref'] = '5ac9f213dd1fa';
+            $openvpnclient['certref'] = Cert::OVPN_CLIENT_CERT_REFID;
 
             $config['openvpn']['openvpn-client'][] = $openvpnclient;
 
@@ -113,9 +113,65 @@ class Openvpn extends Csbackend
 
     }
 
+    private static function initOpenvpnSvrCa($idx){
+        global $config;
+
+        $ca = array('refid' => Cert::OVPN_SERVER_CA_REFID,
+            'descr' => Cert::OVPN_SERVER_CA_DESCR,
+            'serial' => 4);
+        $dn = array(
+            'countryName' => Cert::DN_COUNTRY,
+            'stateOrProvinceName' => Cert::DN_STATE,
+            'localityName' => Cert::DN_CITY,
+            'organizationName' => Cert::DN_ORG,
+            'emailAddress' => Cert::DN_EMAIL,
+            'commonName' => Cert::OVPN_SERVER_CA_CN);
+        if (!ca_create($ca, Cert::KEY_LEN, Cert::LIFE_TIME, $dn, Cert::DIGEST_ALG)) {
+            throw new AppException('OVPN_98');
+        }
+        if(false!==$idx){
+            $config['ca'][$idx] = $ca;
+        }else{
+            $config['ca'][] = $ca;
+        }
+    }
+
+    private static function initOpenvpnSvrCert($idx){
+        global $config;
+
+        $cert = array('refid'=>Cert::OVPN_SERVER_CERT_REFID,
+            'descr'=>Cert::OVPN_SERVER_CERT_DESCR,
+            'caref'=>Cert::OVPN_SERVER_CA_REFID);
+        $dn = array(
+            'countryName' => Cert::DN_COUNTRY,
+            'stateOrProvinceName' => Cert::DN_STATE,
+            'localityName' => Cert::DN_CITY,
+            'organizationName' => Cert::DN_ORG,
+            'emailAddress' => Cert::DN_EMAIL,
+            'commonName' => Cert::OVPN_SERVER_CERT_CN);
+
+        if (!cert_create(
+            $cert,
+            $cert['caref'],
+            2048,
+            3650,
+            $dn,
+            'sha256',
+            'server_cert'
+        )) {
+            throw new AppException('OVPN_99');
+        }
+        if(false !== $idx){
+            $config['cert'][$idx] = $cert;
+        }else{
+            $config['cert'][] = $cert;
+        }
+    }
+
     private static function svrConfInit(){
         global $config;
 
+        $updated = false;
         if(!isset($config['openvpn']) ||
             !is_array($config['openvpn'])){
             $config['openvpn'] = array();
@@ -153,34 +209,51 @@ class Openvpn extends Csbackend
             $openvpnsvr['interface'] = 'wan';
             $openvpnsvr['custom_options'] = '';
             $openvpnsvr['tls'] = 'Iw0KIyAyMDQ4IGJpdCBPcGVuVlBOIHN0YXRpYyBrZXkNCiMNCi0tLS0tQkVHSU4gT3BlblZQTiBTdGF0aWMga2V5IFYxLS0tLS0NCjA1MjExNTYzN2MyY2M1N2ZjMWFhMjc4ZGY0NDk4NzhiDQozNmFmYTY5MzVlNmNjNGNkYWViZTQ0YzI3OTFiYjA2OA0KMWQ0MTI3NmZkZGEzYjc3NTM1MjFkZDc2YWUyNjM0NmMNCmM5YmE2ZDI1ZGIyY2JkOGQwNDk3YmFlZTM3ODdmMzViDQo0Mzc0ZGMxZWViOTliMzFlOGY0ZGEwODg3MTg5ZDFjZQ0KMGE5YzNlYjUzZTY1N2ZmYzQ4NzZkN2ZkNjdiNDQ0NTgNCjZhMWZmMTI4NzkzOWIzMjFhNjI4MTIwYWZlMzdiOThhDQozZGM2ZmY5ZTRjNjQ0NTI1YmRkZTFiYjRlNjUzNDYyYg0KNjFhMDI5MTJjMWUzMDg2NTIxNjcwNGI2MzBhNzBlMGENCmI4YjNiMTU5MjJkMWJjN2FiZmYyNGZlMmEyOTFmYmVhDQpmN2VhZmM4NTBlNDI1ZWZkNTA5MTFmMGVkMTI0NDYzZQ0KZWExZDhkZTAzYWEyYWI1ZGMwYmUzYTkzZjg0YmQ1MzINCmI1ZTU3ZDRmNWE0NmFkZjA1YTk1YzliZjVjYTJlNDQ4DQo5ZTUzNzU5ZTI0MGZjMDFhZDNhMzkxYWE5MTQ1Zjc1MA0KOTZlNGM3OWRhMjA2MWMxMTdlYWUyOTYyYmI1ZTk0NjENCjlhN2Y0ZDE1MGM1NGVmMGIyNzE4ODExNmQzM2U0N2RmDQotLS0tLUVORCBPcGVuVlBOIFN0YXRpYyBrZXkgVjEtLS0tLQ0K';
-            $openvpnsvr['caref'] = Cert::CSG2000P_CA_REFID;
-            $openvpnsvr['certref'] = '592fb0cf2dd36';
+            $openvpnsvr['caref'] = Cert::OVPN_SERVER_CA_REFID;
+            $openvpnsvr['certref'] = Cert::OVPN_SERVER_CERT_REFID;
             $openvpnsvr['dh_length'] = 1024;
             $openvpnsvr['cert_depth'] = 1;
             $openvpnsvr['duplicate_cn'] = 1;
 
             $config['openvpn']['openvpn-server'][] = $openvpnsvr;
+            $updated = true;
+        }
+        $create_cert = false;
+        $ca_idx = false;
+        $ca_create = true;
+        foreach($config['ca'] as $idx=>$a_ca){
+            if(Cert::OVPN_SERVER_CA_REFID == $a_ca['refid'] || Cert::OVPN_SERVER_CA_DESCR == $a_ca['descr']){
+                if(empty($a_ca['crt']) || empty($a_ca['prv'])){
+                    $ca_idx = $idx;
+                    $create_cert = true;
+                }else{
+                    $ca_create = false;
+                }
+            }
+        }
+        if($ca_create){
+            self::initOpenvpnSvrCa($ca_idx);
+            $updated = true;
+        }
 
-            foreach($config['ca'] as $idx=>$a_ca){
-                if(Cert::OVPN_SERVER_CA_REFID == $a_ca['refid'] || Cert::OVPN_SERVER_CA_DESCR == $a_ca['descr']){
-                    unset($config['ca'][$idx]);
+        $cert_idx = false;
+        $cert_create = true;
+        foreach($config['cert'] as $idx=>$a_cert){
+            if(Cert::OVPN_SERVER_CERT_REFID == $a_cert['refid'] || Cert::OVPN_SERVER_CERT_DESCR == $a_cert['descr']){
+                if($create_cert || empty($a_cert['crt']) || empty($a_cert['prv'])){
+                    $cert_idx = $idx;
+                }else{
+                    $cert_create = false;
                 }
             }
-            $config['ca'][] = array('refid' => Cert::OVPN_SERVER_CA_REFID,
-                'descr' => Cert::OVPN_SERVER_CA_DESCR,
-                'serial' => 3,
-                'crt' => '',
-                'prv' => '');
-            foreach($config['cert'] as $idx=>$a_cert){
-                if(Cert::OVPN_SERVER_CERT_REFID == $a_cert['refid'] || Cert::OVPN_SERVER_CERT_DESCR == $a_cert['descr']){
-                    unset($config['cert'][$idx]);
-                }
-            }
-            $config['cert'][] = array(Cert::OVPN_SERVER_CERT_REFID,
-                'descr'=>Cert::OVPN_SERVER_CERT_DESCR,
-                'crt'=>'',
-                'prv'=>'',
-                'caref'=>Cert::OVPN_SERVER_CA_REFID);
+        }
+        if($cert_create){
+            self::initOpenvpnSvrCert($cert_idx);
+            $updated = true;
+        }
+
+        if($updated){
+            write_config();
         }
     }
 
@@ -648,53 +721,6 @@ class Openvpn extends Csbackend
             if(empty($data['ca'])){
                 throw new AppException('OVPN_119');
             }
-            $ca = base64_decode($data['ca']);
-            if(!$ca || !strstr($ca, "BEGIN CERTIFICATE") || !strstr($ca, "END CERTIFICATE")){
-                throw new AppException('OVPN_119');
-            }
-            if(empty($data['cert'])){
-                throw new AppException('OVPN_120');
-            }
-            $cert = base64_decode($data['cert']);
-            if(!$cert || empty($cert) || !strstr($cert, "BEGIN CERTIFICATE") || !strstr($cert, "END CERTIFICATE")){
-                throw new AppException('OVPN_120');
-            }
-            if(empty($data['prv'])){
-                throw new AppException('OVPN_121');
-            }
-            $prv = base64_decode($data['prv']);
-            if(empty($prv) || !strstr($prv, "BEGIN PRIVATE KEY") || !strstr($prv, "END PRIVATE KEY")){
-                throw new AppException('OVPN_121');
-            }
-            $ca_subject = cert_get_subject($ca, false);
-            $subject = cert_get_subject($cert, false);
-            $issuer = cert_get_issuer($cert, false);
-            if($ca_subject != $issuer){
-                throw new AppException('OVPN_122');
-            }
-            foreach($config['ca'] as $idx=>$ca){
-                if(Cert::OVPN_SERVER_CA_DESCR == $ca['descr']){
-                    unset($config['ca'][$idx]);
-                    break ;
-                }
-            }
-            foreach($config['cert'] as $idx=>$cert){
-                if(Cert::OVPN_SERVER_CERT_DESCR == $cert['descr']){
-                    unset($config['cert'][$idx]);
-                    break;
-                }
-            }
-
-            $config['ca'][] = array('refid' => Cert::OVPN_SERVER_CA_REFID,
-                'descr' => Cert::OVPN_SERVER_CA_DESCR,
-                'serial' => 3,
-                'crt' => $data['ca'],
-                'prv' => '');
-            $config['cert'][] = array('refid'=>Cert::OVPN_SERVER_CERT_REFID,
-                'descr'=>Cert::OVPN_SERVER_CERT_DESCR,
-                'crt'=>$data['cert'],
-                'prv'=>$data['prv'],
-                'caref'=>Cert::OVPN_CLIENT_CA_REFID);
             unset($data['ca']);
             unset($data['cert']);
             unset($data['prv']);
@@ -769,9 +795,12 @@ class Openvpn extends Csbackend
             $group = self::initOpenvpnGroup();
         }
         $cscs = array();
-        foreach($config['openvpn']['openvpn-csc'] as $idx=>$csc){
-            $cscs[$csc['common_name']] = $csc;
+        if(is_array($config['openvpn']['openvpn-csc'])){
+            foreach($config['openvpn']['openvpn-csc'] as $idx=>$csc){
+                $cscs[$csc['common_name']] = $csc;
+            }
         }
+
         if(is_array($group['member'])){
             foreach($config['system']['user'] as $idx=>$user){
                 if(in_array($user['uid'], $group['member'])){
@@ -914,9 +943,11 @@ class Openvpn extends Csbackend
                 $config['openvpn']['openvpn-csc'][] = $csc;
             }
         }else{
-            foreach($config['openvpn']['openvpn-csc'] as $idx=>$tmp_csc){
-                if($tmp_csc['common_name'] == $data['Username']){
-                    unset($config['openvpn']['openvpn-csc'][$idx]);
+            if(isset($config['openvpn']['openvpn-csc']) && is_array($config['openvpn']['openvpn-csc'])){
+                foreach($config['openvpn']['openvpn-csc'] as $idx=>$tmp_csc){
+                    if($tmp_csc['common_name'] == $data['Username']){
+                        unset($config['openvpn']['openvpn-csc'][$idx]);
+                    }
                 }
             }
         }
@@ -935,7 +966,7 @@ class Openvpn extends Csbackend
             $config['openvpn']['openvpn-csc'][] = $csc;
         }
         foreach($config['cert'] as $idx=>$cert){
-            if(Cert::CSG2000P_CA_REFID == $cert['caref'] && Openvpn::USER_RELATE_PREFIX.$data['Username'] == $cert['desct']){
+            if(Cert::OVPN_SERVER_CA_REFID == $cert['caref'] && Openvpn::USER_RELATE_PREFIX.$data['Username'] == $cert['desct']){
                 throw new AppException('OVPN_311');
                 break;
             }
@@ -943,7 +974,7 @@ class Openvpn extends Csbackend
         $cert = array();
         $cert['refid'] = uniqid();
         $cert['descr'] = 'openvpn user:'.$data['Username'];
-        $cert['caref'] = Cert::CSG2000P_CA_REFID;
+        $cert['caref'] = Cert::OVPN_SERVER_CA_REFID;
 
         $dn = array(
             'countryName' => Cert::DN_COUNTRY,
@@ -952,14 +983,13 @@ class Openvpn extends Csbackend
             'organizationName' => Cert::DN_ORG,
             'emailAddress' => Cert::DN_EMAIL,
             'commonName' => $data['Username']);
-
         if (!cert_create(
             $cert,
             $cert['caref'],
-            2048,
-            3650,
+            Cert::KEY_LEN,
+            Cert::LIFE_TIME,
             $dn,
-            'sha256',
+            Cert::DIGEST_ALG,
             'usr_cert'
         )) {
             throw new AppException('OVPN_312');

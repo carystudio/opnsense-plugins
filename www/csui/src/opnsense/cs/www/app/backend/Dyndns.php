@@ -164,6 +164,12 @@ class Dyndns extends Csbackend
             $ddns['zoneid'] = isset($data['zoneid'])?$data['zoneid']:'';
             $ddns['resultmatch'] = isset($data['resultmatch'])?$data['resultmatch']:'';
             $ddns['ttl'] = isset($data['ttl'])?$data['ttl']:'';
+            if(!is_array($config['dyndnses'])){
+                $config['dyndnses'] = array();
+            }
+            if(!is_array($config['dyndnses']['dyndns'])){
+                $config['dyndnses']['dyndns'] = array();
+            }
             if(isset($data['id'])){
                 if(!isset($config['dyndnses']['dyndns'][$data['id']])){
                     throw new AppException('DDNS_120');
@@ -181,10 +187,7 @@ class Dyndns extends Csbackend
 
             write_config();
             system_cron_configure();
-
-            if ($data['force']) {
-                dyndns_configure_client($ddns);
-            }
+            dyndns_configure_client($ddns);
         }catch(AppException $aex){
             $result = $aex->getMessage();
         }catch(Exception $ex){

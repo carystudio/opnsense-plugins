@@ -84,12 +84,15 @@ class Ipsec extends Csbackend
         $ipsec_infs = array();
         foreach($config['ipsec']['phase1'] as $tmp_p1){
             $enable = false;
-            foreach($config['ipsec']['phase2'] as $tmp_p2){
-                if(!isset($tmp_p2['disabled'])){
-                    $enable = true;
-                    break ;
+            if(is_array($config['ipsec']['phase2'])){
+                foreach($config['ipsec']['phase2'] as $tmp_p2){
+                    if(!isset($tmp_p2['disabled'])){
+                        $enable = true;
+                        break ;
+                    }
                 }
             }
+
             if($enable){
                 $ipsec_infs[] = $tmp_p1['interface'];
             }
@@ -145,12 +148,15 @@ class Ipsec extends Csbackend
         global $config;
 
         $ipsec_enable = false;
-        foreach($config['ipsec']['phase2'] as $tmp_p2){
-            if(!isset($tmp_p2['disabled'])){
-                $ipsec_enable = true;
-                break ;
+        if(is_array($config['ipsec']['phase2'])){
+            foreach($config['ipsec']['phase2'] as $tmp_p2){
+                if(!isset($tmp_p2['disabled'])){
+                    $ipsec_enable = true;
+                    break ;
+                }
             }
         }
+
         if($ipsec_enable){
             $config['ipsec']['enable'] = 1;
         }else if(isset($config['ipsec']['enable'])){
@@ -489,11 +495,14 @@ class Ipsec extends Csbackend
                         /* XXX does this even apply? only use of system.inc at the top! */
                         system_host_route($phase1['remote-gateway'], $phase1['remote-gateway'], true, false);
                     }
-                    foreach($config['ipsec']['phase2'] as $p2_idx=>$phase2){
-                        if($phase2['ikeid'] == $phase1['ikeid']){
-                            unset($config['ipsec']['phase2'][$p2_idx]);
+                    if(is_array($config['ipsec']['phase2'])){
+                        foreach($config['ipsec']['phase2'] as $p2_idx=>$phase2){
+                            if($phase2['ikeid'] == $phase1['ikeid']){
+                                unset($config['ipsec']['phase2'][$p2_idx]);
+                            }
                         }
                     }
+
                     unset($config['ipsec']['phase1'][$p1_idx]);
                     $deleted = true;
                     break;
