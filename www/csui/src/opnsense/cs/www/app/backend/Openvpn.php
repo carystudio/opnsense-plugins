@@ -290,6 +290,9 @@ class Openvpn extends Csbackend
         if(!isset($openvpnClient['disable']) && '1'!=$openvpnClient['disable']){
             $openvpnClient['disable'] = '0';
         }
+        if(!isset($openvpnClient['reneg-sec'])){
+            $openvpnClient['reneg-sec'] = 3600;
+        }
 
         unset($openvpnClient['caref']);
         unset($openvpnClient['certref']);
@@ -427,10 +430,13 @@ class Openvpn extends Csbackend
             if('none' != $data['proxy_authtype'] && (empty($data['proxy_user']) || empty($data['proxy_passwd']))){
                 throw new AppException('OVPN_210');
             }
-            $data['local_port'] = intval($data['local_port']);
-            if($data['local_port']>65535 || $data['local_port']<1){
-                throw new AppException('OVPN_211');
+            if(isset($data['local_port']) && !empty($data['local_port'])){
+                $data['local_port'] = intval($data['local_port']);
+                if($data['local_port']>65535 || $data['local_port']<1){
+                    throw new AppException('OVPN_211');
+                }
             }
+
             if(!is_numeric($data['reneg-sec'])){
                 throw new AppException('OVPN_212');
             }else{
@@ -485,14 +491,17 @@ class Openvpn extends Csbackend
             if ('none'!=$data['engine'] && !isset($engines[$data['engine']])) {
                 throw new AppException('OVPN_220');
             }
-            if(!is_numeric($data['use_shaper'])){
-                throw new AppException('OVPN_221');
-            }else{
-                $data['use_shaper'] = intval($data['use_shaper']);
-                if($data['use_shaper']<100 || $data['use_shaper']>104857600){
+            if(isset($data['use_shaper']) &&!empty($data['use_shaper'])){
+                if(!is_numeric($data['use_shaper'])){
                     throw new AppException('OVPN_221');
+                }else{
+                    $data['use_shaper'] = intval($data['use_shaper']);
+                    if($data['use_shaper']<100 || $data['use_shaper']>104857600){
+                        throw new AppException('OVPN_221');
+                    }
                 }
             }
+
             if(!isset($openvpn_compression_modes[$data['compression']])){
                 throw new AppException('OVPN_222');
             }
