@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.vpn'),$t('menu.l2tp')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                 <Alert>
+                    {{ $t('l2tp.help') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('l2tp.server')">
+                        <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">
+                            <span slot="open">{{ $t('common.on') }}</span>
+                            <span slot="close">{{ $t('common.off') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <Col v-show="formValidate.status" >
+                    <FormItem :label="$t('l2tp.ip_start')" prop="ipStart">
+                        <Input v-model="formValidate.ipStart"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('l2tp.ip_end')" prop="ipEnd">
+                        <Input v-model="formValidate.ipEnd"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('l2tp.server_addr')" prop="serverAddr">
+                        <Input v-model="formValidate.serverAddr"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('l2tp.pri_dns')" prop="priDns">
+                        <Input v-model="formValidate.priDns"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('l2tp.sec_dns')" prop="secDns">
+                        <Input v-model="formValidate.secDns"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('l2tp.wins_server_addr')" prop="winsServerAddr">
+                        <Input v-model="formValidate.winsServerAddr"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('l2tp.auth_type')">
+                        <Select v-model="formValidate.encryptMethod" >
+                            <Option value="chap">chap</Option>
+                            <Option value="pap">pap</Option>
+                        </Select>
+                    </FormItem>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('common.apply') }}</Button>
+                    </FormItem>
+                    </Col>
+                </Form>
+            </Card>
+            </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+                formValidate: {
+                    status: false,
+                    ipStart:'',
+                    ipEnd:'',
+                    serverAddr:'',
+                    priDns:'',
+                    secDns:'',
+                    winsServerAddr:'',
+                    encryptMethod:'chap'
+                }
+            }
+        },
+        computed:{
+            ruleValidate:function () {
+                var _this = this;
+                return {
+                    ipStart: [
+                        { required: true, message: this.$t('l2tp.msg1'), trigger: 'blur' },
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s != 99) {
+                                if(0 == _s){
+                                    f(_this.$t('l2tp.msg1'));
+                                }else{
+                                    f(_this.$t('l2tp.msg2'));
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    ipEnd: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s != 99) {
+                                if(0 == _s){
+                                    f(_this.$t('l2tp.msg3'));
+                                }else{
+                                    f(_this.$t('l2tp.msg4'));
+                                }
+                            }else{
+                                var _start = cs.ip2int(_this.formValidate.ipStart);
+                                var _end = cs.ip2int(v);
+                                if(_start > _end){
+                                    f(_this.$t('l2tp.msg12'));
+                                }
+                                if((_end - _start > 200)){
+                                    f(_this.$t('l2tp.msg13'));
+                                }
+                                f();
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    serverAddr: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s != 99) {
+                                if(0 == _s){
+                                    f(_this.$t('l2tp.msg5'));
+                                }else{
+                                    f(_this.$t('l2tp.msg6'));
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    priDns: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s != 0) {
+                                if(99 != _s){
+                                    f(_this.$t('l2tp.msg7'));
+                                }else{
+                                    f();
+                                }
+                            }else{
+                                f(_this.$t('l2tp.msg11'));
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    secDns: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s != 0) {
+                                if(99 != _s){
+                                    f(_this.$t('l2tp.msg8'));
+                                }else{
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    winsServerAddr: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s != 0) {
+                                if(99 != _s){
+                                    f(_this.$t('l2tp.msg9'));
+                                }else{
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ]
+                };
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postData = {"action":"getL2tpStatus"};
+            uiPost.getL2tpStatus(postData,function(data) {
+                console.log(data);
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    if(data.data.Enable !=0){
+                        _this.formValidate.status = true;
+                    }else{
+                        _this.formValidate.status = false;
+                    }
+                    _this.formValidate.ipStart = data.data.ClientIpStart;
+                    _this.formValidate.ipEnd = data.data.ClientIpEnd;
+                    _this.formValidate.serverAddr = data.data.LocalIp;
+                    _this.formValidate.priDns = data.data.Dns1;
+                    _this.formValidate.secDns = data.data.Dns2;
+                    _this.formValidate.winsServerAddr = data.data.Wins;
+                    _this.formValidate.encryptMethod = data.data.AuthType;
+                }
+            });
+        },
+        methods:{
+            submitStatus:function(){
+                var _this = this;
+                if(false == this.formValidate.status){
+                    var postVar = {"action":"setL2tpStatus","data":{"Enable":"0"}};
+                    uiPost.setL2tpStatus(postVar,function (data) {
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        if (0 != data.rescode) {
+                            _this.$Message.error({content:_this.$t('l2tp.msg10')+ _this.$t('errorcode.'+data.rescode),duration:5});
+                        }
+                    });
+                }
+            },
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.applyLoading = true;
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        var data = {};
+                        if(true == _this.formValidate.status){
+                            data.Enable = 1;
+                            data.LocalIp = _this.formValidate.serverAddr;
+                            data.ClientIpStart = _this.formValidate.ipStart;
+                            data.ClientIpEnd = _this.formValidate.ipEnd;
+                            data.Dns1 = _this.formValidate.priDns;
+                            data.Dns2 = _this.formValidate.secDns;
+                            data.Wins = _this.formValidate.winsServerAddr;
+                            data.AuthType = _this.formValidate.encryptMethod;
+                        }else{
+                            data.Enable = 0;
+                        }
+                        var postVar = {"action":"setL2tpStatus", "data":data};
+                        uiPost.setL2tpStatus(postVar,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('l2tp.set_success'),onClose:function(){
+                                    _this.applyLoading = false;
+                                }});
+                                var percentTimer = setInterval(function(){
+                                    clearInterval(percentTimer);
+                                    location.href=location.href;
+                                },cs.getTimer(200));
+                            } else {
+                                _this.$Message.error({content:_this.$t('l2tp.msg10')+ _this.$t('errorcode.'+data.rescode),duration:5});
+                                _this.applyLoading = false;
+                            }
+                        });
+                    } else {
+                        _this.applyLoading = false;
+                    }
+                })
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

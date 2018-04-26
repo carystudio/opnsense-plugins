@@ -267,7 +267,7 @@ var menu = [
         "href": "/newui/server",
         "icon": "gear-b",
         "lang": "server",
-        "display":true,
+        "display":false,
         "sub": [
             {
                 "id":"6-1",
@@ -324,6 +324,18 @@ var menu = [
             },
             {
                 "id":"14-4",
+                "href": "/newui/vpn/pptp",
+                "lang": "pptp",
+                "display":true
+            },
+            {
+                "id":"14-5",
+                "href": "/newui/vpn/l2tp",
+                "lang": "l2tp",
+                "display":true
+            },
+            {
+                "id":"14-6",
                 "href": "/newui/vpn/account",
                 "lang": "account",
                 "display":true
