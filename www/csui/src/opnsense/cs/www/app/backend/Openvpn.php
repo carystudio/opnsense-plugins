@@ -1105,7 +1105,7 @@ class Openvpn extends Csbackend
             $filename_addition = "-" . str_replace(' ', '_', cert_get_cn($config['cert'][$crtid]['crt']));
         }
 
-        return "{$host}-{$prot}-{$port}{$filename_addition}.ovpn";
+        return "{$host}-{$prot}-{$port}{$filename_addition}";
     }
 
     private static function openvpn_client_export_validate_config($srvid, $usrid, $crtid)
@@ -1667,6 +1667,19 @@ class Openvpn extends Csbackend
         }
     }
 
+    private static function getUser($username){
+        global $config;
+
+        $user = false;
+        foreach($config['system']['user'] as $tmp_user){
+            if($tmp_user['name'] == $username){
+                $user = $tmp_user;
+                break ;
+            }
+        }
+
+        return $user;
+    }
 
     public static function exportClientConf($data){
         global $config;
@@ -1689,40 +1702,62 @@ class Openvpn extends Csbackend
             $password = '';
             $openvpnmanager = null;
             $advancedoptions = '';
-            if('p2p_shared_key' == $config['openvpn']['openvpn-server'][0]['mode']){
+            if('p2p_shared_key' == $config['openvpn']['openvpn-server'][0]['mode']) {
                 $exp_path = self::openvpn_client_export_sharedkey_config($srvid, $useaddr, $proxy, false);
                 $fp = @fopen($exp_path, 'r');
                 $exp_path = '';
-                while(false !== ($line=fgets($fp))){
-                    if(0 === strpos($line, 'pull')){
+                while (false !== ($line = fgets($fp))) {
+                    if (0 === strpos($line, 'pull')) {
                         continue;
-                    }else if(0 === strpos($line, 'reneg-sec')){
-                        continue ;
-                    }else if(0 === strpos($line, 'secret')){
+                    } else if (0 === strpos($line, 'reneg-sec')) {
+                        continue;
+                    } else if (0 === strpos($line, 'secret')) {
                         $exp_path .= "<secret>\n";
                         $secret = base64_decode($config['openvpn']['openvpn-server'][0]['shared_key']);
-                        if("\n" == $secret[strlen($secret)-1]){
+                        if ("\n" == $secret[strlen($secret) - 1]) {
                             $exp_path .= $secret;
-                        }else{
-                            $exp_path .= $secret."\n";
+                        } else {
+                            $exp_path .= $secret . "\n";
                         }
                         $exp_path .= "</secret>\n";
-                    }else{
+                    } else {
                         $exp_path .= $line;
                     }
                 }
+            }else if('p2p_tls' == $config['openvpn']['openvpn-server'][0]['mode']){
+                $user = self::getUser($data['username']);
+                if(!$user){
+                    throw new AppException('OVPN_501');
+                }
+                print_r($user);
+                $cert = Cert::getCert($user['cert'][0]);
+                if(!$cert){
+                    throw new AppException('OVPN_501');
+                }
+                print_r($cert);
+                $ca = Cert::getCa($cert['caref']);
+                if(!$ca){
+                    throw new AppException('OVPN_501');
+                }
+                $t = time();
+                $zip = new ZipArchive;
+                $res = $zip->open('/usr/local/opnsense/cs/tmp/'.$data['username'].'_'.$t.'.zip');
+                if ($res !== true) {
+                    throw new AppException('OVPN_501');
+                }
+                $zip->addFromString('ca.crt', base64_decode($ca['crt']));
+                $zip->addFromString($data['username'].'.crt', base64_decode($cert['crt']));
+                $zip->addFromString($data['username'].'.key', base64_decode($cert['prv']));
+                $zip->close();
+
+                $exp_path = file_get_contents('/usr/local/opnsense/cs/tmp/'.$data['username'].'_'.$t.'.zip');
+                unlink('/usr/local/opnsense/cs/tmp/'.$data['username'].'_'.$t.'.zip');
             }else{
                 if("server_user" == $config['openvpn']['openvpn-server'][0]['mode']){
                     $nokeys = true;
                 } else {
                     $nokeys = false;
-                    $user = false;
-                    foreach($config['system']['user'] as $tmp_user){
-                        if($tmp_user['name'] == $data['username']){
-                            $user = $tmp_user;
-                            break ;
-                        }
-                    }
+                    $user = self::getUser($data['username']);
                     if(!$user){
                         throw new AppException('OVPN_501');
                     }
@@ -1762,8 +1797,16 @@ class Openvpn extends Csbackend
 
             header('Pragma: ');
             header('Cache-Control: ');
-            header("Content-Type: application/octet-stream");
-            header("Content-Disposition: attachment; filename={$exp_name}");
+            if('p2p_tls' == $config['openvpn']['openvpn-server'][0]['mode']){
+                $exp_name .= '.zip';
+                header("Content-Type: application/zip");
+                header("Content-Disposition: attachment; filename={$exp_name}");
+            }else{
+                $exp_name .= '.ovpn';
+                header("Content-Type: application/octet-stream");
+                header("Content-Disposition: attachment; filename={$exp_name}");
+            }
+
             header("Content-Length: $exp_size");
             header("X-Content-Type-Options: nosniff");
             echo $exp_path;
