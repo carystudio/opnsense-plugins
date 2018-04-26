@@ -133,7 +133,7 @@
                     </FormItem>
                     <!-- btn -->
                     <FormItem>
-                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('common.save') }}</Button>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ editFalg == true ? $t('common.save'):$t('common.add') }}</Button>
                     </FormItem>
                 </Form>
             </Card>
@@ -177,6 +177,7 @@
                 applyLoading:false,
                 interface:[],
                 addDydnsFlag:false,
+                editFalg:false,
                 formValidate: {
                     enable:true,
                     type:"3322",
@@ -344,6 +345,7 @@
                                     on: {
                                         click:function () {
                                             _this.addDydnsFlag = true;
+                                            _this.editFalg = true;
                                             _this.formValidate.id = params.row.id;
                                             if('1' == params.row.enable){
                                                 _this.formValidate.enable = true;
