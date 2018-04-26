@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.vpn'),$t('menu.pptp')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    {{ $t('pptp.help') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('pptp.status')">
+                        <i-switch v-model="formValidate.status" size="large" @on-change="submitStatus">
+                            <span slot="open">{{ $t('common.on') }}</span>
+                            <span slot="close">{{ $t('common.off') }}</span>
+                        </i-switch>
+                    </FormItem>
+                    <Col v-show="formValidate.status" >
+                    {{ $t('pptp.client_addr_pool') }}
+                    <hr>
+                    <br>
+                    <FormItem :label="$t('pptp.ip_start')" prop="startIpAddr">
+                        <Input v-model="formValidate.startIpAddr"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('pptp.ip_end')" prop="endIpAddr">
+                        <Input v-model="formValidate.endIpAddr"></Input>
+                    </FormItem>
+                    <br>
+                    {{ $t('pptp.advanced_setting') }}
+                    <hr>
+                    <br>
+                    <FormItem :label="$t('pptp.mppe_encryption')">
+                        <Select v-model="formValidate.mppeEncrypt" :key="$t('pptp.mppe_encryption')">
+                            <Option value="0">{{$t('pptp.unencryption')}}</Option>
+                            <Option value="1">{{$t('pptp.encryption')}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('pptp.server_addr')" prop="serverAddr">
+                        <Input v-model="formValidate.serverAddr"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('pptp.wins_server_addr')" prop="winsServerAddr">
+                        <Input v-model="formValidate.winsServerAddr"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('pptp.pri_dns')" prop="firstDns">
+                        <Input v-model="formValidate.firstDns"></Input>
+                    </FormItem>
+                    <FormItem :label="$t('pptp.sec_dns')" prop="secondDns">
+                        <Input v-model="formValidate.secondDns"></Input>
+                    </FormItem>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{ $t('common.apply') }}</Button>
+                    </FormItem>
+                    </Col>
+                </Form>
+            </Card>
+            </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+                formValidate: {
+                    status: false,
+                    startIpAddr:'',
+                    endIpAddr:'',
+                    mppeEncrypt:'0',
+                    serverAddr:'',
+                    winsServerAddr:'',
+                    firstDns:'',
+                    secondDns:''
+                }
+            }
+        },
+        computed:{
+            ruleValidate:function () {
+                var _this = this;
+                return {
+                    startIpAddr: [
+                        { required: true, message: this.$t('pptp.msg1'), trigger: 'blur' },
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s != 99) {
+                                if(0 == _s){
+                                    f(_this.$t('pptp.msg1'));
+                                }else{
+                                    f(_this.$t('pptp.msg2'));
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    endIpAddr: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s != 99) {
+                                if(0 == _s){
+                                    f(_this.$t('pptp.msg3'));
+                                }else{
+                                    f(_this.$t('pptp.msg4'));
+                                }
+                            }else{
+                                var _start = cs.ip2int(_this.formValidate.startIpAddr);
+                                var _end = cs.ip2int(v);
+                                if(_start > _end){
+                                    f(_this.$t('pptp.msg11'));
+                                }
+                                if((_end - _start > 200)){
+                                    f(_this.$t('pptp.msg12'));
+                                }
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    serverAddr: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s != 99) {
+                                if(0 == _s){
+                                    f(_this.$t('pptp.msg5'));
+                                }else{
+                                    f(_this.$t('pptp.msg6'));
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    winsServerAddr: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s != 0) {
+                                if(99 != _s){
+                                    f(_this.$t('pptp.msg7'));
+                                }else{
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    firstDns: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s != 99) {
+                                if(0 == _s){
+                                    f(_this.$t('pptp.msg8'));
+                                }else{
+                                    f(_this.$t('pptp.msg9'));
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ],
+                    secondDns: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.ip(v);
+                            if(_s != 0) {
+                                if(99 != _s){
+                                    f(_this.$t('pptp.msg10'));
+                                }else{
+                                    f();
+                                }
+                            }else{
+                                f();
+                            }
+                        },trigger: 'blur' }
+                    ]
+                };
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postData = {"action":"getPptpdStatus"};
+            uiPost.getPptpdStatus(postData,function(data) {
+                console.log(data);
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    var Enable = data.data.Enable;
+                    if(Enable !=0){
+                        _this.formValidate.status = true;
+                    }else{
+                        _this.formValidate.status = false;
+                    }
+
+                    if(null != data.data.LocalIp){
+                        _this.formValidate.startIpAddr = data.data.ClientIpStart;
+                        _this.formValidate.endIpAddr = data.data.ClientIpEnd;
+                        _this.formValidate.serverAddr = data.data.LocalIp;
+                        _this.formValidate.firstDns = data.data.Dns1;
+                        _this.formValidate.secondDns = data.data.Dns2;
+                        _this.formValidate.winsServerAddr = data.data.Wins;
+                        console.log( data.data.Encrypt);
+                        if(null == data.data.Encrypt){
+                            _this.formValidate.mppeEncrypt = '0';
+                        }else{
+                            _this.formValidate.mppeEncrypt = data.data.Encrypt;
+                        }
+                    }
+
+                }
+            });
+        },
+        methods:{
+            submitStatus:function(){
+                var _this = this;
+                var data = {};
+                if(false == this.formValidate.status){
+                    data.Enable = '0';
+                    var postData = {"action":"setPptpdStatus", "data":data};
+                    uiPost.setPptpdStatus(postData,function (data) {
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        if (0 != data.rescode) {
+                            _this.$Message.error({
+                                content: _this.$t('pptp.set_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5, onClose: function () {
+                                    _this.applyLoading = false;
+                                }
+                            });
+                        }
+                    });
+                }
+            },
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.applyLoading = true;
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        var data = {};
+                        data.Enable    = '1';
+                        data.ClientIpStart = _this.formValidate.startIpAddr;
+                        data.ClientIpEnd = _this.formValidate.endIpAddr;
+                        data.Encrypt = _this.formValidate.mppeEncrypt;
+                        data.LocalIp = _this.formValidate.serverAddr;
+                        data.Wins = _this.formValidate.winsServerAddr;
+                        data.Dns1 = _this.formValidate.firstDns;
+                        data.Dns2 = _this.formValidate.secondDns;
+                        var postData = {"action":"setPptpdStatus", "data":data};
+                        uiPost.setPptpdStatus(postData,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            _this.applyLoading = false;
+                            if (0 == data.rescode) {
+                                _this.$Message.success({
+                                    content: _this.$t('pptp.set_success'), onClose: function () {
+                                        _this.applyLoading = false;
+                                    }
+                                });
+                                var percentTimer = setInterval(function () {
+                                    clearInterval(percentTimer);
+                                    location.href = location.href;
+                                }, cs.getTimer(200));
+                            }else{
+                                _this.$Message.error({
+                                    content: _this.$t('pptp.set_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5, onClose: function () {
+                                        _this.applyLoading = false;
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        _this.applyLoading = false;
+                    }
+                })
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>
