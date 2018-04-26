@@ -1227,12 +1227,46 @@
 
                                 ]);
                             }else{
-                                return h('Row', [
-                                    h('Col', {props: {span: 6}}, [h('p', _this.$t('ipsec.local_subnet') + ': ' + params.row['remote-gateway'])]),
-                                    h('Col', {props: {span: 6}}, [h('p', "SPI(s)" + ': ' + params.row['remote-gateway'])]),
-                                    h('Col', {props: {span: 6}}, [h('p', _this.$t('ipsec.remote_subnet') + ': ' + 'public key')]),
-                                    h('Col', {props: {span: 6}}, [h('p', _this.$t('ipsec.staStatus') + ': ' + 'public key')])
-                                ]);
+                                var localSubnet = params.row.children[params.row.staConnect]['local-ts'][0];
+                                var remoteSubnet = params.row.children[params.row.staConnect]['remote-ts'][0];
+                                var sas = params.row.sas;
+                                var sasArr = [];
+
+                                for(var i in sas){
+                                    sasArr[i] = {};
+                                    for(var x in sas[i]['child-sas']){
+                                        if(params.row.staConnect == x.substring(0,params.row.staConnect.length)){
+                                            sasArr[i].spiIn = sas[i]['child-sas'][x]['spi-in'];
+                                            sasArr[i].spiOut = sas[i]['child-sas'][x]['spi-out'];
+                                            sasArr[i].state = sas[i]['child-sas'][x]['state'];
+                                            sasArr[i].installTime = sas[i]['child-sas'][x]['install-time'];
+                                            sasArr[i].bytesIn = sas[i]['child-sas'][x]['bytes-in'];
+                                            sasArr[i].bytesOut = sas[i]['child-sas'][x]['bytes-out'];
+                                        }
+                                        if(params.row.staStatus){
+                                            sasArr[i].state = sasArr[i].state + ',Routed';
+                                        }
+                                    }
+                                }
+
+                                var colArr = [];
+                                for(var j in sasArr){
+                                    if(j != 0){
+                                        colArr.push( h('Col',{props:{span:24}},[h('hr')]));
+                                    }
+                                    colArr.push(
+                                        h('Col', {props: {span: 6}}, [h('p', _this.$t('ipsec.local_subnet') + ': ' + localSubnet)]),
+                                        h('Col', {props: {span: 6}}, [h('p', "SPI(s) " + _this.$t('ipsec.come_in') + ': ' + sasArr[i].spiIn)]),
+                                        h('Col', {props: {span: 6}}, [h('p', "SPI(s) " + _this.$t('ipsec.come_out') + ': ' + sasArr[i].spiOut)]),
+                                        h('Col', {props: {span: 6}}, [h('p', _this.$t('ipsec.remote_subnet') + ': ' + remoteSubnet)]),
+                                        h('Col',{props:{span:24}},[h('br')]),
+                                        h('Col', {props: {span: 6}}, [h('p', _this.$t('ipsec.staStatus') + ': ' + sasArr[i].state)]),
+                                        h('Col', {props: {span: 6}}, [h('p', _this.$t('ipsec.time') + ": " + sasArr[i].installTime)]),
+                                        h('Col', {props: {span: 6}}, [h('p', _this.$t('ipsec.bytes_in') + ": " + sasArr[i].bytesIn)]),
+                                        h('Col', {props: {span: 6}}, [h('p', _this.$t('ipsec.bytes_out') + ": " + sasArr[i].bytesOut)])
+                                    );
+                                }
+                                return h('Row', colArr);
                             }
                         }
                     },
