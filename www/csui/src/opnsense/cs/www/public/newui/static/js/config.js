@@ -342,6 +342,12 @@ var menu = [
                 "href": "/newui/service/dynamicdns",
                 "lang": "dynamicdns",
                 "display":true
+            },
+            {
+                "id":"15-2",
+                "href": "/newui/service/webagency",
+                "lang": "webagency",
+                "display":true
             }
         ]
     },

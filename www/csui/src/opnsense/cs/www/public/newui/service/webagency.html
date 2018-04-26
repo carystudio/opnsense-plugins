@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb"  :breadcrumb="[$t('menu.service'),$t('menu.webagency')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col  :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" >
+                <Alert>
+                  {{ $t('webagency.help') }}
+                </Alert>
+            </Col>
+        </Row>
+        <Row :gutter="26">
+            <!-- content start -->
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" >
+            <div class="ivu-tabs ivu-tabs-card cs-tabs">
+                <div class="ivu-tabs-bar">
+                    <div class="ivu-tabs-nav-container">
+                        <div class="ivu-tabs-nav-wrap" style="position: relative;">
+                            <span class="ivu-tabs-nav-prev ivu-tabs-nav-scroll-disabled"><i class="ivu-icon ivu-icon-chevron-left"></i></span>  <span class="ivu-tabs-nav-next ivu-tabs-nav-scroll-disabled"><i class="ivu-icon ivu-icon-chevron-right"></i></span>
+                            <div class="ivu-tabs-nav-scroll">
+                                <div class="nav-text ivu-tabs-nav">
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':1==showCurrentTabs}" @click="tabsSwitch(1)">
+                                        {{ $t('webagency.Gen_proxy_setting') }}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':2==showCurrentTabs}" @click="tabsSwitch(2)">
+                                        {{ $t('webagency.Enable_traffic_manage') }}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':3==showCurrentTabs}" @click="tabsSwitch(3)">
+                                        {{ $t('webagency.Gen_forwarding_setting') }}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':4==showCurrentTabs}" @click="tabsSwitch(4)">
+                                        {{ $t('webagency.Access_control_list') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+
+                    <div class="ivu-tabs-content ivu-tabs-content-animated">
+
+                        <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 1">
+                            <Card>
+                                <FormItem :label="$t('webagency.enable_agency')">
+                                    <!--proxy.general.enabled-->
+                                    <i-switch v-model="formValidate.general_enabled" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <!--<FormItem label="ICP端口" prop="icpPort">
+                                    &lt;!&ndash;proxy.general.icpPort&ndash;&gt;
+                                    <Input v-model="formValidate.icpPort"></Input>
+                                </FormItem>-->
+                                <FormItem :label="$t('webagency.accessLog')">
+                                    <!--proxy.general.logging.enable.accessLog-->
+                                    <i-switch v-model="formValidate.accessLog" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <!--<FormItem label="日志目标">
+                                    &lt;!&ndash;proxy.general.logging.target&ndash;&gt;
+                                    <i-select v-model="formValidate.target">
+                                        <Option value="" selected="selected">File </Option>
+                                        <Option value="file_extendend">File (Extended) </Option>
+                                        <Option value="syslog">Syslog </Option>
+                                    </i-select>
+                                </FormItem>-->
+                                <FormItem :label="$t('webagency.storeLog')">
+                                    <!--proxy.general.logging.enable.storeLog-->
+                                    <i-switch v-model="formValidate.storeLog" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <!--<FormItem label="忽略access.log中的主机" prop="ignoreLogACL">
+                                    &lt;!&ndash;proxy.general.logging.ignoreLogACL&ndash;&gt;
+                                    <Input v-model="formValidate.ignoreLogACL"></Input>
+                                    <Button type="error" shape="circle" size="small">删除所有</Button>
+                                </FormItem>-->
+                                <!--<FormItem label="使用备用DNS服务器" prop="alternateDNSservers">
+                                    &lt;!&ndash;proxy.general.alternateDNSservers&ndash;&gt;
+                                    <Input v-model="formValidate.alternateDNSservers"></Input>
+                                    <Button type="error" shape="circle" size="small">删除所有</Button>
+                                </FormItem>-->
+                                <FormItem :label="$t('webagency.dnsV4First')">
+                                    <!--proxy.general.dnsV4First-->
+                                    <i-switch v-model="formValidate.dnsV4First" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <!--<FormItem label="使用Via标题">
+                                    &lt;!&ndash;proxy.general.useViaHeader&ndash;&gt;
+                                    <i-switch v-model="formValidate.useViaHeader" size="large" >
+                                        <span slot="open">开</span>
+                                        <span slot="close">关</span>
+                                    </i-switch>
+                                </FormItem>-->
+                                <FormItem :label="$t('webagency.forwardedForHandling')">
+                                    <!--proxy.general.forwardedForHandling-->
+                                    <i-select v-model="formValidate.forwardedForHandling">
+                                        <Option value="">Default </Option>
+                                        <Option value="on" selected="selected">Append client's IP (on) </Option>
+                                        <Option value="off">Set forward header to unknown (off) </Option>
+                                        <Option value="transparent">Do not alter forward header (transparent) </Option>
+                                        <Option value="truncate">Replace all with client's IP (truncate) </Option>
+                                    </i-select>
+                                </FormItem>
+                                <!--<FormItem label="可见主机名" prop="VisibleHostname">
+                                    &lt;!&ndash;proxy.general.VisibleHostname&ndash;&gt;
+                                    <Input v-model="formValidate.VisibleHostname"></Input>
+                                </FormItem>-->
+                                <FormItem :label="$t('webagency.VisibleEmail')" prop="VisibleEmail">
+                                    <!--proxy.general.VisibleEmail-->
+                                    <Input v-model="formValidate.VisibleEmail"></Input>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.suppressVersion')">
+                                    <!--proxy.general.suppressVersion-->
+                                    <i-switch v-model="formValidate.suppressVersion" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.uriWhitespaceHandling')">
+                                    <!--proxy.general.uriWhitespaceHandling-->
+                                    <i-select v-model="formValidate.uriWhitespaceHandling">
+                                        <Option value="" >none  </Option>
+                                        <Option value="strip" selected="selected">Strip whitespaces </Option>
+                                        <Option value="deny">Deny request </Option>
+                                        <Option value="allow">Allow whitespaces </Option>
+                                        <Option value="encode">Encode whitespaces (RFC1738) </Option>
+                                        <Option value="chop">Chop URI at first whitespace </Option>
+                                    </i-select>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.cache_mem')" prop="cache_mem">
+                                    <!--proxy.general.cache.local.cache_mem-->
+                                    <Input v-model="formValidate.cache_mem"></Input>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.cache_linux_packages')">
+                                    <!--proxy.general.cache.local.cache_linux_packages-->
+                                    <i-switch v-model="formValidate.cache_linux_packages" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.cache_windows_updates')">
+                                    <!--proxy.general.cache.local.cache_windows_updates-->
+                                    <i-switch v-model="formValidate.cache_windows_updates" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+
+                            </Card>
+
+                        </div>
+
+                        <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 2">
+                            <Card>
+                                <FormItem :label="$t('webagency.traffic_enabled')">
+                                    <!--proxy.general.traffic.enabled-->
+                                    <i-switch v-model="formValidate.traffic_enabled" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.maxDownloadSize')" prop="maxDownloadSize">
+                                    <!--proxy.general.traffic.maxDownloadSize-->
+                                    <Input v-model="formValidate.maxDownloadSize"></Input>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.maxUploadSize')" prop="maxUploadSize">
+                                    <!--proxy.general.traffic.maxUploadSize-->
+                                    <Input v-model="formValidate.maxUploadSize"></Input>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.OverallBandwidthTrotteling')" prop="OverallBandwidthTrotteling">
+                                    <!--proxy.general.traffic.OverallBandwidthTrotteling-->
+                                    <Input v-model="formValidate.OverallBandwidthTrotteling"></Input>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.perHostTrotteling')" prop="perHostTrotteling">
+                                    <!--proxy.general.traffic.perHostTrotteling-->
+                                    <Input v-model="formValidate.perHostTrotteling"></Input>
+                                </FormItem>
+
+                            </Card>
+
+                        </div>
+
+                        <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 3">
+                           <Card>
+                                <!--<FormItem label="代理接口">
+                                    &lt;!&ndash;proxy.forward.interfaces&ndash;&gt;
+                                    <Select v-model="formValidate.interfaces" filterable>
+                                        <Option v-for="(item,idx) in interfacesOption" :value="idx" :key="idx"> {{ item }}</Option>
+                                    </Select>
+                                    <Button type="error" shape="circle" size="small">删除所有</Button>
+                                </FormItem>-->
+                                <FormItem :label="$t('webagency.port')" prop="port">
+                                    <!--proxy.forward.port-->
+                                    <Input v-model="formValidate.port"></Input>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.transparentMode')">
+                                    <!--proxy.forward.transparentMode-->
+                                    <i-switch v-model="formValidate.transparentMode" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.sslbump')">
+                                    <!--proxy.forward.sslbump-->
+                                    <i-switch v-model="formValidate.sslbump" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.sslurlonly')">
+                                    <!--proxy.forward.sslurlonly-->
+                                    <i-switch v-model="formValidate.sslurlonly" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.sslbumpport')" prop="sslbumpport">
+                                    <!--proxy.forward.sslbumpport-->
+                                    <Input v-model="formValidate.sslbumpport"></Input>
+                                </FormItem>
+                                <!--<FormItem label=" CA使用">
+                                    &lt;!&ndash;proxy.forward.sslcertificate&ndash;&gt;
+                                    <Select v-model="formValidate.sslcertificate" filterable>
+                                        <Option v-for="(item,idx) in sslcertificateOption" :value="idx" :key="idx"> {{ item }}</Option>
+                                    </Select>
+                                </FormItem>-->
+                                <!--<FormItem label=" SSL无冲撞站点" prop="sslnobumpsites">
+                                    &lt;!&ndash;proxy.forward.sslnobumpsites&ndash;&gt;
+                                    <Input v-model="formValidate.sslnobumpsites"></Input>
+                                </FormItem>-->
+                                <FormItem :label="$t('webagency.ssl_crtd_storage_max_size')" prop="ssl_crtd_storage_max_size">
+                                    <!--proxy.forward.ssl_crtd_storage_max_size-->
+                                    <Input v-model="formValidate.ssl_crtd_storage_max_size"></Input>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.sslcrtd_children')" prop="sslcrtd_children">
+                                    <!--proxy.forward.sslcrtd_children-->
+                                    <Input v-model="formValidate.sslcrtd_children"></Input>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.addACLforInterfaceSubnets')">
+                                    <!--proxy.forward.addACLforInterfaceSubnets-->
+                                    <i-switch v-model="formValidate.addACLforInterfaceSubnets" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                            </Card>
+                        </div>
+
+                        <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 4">
+                           <Card>
+                                <!--<FormItem label=" 允许的子网" prop="allowedSubnets">
+                                    &lt;!&ndash;proxy.forward.acl.allowedSubnets&ndash;&gt;
+                                    <Input v-model="formValidate.allowedSubnets" clearable type="textarea" :rows="2"></Input>
+                                </FormItem>-->
+                                <!--<FormItem label="不受限制的IP地址" prop="unrestricted">
+                                    &lt;!&ndash;proxy.forward.acl.unrestricted&ndash;&gt;
+                                    <Input v-model="formValidate.unrestricted" clearable type="textarea" :rows="2"></Input>
+                                </FormItem>-->
+                                <!--<FormItem label="禁止的主机IP地址" prop="bannedHosts">
+                                    &lt;!&ndash;proxy.forward.acl.bannedHosts&ndash;&gt;
+                                    <Input v-model="formValidate.bannedHosts" clearable type="textarea" :rows="2"></Input>
+                                </FormItem>-->
+                                <!--<FormItem label=" 白名单" prop="whiteList">
+                                    &lt;!&ndash;proxy.forward.acl.whiteList&ndash;&gt;
+                                    <Input v-model="formValidate.whiteList" clearable type="textarea" :rows="2"></Input>
+                                </FormItem>-->
+                                <!--<FormItem label="黑名单" prop="blackList">
+                                    &lt;!&ndash;id="proxy.forward.acl.blackList"&ndash;&gt;
+                                    <Input v-model="formValidate.blackList" clearable type="textarea" :rows="2"></Input>
+                                </FormItem>-->
+                                <!--<FormItem label=" 阻止浏览器/用户代理" prop="browser">
+                                    &lt;!&ndash;proxy.forward.acl.browser&ndash;&gt;
+                                    <Input v-model="formValidate.browser" clearable type="textarea" :rows="2"></Input>
+                                </FormItem>-->
+                                <!--<FormItem label=" 阻止特定MIME类型回复 " prop="mimeType">
+                                    &lt;!&ndash;proxy.forward.acl.mimeType&ndash;&gt;
+                                    <Input v-model="formValidate.mimeType" clearable type="textarea" :rows="2"></Input>
+                                </FormItem>-->
+                                <FormItem :label="$t('webagency.safePorts')" prop="safePorts">
+                                    <!--proxy.forward.acl.safePorts-->
+                                    <Input v-model="formValidate.safePorts" clearable type="textarea" :rows="2"></Input>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.sslPorts')" prop="sslPorts">
+                                    <!--proxy.forward.acl.sslPorts-->
+                                    <Input v-model="formValidate.sslPorts" clearable type="textarea" :rows="2"></Input>
+                                </FormItem>
+                            </Card>
+                        </div>
+                    </div>
+                </Form>
+            </div>
+            <br>
+            <div style="text-align: center">
+                <Button type="primary" @click="handleSubmit('formValidate')" :loading="applyLoading">{{$t('webagency.save')}}</Button>
+            </div>
+            </Col>
+            <!-- content end -->
+        </Row>
+    </div>
+
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/plugin/echarts.min.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+  template:"#main",
+  data:function(){
+    return {
+        globalConfig:globalConfig,
+        interfacesOption:{},
+        sslcertificateOption:{},
+        showCurrentTabs:'1',
+        applyLoading:false,
+
+        formValidate:{
+            general_enabled:false,
+            icpPort:'',
+            accessLog:false,
+            target:'',
+            storeLog:false,
+            ignoreLogACL:'',
+            alternateDNSservers:'',
+            dnsV4First:false,
+            useViaHeader:false,
+            forwardedForHandling:'',
+            VisibleHostname:'',
+            VisibleEmail:'',
+            suppressVersion:false,
+            uriWhitespaceHandling:'',
+            cache_mem:'',
+            cache_linux_packages:false,
+            cache_windows_updates:false,
+            traffic_enabled:false,
+            maxDownloadSize:'',
+            maxUploadSize:'',
+            OverallBandwidthTrotteling:'',
+            perHostTrotteling:'',
+            interfaces:'',
+            port:'',
+            transparentMode:false,
+            sslbump:false,
+            sslurlonly:false,
+            sslbumpport:'',
+            sslcertificate:'',
+            sslnobumpsites:'',
+            ssl_crtd_storage_max_size:'',
+            sslcrtd_children:'',
+            addACLforInterfaceSubnets:false,
+            allowedSubnets:'',
+            unrestricted:'',
+            bannedHosts:'',
+            whiteList:'',
+            blackList:'',
+            browser:'',
+            mimeType:'',
+            safePorts:'',
+            sslPorts:''
+        }
+    }
+  },
+    computed:{
+        ruleValidate:function (){
+            var _this = this;
+            return{
+                VisibleEmail:[
+                    {validator:function (r,v,f) {
+                        if(_this.formValidate.general_enabled == true){
+                            var _s = cs.string(v);
+                            if(_s == 0){
+                                f(_this.$t('webagency.msg1'));
+                            }
+                        }
+                        f();
+                    },trigger: 'blur'}
+                ],
+                cache_mem:[
+                    {validator:function (r,v,f) {
+                        if(_this.formValidate.general_enabled == true){
+                            var _s = cs.num(v);
+                            if(_s == 0){
+                                f(_this.$t('webagency.msg2'));
+                            }else if(_s ==1){
+                                f(_this.$t('webagency.msg3'));
+                            }else if( v <128 || v >2048){
+                                f(_this.$t('webagency.msg4'));
+                            }
+                        }
+                        f();
+                    },trigger:'blur'}
+                ],
+                maxDownloadSize:[
+                    {validator:function (r,v,f) {
+                        if(_this.formValidate.general_enabled == true){
+                            if(_this.formValidate.traffic_enabled == true){
+                                var _s = cs.num(v);
+                                if(_s == 0){
+                                    f(_this.$t('webagency.msg5'));
+                                }else if(_s ==1){
+                                    f(_this.$t('webagency.msg6'));
+                                }
+                            }
+                        }
+                        f();
+                    },trigger:'blur'}
+                ],
+                maxUploadSize:[
+                    {validator:function (r,v,f) {
+                        if(_this.formValidate.general_enabled == true){
+                            if(_this.formValidate.traffic_enabled == true){
+                                var _s = cs.num(v);
+                                if(_s == 0){
+                                    f(_this.$t('webagency.msg7'));
+                                }else if(_s ==1){
+                                    f(_this.$t('webagency.msg8'));
+                                }
+                            }
+                        }
+                        f();
+                    },trigger:'blur'}
+                ],
+                OverallBandwidthTrotteling:[
+                    {validator:function (r,v,f) {
+                        if(_this.formValidate.general_enabled == true){
+                            if(_this.formValidate.traffic_enabled == true){
+                                var _s = cs.num(v);
+                                if(_s == 0){
+                                    f(_this.$t('webagency.msg9'));
+                                }else if(_s ==1){
+                                    f(_this.$t('webagency.msg10'));
+                                }
+                            }
+                        }
+                        f();
+                    },trigger:'blur'}
+                ],
+                perHostTrotteling:[
+                    {validator:function (r,v,f) {
+                        if(_this.formValidate.general_enabled == true){
+                            if(_this.formValidate.traffic_enabled == true){
+                                var _s = cs.num(v);
+                                if(_s == 0){
+                                    f(_this.$t('webagency.msg11'));
+                                }else if(_s ==1){
+                                    f(_this.$t('webagency.msg12'));
+                                }
+                            }
+                        }
+                        f();
+                    },trigger:'blur'}
+                ],
+                port:[
+                    {validator:function (r,v,f) {
+                        if(_this.formValidate.general_enabled == true){
+                            var _s = cs.num(v);
+                            if(_s == 0){
+                                f(_this.$t('webagency.msg13'));
+                            }else if(_s ==1){
+                                f(_this.$t('webagency.msg14'));
+                            }else if( v <1 || v >65535){
+                                f(_this.$t('webagency.msg15'));
+                            }
+                        }
+                        f();
+                    },trigger:'blur'}
+                ],
+                sslbumpport:[
+                    {validator:function (r,v,f) {
+                        if(_this.formValidate.general_enabled == true){
+                            var _s = cs.num(v);
+                            if(_s == 0){
+                                f(_this.$t('webagency.msg16'));
+                            }else if(_s ==1){
+                                f(_this.$t('webagency.msg17'));
+                            }else if( v <1 || v >65535){
+                                f(_this.$t('webagency.msg18'));
+                            }else if(v == _this.formValidate.port){
+                                f(_this.$t('webagency.msg19'));
+                            }
+                        }
+                        f();
+                    },trigger:'blur'}
+                ],
+                ssl_crtd_storage_max_size:[
+                    {validator:function (r,v,f) {
+                        if(_this.formValidate.general_enabled == true){
+                            var _s = cs.num(v);
+                            if(_s == 0){
+                                f(_this.$t('webagency.msg20'));
+                            }else if(_s ==1){
+                                f(_this.$t('webagency.msg21'));
+                            }
+                        }
+                        f();
+                    },trigger:'blur'}
+                ],
+                sslcrtd_children:[
+                    {validator:function (r,v,f) {
+                        if(_this.formValidate.general_enabled == true){
+                            var _s = cs.num(v);
+                            if(_s == 0){
+                                f(_this.$t('webagency.msg22'));
+                            }else if(_s ==1){
+                                f(_this.$t('webagency.msg23'));
+                            }
+                        }
+                        f();
+                    },trigger:'blur'}
+                ],
+                safePorts:[
+                    {validator:function (r,v,f) {
+                        if(_this.formValidate.general_enabled == true){
+                            var _s = cs.string(v);
+                            if(_s == 0){
+                                f(_this.$t('webagency.msg24'));
+                            }
+                        }
+                        f();
+                    },trigger:'blur'}
+                ]
+
+            }
+        }
+
+    },
+    methods:{
+        tabsSwitch: function(index) {
+            this.showCurrentTabs = index;
+        },
+        handleSubmit: function (name){
+            var _this = this;
+            this.$refs[name].validate(function(valid){
+                if (valid){
+                    var data = {};
+                    data['general']= {};
+                    data['general']['logging']={};
+                    data['general']['logging']['enable']={};
+                    data['general']['cache']={};
+                    data['general']['cache']['local']={};
+                    data['general']['traffic']={};
+                    data['forward']={};
+                    data['forward']['acl']={};
+                    if(false == _this.formValidate.general_enabled){
+                        data['general']['enabled']= '0';
+                    }else {
+                        data['general']['enabled']= '1';
+                        (true == _this.formValidate.accessLog)?
+                                data['general']['logging']['enable']['accessLog'] = '1':
+                                data['general']['logging']['enable']['accessLog'] = '0';
+                        (true == _this.formValidate.storeLog)?
+                                data['general']['logging']['enable']['storeLog'] = '1':
+                                data['general']['logging']['enable']['storeLog'] = '0';
+                        (true == _this.formValidate.dnsV4First)?
+                                data['general']['dnsV4First'] = '1':
+                                data['general']['dnsV4First'] = '0';
+                        data['general']['forwardedForHandling'] = _this.formValidate.forwardedForHandling;
+                        data['general']['VisibleEmail'] = _this.formValidate.VisibleEmail;
+                        (true == _this.formValidate.suppressVersion)?
+                                data['general']['suppressVersion'] = '1':
+                                data['general']['suppressVersion'] = '0';
+                        data['general']['uriWhitespaceHandling'] = _this.formValidate.uriWhitespaceHandling;
+                        data['general']['cache']['local']['cache_mem'] = _this.formValidate.cache_mem;
+                        (true == _this.formValidate.cache_linux_packages)?
+                                data['general']['cache']['local']['cache_linux_packages'] = '1':
+                                data['general']['cache']['local']['cache_linux_packages'] = '0';
+                        (true == _this.formValidate.cache_windows_updates)?
+                                data['general']['cache']['local']['cache_windows_updates'] = '1':
+                                data['general']['cache']['local']['cache_windows_updates'] = '0';
+                        (true == _this.formValidate.traffic_enabled)?
+                                data['general']['traffic']['enabled'] = '1':
+                                data['general']['traffic']['enabled'] = '0';
+                        data['general']['traffic']['maxDownloadSize'] = _this.formValidate.maxDownloadSize;
+                        data['general']['traffic']['maxUploadSize'] = _this.formValidate.maxUploadSize;
+                        data['general']['traffic']['OverallBandwidthTrotteling'] = _this.formValidate.OverallBandwidthTrotteling;
+                        data['general']['traffic']['perHostTrotteling'] = _this.formValidate.perHostTrotteling;
+                        data['forward']['port'] = _this.formValidate.port;
+                        data['forward']['sslbumpport'] = _this.formValidate.sslbumpport;
+                        (true == _this.formValidate.sslbump)?
+                                data['forward']['sslbump'] = '1':
+                                data['forward']['sslbump'] = '0';
+                        (true == _this.formValidate.sslurlonly)?
+                                data['forward']['sslurlonly'] = '1':
+                                data['forward']['sslurlonly'] = '0';
+                        data['forward']['ssl_crtd_storage_max_size'] = _this.formValidate.ssl_crtd_storage_max_size;
+                        data['forward']['sslcrtd_children'] = _this.formValidate.sslcrtd_children;
+                        (true == _this.formValidate.addACLforInterfaceSubnets)?
+                                data['forward']['addACLforInterfaceSubnets'] = '1':
+                                data['forward']['addACLforInterfaceSubnets'] = '0';
+                        (true == _this.formValidate.transparentMode)?
+                                data['forward']['transparentMode'] = '1':
+                                data['forward']['transparentMode'] = '0';
+                        data['forward']['acl']['safePorts'] = _this.formValidate.safePorts;
+                        data['forward']['acl']['sslPorts'] = _this.formValidate.sslPorts;
+                    }
+
+                    var postData = {"action":"setProxy","data":data};
+                    console.log(postData);
+                    _this.applyLoading = true;
+                    uiPost.setProxy(postData,function(data){
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        if (0 == data.rescode) {
+                            _this.$Message.success({content:_this.$t('openvpn.success'),onClose:function(){
+                                location.href = location.href;
+                            }});
+                        } else {
+                            _this.$Message.error({content:_this.$t('openvpn.fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                        }
+                        _this.applyLoading = false;
+                    });
+
+                }
+            });
+        }
+    },
+    created:function() {
+        var _this = this;
+        var postVar = {"action":"getProxy","data":[]};
+        _this.$Spin.show();  //加载动画
+        uiPost.getProxy(postVar,function(data){
+            console.log(data);
+            if (9999 == data.rescode){
+                cs.loginOut();
+            }
+            _this.$Spin.hide();   //关闭加载动画
+            if (0 == data.rescode){
+                if ('1' == data.data.general.enabled){
+                    _this.formValidate.general_enabled = true;
+                }
+                _this.formValidate.icpPort = data.data.general.icpPort;
+                if('1' == data.data.general.logging.enable.accessLog){
+                    _this.formValidate.accessLog = true;
+                }
+                _this.formValidate.target = data.data.general.logging.target;   /**/
+                if('1' == data.data.general.logging.enable.storeLog){
+                    _this.formValidate.storeLog = true;
+                }
+                _this.formValidate.ignoreLogACL = data.data.general.logging.ignoreLogACL;
+                _this.formValidate.alternateDNSservers = data.data.general.alternateDNSservers;
+                if('1' == data.data.general.dnsV4First){
+                    _this.formValidate.dnsV4First = true;
+                }
+                if('1' == data.data.general.useViaHeader){
+                    _this.formValidate.useViaHeader = true;
+                }
+                _this.formValidate.forwardedForHandling = data.data.general.forwardedForHandling;
+                _this.formValidate.VisibleHostname = data.data.general.VisibleHostname;
+                _this.formValidate.VisibleEmail = data.data.general.VisibleEmail;
+                if('1' == data.data.general.suppressVersion){
+                    _this.formValidate.suppressVersion = true;
+                }
+                _this.formValidate.uriWhitespaceHandling = data.data.general.uriWhitespaceHandling;
+                _this.formValidate.cache_mem = data.data.general.cache.local.cache_mem;
+                if('1' == data.data.general.cache.local.cache_linux_packages){
+                    _this.formValidate.cache_linux_packages = true;
+                }
+                if('1' == data.data.general.cache.local.cache_windows_updates){
+                    _this.formValidate.cache_windows_updates = true;
+                }
+                /*第二*/
+                if('1' == data.data.general.traffic.enabled){
+                    _this.formValidate.traffic_enabled = true;
+                }
+                _this.formValidate.maxDownloadSize = data.data.general.traffic.maxDownloadSize;
+                _this.formValidate.maxUploadSize = data.data.general.traffic.maxUploadSize;
+                _this.formValidate.OverallBandwidthTrotteling = data.data.general.traffic.OverallBandwidthTrotteling;
+                _this.formValidate.perHostTrotteling = data.data.general.traffic.perHostTrotteling;
+                /*第三*/
+                _this.formValidate.interfaces = data.data.forward.interfaces;
+                _this.formValidate.port = data.data.forward.port;
+                if('1' == data.data.forward.transparentMode){
+                    _this.formValidate.transparentMode = true;
+                }
+                if('1' == data.data.forward.sslbump){
+                    _this.formValidate.sslbump = true;
+                }
+                if('1' == data.data.forward.sslurlonly){
+                    _this.formValidate.sslurlonly = true;
+                }
+                _this.formValidate.sslbumpport = data.data.forward.sslbumpport;
+                _this.formValidate.sslcertificate = data.data.forward.sslcertificate;
+                _this.formValidate.sslnobumpsites = data.data.forward.sslnobumpsites;
+                _this.formValidate.ssl_crtd_storage_max_size = data.data.forward.ssl_crtd_storage_max_size;
+                _this.formValidate.sslcrtd_children = data.data.forward.sslcrtd_children;
+                if('1' == data.data.forward.addACLforInterfaceSubnets){
+                    _this.formValidate.addACLforInterfaceSubnets = true;
+                }
+                /*第四*/
+                _this.formValidate.allowedSubnets = data.data.forward.acl.allowedSubnets;
+                _this.formValidate.unrestricted = data.data.forward.acl.unrestricted;
+                _this.formValidate.bannedHosts = data.data.forward.acl.bannedHosts;
+                _this.formValidate.whiteList = data.data.forward.acl.whiteList;
+                _this.formValidate.blackList = data.data.forward.acl.blackList;
+                _this.formValidate.browser = data.data.forward.acl.browser;
+                _this.formValidate.mimeType = data.data.forward.acl.mimeType;
+                _this.formValidate.safePorts = data.data.forward.acl.safePorts;
+                _this.formValidate.sslPorts = data.data.forward.acl.sslPorts;
+            }
+        });
+    }
+
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

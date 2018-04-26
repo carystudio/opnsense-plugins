@@ -45,7 +45,7 @@
                     <FormItem :label="$t('clients.mode')">
                         <Select v-model="formValidate.mode"  @on-change="modeStatus" :key="$t('clients.mode')">
                             <Option value="p2p_tls">{{$t('clients.msg1')}}</Option>
-                            <!--<Option value="p2p_shared_key">端对端（共享密钥）</Option>-->
+                            <Option value="p2p_shared_key">{{$t('clients.msg_sharedkey')}}</Option>
                         </Select>
                     </FormItem>
                     <FormItem :label="$t('clients.protocol')">
@@ -156,12 +156,9 @@
                             <Input v-model="formValidate.prv" type="textarea" :rows="3"></Input>
                         </FormItem>
                     </div>
-                    <div v-if="p2p_shared_key == true">
-                        <FormItem :label="$t('clients.autokey_enable')" prop="autokey_enable">
-                            <Checkbox v-model="formValidate.autokey_enable">{{$t('clients.msg7')}} </Checkbox>
-                            <FormItem v-if="formValidate.autokey_enable == false">
-                                <Input v-model="formValidate.shared_key" type="textarea" :rows="4" :placeholder="$t('clients.msg8')"></Input>
-                            </FormItem>
+                    <div v-if="'p2p_shared_key' == formValidate.mode">
+                        <FormItem :label="$t('clients.autokey_enable')" prop="shared_key">
+                            <Input v-model="formValidate.shared_key" type="textarea" :rows="4" :placeholder="$t('clients.msg8')"></Input>
                         </FormItem>
                     </div>
                     <FormItem :label="$t('clients.crypto')">
@@ -186,18 +183,12 @@
                         <Icon type="information-circled"></Icon>
                         {{$t('clients.tunnel_setting')}}
                     </p>
-                    <!--<FormItem label="IPv4隧道网络">
+                    <FormItem label="IPv4隧道网络">
                         <Input v-model="formValidate.tunnel_network"></Input>
-                    </FormItem>
-                    <FormItem label="IPv6隧道网络">
-                        <Input v-model="formValidate.tunnel_networkv6"></Input>
                     </FormItem>
                     <FormItem label="IPv4远程网络">
                         <Input v-model="formValidate.remote_network"></Input>
                     </FormItem>
-                    <FormItem label="IPv6远程网络">
-                        <Input v-model="formValidate.remote_networkv6"></Input>
-                    </FormItem>-->
                     <FormItem :label="$t('clients.use_shaper')" prop="use_shaper">
                         <Input v-model="formValidate.use_shaper"></Input>
                     </FormItem>
@@ -306,7 +297,7 @@ var cs_main = {
             local_port:'',
             auth_user:'',
             auth_pass:'',
-            reneg_sec:'',
+            reneg_sec:'3600',
             tlsauth_enable: false,
             autotls_enable:'',
             tls:'',
@@ -319,9 +310,7 @@ var cs_main = {
             digest:'',
             engine:'',
             tunnel_network:'',
-            tunnel_networkv6:'',
             remote_network:'',
-            remote_networkv6:'',
             use_shaper:'',
             compression:'none',
             passtos:'',
@@ -360,58 +349,10 @@ var cs_main = {
                         f();
                     },trigger: 'blur' }
                 ],
-                proxy_addr: [
-                    { validator:function(r, v, f) {
-                        var _s = cs.string(v);
-                        if(0 == _s){
-                            f(_this.$t('clients.msg20'));
-                        }
-                        f();
-                    },trigger: 'blur' }
-                ],
-                proxy_port: [
-                    { validator:function(r, v, f) {
-                        var _s = cs.num(v);
-                        if(0 == _s){
-                            f(_this.$t('clients.msg21'));
-                        }else if(1 == _s){
-                            f(_this.$t('clients.msg22'));
-                        }else if( v <1 || v >65535){
-                            f(_this.$t('clients.msg23'));
-                        }
-                        f();
-                    },trigger: 'blur' }
-                ],
-                proxy_user: [
-                    { validator:function(r, v, f) {
-                        if(_this.formValidate.proxy_authtype != 'none'){
-                            var _s = cs.string(v);
-                            if(0 == _s){
-                                f(_this.$t('clients.msg24'));
-                            }
-                        }
-                        f();
-                    },trigger: 'blur' }
-                ],
-                proxy_passwd: [
-                    { validator:function(r, v, f) {
-                        if(_this.formValidate.proxy_authtype != 'none'){
-                            var _s = cs.string(v);
-                            if(0 == _s){
-                                f(_this.$t('clients.msg25'));
-                            }
-                        }
-                        f();
-                    },trigger: 'blur' }
-                ],
                 local_port: [
                 { validator:function(r, v, f) {
                     var _s = cs.num(v);
-                    if(0 == _s){
-                        f(_this.$t('clients.msg26'));
-                    }else if(1 == _s){
-                        f(_this.$t('clients.msg27'));
-                    }else if( v <1 || v >65535){
+                    if(_s>1 &&  (v <1 || v >65535)){
                         f(_this.$t('clients.msg28'));
                     }
                     f();
@@ -473,11 +414,7 @@ var cs_main = {
                 use_shaper: [
                 { validator:function(r, v, f) {
                     var _s = cs.num(v);
-                    if(0 == _s){
-                        f(_this.$t('clients.msg35'));
-                    }else if(1 == _s){
-                        f(_this.$t('clients.msg36'));
-                    }else if( v <100 || v >104857600){
+                    if(_s>1 && (v <100 || v >104857600)){
                         f(_this.$t('clients.msg37'));
                     }
                     f();
@@ -537,6 +474,8 @@ var cs_main = {
                 _this.formValidate.dev_mode = data.data.dev_mode;
                 _this.formValidate.digest = data.data.digest;
                 _this.formValidate.engine = data.data.engine;
+                _this.formValidate.tunnel_network = data.data.tunnel_network;
+                _this.formValidate.remote_network = data.data.remote_network;
                 _this.formValidate.interface = data.data.interface;
                 _this.formValidate.mode = data.data.mode;
                 _this.modeStatus();
@@ -560,20 +499,27 @@ var cs_main = {
                 _this.formValidate.proxy_passwd = data.data.proxy_passwd;
                 _this.formValidate.local_port = data.data.local_port;
                 _this.formValidate.reneg_sec = data.data['reneg-sec'];
-                if (data.data.tls){
-                    _this.formValidate.tlsauth_enable = true;
-                    _this.formValidate.autotls_enable = false;
-                    _this.formValidate.tls = data.data.tls;
+                if("p2p_tls" == _this.formValidate.mode){
+                    if (data.data.tls){
+                        _this.formValidate.tlsauth_enable = true;
+                        _this.formValidate.autotls_enable = false;
+                        _this.formValidate.tls = data.data.tls;
+                    }
+                    if(data.data.ca){
+                        _this.formValidate.ca =  $.base64.decode(data.data.ca);   //对等证书颁发机构
+                    }
+                    if(data.data.cert){
+                        _this.formValidate.cert = $.base64.decode(data.data.cert);  //服务器证书
+                    }
+                    if(data.data.prv){
+                        _this.formValidate.prv = $.base64.decode(data.data.prv);  //私有密钥数据
+                    }
+                }else{
+                    if(data.data.shared_key){
+                        _this.formValidate.shared_key = $.base64.decode(data.data.shared_key);
+                    }
                 }
-                if(data.data.ca){
-                    _this.formValidate.ca =  $.base64.decode(data.data.ca);   //对等证书颁发机构
-                }
-                if(data.data.cert){
-                    _this.formValidate.cert = $.base64.decode(data.data.cert);  //服务器证书
-                }
-                if(data.data.prv){
-                    _this.formValidate.prv = $.base64.decode(data.data.prv);  //私有密钥数据
-                }
+
                 _this.formValidate.use_shaper = data.data.use_shaper;
                 if('yes' == data.data.passtos ){
                     _this.formValidate.passtos = true;
@@ -606,14 +552,14 @@ var cs_main = {
                     if(_this.formValidate.mode == "p2p_tls"){
                         if (_this.formValidate.tlsauth_enable == true && _this.formValidate.autotls_enable == false){
                             data.tls = _this.formValidate.tls;
+                        }else{
+                            data.tls = "";
                         }
                         data.ca = $.base64.encode(_this.formValidate.ca);
                         data.cert = $.base64.encode(_this.formValidate.cert);
                         data.prv = $.base64.encode(_this.formValidate.prv);
                     }else{
-                        if(_this.formValidate.autokey_enable == true){
-                            data.shared_key = _this.formValidate.shared_key;
-                        }
+                        data.shared_key = $.base64.encode(_this.formValidate.shared_key);
                     }
                     data.protocol = _this.formValidate.protocol;
                     data.dev_mode = _this.formValidate.dev_mode;
@@ -636,10 +582,8 @@ var cs_main = {
                     data.digest = _this.formValidate.digest;
                     data.engine = _this.formValidate.engine;
                     /*后台没有验证的数据*/
-                    /*data.tunnel_network = _this.formValidate.tunnel_network;
-                    data.tunnel_networkv6 = _this.formValidate.tunnel_networkv6;
+                    data.tunnel_network = _this.formValidate.tunnel_network;
                     data.remote_network = _this.formValidate.remote_network;
-                    data.remote_networkv6 = _this.formValidate.remote_networkv6;*/
                     data.use_shaper = _this.formValidate.use_shaper;
                     if('none' == _this.formValidate.compression){
                         data.compression = '';

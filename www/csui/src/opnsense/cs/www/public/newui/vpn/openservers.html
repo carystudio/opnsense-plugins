@@ -76,29 +76,6 @@
                         <!--TLS认证-->
                         <FormItem :label="$t('openvpn.TLS_certification')" prop="TLS_certification">
                             <Checkbox v-model="formValidate.tlsauth_enable"> *{{ $t('openvpn.msg1') }}</Checkbox>
-                            <div v-if="formValidate.tlsauth_enable == true" >
-                                <Checkbox v-model="formValidate.autotls_enable"> *{{ $t('openvpn.msg2') }}</Checkbox>
-                                <FormItem v-if="formValidate.autotls_enable != true" prop="tls">
-                                    <Input v-model="formValidate.tls" type="textarea" :rows="4" :placeholder="$t('openvpn.msg3')"></Input>
-                                </FormItem>
-                            </div>
-                        </FormItem>
-                        <!--对等证书颁发机构-->
-                        <FormItem :label="$t('openvpn.awarding_bodies')" prop="ca">
-                            <Input v-model="formValidate.ca" type="textarea" :rows="3"></Input>
-                        </FormItem>
-
-                       <!-- <FormItem :label="$t('openvpn.Certificate_revocation_list')">
-                            <Select v-model="formValidate.revocation_list">
-                                <Option v-for="revocation_list in revocationListOption" :value="revocation_list.value" :key="revocation_list.value"> {{ revocation_list.option }}</Option>
-                            </Select>
-                        </FormItem>-->
-                        <!--服务器证书-->
-                        <FormItem :label="$t('openvpn.server_id')" prop="cert">
-                            <Input v-model="formValidate.cert" type="textarea" :rows="3"></Input>
-                        </FormItem>
-                        <FormItem :label="$t('openvpn.keys_data')" prop="prv">
-                            <Input v-model="formValidate.prv" type="textarea" :rows="3"></Input>
                         </FormItem>
                         <FormItem :label="$t('openvpn.DH_par_len')">
                             <Select v-model="formValidate.dh_length">
@@ -305,7 +282,7 @@
                             <Option v-for="verbosity_level in verbosityLevelOption" :value="verbosity_level.value" :key="verbosity_level.value"> {{ verbosity_level.option }}</Option>
                         </Select>
                     </FormItem>
-                    <FormItem v-if="server_tls == false" :label="$t('openvpn.reneg-sec')" prop="reneg_sec">
+                    <FormItem v-if="server_tls == false && p2p_shared_key == false" :label="$t('openvpn.reneg-sec')" prop="reneg_sec">
                         <Input v-model="formValidate.reneg_sec"><span slot="append">{{ $t('openvpn.sec') }}</span></Input>
                     </FormItem>
                     <br>
@@ -342,9 +319,11 @@ var cs_main = {
     return {
         globalConfig:globalConfig,
         applyLoading: false,
-        server_tls: false,
         p2p_shared_key: false,
+        p2p_tls: false,
         server_tls_user: false,
+        server_tls: false,
+        server_user: false,
         tkipOption:{},
         md5_approve:{},
         hardware_encryption:{},
@@ -368,10 +347,6 @@ var cs_main = {
             dev_mode: '',
             interface: '',
             local_port: '',
-            tls: '',
-            ca: '',
-            cert: '',
-            prv: '',
             revocation_list: '',
             dh_length: '',
             crypto: '',
@@ -408,7 +383,7 @@ var cs_main = {
             client_mgmt_port: '',
             custom_options: '',
             verbosity_level: '',
-            reneg_sec: 0,
+            reneg_sec: 3600,
             staNum:0,
             multiAp1:'',
             multiAp2:'',
@@ -434,42 +409,16 @@ var cs_main = {
                         f();
                     },trigger: 'blur' }
                 ],
-                tls: [
+
+                shared_key: [
                     { validator:function(r, v, f) {
-                        if (_this.formValidate.tlsauth_enable == true){
-                            if(_this.formValidate.autotls_enable ==false){
+                        if (_this.formValidate.mode == 'p2p_shared_key'){
+                            if(_this.formValidate.autokey_enable ==false){
                                 var _s = cs.string(v);
                                 if(0 == _s){
                                     f(_this.$t('openvpn.msg41'));
                                 }
                             }
-                        }
-                        f();
-                    },trigger: 'blur' }
-                ],
-                ca: [
-                    { validator:function(r, v, f) {
-                        var _s = cs.string(v);
-                        if(0 == _s){
-                            f(_this.$t('openvpn.msg42'));
-                        }
-                        f();
-                    },trigger: 'blur' }
-                ],
-                cert: [
-                    { validator:function(r, v, f) {
-                        var _s = cs.string(v);
-                        if(0 == _s){
-                            f(_this.$t('openvpn.msg43'));
-                        }
-                        f();
-                    },trigger: 'blur' }
-                ],
-                prv: [
-                    { validator:function(r, v, f) {
-                        var _s = cs.string(v);
-                        if(0 == _s){
-                            f(_this.$t('openvpn.msg44'));
                         }
                         f();
                     },trigger: 'blur' }
@@ -623,7 +572,7 @@ var cs_main = {
                 ],
                 reneg_sec: [
                     { validator:function(r, v, f) {
-                        if(_this.formValidate.mode != 'server_tls'){
+                        if(_this.formValidate.mode != 'server_tls' && _this.formValidate.mode != 'p2p_shared_key'){
                             var _s = cs.num(v);
                             if(1 == _s){
                                 f(_this.$t('openvpn.msg60'));
@@ -646,8 +595,11 @@ var cs_main = {
                     option: _this.$t('openvpn.remote_access_2'),
                     value: 'server_user'
                 },{
-                    option: _this.$t('openvpn.remote_access_3'),
-                    value: 'server_tls_user'
+                    option: _this.$t('openvpn.remote_access_4'),
+                    value: 'p2p_tls'
+                },{
+                    option: _this.$t('openvpn.remote_access_5'),
+                    value: 'p2p_shared_key'
                 }
             ]
         },
@@ -780,10 +732,6 @@ var cs_main = {
                     _this.formValidate.status = true;
                 }
 
-                _this.formValidate.ca =  $.base64.decode(data.data.ca);   //对等证书颁发机构
-                console.log("-------------------------start2--------------------------------");
-                _this.formValidate.cert = $.base64.decode(data.data.cert);  //服务器证书
-                _this.formValidate.prv = $.base64.decode(data.data.prv);  //私有密钥数据
                 _this.formValidate.cert_depth = data.data.cert_depth;  //证书深度
                 if ('yes' == data.data.client2client){
                     _this.formValidate.client2client = true;         //内部客户端通信
@@ -856,10 +804,8 @@ var cs_main = {
                 _this.formValidate.remote_networkv6 = data.data.remote_networkv6;
                 _this.formValidate.reneg_sec = data.data["reneg-sec"];
 
-                if (data.data.tls){
+                if ('yes' == data.data.tlsauth_enable){
                     _this.formValidate.tlsauth_enable = true;
-                    _this.formValidate.autotls_enable = false;
-                    _this.formValidate.tls = data.data.tls;
                 }
 
                 if ('yes' == data.data.topology_subnet){
@@ -888,13 +834,19 @@ var cs_main = {
                     _this.formValidate.ntp_server_enable = true;
                     _this.formValidate.ntp_server2 = data.data.ntp_server2;
                 }
-                if (data.autotls_enable == 'yes'){
-                    _this.formValidate.autotls_enable = true;
-                }
-                if (data.tlsauth_enable == 'yes'){
-                    _this.formValidate.tlsauth_enable = true;
-                }
+                if('p2p_shared_key' == _this.formValidate.mode){
+                    if(data.data.shared_key.length > 0){
+                        _this.formValidate.shared_key = $.base64.decode(data.data.shared_key);
+                        _this.formValidate.autokey_enable = false;
+                    }else{
+                        _this.formValidate.autokey_enable = true;
+                    }
 
+                }else{
+                    if (data.tlsauth_enable == 'yes'){
+                        _this.formValidate.tlsauth_enable = true;
+                    }
+                }
 
                 /*if ('' == data.data.tls){
                     _this.formValidate.autotls_enable = true;
@@ -966,12 +918,17 @@ var cs_main = {
                     data.dev_mode = _this.formValidate.dev_mode;
                     data.interface = _this.formValidate.interface;
                     data.local_port = _this.formValidate.local_port;
-                    if (_this.formValidate.tlsauth_enable == true && _this.formValidate.autotls_enable == false){
-                        data.tls = _this.formValidate.tls;
+                    if (_this.formValidate.tlsauth_enable == true){
+                        data.tlsauth_enable = 'yes';
                     }
-                    data.ca = $.base64.encode(_this.formValidate.ca);
-                    data.cert = $.base64.encode(_this.formValidate.cert);
-                    data.prv = $.base64.encode(_this.formValidate.prv);
+                    if('p2p_shared_key' == data.mode){
+                        if(_this.formValidate.autokey_enable == false){
+                            data.shared_key = $.base64.encode(_this.formValidate.shared_key);
+                        }else{
+                            data.shared_key = '';
+                        }
+
+                    }
                     data.dh_length = _this.formValidate.dh_length;
                     data.cert_depth = _this.formValidate.cert_depth;
 
@@ -1055,10 +1012,8 @@ var cs_main = {
 
                     data.custom_options = _this.formValidate.custom_options;
                     data.verbosity_level = _this.formValidate.verbosity_level;
-                    if (_this.formValidate.mode != 'server_tls'){
+                    if (_this.formValidate.mode != 'server_tls' && _this.formValidate.mode != 'p2p_shared_key'){
                         data["reneg-sec"] = _this.formValidate.reneg_sec;
-                    }else{
-                        data["reneg-sec"] = 0;
                     }
 
                     var postData = {"action":"setOpenvpnSvrStatus","data":data};
