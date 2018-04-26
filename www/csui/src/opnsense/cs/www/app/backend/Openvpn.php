@@ -49,6 +49,8 @@ class Openvpn extends Csbackend
      const USER_GROUP = 'openvpn';
      const USER_RELATE_PREFIX = 'openvpn user:';
      const USER_DESCR = 'openvpn user';
+     const FILTER_LISTEN_ACCEPT_NAME = 'OpenVPN_LISTEN_ACCEPT';
+     const FILTER_SUBNET_ACCEPT_NAME = 'OpenVPN_SUBNET_ACCEPT';
 
 
 
@@ -349,7 +351,7 @@ class Openvpn extends Csbackend
         global $config;
 
         foreach($config['filter']['rule'] as $idx=>$rule){
-            if('OpenVPN_SUBNET_ACCEPT' == $rule['descr'] || 'OpenVPN_LISTEN_ACCEPT'==$rule['descr']){
+            if(Openvpn::FILTER_SUBNET_ACCEPT_NAME == $rule['descr'] || Openvpn::FILTER_LISTEN_ACCEPT_NAME==$rule['descr']){
                 unset($config['filter']['rule'][$idx]);
             }
         }
@@ -359,7 +361,8 @@ class Openvpn extends Csbackend
                 'interface'=>$config['openvpn']['openvpn-server'][0]['interface'],
                 'ipprotocol'=>'inet',
                 'statetype'=>'keep state',
-                'descr'=>'OpenVPN_LISTEN_ACCEPT',
+                'protocol'=>strtolower($config['openvpn']['openvpn-server'][0]['protocol']),
+                'descr'=>Openvpn::FILTER_LISTEN_ACCEPT_NAME,
                 'source'=>array('any'=>1),
                 'destination'=>array(
                     'network'=>$config['openvpn']['openvpn-server'][0]['interface'].'ip',
@@ -370,7 +373,7 @@ class Openvpn extends Csbackend
                 'interface'=>'openvpn',
                 'ipprotocol'=>'inet',
                 'statetype'=>'keep state',
-                'desct'=>'OpenVPN_SUBNET_ACCEPT',
+                'desct'=>Openvpn::FILTER_SUBNET_ACCEPT_NAME,
                 'source'=>array('any'=>'1'),
                 'destination'=>array('any'=>1,)
             );
