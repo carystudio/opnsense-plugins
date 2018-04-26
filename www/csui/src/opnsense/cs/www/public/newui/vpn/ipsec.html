@@ -879,13 +879,13 @@
                                         _this.formValidate.hashAlgorithm = params.row['hash-algorithm'];
                                         _this.formValidate.dhgroup = params.row.dhgroup;
                                         _this.formValidate.lifetime = params.row.lifetime;
-                                        if('1' == params.row.rekey_enable){
+                                        if('yes' == params.row.rekey_enable){
                                             _this.formValidate.rekeyEnable = false;
                                         }else{
                                             _this.formValidate.rekeyEnable = true;
                                         }
 
-                                        if('1' == params.row.reauth_enable){
+                                        if('yes' == params.row.reauth_enable){
                                             _this.formValidate.reauthEnable = false;
                                         }else{
                                             _this.formValidate.reauthEnable = true;
@@ -896,7 +896,7 @@
                                         }else {
                                             _this.formValidate.mobike = true;
                                         }
-                                        if('1' == params.row.tunnel_isolation){
+                                        if('yes' == params.row.tunnel_isolation){
                                            _this.formValidate.tunnelIsolation = true;
                                         }else{
                                             _this.formValidate.tunnelIsolation = false;
@@ -1311,6 +1311,17 @@
                     },
                     {
                         title: _this.$t('ipsec.staStatus'),
+                        key: 'staStatus',
+                        render: function (h, params) {
+                            if(params.row.sas.length <= 0){
+                                return h('p', _this.$t('ipsec.disconnect'));
+                            }else{
+                                return h('p', _this.$t('ipsec.connected'));
+                            }
+                        }
+                    },
+                    {
+                        title: _this.$t('ipsec.operation'),
                         key: 'staStatus',
                         align: 'center',
                         render: function (h, params) {
