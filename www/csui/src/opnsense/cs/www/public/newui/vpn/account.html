@@ -209,6 +209,8 @@
                 globalConfig:globalConfig,
                 applyLoading:false,
                 editFlag:false,
+                openVpnServer:'',
+                serverEnable:false,
                 formInline: {
                     action:'',
                     data:{
@@ -616,7 +618,8 @@
                                 h('Button', {
                                     props: {
                                         type: 'info',
-                                        size: 'small'
+                                        size: 'small',
+                                        disabled: !_this.serverEnable
                                     },
                                     style: {
                                         marginRight: '5px'
@@ -731,8 +734,13 @@
                                 }
                                 _this.$Spin.hide();   //加载动画
                                 if (0 == data.rescode) {
-                                    _this.openVpnData = data.data;
-
+                                    _this.openVpnServer = data.data.mode;
+                                    if('0' == data.data.server_enable){
+                                        _this.serverEnable = false;
+                                    }else{
+                                        _this.serverEnable = true;
+                                    }
+                                    _this.openVpnData = data.data.users;
                                     var tmp = [];
                                     if(_this.pptpData){
                                         for(var i=0;i<_this.pptpData.length;i++){
