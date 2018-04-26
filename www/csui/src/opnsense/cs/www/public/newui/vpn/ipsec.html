@@ -1331,8 +1331,8 @@
                                                 console.log(params);
                                                 var data = {};
                                                 data.connid = params.row.staConnect;
-                                                var postVar = {"action":"ipsecDisconnect","data":data};
-                                                uiPost.ipsecDisconnect(postVar,function (data) {
+                                                var postVar = {"action":"ipsecConnect","data":data};
+                                                uiPost.ipsecConnect(postVar,function (data) {
                                                     if (9999 == data.rescode){
                                                         cs.loginOut();
                                                     }
@@ -1357,8 +1357,8 @@
                                             click:function () {
                                                 var data = {};
                                                 data.connid = params.row.staConnect;
-                                                var postVar = {"action":"ipsecConnect","data":data};
-                                                uiPost.ipsecConnect(postVar,function (data) {
+                                                var postVar = {"action":"ipsecDisconnect","data":data};
+                                                uiPost.ipsecDisconnect(postVar,function (data) {
                                                     if (9999 == data.rescode){
                                                         cs.loginOut();
                                                     }
