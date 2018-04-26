@@ -455,11 +455,11 @@ var cs_main = {
                     {validator:function (r,v,f) {
                         if(_this.formValidate.general_enabled == true){
                             if(_this.formValidate.traffic_enabled == true){
-                                var _s = cs.num(v);
-                                if(_s == 0){
-                                    f(_this.$t('webagency.msg9'));
-                                }else if(_s ==1){
-                                    f(_this.$t('webagency.msg10'));
+                                if(v){
+                                    var _s = cs.num(v);
+                                    if(_s ==1){
+                                        f(_this.$t('webagency.msg10'));
+                                    }
                                 }
                             }
                         }
@@ -470,12 +470,13 @@ var cs_main = {
                     {validator:function (r,v,f) {
                         if(_this.formValidate.general_enabled == true){
                             if(_this.formValidate.traffic_enabled == true){
-                                var _s = cs.num(v);
-                                if(_s == 0){
-                                    f(_this.$t('webagency.msg11'));
-                                }else if(_s ==1){
-                                    f(_this.$t('webagency.msg12'));
+                                if(v){
+                                    var _s = cs.num(v);
+                                    if(_s ==1){
+                                        f(_this.$t('webagency.msg12'));
+                                    }
                                 }
+
                             }
                         }
                         f();

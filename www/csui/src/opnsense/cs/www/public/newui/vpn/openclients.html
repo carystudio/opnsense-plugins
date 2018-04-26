@@ -503,7 +503,7 @@ var cs_main = {
                     if (data.data.tls){
                         _this.formValidate.tlsauth_enable = true;
                         _this.formValidate.autotls_enable = false;
-                        _this.formValidate.tls = data.data.tls;
+                        _this.formValidate.tls = $.base64.decode(data.data.tls);
                     }
                     if(data.data.ca){
                         _this.formValidate.ca =  $.base64.decode(data.data.ca);   //对等证书颁发机构
@@ -551,7 +551,7 @@ var cs_main = {
                     data.mode = _this.formValidate.mode;
                     if(_this.formValidate.mode == "p2p_tls"){
                         if (_this.formValidate.tlsauth_enable == true && _this.formValidate.autotls_enable == false){
-                            data.tls = _this.formValidate.tls;
+                            data.tls = $.base64.encode(_this.formValidate.tls);
                         }else{
                             data.tls = "";
                         }
