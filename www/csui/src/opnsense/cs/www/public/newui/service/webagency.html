@@ -76,7 +76,7 @@
                                 <!--<FormItem label="日志目标">
                                     &lt;!&ndash;proxy.general.logging.target&ndash;&gt;
                                     <i-select v-model="formValidate.target">
-                                        <Option value="" selected="selected">File </Option>
+                                        <Option value="">File </Option>
                                         <Option value="file_extendend">File (Extended) </Option>
                                         <Option value="syslog">Syslog </Option>
                                     </i-select>
@@ -88,16 +88,14 @@
                                         <span slot="close"> {{ $t('webagency.close') }}</span>
                                     </i-switch>
                                 </FormItem>
-                                <!--<FormItem label="忽略access.log中的主机" prop="ignoreLogACL">
-                                    &lt;!&ndash;proxy.general.logging.ignoreLogACL&ndash;&gt;
-                                    <Input v-model="formValidate.ignoreLogACL"></Input>
-                                    <Button type="error" shape="circle" size="small">删除所有</Button>
-                                </FormItem>-->
-                                <!--<FormItem label="使用备用DNS服务器" prop="alternateDNSservers">
-                                    &lt;!&ndash;proxy.general.alternateDNSservers&ndash;&gt;
-                                    <Input v-model="formValidate.alternateDNSservers"></Input>
-                                    <Button type="error" shape="circle" size="small">删除所有</Button>
-                                </FormItem>-->
+                                <FormItem :label="$t('webagency.ignoreLogACL')" prop="ignoreLogACL">
+                                    <!--proxy.general.logging.ignoreLogACL-->
+                                    <i-input v-model="formValidate.ignoreLogACL" clearable></i-input>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.alternateDNSservers')" prop="alternateDNSservers">
+                                    <!--proxy.general.alternateDNSservers-->
+                                    <i-input v-model="formValidate.alternateDNSservers" clearable></i-input>
+                                </FormItem>
                                 <FormItem :label="$t('webagency.dnsV4First')">
                                     <!--proxy.general.dnsV4First-->
                                     <i-switch v-model="formValidate.dnsV4First" size="large" >
@@ -105,27 +103,27 @@
                                         <span slot="close"> {{ $t('webagency.close') }}</span>
                                     </i-switch>
                                 </FormItem>
-                                <!--<FormItem label="使用Via标题">
-                                    &lt;!&ndash;proxy.general.useViaHeader&ndash;&gt;
+                                <FormItem :label="$t('webagency.useViaHeader')">
+                                    <!--proxy.general.useViaHeader-->
                                     <i-switch v-model="formValidate.useViaHeader" size="large" >
-                                        <span slot="open">开</span>
-                                        <span slot="close">关</span>
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
                                     </i-switch>
-                                </FormItem>-->
+                                </FormItem>
                                 <FormItem :label="$t('webagency.forwardedForHandling')">
                                     <!--proxy.general.forwardedForHandling-->
                                     <i-select v-model="formValidate.forwardedForHandling">
-                                        <Option value="">Default </Option>
-                                        <Option value="on" selected="selected">Append client's IP (on) </Option>
-                                        <Option value="off">Set forward header to unknown (off) </Option>
-                                        <Option value="transparent">Do not alter forward header (transparent) </Option>
-                                        <Option value="truncate">Replace all with client's IP (truncate) </Option>
+                                        <Option value="0">{{ $t('webagency.msg25') }} </Option>
+                                        <Option value="on" selected="selected">{{ $t('webagency.msg26') }}</Option>
+                                        <Option value="off">{{ $t('webagency.msg27') }}</Option>
+                                        <Option value="transparent">{{ $t('webagency.msg28') }}</Option>
+                                        <Option value="truncate">{{ $t('webagency.msg29') }}</Option>
                                     </i-select>
                                 </FormItem>
-                                <!--<FormItem label="可见主机名" prop="VisibleHostname">
-                                    &lt;!&ndash;proxy.general.VisibleHostname&ndash;&gt;
+                                <FormItem :label="$t('webagency.VisibleHostname')" prop="VisibleHostname">
+                                    <!--proxy.general.VisibleHostname-->
                                     <Input v-model="formValidate.VisibleHostname"></Input>
-                                </FormItem>-->
+                                </FormItem>
                                 <FormItem :label="$t('webagency.VisibleEmail')" prop="VisibleEmail">
                                     <!--proxy.general.VisibleEmail-->
                                     <Input v-model="formValidate.VisibleEmail"></Input>
@@ -140,12 +138,12 @@
                                 <FormItem :label="$t('webagency.uriWhitespaceHandling')">
                                     <!--proxy.general.uriWhitespaceHandling-->
                                     <i-select v-model="formValidate.uriWhitespaceHandling">
-                                        <Option value="" >none  </Option>
-                                        <Option value="strip" selected="selected">Strip whitespaces </Option>
-                                        <Option value="deny">Deny request </Option>
-                                        <Option value="allow">Allow whitespaces </Option>
-                                        <Option value="encode">Encode whitespaces (RFC1738) </Option>
-                                        <Option value="chop">Chop URI at first whitespace </Option>
+                                        <Option value="none">{{ $t('webagency.msg30') }}</Option>
+                                        <Option value="strip">{{ $t('webagency.msg31') }}</Option>
+                                        <Option value="deny">{{ $t('webagency.msg32') }}</Option>
+                                        <Option value="allow">{{ $t('webagency.msg33') }}</Option>
+                                        <Option value="encode">{{ $t('webagency.msg34') }} </Option>
+                                        <Option value="chop">{{ $t('webagency.msg35') }} </Option>
                                     </i-select>
                                 </FormItem>
                                 <FormItem :label="$t('webagency.cache_mem')" prop="cache_mem">
@@ -245,10 +243,10 @@
                                         <Option v-for="(item,idx) in sslcertificateOption" :value="idx" :key="idx"> {{ item }}</Option>
                                     </Select>
                                 </FormItem>-->
-                                <!--<FormItem label=" SSL无冲撞站点" prop="sslnobumpsites">
-                                    &lt;!&ndash;proxy.forward.sslnobumpsites&ndash;&gt;
+                                <FormItem :label="$t('webagency.sslnobumpsites')" prop="sslnobumpsites">
+                                    <!--proxy.forward.sslnobumpsites-->
                                     <Input v-model="formValidate.sslnobumpsites"></Input>
-                                </FormItem>-->
+                                </FormItem>
                                 <FormItem :label="$t('webagency.ssl_crtd_storage_max_size')" prop="ssl_crtd_storage_max_size">
                                     <!--proxy.forward.ssl_crtd_storage_max_size-->
                                     <Input v-model="formValidate.ssl_crtd_storage_max_size"></Input>
@@ -269,34 +267,35 @@
 
                         <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 4">
                            <Card>
-                                <!--<FormItem label=" 允许的子网" prop="allowedSubnets">
-                                    &lt;!&ndash;proxy.forward.acl.allowedSubnets&ndash;&gt;
+                                <FormItem :label="$t('webagency.allowedSubnets')" prop="allowedSubnets">
+                                    <!--proxy.forward.acl.allowedSubnets-->
                                     <Input v-model="formValidate.allowedSubnets" clearable type="textarea" :rows="2"></Input>
-                                </FormItem>-->
-                                <!--<FormItem label="不受限制的IP地址" prop="unrestricted">
-                                    &lt;!&ndash;proxy.forward.acl.unrestricted&ndash;&gt;
+                                </FormItem>
+                                <FormItem :label="$t('webagency.unrestricted')" prop="unrestricted">
+                                    <!--proxy.forward.acl.unrestricted-->
                                     <Input v-model="formValidate.unrestricted" clearable type="textarea" :rows="2"></Input>
-                                </FormItem>-->
-                                <!--<FormItem label="禁止的主机IP地址" prop="bannedHosts">
-                                    &lt;!&ndash;proxy.forward.acl.bannedHosts&ndash;&gt;
+                                </FormItem>
+                                <FormItem :label="$t('webagency.bannedHosts')" prop="bannedHosts">
+                                    <!--proxy.forward.acl.bannedHosts-->
                                     <Input v-model="formValidate.bannedHosts" clearable type="textarea" :rows="2"></Input>
-                                </FormItem>-->
-                                <!--<FormItem label=" 白名单" prop="whiteList">
-                                    &lt;!&ndash;proxy.forward.acl.whiteList&ndash;&gt;
+                                </FormItem>
+                                <FormItem :label="$t('webagency.whiteList')" prop="whiteList">
+                                    <!--proxy.forward.acl.whiteList-->
                                     <Input v-model="formValidate.whiteList" clearable type="textarea" :rows="2"></Input>
-                                </FormItem>-->
-                                <!--<FormItem label="黑名单" prop="blackList">
-                                    &lt;!&ndash;id="proxy.forward.acl.blackList"&ndash;&gt;
+                                </FormItem>
+                                <FormItem :label="$t('webagency.blackList')" prop="blackList">
+                                    <!--id="proxy.forward.acl.blackList"-->
                                     <Input v-model="formValidate.blackList" clearable type="textarea" :rows="2"></Input>
-                                </FormItem>-->
-                                <!--<FormItem label=" 阻止浏览器/用户代理" prop="browser">
-                                    &lt;!&ndash;proxy.forward.acl.browser&ndash;&gt;
+                                </FormItem>
+                                <FormItem :label="$t('webagency.browser')" prop="browser">
+                                    <!--proxy.forward.acl.browser-->
                                     <Input v-model="formValidate.browser" clearable type="textarea" :rows="2"></Input>
-                                </FormItem>-->
-                                <!--<FormItem label=" 阻止特定MIME类型回复 " prop="mimeType">
-                                    &lt;!&ndash;proxy.forward.acl.mimeType&ndash;&gt;
+                                </FormItem>
+                                <FormItem :label="$t('webagency.mimeType')" prop="mimeType">
+                                    <!--proxy.forward.acl.mimeType-->
                                     <Input v-model="formValidate.mimeType" clearable type="textarea" :rows="2"></Input>
-                                </FormItem>-->
+                                </FormItem>
+
                                 <FormItem :label="$t('webagency.safePorts')" prop="safePorts">
                                     <!--proxy.forward.acl.safePorts-->
                                     <Input v-model="formValidate.safePorts" clearable type="textarea" :rows="2"></Input>
@@ -355,11 +354,11 @@ var cs_main = {
             alternateDNSservers:'',
             dnsV4First:false,
             useViaHeader:false,
-            forwardedForHandling:'',
+            forwardedForHandling:'0',
             VisibleHostname:'',
             VisibleEmail:'',
             suppressVersion:false,
-            uriWhitespaceHandling:'',
+            uriWhitespaceHandling:'none',
             cache_mem:'',
             cache_linux_packages:false,
             cache_windows_updates:false,
@@ -586,12 +585,26 @@ var cs_main = {
                         (true == _this.formValidate.dnsV4First)?
                                 data['general']['dnsV4First'] = '1':
                                 data['general']['dnsV4First'] = '0';
-                        data['general']['forwardedForHandling'] = _this.formValidate.forwardedForHandling;
+                        (true == _this.formValidate.useViaHeader)?
+                                data['general']['useViaHeader'] = '1':
+                                data['general']['useViaHeader'] = '0';
+                        if(_this.formValidate.forwardedForHandling == '0'){
+                            data['general']['forwardedForHandling'] = '';
+                        }else{
+                            data['general']['forwardedForHandling'] = _this.formValidate.forwardedForHandling;
+                        }
+                        data['general']['logging']['ignoreLogACL'] = _this.formValidate.ignoreLogACL;
+                        data['general']['alternateDNSservers'] = _this.formValidate.alternateDNSservers;
                         data['general']['VisibleEmail'] = _this.formValidate.VisibleEmail;
+                        data['general']['VisibleHostname'] = _this.formValidate.VisibleHostname;
                         (true == _this.formValidate.suppressVersion)?
                                 data['general']['suppressVersion'] = '1':
                                 data['general']['suppressVersion'] = '0';
-                        data['general']['uriWhitespaceHandling'] = _this.formValidate.uriWhitespaceHandling;
+                        if(_this.formValidate.uriWhitespaceHandling == 'none'){
+                            data['general']['uriWhitespaceHandling'] = '';
+                        }else{
+                            data['general']['uriWhitespaceHandling'] = _this.formValidate.uriWhitespaceHandling;
+                        }
                         data['general']['cache']['local']['cache_mem'] = _this.formValidate.cache_mem;
                         (true == _this.formValidate.cache_linux_packages)?
                                 data['general']['cache']['local']['cache_linux_packages'] = '1':
@@ -615,6 +628,12 @@ var cs_main = {
                                 data['forward']['sslurlonly'] = '1':
                                 data['forward']['sslurlonly'] = '0';
                         data['forward']['ssl_crtd_storage_max_size'] = _this.formValidate.ssl_crtd_storage_max_size;
+
+
+                        data['forward']['sslnobumpsites'] = _this.formValidate.sslnobumpsites;
+
+
+
                         data['forward']['sslcrtd_children'] = _this.formValidate.sslcrtd_children;
                         (true == _this.formValidate.addACLforInterfaceSubnets)?
                                 data['forward']['addACLforInterfaceSubnets'] = '1':
@@ -625,6 +644,14 @@ var cs_main = {
                         data['forward']['acl']['safePorts'] = _this.formValidate.safePorts;
                         data['forward']['acl']['sslPorts'] = _this.formValidate.sslPorts;
                     }
+                    data['forward']['acl']['allowedSubnets'] = _this.formValidate.allowedSubnets;
+                    data['forward']['acl']['unrestricted'] = _this.formValidate.unrestricted;
+                    data['forward']['acl']['bannedHosts'] = _this.formValidate.bannedHosts;
+                    data['forward']['acl']['whiteList'] = _this.formValidate.whiteList;
+                    data['forward']['acl']['blackList'] = _this.formValidate.blackList;
+                    data['forward']['acl']['browser'] = _this.formValidate.browser;
+                    data['forward']['acl']['mimeType'] = _this.formValidate.mimeType;
+
 
                     var postData = {"action":"setProxy","data":data};
                     console.log(postData);
@@ -677,13 +704,21 @@ var cs_main = {
                 if('1' == data.data.general.useViaHeader){
                     _this.formValidate.useViaHeader = true;
                 }
-                _this.formValidate.forwardedForHandling = data.data.general.forwardedForHandling;
+                if(data.data.general.forwardedForHandling == ''){
+                    _this.formValidate.forwardedForHandling = '0';
+                }else{
+                    _this.formValidate.forwardedForHandling = data.data.general.forwardedForHandling;
+                }
                 _this.formValidate.VisibleHostname = data.data.general.VisibleHostname;
                 _this.formValidate.VisibleEmail = data.data.general.VisibleEmail;
                 if('1' == data.data.general.suppressVersion){
                     _this.formValidate.suppressVersion = true;
                 }
-                _this.formValidate.uriWhitespaceHandling = data.data.general.uriWhitespaceHandling;
+                if(data.data.general.uriWhitespaceHandling == ''){
+                    _this.formValidate.uriWhitespaceHandling = 'none';
+                }else{
+                    _this.formValidate.uriWhitespaceHandling = data.data.general.uriWhitespaceHandling;
+                }
                 _this.formValidate.cache_mem = data.data.general.cache.local.cache_mem;
                 if('1' == data.data.general.cache.local.cache_linux_packages){
                     _this.formValidate.cache_linux_packages = true;
