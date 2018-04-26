@@ -19,6 +19,7 @@ class Ipsec extends Csbackend
     const FILTER_NAME_ESP = 'IPSEC_SERVER_ESP_ACCEPT';
     const FILTER_NAME_ISAKMP = 'IPSEC_SERVER_ISAKMP_ACCESS';
     const FILTER_NAME_NAT = 'IPSEC_SERVER_NAT_ACCEPT';
+    const FILTER_NAME_ALLOW_REMOTE_SITE = 'IPSEC_REMOTE_SITE_ACCEPT';
     const AUTO = array('', 'add', 'route', 'start');
     const IKETYPE = array('ikev1', 'ikev2');
     const MODE = array('main', 'aggressive');
@@ -76,7 +77,8 @@ class Ipsec extends Csbackend
         foreach($config['filter']['rule'] as $idx=>$rule){
             if(Ipsec::FILTER_NAME_ESP == $rule['descr'] ||
                 Ipsec::FILTER_NAME_ISAKMP==$rule['descr'] ||
-                Ipsec::FILTER_NAME_NAT==$rule['descr']){
+                Ipsec::FILTER_NAME_NAT==$rule['descr'] ||
+                Ipsec::FILTER_NAME_ALLOW_REMOTE_SITE == $rule['descr']){
                 unset($config['filter']['rule'][$idx]);
             }
         }
@@ -141,7 +143,15 @@ class Ipsec extends Csbackend
             'source'=>array('any'=>1),
             'destination'=>array('network'=>'(self)', 'port'=>4500)
         );
-
+        $config['filter']['rule'][] = array(
+            'type'=>'pass',
+            'interface'=>'enc0',
+            'ipprotocol'=>'inet',
+            'statetype'=>'keep state',
+            'descr'=>Ipsec::FILTER_NAME_ALLOW_REMOTE_SITE,
+            'source'=>array('any'=>1),
+            'destination'=>array('any'=>1)
+        );
     }
 
     private static function setEnable(){
