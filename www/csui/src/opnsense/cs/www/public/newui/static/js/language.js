@@ -75,7 +75,8 @@ var messages = {
             l2tp:"L2TP Server",
             account:"Account Management",
             service:"Service",
-            dynamicdns:"Dynamic DNS"
+            dynamicdns:"Dynamic DNS",
+            logs:"Log File"
         },
         login:{
             "title":"USER LOGIN",
@@ -1164,6 +1165,15 @@ var messages = {
             "client2client":"Internal client communication",
             "reneg-sec":"To renegotiate the time",
 			"sec":"Second",
+            "common_name":"Common Name",
+            "name":"Name",
+            "remote_host":"Remote Host",
+            "virtual_addr":"Virtual Addr",
+            "connect_time":"Connected Since",
+            "bytes_sent":"Bytes Sent",
+            "bytes_recv":"Bytes Received",
+            "link_status":"Status",
+            "connection_status":"Connection Status",
             "msg1":"To enable the TLS authentication",
             "msg2":"Automatic generation of sharing the TLS authentication key",
             "msg3":"Paste your Shared key here...",
@@ -1270,6 +1280,14 @@ var messages = {
             "custom_options":"Advanced",
             "verbosity_level":"Verbosity level",
             "save":"Save",
+            "name":"Name",
+            "remote_host":"Remote Host",
+            "virtual_addr":"Virtual Addr",
+            "connect_time":"Connected Since",
+            "bytes_sent":"Bytes Sent",
+            "bytes_recv":"Bytes Received",
+            "link_status":"Status",
+            "connection_status":"Connection Status",
             "msg1":"Peer to Peer(SSL/TLS)",
 			"msg_sharedkey": "Peer to Peer(Shared Key)",
             "msg2":" none",
@@ -1478,6 +1496,11 @@ var messages = {
             "msg13":"The life cycle can't be empty!",
             "msg14":"The lifecycle is ineffective. It must be a number!",
             "msg19":"The pre shared key cannot be empty!"
+        },
+        "logs":{
+            "help":"This page is used to view OpenVPN and IPSec logs.",
+            "openvpn_log":"OpenVPN Log File",
+            "ipsec_log":"ipsec Log File"
         },
         "firewall":{
             "title":"Firewall Type",
@@ -2297,7 +2320,7 @@ var messages = {
             "OVPN_214":"The client certificate parameter is not correct",
             "OVPN_215":"The private key parameter data is not correct",
             "OVPN_216":"Peer certificate issuing authority parameter is not correct",
-            "OVPN_217":"Server mode parameters cannot be empty",
+            "OVPN_217":"The pre shared key cannot be empty",
             "OVPN_218":"Encryption algorithm parameters is not correct",
             "OVPN_219":"Certification of the algorithm parameter is not correct",
             "OVPN_220":"Hardware encryption parameters is not correct",
@@ -2472,7 +2495,8 @@ var messages = {
             l2tp:"L2TP服务器",
             account:"账号管理",
             service:"服务",
-            dynamicdns:"动态DNS"
+            dynamicdns:"动态DNS",
+            logs:"日志文件"
         },
         login:{
             "title":"用户登录",
@@ -3571,6 +3595,15 @@ var messages = {
             "client2client":"内部客户端通信",
             "reneg-sec":"重新协商时间",
 			"sec":"秒",
+            "common_name":"普通名称",
+            "name":"名称",
+            "remote_host":"远程主机",
+            "virtual_addr":"虚拟地址",
+            "connect_time":"连接时间",
+            "bytes_sent":"发送字节",
+            "bytes_recv":"接收字节",
+            "link_status":"状态",
+            "connection_status":"链接状态",
             "msg1":"启用TLS认证",
             "msg2":"自动生成共享TLS身份验证密钥",
             "msg3":"在此处粘贴您的共享密钥...",
@@ -3677,6 +3710,14 @@ var messages = {
             "custom_options":"高级",
             "verbosity_level":"冗余级别",
             "save":"保存",
+            "name":"名称",
+            "remote_host":"远程主机",
+            "virtual_addr":"虚拟地址",
+            "connect_time":"连接时间",
+            "bytes_sent":"发送字节",
+            "bytes_recv":"接收字节",
+            "link_status":"状态",
+            "connection_status":"链接状态",
             "msg1":"端对端（SSL/TLS）",
 			"msg_sharedkey": "端对端（共享密钥）",
             "msg2":"没有",
@@ -3889,6 +3930,11 @@ var messages = {
             "msg17":"对端标识IP地址不合法！",
             "msg18":"主机地址不合法！",
             "msg19":"预共享密钥不能为空！"
+        },
+        "logs":{
+            "help":"用于查看OpenVPN与ipsec日志",
+            "openvpn_log":"OpenVPN 日志",
+            "ipsec_log":"ipsec 日志"
         },
         "firewall":{
             "title":"防火墙类型",
@@ -4707,7 +4753,7 @@ var messages = {
             "OVPN_214":"客户端证书参数不正确",
             "OVPN_215":"私有密钥数据参数不正确",
             "OVPN_216":"对等证书颁发机构参数不正确",
-            "OVPN_217":"服务器模式参数不能为空",
+            "OVPN_217":"预共享密钥不能为空",
             "OVPN_218":"加密算法参数不正确",
             "OVPN_219":"认证摘要算法参数不正确",
             "OVPN_220":"硬件加密参数不正确",

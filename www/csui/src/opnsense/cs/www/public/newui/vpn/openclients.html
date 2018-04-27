@@ -34,10 +34,14 @@
 
                     <FormItem :label="$t('clients.disable')">
                         <!--<Icon type="information-circled" color="#ff9900"></Icon>-->
-                        <i-switch v-model="formValidate.disable" size="large" >
-                            <span slot="open">{{$t('clients.open')}}</span>
-                            <span slot="close">{{$t('clients.close')}}</span>
-                        </i-switch>
+                        <Row>
+                            <i-switch v-model="formValidate.disable" size="large" >
+                                <span slot="open">{{$t('clients.open')}}</span>
+                                <span slot="close">{{$t('clients.close')}}</span>
+                            </i-switch>
+                            &nbsp;
+                            <Button type="ghost" shape="circle" v-show="clientStatus" @click="showTable">{{$t('clients.connection_status')}}</Button>
+                        </Row>
                     </FormItem>
                     <!--<FormItem label="描述">
                         <Input v-model="formValidate.description"></Input>
@@ -249,6 +253,20 @@
         </Row>
     </div>
 
+<Modal
+        v-model="linkStatusList"
+        :title="$t('clients.connection_status')"
+        :width="1000"
+>
+    <Form :label-width="120" label-position="left">
+        <Col>
+        <Table border :columns="linkStatusColumns" :data="linkStatusData" :no-data-text="$t('common.no_data')"></Table>
+        </Col>
+    </Form>
+    <div slot="footer">
+    </div>
+</Modal>
+
     <!-- 这个不能删除，用于底部显示 -->
     <slot name="footer"></slot>
 </Col>
@@ -278,6 +296,9 @@ var cs_main = {
         engineOption:{},
         portOption:[],
 
+        clientStatus:false,
+        linkStatusList:false,
+        linkStatusData:[],
         formValidate:{
             disable:false,
             description:'',
@@ -324,6 +345,57 @@ var cs_main = {
       }
     },
     computed:{
+        linkStatusColumns:function () {
+            var _this = this;
+            return [
+                {
+                    title: 'ID',
+                    type: 'index',
+                    width: "60"
+                },
+                {
+                    title: _this.$t('clients.name'),
+                    key: 'name',
+                    align: 'center'
+                }, {
+                    title: _this.$t('clients.remote_host'),
+                    key: 'remote_host',
+                    align: 'center'
+                },
+                {
+                    title: _this.$t('clients.virtual_addr'),
+                    key: 'virtual_addr',
+                    align: 'center'
+                },
+                {
+                    title: _this.$t('clients.connect_time'),
+                    key: 'connect_time',
+                    align: 'center'
+                },
+                {
+                    title: _this.$t('clients.bytes_sent'),
+                    key: 'bytes_sent',
+                    align: 'center'
+                },
+                {
+                    title: _this.$t('clients.bytes_recv'),
+                    key: 'bytes_recv',
+                    align: 'center'
+                },
+                {
+                    title: _this.$t('clients.link_status'),
+                    key: 'status',
+                    align: 'center'
+                }/*,{
+                 title: "操作",
+                 key: 'id',
+                 align: 'center',
+                 render: function (h, params) {
+
+                 }
+                 }*/
+            ]
+        },
         ruleValidate:function (){
             var _this = this;
             return {
@@ -460,7 +532,9 @@ var cs_main = {
             if (0 == data.rescode){
                 if ('1' == data.data.disable || 'yes' == data.data.disable){
                     _this.formValidate.disable = false;
+                    _this.clientStatus = false;
                 }else {
+                    _this.clientStatus = true;
                     _this.formValidate.disable = true;
                 }
                 if(!data.data.compression){
@@ -531,6 +605,24 @@ var cs_main = {
         });
     },
     methods:{
+        showTable:function () {
+            var _this = this;
+            _this.linkStatusList = _this.clientStatus;
+            var postVar = {"action":"getOpenvpnStatus","data":[]};
+            uiPost.getOpenvpnStatus(postVar,function(data){
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                _this.linkStatusData = data.data.clients;
+                for(var i in _this.linkStatusData){
+                    if(!_this.linkStatusData[i].status || 'up' != _this.linkStatusData[i].status){
+                        _this.linkStatusData[i].connect_time = '0';
+                        _this.linkStatusData[i].bytes_sent = '0';
+                        _this.linkStatusData[i].bytes_recv = '0';
+                    }
+                }
+            });
+        },
         modeStatus:function (){
             if ('p2p_shared_key' == this.formValidate.mode){
                 this.p2p_shared_key = true;
@@ -612,7 +704,7 @@ var cs_main = {
                         }
                         if (0 == data.rescode) {
                             _this.$Message.success({content:_this.$t('openvpn.success'),onClose:function(){
-//                        location.href = location.href;
+                                location.href = location.href;
                             }});
                         } else {
                             _this.$Message.error({content:_this.$t('openvpn.fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});

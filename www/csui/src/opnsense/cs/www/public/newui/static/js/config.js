@@ -339,6 +339,12 @@ var menu = [
                 "href": "/newui/vpn/account",
                 "lang": "account",
                 "display":true
+            },
+            {
+                "id":"14-7",
+                "href": "/newui/vpn/logs",
+                "lang": "logs",
+                "display":true
             }
         ]
     },

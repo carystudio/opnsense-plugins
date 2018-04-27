@@ -6724,6 +6724,24 @@ uiPost.prototype.doLogin = function(postVar,callback){
         this.url = '/webapi';
         return this.post(postVar,callback);
     };
+    uiPost.prototype.getOpenvpnStatus = function(postVar,callback){
+        this.topicurl = 'getOpenvpnStatus';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getOpenvpnLogs = function(postVar,callback){
+        this.topicurl = 'getOpenvpnLogs';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getIpsecLogs = function(postVar,callback){
+        this.topicurl = 'getIpsecLogs';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
 
 	obj.uiPost = new uiPost();
 })(window);

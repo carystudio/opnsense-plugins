@@ -31,10 +31,14 @@
                         {{$t('openvpn.convention_info')}}
                     </p>
                     <FormItem :label="$t('openvpn.on_and_off')" prop="on_and_off">
-                        <i-switch v-model="formValidate.status" size="large">
-                            <span slot="open">{{ $t('common.enabled') }}</span>
-                            <span slot="close">{{ $t('common.disabled') }}</span>
-                        </i-switch>
+                        <Row>
+                            <i-switch v-model="formValidate.status" size="large">
+                                <span slot="open">{{ $t('common.enabled') }}</span>
+                                <span slot="close">{{ $t('common.disabled') }}</span>
+                            </i-switch>
+                            &nbsp;
+                            <Button type="ghost" shape="circle" v-show="serverStatus" @click="showTable">{{ $t('openvpn.connection_status') }}</Button>
+                        </Row>
                     </FormItem>
                     <FormItem :label="$t('openvpn.Server_mode')">
                         <Select v-model="formValidate.mode"  @on-change="modeStatus" :key="$t('openvpn.Server_mode')">
@@ -297,6 +301,20 @@
         </Row>
     </div>
 
+<Modal
+        v-model="linkStatusList"
+        :title="$t('openvpn.connection_status')"
+        :width="1000"
+>
+    <Form :label-width="120" label-position="left">
+        <Col>
+        <Table border :columns="linkStatusColumns" :data="linkStatusData" :no-data-text="$t('common.no_data')"></Table>
+        </Col>
+    </Form>
+    <div slot="footer">
+    </div>
+</Modal>
+
     <!-- 这个不能删除，用于底部显示 -->
     <slot name="footer"></slot>
 </Col>
@@ -329,6 +347,10 @@ var cs_main = {
         hardware_encryption:{},
         portOption:[],
 
+        linkStatusList:false,
+        linkStatusData:[],
+        serverStatus:false,
+        serverMode:'server_tls',
         formValidate:{
             tlsauth_enable: false,
             autotls_enable: true,
@@ -393,6 +415,104 @@ var cs_main = {
       }
     },
     computed:{
+        linkStatusColumns:function () {
+            var _this = this;
+            if('p2p_shared_key' == _this.serverMode){   //共享密钥
+                return [
+                    {
+                        title: 'ID',
+                        type: 'index',
+                        width: "60"
+                    },
+                    {
+                        title: _this.$t('openvpn.name'),
+                        key: 'name',
+                        align: 'center'
+                    }, {
+                        title: _this.$t('openvpn.remote_host'),
+                        key: 'remote_host',
+                        align: 'center'
+                    },
+                    {
+                        title: _this.$t('openvpn.virtual_addr'),
+                        key: 'virtual_addr',
+                        align: 'center'
+                    },
+                    {
+                        title: _this.$t('openvpn.connect_time'),
+                        key: 'connect_time',
+                        align: 'center'
+                    },
+                    {
+                        title: _this.$t('openvpn.bytes_sent'),
+                        key: 'bytes_sent',
+                        align: 'center'
+                    },
+                    {
+                        title: _this.$t('openvpn.bytes_recv'),
+                        key: 'bytes_recv',
+                        align: 'center'
+                    },
+                    {
+                        title: _this.$t('openvpn.link_status'),
+                        key: 'status',
+                        align: 'center'
+                    }/*,{
+                     title: "操作",
+                     key: 'id',
+                     align: 'center',
+                     render: function (h, params) {
+
+                     }
+                     }*/
+                ]
+            }else{
+                return [
+                    {
+                        title: 'ID',
+                        type: 'index',
+                        width: "60"
+                    },
+                    {
+                        title: _this.$t('openvpn.common_name'),
+                        key: 'common_name',
+                        align: 'center'
+                    }, {
+                        title: _this.$t('openvpn.remote_host'),
+                        key: 'remote_host',
+                        align: 'center'
+                    },
+                    {
+                        title: _this.$t('openvpn.virtual_addr'),
+                        key: 'virtual_addr',
+                        align: 'center'
+                    },
+                    {
+                        title: _this.$t('openvpn.connect_time'),
+                        key: 'connect_time',
+                        align: 'center'
+                    },
+                    {
+                        title: _this.$t('openvpn.bytes_sent'),
+                        key: 'bytes_sent',
+                        align: 'center'
+                    },
+                    {
+                        title: _this.$t('openvpn.bytes_recv'),
+                        key: 'bytes_recv',
+                        align: 'center'
+                    }/*,{
+                     title: "操作",
+                     key: 'id',
+                     align: 'center',
+                     render: function (h, params) {
+
+                     }
+                     }*/
+                ]
+            }
+
+        },
         ruleValidate:function (){
             var _this = this;
             return {
@@ -728,8 +848,10 @@ var cs_main = {
             if (0 == data.rescode) {
                 if ('1' == data.data.disable || 'yes' == data.data.disable){
                     _this.formValidate.status = false;
+                    _this.serverStatus = false;
                 }else {
                     _this.formValidate.status = true;
+                    _this.serverStatus = true;
                 }
 
                 _this.formValidate.cert_depth = data.data.cert_depth;  //证书深度
@@ -783,6 +905,7 @@ var cs_main = {
                 _this.formValidate.local_port = data.data.local_port;    //本地端口
                 _this.formValidate.maxclients = data.data.maxclients;    // 并发连接
                 _this.formValidate.mode = data.data.mode;      //服务器模式
+                _this.serverMode = data.data.mode;
                 _this.modeStatus();
                 if ('yes'== data.data.netbios_enable){
                     _this.formValidate.netbios_enable = true;
@@ -878,14 +1001,14 @@ var cs_main = {
         });
     },
     methods:{
-        enable (index) {
+        enable:function (index) {
             console.log(index);
             type:'default'
         },
-        show (index) {
+        show:function (index) {
 
         },
-        remove (index) {
+        remove :function(index) {
             this.data6.splice(index, 1);
         },
         modeStatus:function (){
@@ -904,6 +1027,25 @@ var cs_main = {
             }else {
                 this.server_tls_user = false;
             }
+        },
+        showTable:function () {
+            var _this = this;
+            _this.linkStatusList = _this.serverStatus;
+            var postVar = {"action":"getOpenvpnStatus","data":[]};
+            uiPost.getOpenvpnStatus(postVar,function(data){
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if(data.data.servers.length > 0){
+                    for(var x in data.data.servers){
+                        _this.linkStatusData = data.data.servers[x].conns;
+                    }
+                    console.log(_this.linkStatusData);
+                }else if(data.data.sk_servers.length > 0){
+                    _this.linkStatusData = data.data.sk_servers;
+                }
+            });
+            console.log(_this.linkStatusData);
         },
         handleSubmit: function (name) {
             var _this = this;
@@ -1025,7 +1167,7 @@ var cs_main = {
                         }
                         if (0 == data.rescode) {
                             _this.$Message.success({content:_this.$t('openvpn.success'),onClose:function(){
-//                        location.href = location.href;
+                                location.href = location.href;
                             }});
                         } else {
                             _this.$Message.error({content:_this.$t('openvpn.fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
