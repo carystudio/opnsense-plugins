@@ -25,7 +25,7 @@ class Cert
     const CSG2000P_CA_REFID = '592fa6d7bf05a';
     
     const OVPN_CLIENT_CA_REFID = '5ac9f07897dde';
-    const OVPN_CLIENT_CA_DESCR = 'CSG2000P_openvpn_server_ca';
+    const OVPN_CLIENT_CA_DESCR = 'CSG2000P_openvpn_client_ca';
     const OVPN_CLIENT_CERT_REFID = '5ac9f213dd1fa';
     const OVPN_CLIENT_CERT_DESCR = 'CSG2000P_openvpn_client';
     const OVPN_SERVER_CA_CN = 'OVPN_SERVER_CA';

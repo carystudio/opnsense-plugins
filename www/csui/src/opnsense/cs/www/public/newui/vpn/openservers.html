@@ -80,6 +80,9 @@
                         <!--TLS认证-->
                         <FormItem :label="$t('openvpn.TLS_certification')" prop="TLS_certification">
                             <Checkbox v-model="formValidate.tlsauth_enable"> *{{ $t('openvpn.msg1') }}</Checkbox>
+                            <FormItem v-show="formValidate.tlsauth_enable == true" prop="tls">
+                                <Input v-model="formValidate.tls" readonly type="textarea" :rows="4" :placeholder="$t('openvpn.msg35')"></Input>
+                            </FormItem>
                         </FormItem>
                         <FormItem :label="$t('openvpn.DH_par_len')">
                             <Select v-model="formValidate.dh_length">
@@ -353,6 +356,7 @@ var cs_main = {
         serverMode:'server_tls',
         formValidate:{
             tlsauth_enable: false,
+            tls: '',
             autotls_enable: true,
             redirect_gateway: false,
             dns_domain_enable: false,
@@ -557,13 +561,9 @@ var cs_main = {
                 dns_domain: [
                     { validator:function(r, v, f) {
                         if(_this.formValidate.dns_domain_enable == true){
-                            var _s = cs.num(v);
+                            var _s = cs.string(v);
                             if(0 == _s){
                                 f(_this.$t('openvpn.msg47'));
-                            }else if(1 == _s){
-                                f(_this.$t('openvpn.msg48'));
-                            }else if(v >65535 || v<=0){
-                                f(_this.$t('openvpn.msg49'));
                             }
                         }
                         f();
@@ -929,6 +929,7 @@ var cs_main = {
 
                 if ('yes' == data.data.tlsauth_enable){
                     _this.formValidate.tlsauth_enable = true;
+                    _this.formValidate.tls = $.base64.decode(data.data.tls);
                 }
 
                 if ('yes' == data.data.topology_subnet){
