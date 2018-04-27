@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb"  :breadcrumb="[$t('menu.vpn'),$t('menu.logs')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col  :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" >
+            <Alert>
+                {{$t('logs.help')}}
+            </Alert>
+            </Col>
+        </Row>
+        <Row :gutter="26">
+            <!-- content start -->
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" >
+            <div class="ivu-tabs ivu-tabs-card cs-tabs">
+                <div class="ivu-tabs-bar">
+                    <div class="ivu-tabs-nav-container">
+                        <div class="ivu-tabs-nav-wrap" style="position: relative;">
+                            <span class="ivu-tabs-nav-prev ivu-tabs-nav-scroll-disabled"><i class="ivu-icon ivu-icon-chevron-left"></i></span>  <span class="ivu-tabs-nav-next ivu-tabs-nav-scroll-disabled"><i class="ivu-icon ivu-icon-chevron-right"></i></span>
+                            <div class="ivu-tabs-nav-scroll">
+                                <div class="nav-text ivu-tabs-nav">
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':1==showCurrentTabs}" @click="tabsSwitch(1)">
+                                        {{$t('logs.openvpn_log')}}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':2==showCurrentTabs}" @click="tabsSwitch(2)">
+                                        {{$t('logs.ipsec_log')}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <Form :label-width="globalConfig.labelWith" label-position="left">
+
+                    <div class="ivu-tabs-content ivu-tabs-content-animated">
+
+                        <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 1">
+                            <Card>
+                                <Input v-model="openVpnLog" type="textarea" :rows="20"></Input>
+                            </Card>
+                        </div>
+
+                        <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 2">
+                            <Card>
+                                <Input v-model="ipsecLog" type="textarea" :rows="20"></Input>
+                            </Card>
+                        </div>
+
+                    </div>
+                </Form>
+            </div>
+            <br>
+            </Col>
+            <!-- content end -->
+        </Row>
+    </div>
+
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/plugin/echarts.min.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script  type="text/javascript">
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            return {
+                globalConfig:globalConfig,
+                showCurrentTabs:'1',
+                openVpnLog:'',
+                ipsecLog:''
+            }
+        },
+        computed:{
+
+        },
+        methods:{
+            tabsSwitch: function(index) {
+                var _this = this;
+                _this.showCurrentTabs = index;
+                var action = "";
+                if('1' == this.showCurrentTabs){
+                    action = "getOpenvpnLogs";
+                }else{
+                    action = "getIpsecLogs";
+                }
+                clearInterval(_this.getOpenvpnLogsCreateTime);
+                clearInterval(_this.getLogsTime);
+                var postVar = {"action":action,"data":[]};
+                postVar = JSON.stringify(postVar);
+
+                _this.getLogsTime = setInterval(function() {
+                    $.ajax({
+                        type:"post",
+                        url:"/webapi",
+                        data:postVar,
+                        async : true,
+                        success:function(data){
+                            if('1' == _this.showCurrentTabs){
+                                _this.openVpnLog = data;
+                            }else{
+                                _this.ipsecLog = data;
+                            }
+                        }
+                    });
+                }, 5000);
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postVar = {"action":"getOpenvpnLogs","data":[]};
+            postVar = JSON.stringify(postVar);
+            $.ajax({
+                type:"post",
+                url:"/webapi",
+                data:postVar,
+                async : true,
+                success:function(data){
+                    _this.openVpnLog = data;
+                }
+            });
+
+            _this.getOpenvpnLogsCreateTime = setInterval(function() {
+                $.ajax({
+                    type:"post",
+                    url:"/webapi",
+                    data:postVar,
+                    async : true,
+                    success:function(data){
+                        _this.openVpnLog = data;
+                    }
+                });
+            }, 5000);
+
+            var postData = {"action":"getIpsecLogs","data":[]};
+            postData = JSON.stringify(postData);
+            $.ajax({
+                type:"post",
+                url:"/webapi",
+                data:postData,
+                async : true,
+                success:function(data){
+                    _this.ipsecLog = data;
+                }
+            });
+        }
+
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>
