@@ -60,56 +60,58 @@ class Proxy extends Csbackend
             }else{
                 $proxy_https_port = 3129;
             }
-            $nat_rule_http = array(
-                'protocol'=>'tcp',
-                'interface'=>'lan',
-                'ipprotocol'=>'inet',
-                'descr'=>Proxy::FILTER_RULE_NAME_HTTP,
-                'tag'=>'',
-                'tagged'=>'',
-                'poolopts'=>'',
-                'associated-rule-id'=>Proxy::RULE_ASSOCID_HTTP,
-                'target'=>'127.0.0.1',
-                'local-port'=>$proxy_http_port,
-                'source'=>array('network'=>'lan'),
-                'destination'=>array('network'=>'(self)', 'not'=>'1', 'port'=>80)
-            );
-            $nat_rule_https = array(
-                'protocol'=>'tcp',
-                'interface'=>'lan',
-                'ipprotocol'=>'inet',
-                'descr'=>Proxy::FILTER_RULE_NAME_HTTPS,
-                'tag'=>'',
-                'tagged'=>'',
-                'poolopts'=>'',
-                'associated-rule-id'=>Proxy::RULE_ASSOCID_HTTPS,
-                'target'=>'127.0.0.1',
-                'local-port'=>$proxy_https_port,
-                'source'=>array('network'=>'lan'),
-                'destination'=>array('network'=>'(self)', 'not'=>'1', 'port'=>443)
-            );
-            $filter_rule_http = array(
-                'source'=>array('network'=>'lan'),
-                'interface'=>'lan',
-                'protocol'=>'tcp',
-                'ipprotocol'=>'inet',
-                'destination'=>array('address'=>'127.0.0.1', 'port'=>$proxy_http_port),
-                'descr'=>Proxy::FILTER_RULE_NAME_HTTP,
-                'associated-rule-id'=>Proxy::RULE_ASSOCID_HTTP
-            );
-            $filter_rule_https = array(
-                'source'=>array('network'=>'lan'),
-                'interface'=>'lan',
-                'protocol'=>'tcp',
-                'ipprotocol'=>'inet',
-                'destination'=>array('address'=>'127.0.0.1', 'port'=>$proxy_https_port),
-                'descr'=>Proxy::FILTER_RULE_NAME_HTTPS,
-                'associated-rule-id'=>Proxy::RULE_ASSOCID_HTTPS
-            );
-            $config['nat']['rule'][] = $nat_rule_http;
-            $config['nat']['rule'][] = $nat_rule_https;
-            $config['filter']['rule'][] = $filter_rule_http;
-            $config['filter']['rule'][] = $filter_rule_https;
+            if('1'== $config['OPNsense']['proxy']['forward']['transparentMode']){
+                $nat_rule_http = array(
+                    'protocol'=>'tcp',
+                    'interface'=>'lan',
+                    'ipprotocol'=>'inet',
+                    'descr'=>Proxy::FILTER_RULE_NAME_HTTP,
+                    'tag'=>'',
+                    'tagged'=>'',
+                    'poolopts'=>'',
+                    'associated-rule-id'=>Proxy::RULE_ASSOCID_HTTP,
+                    'target'=>'127.0.0.1',
+                    'local-port'=>$proxy_http_port,
+                    'source'=>array('network'=>'lan'),
+                    'destination'=>array('network'=>'(self)', 'not'=>'1', 'port'=>80)
+                );
+                $nat_rule_https = array(
+                    'protocol'=>'tcp',
+                    'interface'=>'lan',
+                    'ipprotocol'=>'inet',
+                    'descr'=>Proxy::FILTER_RULE_NAME_HTTPS,
+                    'tag'=>'',
+                    'tagged'=>'',
+                    'poolopts'=>'',
+                    'associated-rule-id'=>Proxy::RULE_ASSOCID_HTTPS,
+                    'target'=>'127.0.0.1',
+                    'local-port'=>$proxy_https_port,
+                    'source'=>array('network'=>'lan'),
+                    'destination'=>array('network'=>'(self)', 'not'=>'1', 'port'=>443)
+                );
+                $filter_rule_http = array(
+                    'source'=>array('network'=>'lan'),
+                    'interface'=>'lan',
+                    'protocol'=>'tcp',
+                    'ipprotocol'=>'inet',
+                    'destination'=>array('address'=>'127.0.0.1', 'port'=>$proxy_http_port),
+                    'descr'=>Proxy::FILTER_RULE_NAME_HTTP,
+                    'associated-rule-id'=>Proxy::RULE_ASSOCID_HTTP
+                );
+                $filter_rule_https = array(
+                    'source'=>array('network'=>'lan'),
+                    'interface'=>'lan',
+                    'protocol'=>'tcp',
+                    'ipprotocol'=>'inet',
+                    'destination'=>array('address'=>'127.0.0.1', 'port'=>$proxy_https_port),
+                    'descr'=>Proxy::FILTER_RULE_NAME_HTTPS,
+                    'associated-rule-id'=>Proxy::RULE_ASSOCID_HTTPS
+                );
+                $config['nat']['rule'][] = $nat_rule_http;
+                $config['nat']['rule'][] = $nat_rule_https;
+                $config['filter']['rule'][] = $filter_rule_http;
+                $config['filter']['rule'][] = $filter_rule_https;
+            }
         }
     }
 
@@ -517,7 +519,7 @@ EOF;
                 
                 $config['OPNsense']['proxy'] = $data;
             }
-
+            self::setFirewall();
             write_config();
             self::configure();
         }catch(AppException $aex){
