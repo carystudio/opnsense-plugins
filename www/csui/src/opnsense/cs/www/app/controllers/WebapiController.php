@@ -346,6 +346,11 @@ class WebapiController extends BaseController
                 $result['rescode'] = Openvpn::delUser($para['data']);
             }else if('getOpenvpnEncryInfo' == $action){
                 $result['rescode'] = Openvpn::getEncryInfo();
+            }else if('getOpenvpnStatus' == $action){
+                $result['rescode'] = Openvpn::getStatus();
+            }else if('getOpenvpnLogs'==$action) {
+                Openvpn::getLogs();
+                return;
             }else if('getIpsecPhase1'==$action){
                 $result['rescode'] = Ipsec::getPhase1();
             }else if('setIpsecPhase1'==$action){

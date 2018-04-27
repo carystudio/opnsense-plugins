@@ -373,7 +373,7 @@ class Openvpn extends Csbackend
                 'interface'=>'openvpn',
                 'ipprotocol'=>'inet',
                 'statetype'=>'keep state',
-                'desct'=>Openvpn::FILTER_SUBNET_ACCEPT_NAME,
+                'descr'=>Openvpn::FILTER_SUBNET_ACCEPT_NAME,
                 'source'=>array('any'=>'1'),
                 'destination'=>array('any'=>1,)
             );
@@ -453,14 +453,19 @@ class Openvpn extends Csbackend
                 }
             }
 
-            if(!is_numeric($data['reneg-sec'])){
-                throw new AppException('OVPN_212');
-            }else{
-                $data['reneg-sec'] = intval($data['reneg-sec']);
-                if($data['reneg-sec']<0){
+            if('p2p_shared_key'!=$data['mode']){
+                if(!is_numeric($data['reneg-sec'])){
                     throw new AppException('OVPN_212');
+                }else{
+                    $data['reneg-sec'] = intval($data['reneg-sec']);
+                    if($data['reneg-sec']<0){
+                        throw new AppException('OVPN_212');
+                    }
                 }
+            }else if(isset($data['reneg-sec'])){
+                unset($data['reneg-sec']);
             }
+
             if('p2p_tls' == $data['mode']){
                 if(empty($data['ca'])){
                     throw new AppException('OVPN_213');
@@ -1864,5 +1869,20 @@ class Openvpn extends Csbackend
         $result['engineList'] = self::getEnginelist();
 
         return $result;
+    }
+
+    public static function getStatus(){
+        $servers = openvpn_get_active_servers();
+        $sk_servers = openvpn_get_active_servers("p2p");
+        $clients = openvpn_get_active_clients();
+
+        return array('servers'=>$servers, 'sk_servers'=>$sk_servers, 'clients'=>$clients);
+    }
+
+    public static function getLogs(){
+        exec("/usr/local/sbin/clog /var/log/openvpn.log| grep -v \"CLOG\" | grep -v \"\033\" | /usr/bin/tail -r -n 100", $logarr);
+        $logs = implode("\n", $logarr);
+
+        echo $logs;
     }
 }

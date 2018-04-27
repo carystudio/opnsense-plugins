@@ -360,7 +360,7 @@ var cs_main = {
                 ],
                 reneg_sec: [
                 { validator:function(r, v, f) {
-                    if(_this.formValidate.mode != 'server_tls'){
+                    if(_this.formValidate.mode != 'server_tls' && _this.formValidate.mode != 'p2p_shared_key'){
                         var _s = cs.num(v);
                         if(0 == _s){
                             f(_this.$t('clients.msg29'));
