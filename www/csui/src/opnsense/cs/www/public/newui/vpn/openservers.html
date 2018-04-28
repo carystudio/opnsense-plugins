@@ -136,13 +136,10 @@
                     <!--<FormItem :label="$t('openvpn.ipv6_tunnel_set')" prop="ipv6_tunnel_set">
                         <Input v-model="formValidate.tunnel_networkv6"></Input>
                     </FormItem>-->
-                    <!--<FormItem :label="$t('openvpn.redirect_gateway')" prop="redirect_gateway">
+                    <FormItem :label="$t('openvpn.redirect_gateway')" prop="redirect_gateway">
                         <Checkbox v-model="formValidate.redirect_gateway"> *{{ $t('openvpn.msg4') }}</Checkbox>
                     </FormItem>
-                    <FormItem :label="$t('openvpn.ipv4_local_network')" v-if="redirect_gateway == false" prop="ipv4_local_network">
-                        <Input v-model="formValidate.local_network"></Input>
-                    </FormItem>-->
-                    <FormItem :label="$t('openvpn.ipv4_local_network')" prop="ipv4_local_network">
+                    <FormItem :label="$t('openvpn.ipv4_local_network')" v-show="!formValidate.redirect_gateway" prop="ipv4_local_network">
                         <Input v-model="formValidate.local_network"></Input>
                     </FormItem>
                     <!--<FormItem :label="$t('openvpn.ipv6_local_network')" v-if="redirect_gateway == false" prop="ipv6_local_network">
@@ -895,13 +892,15 @@ var cs_main = {
                 _this.formValidate.engine = data.data.engine;    //硬件加密
                 _this.formValidate.interface = data.data.interface;     //接口
                 if (data.data.local_network){
-                    _this.formValidate.redirect_gateway = false;
                     _this.formValidate.local_network = data.data.local_network;
                 }
-                if (data.data.local_networkv6){
-                    _this.formValidate.redirect_gateway = false;
-                    _this.formValidate.local_networkv6 = data.data.local_networkv6;
+                if('yes' == data.data.gwredir){
+                    _this.formValidate.redirect_gateway = true;
                 }
+//                if (data.data.local_networkv6){
+//                    _this.formValidate.redirect_gateway = false;
+//                    _this.formValidate.local_networkv6 = data.data.local_networkv6;
+//                }
                 _this.formValidate.local_port = data.data.local_port;    //本地端口
                 _this.formValidate.maxclients = data.data.maxclients;    // 并发连接
                 _this.formValidate.mode = data.data.mode;      //服务器模式
@@ -1083,6 +1082,9 @@ var cs_main = {
                     data.engine = _this.formValidate.engine;
                     data.tunnel_network = _this.formValidate.tunnel_network;
                     data.tunnel_networkv6 = _this.formValidate.tunnel_networkv6;
+                    if(_this.formValidate.redirect_gateway){
+                        data.gwredir = 'yes';
+                    }
                     data.local_network = _this.formValidate.local_network;
                     data.local_networkv6 = _this.formValidate.local_networkv6;
                     data.remote_network = _this.formValidate.remote_network;
