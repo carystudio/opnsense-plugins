@@ -368,14 +368,17 @@ class Openvpn extends Csbackend
                     'network'=>$config['openvpn']['openvpn-server'][0]['interface'].'ip',
                     'port'=>$config['openvpn']['openvpn-server'][0]['local_port']),
             );
+        }
+        if((!isset($config['openvpn']['openvpn-server'][0]['disable']) || 'yes'!=$config['openvpn']['openvpn-server'][0]['disable']) ||
+            (!isset($config['openvpn']['openvpn-client'][0]['disable']) || 'yes'!=$config['openvpn']['openvpn-client'][0]['disable'])) {
             $config['filter']['rule'][] = array(
-                'type'=>'pass',
-                'interface'=>'openvpn',
-                'ipprotocol'=>'inet',
-                'statetype'=>'keep state',
-                'descr'=>Openvpn::FILTER_SUBNET_ACCEPT_NAME,
-                'source'=>array('any'=>'1'),
-                'destination'=>array('any'=>1,)
+                'type' => 'pass',
+                'interface' => 'openvpn',
+                'ipprotocol' => 'inet',
+                'statetype' => 'keep state',
+                'descr' => Openvpn::FILTER_SUBNET_ACCEPT_NAME,
+                'source' => array('any' => '1'),
+                'destination' => array('any' => 1,)
             );
         }
     }
@@ -587,6 +590,7 @@ class Openvpn extends Csbackend
             }
             $config['openvpn']['openvpn-client']=array($data);
 
+            self::setFirewall();
             write_config();
 
             openvpn_configure_single($data['vpnid']);
