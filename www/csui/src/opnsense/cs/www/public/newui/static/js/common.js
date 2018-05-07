@@ -251,7 +251,7 @@ cs.prototype.mac = function (str){
  */
 cs.prototype.mask = function(str){
 	var ret = 99;		
-	if(undefined == str || str=="...") { ret = 0;  return ret; }
+	if(undefined == str || str=="..." || str=="") { ret = 0;  return ret; }
 	var reg=/^(?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))$/;
 	if(!reg.test(str)) ret = 1;
 	var buf=str.split(".");

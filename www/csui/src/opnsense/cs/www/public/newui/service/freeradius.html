@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb"  :breadcrumb="[$t('menu.service'),$t('menu.freeradius')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col  :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" style="width: 80%; margin-left: 11%;">
+            <Alert>
+                {{ $t('freeradius.help') }}
+            </Alert>
+            </Col>
+        </Row>
+        <Row :gutter="26">
+            <!-- content start -->
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" style="width: 80%; margin-left: 11%;">
+            <div class="ivu-tabs ivu-tabs-card cs-tabs">
+                <div class="ivu-tabs-bar">
+                    <div class="ivu-tabs-nav-container">
+                        <div class="ivu-tabs-nav-wrap" style="position: relative;">
+                            <span class="ivu-tabs-nav-prev ivu-tabs-nav-scroll-disabled"><i class="ivu-icon ivu-icon-chevron-left"></i></span>  <span class="ivu-tabs-nav-next ivu-tabs-nav-scroll-disabled"><i class="ivu-icon ivu-icon-chevron-right"></i></span>
+                            <div class="ivu-tabs-nav-scroll">
+                                <div class="nav-text ivu-tabs-nav">
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':1==showCurrentTabs}" @click="tabsSwitch(1)">
+                                        {{ $t('freeradius.freegeneral') }}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':2==showCurrentTabs}" @click="tabsSwitch(2)">
+                                        {{ $t('freeradius.freeuser') }}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':3==showCurrentTabs}" @click="tabsSwitch(3)">
+                                        {{ $t('freeradius.freeclients') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                    <div class="ivu-tabs-content ivu-tabs-content-animated">
+                        <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 1">
+                            <!--常规设置-->
+                            <Card>
+                                <Form ref="generalFormDate" :model="generalFormDate" :label-width="globalConfig.labelWith" label-position="left">
+                                    <FormItem :label="$t('freegeneral.switch')">
+                                        <!--general.enabled-->
+                                        <i-switch v-model="generalFormDate.enabled" size="large" >
+                                            <span slot="open">{{$t('common.enabled')}}</span>
+                                            <span slot="close">{{$t('common.disabled')}}</span>
+                                        </i-switch>
+                                    </FormItem>
+                                    <FormItem :label="$t('freegeneral.vlan_assign')">
+                                        <i-switch v-model="generalFormDate.vlanassign" size="large" >
+                                            <span slot="open">{{$t('common.enabled')}}</span>
+                                            <span slot="close">{{$t('common.disabled')}}</span>
+                                        </i-switch>
+                                    </FormItem>
+                                    <FormItem :label="$t('freegeneral.wispr_attr')">
+                                        <i-switch v-model="generalFormDate.wispr" size="large" >
+                                            <span slot="open">{{$t('common.enabled')}}</span>
+                                            <span slot="close">{{$t('common.disabled')}}</span>
+                                        </i-switch>
+                                    </FormItem>
+                                    <FormItem :label="$t('freegeneral.chillispot_attr')">
+                                        <i-switch v-model="generalFormDate.chillispot" size="large" >
+                                            <span slot="open">{{$t('common.enabled')}}</span>
+                                            <span slot="close">{{$t('common.disabled')}}</span>
+                                        </i-switch>
+                                    </FormItem>
+                                    <FormItem :label="$t('freegeneral.session_limit')">
+                                        <i-switch v-model="generalFormDate.sessionlimit" size="large" >
+                                            <span slot="open">{{$t('common.enabled')}}</span>
+                                            <span slot="close">{{$t('common.disabled')}}</span>
+                                        </i-switch>
+                                    </FormItem>
+                                    <FormItem :label="$t('freegeneral.log_type')">
+                                        <Select v-model="generalFormDate.log_destination">
+                                            <Option value="file">file</Option>
+                                            <Option value="syslog">syslog</Option>
+                                        </Select>
+                                    </FormItem>
+                                    <FormItem :label="$t('freegeneral.log_auth_request')">
+                                        <i-switch v-model="generalFormDate.log_authentication_request" size="large" >
+                                            <span slot="open">{{$t('common.enabled')}}</span>
+                                            <span slot="close">{{$t('common.disabled')}}</span>
+                                        </i-switch>
+                                    </FormItem>
+                                    <FormItem :label="$t('freegeneral.log_bad_pwd_save')">
+                                        <i-switch v-model="generalFormDate.log_authbadpass" size="large" >
+                                            <span slot="open">{{$t('common.enabled')}}</span>
+                                            <span slot="close">{{$t('common.disabled')}}</span>
+                                        </i-switch>
+                                    </FormItem>
+                                    <FormItem :label="$t('freegeneral.log_good_pwd_save')">
+                                        <i-switch v-model="generalFormDate.log_authgoodpass" size="large" >
+                                            <span slot="open">{{$t('common.enabled')}}</span>
+                                            <span slot="close">{{$t('common.disabled')}}</span>
+                                        </i-switch>
+                                    </FormItem>
+                                    <FormItem :label="$t('freegeneral.default_eap_type')">
+                                        <Select v-model="generalFormDate.default_eap_type" placement="top">
+                                            <Option value="md5">MD5</Option>
+                                            <Option value="mschapv2">MSCHAPv2</Option>
+                                            <Option value="peap">PEAP</Option>
+                                            <Option value="ttls">TTLS</Option>
+                                        </Select>
+                                    </FormItem>
+                                    <FormItem>
+                                        <Button type="primary" @click="generalSave('generalFormDate')" :loading="genApplyLoading">{{$t('common.save')}}</Button>
+                                    </FormItem>
+                                </Form>
+                            </Card>
+                        </div>
+
+                        <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 2">
+                            <!--用户设置-->
+                            <Card>
+                                <Row>
+                                    <Button type="primary" @click="adduser" :loading="frUserApplyLoading">{{$t('freeuser.add_user')}}</Button>
+                                </Row>
+                                <br>
+                                <Row>
+                                    <Col>
+                                    <Form :label-width="globalConfig.labelWith" label-position="left">
+                                        <Table border ref="frUserTableSelect" :columns="accountListColumns" :data="freeuserData" :no-data-text="$t('common.no_data')"></Table>
+                                    </Form>
+                                    <br>
+                                    </Col>
+                                </Row>
+                            </Card>
+
+                        </div>
+
+                        <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 3">
+                            <!--客户端设置-->
+                            <Card>
+                                <Row>
+                                    <Button type="primary" @click="addclients" >{{$t('freeclient.add_client')}}</Button>
+                                </Row>
+                                <br>
+                                <Row>
+                                    <Col>
+                                    <Form :label-width="globalConfig.labelWith" label-position="left">
+                                        <Table border ref="frClientTableSelect" :columns="frClientListColumns" :data="freeClientData" :no-data-text="$t('common.no_data')"></Table>
+                                    </Form>
+                                    <br>
+                                    </Col>
+                                </Row>
+                            </Card>
+                        </div>
+                    </div>
+            </div>
+            </Col>
+            <!-- content end -->
+        </Row>
+    </div>
+    <Modal
+            v-model="freeUserEditList"
+            :title="$t('freeuser.edit_user')"
+            :width="600"
+            :closable="false"
+    >
+        <Form ref="freeUserFormData" :model="freeUserFormData" :rules="frUserRuleValidate" :label-width="120" label-position="left">
+            <Col>
+            <FormItem :label="$t('freeuser.enabled')">
+                <i-switch v-model="freeUserFormData.enabled" size="large" >
+                    <span slot="open">{{$t('common.enabled')}}</span>
+                    <span slot="close">{{$t('common.disabled')}}</span>
+                </i-switch>
+            </FormItem>
+            <FormItem :label="$t('freeuser.username')" prop="username">
+                <Input v-model="freeUserFormData.username" :maxlength="50" :disabled="frUserEditStatus"></Input>
+            </FormItem>
+            <FormItem :label="$t('freeuser.password')" prop="password">
+                <Input v-model="freeUserFormData.password" :maxlength="50"></Input>
+            </FormItem>
+            <FormItem :label="$t('freeuser.descr')">
+                <Input v-model="freeUserFormData.description" :maxlength="50"></Input>
+            </FormItem>
+            <FormItem :label="$t('freeuser.ip_address')" prop="ip">
+                <Input v-model="freeUserFormData.ip" :maxlength="50"></Input>
+            </FormItem>
+            <FormItem :label="$t('freeuser.subnet')" prop="subnet">
+                <Input v-model="freeUserFormData.subnet" :maxlength="50"></Input>
+            </FormItem>
+            <FormItem label="VLAN ID" prop="vlan">
+                <Input v-model="freeUserFormData.vlan" :maxlength="50"></Input>
+            </FormItem>
+            <div v-show="frUserWisprStatus">
+                <FormItem :label="$t('freeuser.wispr_bw_min_up')" prop="wispr_bw_min_up">
+                    <Input v-model="freeUserFormData.wispr_bw_min_up" :maxlength="50"></Input>
+                </FormItem>
+                <FormItem :label="$t('freeuser.wispr_bw_max_up')" prop="wispr_bw_max_up">
+                    <Input v-model="freeUserFormData.wispr_bw_max_up" :maxlength="50"></Input>
+                </FormItem>
+                <FormItem :label="$t('freeuser.wispr_bw_min_down')" prop="wispr_bw_min_down">
+                    <Input v-model="freeUserFormData.wispr_bw_min_down" :maxlength="50"></Input>
+                </FormItem>
+                <FormItem :label="$t('freeuser.wispr_bw_max_down')" prop="wispr_bw_max_down">
+                    <Input v-model="freeUserFormData.wispr_bw_max_down" :maxlength="50"></Input>
+                </FormItem>
+            </div>
+            <div v-show="frUserChillispotStatus">
+                <FormItem :label="$t('freeuser.chillispot_bw_max_up')" prop="chillispot_bw_max_up">
+                    <Input v-model="freeUserFormData.chillispot_bw_max_up" :maxlength="50"></Input>
+                </FormItem>
+                <FormItem :label="$t('freeuser.chillispot_bw_max_dwon')" prop="chillispot_bw_max_down">
+                    <Input v-model="freeUserFormData.chillispot_bw_max_down" :maxlength="50"></Input>
+                </FormItem>
+            </div>
+            <div v-show="frUserSessionlimitStatus">
+                <FormItem :label="$t('freeuser.max_session')" prop="sessionlimit_max_session_limit">
+                    <Input v-model="freeUserFormData.sessionlimit_max_session_limit" :maxlength="50"></Input>
+                </FormItem>
+            </div>
+            </Col>
+        </Form>
+        <div slot="footer">
+            <Button type="text" @click="freeUserEditList=false">{{ $t('common.cancel') }}</Button>
+            <Button type="primary" @click="frUserOk('freeUserFormData')">{{ $t('common.save') }}</Button>
+        </div>
+    </Modal>
+
+    <Modal
+            v-model="frClientEditList"
+            :title="$t('freeclient.edit_client')"
+            :width="600"
+            :closable="false"
+    >
+        <Form ref="frClientFormDate" :model="frClientFormDate" :rules="frClientRuleValidate" :label-width="120" label-position="left">
+            <Col>
+            <FormItem :label="$t('freeclient.enabled')">
+                <i-switch v-model="frClientFormDate.enabled" size="large" >
+                    <span slot="open">{{$t('common.enabled')}}</span>
+                    <span slot="close">{{$t('common.disabled')}}</span>
+                </i-switch>
+            </FormItem>
+            <FormItem :label="$t('freeclient.name')" prop="name">
+                <Input v-model="frClientFormDate.name" :maxlength="20" :disabled="frClientEditName"></Input>
+            </FormItem>
+            <FormItem :label="$t('freeclient.secret')" prop="secret">
+                <Input v-model="frClientFormDate.secret" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('freeclient.network_ip')" prop="ip">
+                <Input v-model="frClientFormDate.ip" :maxlength="20"></Input>
+            </FormItem>
+            </Col>
+        </Form>
+        <div slot="footer">
+            <Button type="text" @click="frClientEditList=false">{{ $t('common.cancel') }}</Button>
+            <Button type="primary" @click="frClientOk('frClientFormDate')">{{ $t('common.save') }}</Button>
+        </div>
+    </Modal>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/plugin/echarts.min.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            return {
+                globalConfig:globalConfig,
+
+                showCurrentTabs:'1',
+
+                //常规设置
+                genApplyLoading:false,
+                generalFormDate: {
+                    enabled:false,
+                    vlanassign:false,
+                    wispr:false,
+                    chillispot:false,
+                    sessionlimit:false,
+                    log_destination:'file',
+                    log_authentication_request:false,
+                    log_authbadpass:false,
+                    log_authgoodpass:false,
+                    default_eap_type:'md5'
+                },
+
+                //用户设置
+                frUserEditStatus:false,
+                freeUserEditList:false,
+                frUserApplyLoading:false,
+                freeUserFormData: {
+                    enabled:true,
+                    username:'',
+                    password:'',
+                    description:'',
+                    ip:'',
+                    subnet:'',
+                    vlan:'',
+                    wispr_bw_min_up:'',
+                    wispr_bw_max_up:'',
+                    wispr_bw_min_down:'',
+                    wispr_bw_max_down:'',
+                    chillispot_bw_max_up:'',
+                    chillispot_bw_max_down:'',
+                    sessionlimit_max_session_limit:''
+                },
+                frUserWisprStatus:false,
+                frUserChillispotStatus:false,
+                frUserSessionlimitStatus:false,
+                frUserUuid:'',
+                freeuserData:[],
+
+                //客户端设置
+                frClientEditList:false,
+                frClientEditName:false,
+                frClientFormDate: {
+                    enabled:true,
+                    name:'',
+                    secret:'',
+                    ip:'',
+                    uuid:''
+                },
+                freeClientData:[]
+            }
+        },
+        computed:{
+            frUserRuleValidate:function(){
+                var _this = this;
+                return {
+                    username:[
+                        { required: true, message: this.$t('freeuser.msg1'), trigger: 'blur' },
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.string(v);
+                                if(0 == _s){
+                                    f(_this.$t('freeuser.msg1'));
+                                }else if(99 != _s){
+                                    f(_this.$t('freeuser.msg2'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    password:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.string(v);
+                                if(0 == _s){
+                                    f(_this.$t('freeuser.msg3'));
+                                }else if(99 != _s){
+                                    f(_this.$t('freeuser.msg4'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    ip:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.ip(v);
+                                if(99 != _s && 0 != _s){
+                                    f(_this.$t('freeuser.msg5'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    subnet:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.mask(v);
+                                if(99 != _s && 0 != _s){
+                                    f(_this.$t('freeuser.msg6'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    vlan:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.num_range(v,1,4096);
+                                if(1 == _s || 2 == _s){
+                                    f(_this.$t('freeuser.msg7'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    wispr_bw_min_up:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.num(v);
+                                if(1 == _s){
+                                    f(_this.$t('freeuser.msg8'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    wispr_bw_max_up:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.num(v);
+                                if(1 == _s){
+                                    f(_this.$t('freeuser.msg9'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    wispr_bw_min_down:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.num(v);
+                                if(1 == _s){
+                                    f(_this.$t('freeuser.msg10'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    wispr_bw_max_down:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.num(v);
+                                if(1 == _s){
+                                    f(_this.$t('freeuser.msg11'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    chillispot_bw_max_up:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.num(v);
+                                if(1 == _s){
+                                    f(_this.$t('freeuser.msg12'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    chillispot_bw_max_down:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.num(v);
+                                if(1 == _s){
+                                    f(_this.$t('freeuser.msg13'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    sessionlimit_max_session_limit:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.num(v);
+                                if(1 == _s){
+                                    f(_this.$t('freeuser.msg14'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ]
+                }
+            },
+            accountListColumns: function() {
+                var _this = this;
+                return [{
+                    type: 'selection',
+                    width: 60,
+                    align: 'center'
+                }, {
+                    title: _this.$t('freeuser.status'),
+                    key: 'enabled',
+                    align: 'center',
+                    render: function(h, params){
+                        if('1' == params.row.enabled){
+                            return h('p', _this.$t('freeuser.enabled'));
+                        }else{
+                            return h('p', _this.$t('freeuser.disabled'));
+                        }
+                    }
+                }, {
+                    title: _this.$t('freeuser.username'),
+                    key: 'username',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: _this.$t('freeuser.password'),
+                    key: 'password',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: _this.$t('freeuser.descr'),
+                    key: 'description',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: _this.$t('freeuser.ip_address'),
+                    key: 'ip',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: _this.$t('freeuser.subnet'),
+                    key: 'subnet',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: 'VLAN ID',
+                    key: 'vlan',
+                    align: 'center',
+                    render: function(h, params) {
+                        var str = '';
+                        if(params.row.vlan){
+                            str = params.row.vlan.join(',');
+                        }
+                        return h('p',str);
+                    }
+                }, {
+                    title: 'ID',
+                    key: 'uuid',
+                    align: 'center',
+                    sortable: true
+                },{
+                    title: _this.$t('freeuser.operation'),
+                    key: 'uuid',
+                    align: 'center',
+                    render: function(h, params) {
+                        return[
+                            h('Icon', {
+                                props: {
+                                    type: 'edit'
+                                },
+                                style: {
+                                    cursor: 'pointer',
+                                    marginRight: '5px'
+                                },
+                                nativeOn:{
+                                    click:function (){
+                                        _this.frUserEditStatus = true;
+                                        _this.freeUserEditList = true;
+                                        if('1' == params.row.enabled){
+                                            _this.freeUserFormData.enabled = true;
+                                        }else{
+                                            _this.freeUserFormData.enabled = false;
+                                        }
+                                        _this.freeUserFormData.username = params.row.username;
+                                        _this.freeUserFormData.password = params.row.password;
+                                        _this.freeUserFormData.description = params.row.description;
+                                        _this.freeUserFormData.ip = params.row.ip;
+                                        _this.freeUserFormData.subnet = params.row.subnet;
+                                        if(params.row.vlan){
+                                            _this.freeUserFormData.vlan = params.row.vlan.join(',');
+                                        }else{
+                                            _this.freeUserFormData.vlan = '';
+                                        }
+                                        _this.freeUserFormData.wispr_bw_min_up = params.row.wispr_bw_min_up;
+                                        _this.freeUserFormData.wispr_bw_max_up = params.row.wispr_bw_max_up;
+                                        _this.freeUserFormData.wispr_bw_min_down = params.row.wispr_bw_min_down;
+                                        _this.freeUserFormData.wispr_bw_max_down = params.row.wispr_bw_max_down;
+                                        _this.freeUserFormData.chillispot_bw_max_up = params.row.chillispot_bw_max_up;
+                                        _this.freeUserFormData.chillispot_bw_max_down = params.row.chillispot_bw_max_down;
+                                        _this.freeUserFormData.sessionlimit_max_session_limit = params.row.sessionlimit_max_session_limit;
+                                        _this.frUserUuid = params.row.uuid;
+                                        _this.$refs['freeUserFormData'].validate(function(valid){
+                                            if(valid){
+                                            }
+                                        });
+                                    }
+                                }
+                            }),
+                            h('Poptip',{
+                                props: {
+                                    confirm: true,
+                                    title: _this.$t('freeuser.del_sure'),
+                                    "ok-text":_this.$t('common.ok'),
+                                    "cancel-text":_this.$t('common.cancel')
+                                },
+                                style: {
+                                    marginRight: '5px'
+                                },
+                                on: {
+                                    "on-ok": function(){
+                                        var data = {};
+                                        data.uuid = params.row.uuid;
+                                        var postData = {"action":"delFrUser","data":data};
+//                                        _this.$Spin.show();   //关闭加载动画
+                                        uiPost.delFrUser(postData,function(data){
+                                            if (9999 == data.rescode){
+                                                cs.loginOut();
+                                            }
+//                                            _this.$Spin.hide();   //关闭加载动画
+                                            if (0 == data.rescode) {
+                                                _this.$Message.success({content:_this.$t('freeuser.del_success'),onClose:function(){
+                                                    location.href = location.href;
+                                                }});
+                                            }else{
+                                                _this.$Message.error({content:_this.$t('freeuser.del_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                                            }
+                                        });
+                                    }
+                                }
+                            },[
+                                h('Icon', {
+                                    props: {
+                                        type: 'ios-trash-outline'
+                                    },
+                                    style: {
+                                        cursor: 'pointer',
+                                        marginRight: '5px'
+                                    }
+                                })
+                            ])
+                        ]
+                    }
+                }];
+            },
+            frClientRuleValidate:function(){
+                var _this = this;
+                return {
+                    name:[
+                        { required: true, message: this.$t('freeclient.msg1'), trigger: 'blur' },
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.string(v);
+                                if(0 == _s){
+                                    f(_this.$t('freeclient.msg1'));
+                                }else if(1 == _s){
+                                    f(_this.$t('freeclient.msg2'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    secret:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.string(v);
+                                if(0 == _s){
+                                    f(_this.$t('freeclient.msg3'));
+                                }else if(1 == _s){
+                                    f(_this.$t('freeclient.msg4'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    ip:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.ip(v);
+                                if(99 != _s && 0 != _s){
+                                    var tmp = v.split("/");
+                                    var reg=/^(?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))$/;
+                                    console.log(reg.test(tmp[0]));
+                                    console.log(tmp[0]);
+                                    if(!reg.test(tmp[0]) || 99 != cs.num_range(tmp[1],8,24)){
+                                        f(_this.$t('freeclient.msg5')+'10.10.10.0/24');
+                                    }
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ]
+                }
+            },
+            frClientListColumns: function() {
+                var _this = this;
+                return [{
+                    type: 'selection',
+                    width: 60,
+                    align: 'center'
+                }, {
+                    title: _this.$t('freeclient.status'),
+                    key: 'enabled',
+                    align: 'center',
+                    render: function(h, params){
+                        if('1' == params.row.enabled){
+                            return[
+                                h('p', _this.$t('freeclient.enabled'))
+                            ]
+                        }else {
+                            return[
+                                h('p', _this.$t('freeclient.disabled'))
+                            ]
+                        }
+                    }
+                }, {
+                    title: _this.$t('freeclient.name'),
+                    key: 'name',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: _this.$t('freeclient.secret'),
+                    key: 'secret',
+                    align: 'center',
+                    sortable: true
+                },{
+                    title: _this.$t('freeclient.network_ip'),
+                    key: 'ip',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: 'ID',
+                    key: 'uuid',
+                    align: 'center',
+                    sortable: true
+                },{
+                    title: _this.$t('freeclient.operation'),
+                    key: 'descr',
+                    align: 'center',
+                    render: function(h, params) {
+                        return[
+                            h('Icon', {
+                                props: {
+                                    type: 'edit'
+                                },
+                                style: {
+                                    cursor: 'pointer',
+                                    marginRight: '5px'
+                                },
+                                nativeOn:{
+                                    click:function (){
+                                        _this.frClientEditList = true;
+                                        _this.frClientEditName = true;
+                                        if('1' == params.row.enabled){
+                                            _this.frClientFormDate.enabled = true;
+                                        }else{
+                                            _this.frClientFormDate.enabled = false;
+                                        }
+
+                                        _this.frClientFormDate.ip = params.row.ip;
+                                        _this.frClientFormDate.name = params.row.name;
+                                        _this.frClientFormDate.secret = params.row.secret;
+                                        _this.frClientFormDate.uuid = params.row.uuid;
+                                        var data = {};
+                                    }
+                                }
+                            }),
+                            h('Poptip',{
+                                props: {
+                                    confirm: true,
+                                    title: _this.$t('freeclient.del_sure'),
+                                    "ok-text":_this.$t('common.ok'),
+                                    "cancel-text":_this.$t('common.cancel')
+                                },
+                                style: {
+                                    marginRight: '5px'
+                                },
+                                on: {
+                                    "on-ok": function(){
+                                        var data = {};
+                                        data.uuid = params.row.uuid;
+                                        var postData = {"action":"delClientCfg","data":data};
+                                        uiPost.delClientCfg(postData,function(data){
+                                            if (9999 == data.rescode){
+                                                cs.loginOut();
+                                            }
+                                            if (0 == data.rescode) {
+                                                _this.$Message.success({content:_this.$t('freeclient.del_success'),onClose:function(){
+                                                    location.href = location.href;
+                                                }});
+                                            }else{
+                                                _this.$Message.error({content:_this.$t('freeclient.del_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                                            }
+                                        });
+                                    }
+                                }
+                            },[
+                                h('Icon', {
+                                    props: {
+                                        type: 'ios-trash-outline'
+                                    },
+                                    style: {
+                                        cursor: 'pointer',
+                                        marginRight: '5px'
+                                    }
+                                })
+                            ])
+                        ]
+                    }
+                }];
+            }
+        },
+        methods:{
+            tabsSwitch: function(index) {
+                this.showCurrentTabs = index;
+            },
+            generalSave:function (name) {
+                var _this = this;
+                var data = {};
+                if(_this.generalFormDate.enabled){
+                    data.enabled = '1';
+                }else{
+                    data.enabled = '0';
+                }
+                if(_this.generalFormDate.vlanassign){
+                    data.vlanassign = '1';
+                }else{
+                    data.vlanassign = '0';
+                }
+                if(_this.generalFormDate.wispr){
+                    data.wispr = '1';
+                }else{
+                    data.wispr = '0';
+                }
+                if(_this.generalFormDate.chillispot){
+                    data.chillispot = '1';
+                }else{
+                    data.chillispot = '0';
+                }
+                if(_this.generalFormDate.sessionlimit){
+                    data.sessionlimit = '1';
+                }else{
+                    data.sessionlimit = '0';
+                }
+                data.log_destination = _this.generalFormDate.log_destination;
+                if(_this.generalFormDate.log_authentication_request){
+                    data.log_authentication_request = '1';
+                }else{
+                    data.log_authentication_request = '0';
+                }
+                if(_this.generalFormDate.log_authbadpass){
+                    data.log_authbadpass = '1';
+                }else{
+                    data.log_authbadpass = '0';
+                }
+                if(_this.generalFormDate.log_authgoodpass){
+                    data.log_authgoodpass = '1';
+                }else{
+                    data.log_authgoodpass = '0';
+                }
+                data.default_eap_type = _this.generalFormDate.default_eap_type;
+                console.log(data);
+
+                var postVar = {"action":"setFrGeneral","data":data};
+                uiPost.setFrGeneral(postVar,function(data){
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    if (0 != data.rescode) {
+                        _this.$Message.error({content:_this.$t('freegeneral.set_fail') +' '+ _this.$t('errorcode.'+data.rescode),duration:5});
+                    }else{
+                        _this.$Message.success({content:_this.$t('freegeneral.set_success'),onClose:function(){
+                            location.href = location.href;
+                        }});
+                    }
+                });
+            },
+            frUserOk:function (name) {
+                var _this = this;
+                _this.$refs[name].validate(function(valid){
+                    if(valid){
+                        _this.freeUserEditList = false;
+
+                        var data = {};
+                        data.uuid = _this.frUserUuid;
+                        if(_this.freeUserFormData.enabled){
+                            data.enabled = '1';
+                        }else{
+                            data.enabled = '0';
+                        }
+                        data.username = _this.freeUserFormData.username;
+                        data.password = _this.freeUserFormData.password;
+                        data.description = _this.freeUserFormData.description;
+                        data.ip = _this.freeUserFormData.ip;
+                        data.subnet = _this.freeUserFormData.subnet;
+                        data.vlan = _this.freeUserFormData.vlan;
+                        data.wispr_bw_min_up = _this.freeUserFormData.wispr_bw_min_up;
+                        data.wispr_bw_max_up = _this.freeUserFormData.wispr_bw_max_up;
+                        data.wispr_bw_min_down = _this.freeUserFormData.wispr_bw_min_down;
+                        data.wispr_bw_max_down = _this.freeUserFormData.wispr_bw_max_down;
+                        data.chillispot_bw_max_up = _this.freeUserFormData.chillispot_bw_max_up;
+                        data.chillispot_bw_max_down = _this.freeUserFormData.chillispot_bw_max_down;
+                        data.sessionlimit_max_session_limit = _this.freeUserFormData.sessionlimit_max_session_limit;
+
+                        var postVar = {"action":"setFrUser","data":data};
+                        uiPost.setFrUser(postVar,function(data) {
+                            if (9999 == data.rescode) {
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.frUserUuid ? _this.$t('freeuser.edit_success'):_this.$t('freeuser.add_success'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            }else{
+                                _this.$Message.error({content:_this.frUserUuid ? _this.$t('freeuser.edit_fail'):_this.$t('freeuser.add_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
+                        });
+                    }
+                });
+            },
+            adduser:function () {
+                var _this = this;
+
+                _this.freeUserFormData.enabled = true;
+                _this.freeUserFormData.username = '';
+                _this.freeUserFormData.password = '';
+                _this.freeUserFormData.description = '';
+                _this.freeUserFormData.ip = '';
+                _this.freeUserFormData.subnet = '';
+                _this.freeUserFormData.vlan = '';
+                _this.freeUserFormData.wispr_bw_min_up = '';
+                _this.freeUserFormData.wispr_bw_max_up = '';
+                _this.freeUserFormData.wispr_bw_min_down = '';
+                _this.freeUserFormData.wispr_bw_max_down = '';
+                _this.freeUserFormData.chillispot_bw_max_up = '';
+                _this.freeUserFormData.chillispot_bw_max_down = '';
+                _this.freeUserFormData.sessionlimit_max_session_limit = '';
+                _this.frUserUuid = '';
+
+                _this.freeUserEditList = true;
+                _this.frUserEditStatus = false;
+            },
+            frClientOk (name) {
+                var _this = this;
+                _this.$refs[name].validate(function(valid){
+                    if(valid) {
+//                        _this.frClientEditList = false;
+                        var data = {};
+                        if(_this.frClientFormDate.enabled){
+                            data.enabled = '1';
+                        }else{
+                            data.enabled = '0';
+                        }
+                        data.ip = _this.frClientFormDate.ip;
+                        data.name = _this.frClientFormDate.name;
+                        data.secret = _this.frClientFormDate.secret;
+                        data.uuid = _this.frClientFormDate.uuid;
+                        var postVar = {"action":"setFrClientCfg","data":data};
+                        uiPost.setFrClientCfg(postVar,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.frClientEditName?_this.$t('freeclient.edit_success'):_this.$t('freeclient.add_success'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            }else{
+                                _this.$Message.error({content:_this.frClientEditName?_this.$t('freeclient.edit_fail'):_this.$t('freeclient.add_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
+                        });
+                    }
+                });
+            },
+            addclients:function () {
+                var _this = this;
+                _this.frClientEditList = true;
+                _this.frClientEditName = false;
+                _this.frClientFormDate.enabled = true;
+                _this.frClientFormDate.ip = '';
+                _this.frClientFormDate.name = '';
+                _this.frClientFormDate.secret = '';
+                _this.frClientFormDate.uuid = '';
+            }
+        },
+        created:function() {
+            var _this = this;
+            // 常规设置
+            var postGenVar = {"action":"getFrStatus","data":[]};
+//            _this.$Spin.show();  //加载动画
+            uiPost.getFrStatus(postGenVar,function(data){
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+//                _this.$Spin.hide();   //关闭加载动画
+                if (0 == data.rescode){
+                    if('1' == data.data.enabled){
+                        _this.generalFormDate.enabled = true;
+                    }
+                    if('1' == data.data.vlanassign){
+                        _this.generalFormDate.vlanassign = true;
+                    }
+                    if('1' == data.data.wispr){
+                        _this.generalFormDate.wispr = true;
+                    }
+                    if('1' == data.data.chillispot){
+                        _this.generalFormDate.chillispot = true;
+                    }
+                    if('1' == data.data.sessionlimit){
+                        _this.generalFormDate.sessionlimit = true;
+                    }
+                    _this.generalFormDate.log_destination = data.data.log_destination;
+                    if('1' == data.data.log_authentication_request){
+                        _this.generalFormDate.log_authentication_request = true;
+                    }
+                    if('1' == data.data.log_authbadpass){
+                        _this.generalFormDate.log_authbadpass = true;
+                    }
+                    if('1' == data.data.log_authgoodpass){
+                        _this.generalFormDate.log_authgoodpass = true;
+                    }
+                    _this.generalFormDate.default_eap_type = data.data.default_eap_type;
+                }
+            });
+
+            //用户设置
+            var postFrUserVar = {"action":"getFrUser","data":[]};
+            uiPost.getFrUser(postFrUserVar,function(data) {
+                if (9999 == data.rescode) {
+                    cs.loginOut();
+                }
+                if (0 == data.rescode){
+                    _this.freeuserData = data.data;
+                }
+            });
+
+            var postFrUserDta = {"action":"getFrStatus","data":[]};
+            uiPost.getFrStatus(postFrUserDta,function(data){
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode){
+                    if('1' == data.data.wispr){
+                        _this.frUserWisprStatus = true;
+                    }
+                    if('1' == data.data.chillispot){
+                        _this.frUserChillispotStatus = true;
+                    }
+                    if('1' == data.data.sessionlimit){
+                        _this.frUserSessionlimitStatus = true;
+                    }
+                }
+            });
+
+            //客户端设置
+            var postClientVar = {"action":"getClientConfig","data":[]};
+            uiPost.getClientConfig(postClientVar,function(data){
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode){
+
+                    _this.freeClientData = data.data;
+                }
+            });
+        }
+
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

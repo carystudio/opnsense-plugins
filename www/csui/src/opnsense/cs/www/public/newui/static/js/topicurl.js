@@ -6742,6 +6742,78 @@ uiPost.prototype.doLogin = function(postVar,callback){
         this.url = '/webapi';
         return this.post(postVar,callback);
     };
+    uiPost.prototype.startCapturePacket = function(postVar,callback){
+        this.topicurl = 'startCapturePacket';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getCaptureStatus = function(postVar,callback){
+        this.topicurl = 'getCaptureStatus';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getCaptureView = function(postVar,callback){
+        this.topicurl = 'getCaptureView';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.delCapturePacket = function(postVar,callback){
+        this.topicurl = 'delCapturePacket';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getFrStatus = function(postVar,callback){
+        this.topicurl = 'getFrStatus';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setFrGeneral = function(postVar,callback){
+        this.topicurl = 'setFrGeneral';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getFrUser = function(postVar,callback){
+        this.topicurl = 'getFrUser';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setFrUser = function(postVar,callback){
+        this.topicurl = 'setFrUser';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.delFrUser = function(postVar,callback){
+        this.topicurl = 'delFrUser';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.getClientConfig = function(postVar,callback){
+        this.topicurl = 'getClientConfig';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.delClientCfg = function(postVar,callback){
+        this.topicurl = 'delClientCfg';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setFrClientCfg = function(postVar,callback){
+        this.topicurl = 'setFrClientCfg';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
 
 	obj.uiPost = new uiPost();
 })(window);

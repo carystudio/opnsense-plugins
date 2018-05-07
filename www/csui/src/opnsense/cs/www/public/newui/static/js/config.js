@@ -366,6 +366,18 @@ var menu = [
                 "href": "/newui/service/webagency",
                 "lang": "webagency",
                 "display":true
+            },
+            {
+                "id":"15-3",
+                "href": "/newui/service/capture",
+                "lang": "capture",
+                "display":true
+            },
+            {
+                "id":"15-4",
+                "href": "/newui/service/freeradius",
+                "lang": "freeradius",
+                "display":true
             }
         ]
     },
