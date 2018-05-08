@@ -92,6 +92,7 @@ class Freeradius extends Csbackend
                 }
             }
             write_config();
+            self::reconfigure();
         }catch(AppException $aex){
             $result = $aex->getMessage();
         }catch(Exception $ex){
@@ -247,7 +248,7 @@ class Freeradius extends Csbackend
                 $config['OPNsense']['freeradius']['user'][0]['users'] = $frUser;
             }
             write_config();
-
+            self::reconfigure();
         }catch(AppException $aex){
             $result = $aex->getMessage();
         }catch(Exception $ex){
@@ -279,6 +280,7 @@ class Freeradius extends Csbackend
 
 
             write_config();
+            self::reconfigure();
         }catch(AppException $aex){
             $result = $aex->getMessage();
         }catch(Exception $ex){
@@ -398,6 +400,7 @@ class Freeradius extends Csbackend
                 throw new AppException("RADIUS_401");   //用户不存在
             }
             write_config();
+            self::reconfigure();
         }catch(AppException $aex){
             $result = $aex->getMessage();
         }catch(Exception $ex){
@@ -503,6 +506,7 @@ class Freeradius extends Csbackend
             }
             $config['OPNsense']['freeradius']['client']['clients'] = $client;
             write_config();
+            self::reconfigure();
         }catch(AppException $aex){
             $result = $aex->getMessage();
         }catch(Exception $ex){
@@ -510,6 +514,101 @@ class Freeradius extends Csbackend
         }
 
         return $result;
+    }
+
+    /**
+     * start freeradius service (in background)
+     * @return array
+     */
+    private static function start()
+    {
+        $backend = new Backend();
+        $response = $backend->configdRun('freeradius start');
+        return array("response" => $response);
+    }
+
+    /**
+     * stop freeradius service
+     * @return array
+     */
+    private static function stop()
+    {
+        $backend = new Backend();
+        $response = $backend->configdRun("freeradius stop");
+        return array("response" => $response);
+    }
+
+    /**
+     * restart freeradius service
+     * @return array
+     */
+    private static function restart()
+    {
+        $backend = new Backend();
+        $response = $backend->configdRun("freeradius restart");
+        return array("response" => $response);
+    }
+
+    /**
+     * retrieve status of freeradius
+     * @return array
+     * @throws \Exception
+     */
+    private static function status()
+    {
+        global $config;
+        $backend = new Backend();
+//        $mdlGeneral = new General();
+        $response = $backend->configdRun("freeradius status");
+
+        if (strpos($response, "not running") > 0) {
+            if('1' == $config['OPNsense']['freeradius']['general']['enabled']){
+                $status = "stopped";
+            } else {
+                $status = "disabled";
+            }
+        } elseif (strpos($response, "is running") > 0) {
+            $status = "running";
+        } else if('0' == $config['OPNsense']['freeradius']['general']['enabled']){
+            $status = "disabled";
+        } else {
+            $status = "unkown";
+        }
+
+
+        return array("status" => $status);
+    }
+
+    /**
+     * reconfigure freeradius, generate config and reload
+     */
+    private static function reconfigure()
+    {
+        global $config;
+        // close session for long running action
+//        session_write_close();
+
+//        $mdlGeneral = new BaseModel();
+        $backend = new Backend();
+
+        $runStatus = self::status();
+
+        // stop freeradius if it is running or not
+        self::stop();
+
+        // generate template
+        $backend->configdRun('template reload OPNsense/Freeradius');
+
+        // (res)start daemon
+        if('1' == $config['OPNsense']['freeradius']['general']['enabled']){
+            self::start();
+        }
+
+        return array("status" => "ok");
+    }
+
+    public static function getRunStatus(){
+        return self::status();
     }
 }
 
