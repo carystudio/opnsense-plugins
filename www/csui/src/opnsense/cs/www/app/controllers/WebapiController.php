@@ -116,6 +116,9 @@ class WebapiController extends BaseController
                     $data = json_decode($_POST['data'], true);
                     Openvpn::exportClientConf($data);
                     return;
+                }else if('downoladCapture'==$action) {
+                    Packet::downloadCapture();
+                    return;
                 }
             }
             $para = json_decode($text, true);
@@ -406,6 +409,66 @@ class WebapiController extends BaseController
             }else if('wolWakeup'==$action){
                 $this->checkData($para);
                 $result['rescode'] = Wol::wakeup($para['data']);
+            }else if('startCapturePacket'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Packet::setCapturePacketStart($para['data']);
+            }else if('stopCapturePacket'==$action){
+                Packet::setCaptureStop();
+            }else if('getCaptureStatus'==$action){
+                $result['rescode'] = Packet::getCaptureStatus();
+            }else if('getCaptureView'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Packet::getCaptureView($para['data']);
+            }else if('downoladCapture'==$action) {
+                Packet::downloadCapture();
+                return;
+            }else if('delCapturePacket'==$action) {
+                Packet::removeCapture();
+            }else if('getFrStatus'==$action){
+                $result['rescode'] = Freeradius::getGeneralStatus();
+            }else if('setFrGeneral'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Freeradius::setGeneral($para['data']);
+            }else if('getFrUser'==$action){
+                $result['rescode'] = Freeradius::getFrUser();
+            }else if('setFrUser'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Freeradius::setFrUser($para['data']);
+            }else if('delFrUser'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Freeradius::delFrUser($para['data']);
+            }else if('getClientConfig'==$action){
+                $result['rescode'] = Freeradius::getClientCfg();
+            }else if('delClientCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Freeradius::delClientCfg($para['data']);
+            }else if('setFrClientCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Freeradius::setClient($para['data']);
+            }else if('getFrRunStatus'==$action){
+                $result['rescode'] = Freeradius::getRunStatus();
+            }else if('getTraShaCfg'==$action){
+                $result['rescode'] = Trafficshaper::getTraShaCfg();
+            }else if('setTraShaPipeCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Trafficshaper::setPipe($para['data']);
+            }else if('delTraShaPipeCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Trafficshaper::delPipe($para['data']);
+            }else if('setTraShaQueueCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Trafficshaper::setQueue($para['data']);
+            }else if('delTraShaQueueCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Trafficshaper::delQueue($para['data']);
+            }else if('setTraShaRuleCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Trafficshaper::setRule($para['data']);
+            }else if('setTraShaConfig'==$action){
+                $result['rescode'] = Trafficshaper::setConfig();
+            }else if('delTraShaRulesCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Trafficshaper::delrule($para['data']);
             }else if('test' == $action){
                 $result['rescode'] = Dns::getErrors();
             }else{

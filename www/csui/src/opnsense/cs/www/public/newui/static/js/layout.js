@@ -50,7 +50,8 @@ Vue.component('cs-header', {
       menu:menu,
       menuArr:[],
       menuArrData:[],
-      currentLang:''
+      currentLang:'',
+      currentTraShaTab:'1'
     }
   },
   created:function(){
@@ -185,6 +186,8 @@ Vue.component('cs-left', {
             if ('10-11' == name) {
               this.logout();
               break;
+            }else if('8-10' == name){
+                localStorage.setItem('currentTab','1');
             }
             if (this.menus[i].sub[j].id == name) 
             {

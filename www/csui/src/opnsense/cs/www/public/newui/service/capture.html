@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.service'),$t('menu.capture')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+                <Alert>
+                    {{ $t('capture.help') }}
+                </Alert>
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <Col>
+                    <br>
+                    <FormItem :label="$t('capture.interface')" prop="interface">
+                        <Select v-model="formValidate.interface" >
+                            <Option v-for="(v,i) in interface" :value="v.interface" :key="v.interface">{{v.name}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('capture.promiscuous')">
+                        <i-switch v-model="formValidate.promiscuous" size="large" >
+                            <span slot="open">{{$t('common.enabled')}}</span>
+                            <span slot="close">{{$t('common.disabled')}}</span>
+                        </i-switch>
+                    </FormItem>
+                    <FormItem :label="$t('capture.addr_family')">
+                        <Select v-model="formValidate.fam" :key="$t('capture.addr_family')">
+                            <Option value="none">{{$t('capture.any')}}</Option>
+                            <Option value="ip">{{$t('capture.only_ipv4')}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('capture.protocol')">
+                        <Select v-model="formValidate.proto" :key="$t('capture.protocol')">
+                            <Option value="none">{{$t('capture.any')}}</Option>
+                            <Option value="icmp" >ICMP</Option>
+                            <Option value="!icmp" >{{$t('capture.exclude')}}ICMP</Option>
+                            <!--<Option value="icmp6" >ICMPv6</Option>-->
+                            <!--<Option value="!icmp6" >排除ICMPv6</Option>-->
+                            <Option value="tcp" >TCP</Option>
+                            <Option value="!tcp" >{{$t('capture.exclude')}}TCP</Option>
+                            <Option value="udp" >UDP</Option>
+                            <Option value="!udp" >{{$t('capture.exclude')}}UDP</Option>
+                            <Option value="arp" >ARP</Option>
+                            <Option value="!arp" >{{$t('capture.exclude')}}ARP</Option>
+                            <Option value="carp" >CARP (VRRP)</Option>
+                            <Option value="!carp" >{{$t('capture.exclude')}}CARP（VRRP）</Option>
+                            <Option value="esp" >ESP</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('capture.host_address')" prop="host">
+                        <Input v-model="formValidate.host" ></Input>
+                    </FormItem>
+                    <FormItem :label="$t('capture.port')" prop="port">
+                        <Input v-model="formValidate.port" ></Input>
+                    </FormItem>
+                    <FormItem :label="$t('capture.packet_length')" prop="snaplen">
+                        <Input v-model="formValidate.snaplen" ></Input>
+                    </FormItem>
+                    <FormItem :label="$t('capture.count')" prop="count">
+                        <Input v-model="formValidate.count" :maxlength="5"></Input>
+                    </FormItem>
+                    {{$t('capture.view_setting')}}
+                    <hr>
+                    <br>
+                    <FormItem :label="$t('capture.detail_level')">
+                        <Select v-model="formValidate.detail" :key="$t('capture.detail_level')">
+                            <Option value="normal">{{$t('capture.normal')}}</Option>
+                            <Option value="medium">{{$t('capture.medium')}}</Option>
+                            <Option value="high">{{$t('capture.high')}}</Option>
+                            <Option value="full">{{$t('capture.full')}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem :label="$t('capture.reverse_dns_lookup')">
+                        <i-switch v-model="formValidate.dnsquery" size="large" >
+                            <span slot="open">{{$t('common.enabled')}}</span>
+                            <span slot="close">{{$t('common.disabled')}}</span>
+                        </i-switch>
+                    </FormItem>
+                    <!-- btn -->
+                    <FormItem>
+                        <Button type="primary" @click="handleSubmit('formValidate')">{{startBtnStatus ? $t('capture.stop'):$t('capture.start')}}</Button>
+                        <Button type="primary" @click="viewCapture" v-show="fileExist && !startBtnStatus">{{$t('capture.view_capture')}}</Button>
+                        <Button type="primary" @click="downCapture" v-show="fileExist && !startBtnStatus">{{$t('capture.download_capture')}}</Button>
+                        <Button type="primary" @click="removeCapture" v-show="fileExist && !startBtnStatus">{{$t('capture.delete_capture')}}</Button>
+                    </FormItem>
+                    </Col>
+                </Form>
+            </Card>
+            <br>
+            </Col>
+        </row>
+    </div>
+
+    <Form ref="formInline" :model="formInline" method="POST" action="/webapi" hidden>
+        <Input v-model="formInline.action" name="action"></Input>
+    </Form>
+
+    <Modal
+            v-model="viewCaptureList"
+            :title="$t('capture.capture_outpot')"
+            :width="1000"
+    >
+        <Form :label-width="120" label-position="left">
+            <Col>
+            <Table border :loading="loading" :columns="captureListColumns" :height="500" :data="captureListData" :show-header="false" :no-data-text="$t('common.no_data')"></Table>
+            </Col>
+        </Form>
+        <div slot="footer">
+        </div>
+    </Modal>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            return {
+                globalConfig:globalConfig,
+                arpLoading:true,
+
+                interface:[],
+                formValidate:{
+                    interface:'lan',
+                    promiscuous:false,
+                    fam:"none",
+                    proto:"none",
+                    host:'',
+                    port:'',
+                    snaplen:'',
+                    count:100,
+                    detail:'normal',
+                    dnsquery:false
+                },
+                formInline: {
+                    action:'downoladCapture'
+                },
+                startBtnStatus:false,
+                fileExist:false,
+                viewCaptureList:false,
+                captureListData:[],
+                loading:false
+            }
+        },
+        computed:{
+            captureListColumns:function () {
+                var _this = this;
+                return [
+                    {
+                        title: "ID",
+                        type: 'index',
+                        align: 'center',
+                        width:"80"
+                    },
+                    {
+                        title: _this.$t('capture.data'),
+                        key: 'data'
+                    }
+                ]
+            },
+            ruleValidate:function(){
+                var _this = this;
+                return {
+                    host:[{
+                        validator: function (r, v, f) {
+                            f();
+                        }, trigger: 'blur'
+                    }
+                    ],
+                    port:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.num(v);
+                                if(_s == 1){
+                                    f(_this.$t('capture.msg1'));
+                                }else if(2 == _s){
+                                    f(_this.$t('capture.msg2'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    snaplen:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.port(v);
+                                if(_s == 1){
+                                    f(_this.$t('capture.msg3'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    count:[
+                        {
+                            validator: function (r, v, f) {
+                                var _s = cs.num(v);
+                                if(_s == 1){
+                                    f(_this.$t('capture.msg4'));
+                                }
+                                f();
+                            }, trigger: 'blur'
+                        }
+                    ]
+                }
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postVar = {"action":"getLanWanInf","data":[]};
+//            _this.$Spin.show();  //加载动画
+            uiPost.getLanWanInf(postVar,function(data) {
+                if (9999 == data.rescode) {
+                    cs.loginOut();
+                }
+//                _this.$Spin.hide();   //关闭加载动画
+                _this.interface = data.data;
+            });
+
+            var postData = {"action":"getCaptureStatus"};
+            uiPost.getCaptureStatus(postData,function(data) {
+                if (9999 == data.rescode) {
+                    cs.loginOut();
+                }
+                if(0 == data.rescode){
+                    if(data.data.status){
+                        _this.startBtnStatus = true;
+                    }else{
+                        _this.startBtnStatus = false;
+                    }
+                    if(data.data.file){
+                        _this.fileExist = true;
+                    }else{
+                        _this.fileExist = false;
+                    }
+                }
+            });
+        },
+        methods:{
+            handleSubmit: function(name) {
+                var _this = this;
+                _this.$refs[name].validate(function(valid){
+                    if (valid) {
+                        var data = {};
+                        data.interface = _this.formValidate.interface;
+                        if(_this.formValidate.promiscuous){
+                            data.promiscuous = 'on';
+                        }
+                        if('none' == _this.formValidate.fam){
+                            data.fam = '';
+                        }else{
+                            data.fam = _this.formValidate.fam;
+                        }
+                        if('none' == _this.formValidate.proto){
+                            data.proto = '';
+                        }else{
+                            data.proto = _this.formValidate.proto;
+                        }
+                        data.host = _this.formValidate.host;
+                        data.port = _this.formValidate.port;
+                        data.snaplen = _this.formValidate.snaplen;
+                        data.count = _this.formValidate.count;
+                        data.detail = _this.formValidate.detail;
+                        if(_this.formValidate.dnsquery){
+                            data.dnsquery = 'on';
+                        }
+
+                        var postVar = {};
+                        if(_this.startBtnStatus){
+                            postVar = {"action":"stopCapturePacket","data":data};
+                        }else{
+                            postVar = {"action":"startCapturePacket","data":data};
+                        }
+
+                        uiPost.startCapturePacket(postVar,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            var postData = {"action":"getCaptureStatus"};
+                            uiPost.getCaptureStatus(postData,function(data) {
+                                if (9999 == data.rescode) {
+                                    cs.loginOut();
+                                }
+                                if(0 == data.rescode){
+                                    if(data.data.status){
+                                        _this.startBtnStatus = true;
+                                    }else{
+                                        _this.startBtnStatus = false;
+                                    }
+                                    if(data.data.file){
+                                        _this.fileExist = true;
+                                    }else{
+                                        _this.fileExist = false;
+                                    }
+                                }
+                            });
+                        });
+                    }
+                })
+            },
+            viewCapture:function () {
+                var _this = this;
+                var data = {};
+                if(_this.formValidate.dnsquery){
+                    data.dnsquery = 'on';
+                }else{
+                    data.dnsquery = '';
+                }
+                data.detail = _this.formValidate.detail;
+                _this.viewCaptureList = true;
+                var postVar = {"action":"getCaptureView","data":data};
+                _this.loading = true;
+                uiPost.getCaptureView(postVar,function(data) {
+                    if (9999 == data.rescode) {
+                        cs.loginOut();
+                    }
+                    _this.loading = false;
+                    if(0 == data.rescode){
+                        var tmpData = [];
+                        for(var i in data.data){
+                            tmpData[i] = {};
+                            tmpData[i].data = data.data[i];
+                        }
+                        _this.captureListData = tmpData;
+                    }
+                });
+            },
+            downCapture:function () {
+                var _this = this;
+                _this.$refs.formInline.$el.submit();
+            },
+            removeCapture:function () {
+                var _this = this;
+                var postVar = {"action":"delCapturePacket","data":[]};
+                uiPost.delCapturePacket(postVar,function(data) {
+                    if (9999 == data.rescode) {
+                        cs.loginOut();
+                    }
+                    if (0 != data.rescode) {
+                        _this.$Message.error({content:_this.$t('capture.del_fail') +' '+ _this.$t('errorcode.'+data.rescode),duration:5});
+                    }else{
+//                        _this.$Message.success({content:_this.$t('capture.del_success'),onClose:function(){
+                        location.href = location.href;
+//                        }});
+                    }
+                });
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

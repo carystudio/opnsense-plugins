@@ -1119,16 +1119,25 @@ var cs_main = {
                     }
                     if(_this.formValidate.dns_domain_enable == true){
                         data.dns_domain_enable = 'yes';
+                        data.dns_domain = _this.formValidate.dns_domain;
+                    }else{
+                        data.dns_domain = '';
                     }
-                    data.dns_domain = _this.formValidate.dns_domain;
+
 
                     if(_this.formValidate.dns_server_enable == true){
                         data.dns_server_enable = 'yes';
+                        data.dns_server1 = _this.formValidate.dns_server1;
+                        data.dns_server2 = _this.formValidate.dns_server2;
+                        data.dns_server3 = _this.formValidate.dns_server3;
+                        data.dns_server4 = _this.formValidate.dns_server4;
+                    }else{
+                        data.dns_server1 = '';
+                        data.dns_server2 = '';
+                        data.dns_server3 = '';
+                        data.dns_server4 = '';
                     }
-                    data.dns_server1 = _this.formValidate.dns_server1;
-                    data.dns_server2 = _this.formValidate.dns_server2;
-                    data.dns_server3 = _this.formValidate.dns_server3;
-                    data.dns_server4 = _this.formValidate.dns_server4;
+
 
                     if (_this.formValidate.push_register_dns == true){
                         data.push_register_dns = 'yes';
