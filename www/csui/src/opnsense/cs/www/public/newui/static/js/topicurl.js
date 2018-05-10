@@ -6814,6 +6814,48 @@ uiPost.prototype.doLogin = function(postVar,callback){
         this.url = '/webapi';
         return this.post(postVar,callback);
     };
-
+    uiPost.prototype.getTraShaCfg = function(postVar,callback){
+        this.topicurl = 'getTraShaCfg';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.delTraShaPipeCfg = function(postVar,callback){
+        this.topicurl = 'delTraShaPipeCfg';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.delTraShaQueueCfg = function(postVar,callback){
+        this.topicurl = 'delTraShaQueueCfg';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.delTraShaRulesCfg = function(postVar,callback){
+        this.topicurl = 'delTraShaRulesCfg';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setTraShaPipeCfg = function(postVar,callback){
+        this.topicurl = 'setTraShaPipeCfg';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setTraShaQueueCfg = function(postVar,callback){
+        this.topicurl = 'setTraShaQueueCfg';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.setTraShaRuleCfg = function(postVar,callback){
+        this.topicurl = 'setTraShaRuleCfg';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+ 
 	obj.uiPost = new uiPost();
 })(window);

@@ -586,7 +586,7 @@ class Freeradius extends Csbackend
     {
         global $config;
         // close session for long running action
-//        session_write_close();
+        session_write_close();
 
 //        $mdlGeneral = new BaseModel();
         $backend = new Backend();
