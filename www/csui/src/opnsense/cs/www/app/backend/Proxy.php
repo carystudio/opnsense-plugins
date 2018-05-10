@@ -118,103 +118,8 @@ class Proxy extends Csbackend
     private static function initConf(){
         global $config;
 
-        $proxy_data_json = <<<EOF
-<proxy version="0.0.0">
-      <general>
-        <enabled>0</enabled>
-        <icpPort/>
-        <logging>
-          <enable>
-            <accessLog>1</accessLog>
-            <storeLog>1</storeLog>
-          </enable>
-          <ignoreLogACL/>
-          <target/>
-        </logging>
-        <alternateDNSservers/>
-        <dnsV4First>0</dnsV4First>
-        <forwardedForHandling>on</forwardedForHandling>
-        <uriWhitespaceHandling>strip</uriWhitespaceHandling>
-        <useViaHeader>1</useViaHeader>
-        <suppressVersion>0</suppressVersion>
-        <VisibleEmail>admin@localhost.local</VisibleEmail>
-        <VisibleHostname/>
-        <cache>
-          <local>
-            <enabled>0</enabled>
-            <directory>/var/squid/cache</directory>
-            <cache_mem>256</cache_mem>
-            <maximum_object_size/>
-            <size>100</size>
-            <l1>16</l1>
-            <l2>256</l2>
-            <cache_linux_packages>0</cache_linux_packages>
-            <cache_windows_updates>0</cache_windows_updates>
-          </local>
-        </cache>
-        <traffic>
-          <enabled>0</enabled>
-          <maxDownloadSize>2048</maxDownloadSize>
-          <maxUploadSize>1024</maxUploadSize>
-          <OverallBandwidthTrotteling>1024</OverallBandwidthTrotteling>
-          <perHostTrotteling>256</perHostTrotteling>
-        </traffic>
-      </general>
-      <forward>
-        <interfaces>lan</interfaces>
-        <port>3128</port>
-        <sslbumpport>3129</sslbumpport>
-        <sslbump>0</sslbump>
-        <sslurlonly>0</sslurlonly>
-        <sslcertificate/>
-        <sslnobumpsites/>
-        <ssl_crtd_storage_max_size>4</ssl_crtd_storage_max_size>
-        <sslcrtd_children>5</sslcrtd_children>
-        <ftpInterfaces/>
-        <ftpPort>2121</ftpPort>
-        <ftpTransparentMode>0</ftpTransparentMode>
-        <addACLforInterfaceSubnets>1</addACLforInterfaceSubnets>
-        <transparentMode>0</transparentMode>
-        <acl>
-          <allowedSubnets/>
-          <unrestricted/>
-          <bannedHosts/>
-          <whiteList/>
-          <blackList/>
-          <browser/>
-          <mimeType/>
-          <safePorts>80:http,21:ftp,443:https,70:gopher,210:wais,1025-65535:unregistered ports,280:http-mgmt,488:gss-http,591:filemaker,777:multiling http</safePorts>
-          <sslPorts>443:https</sslPorts>
-          <remoteACLs>
-            <blacklists/>
-            <UpdateCron/>
-          </remoteACLs>
-        </acl>
-        <icap>
-          <enable>0</enable>
-          <RequestURL>icap://[::1]:1344/avscan</RequestURL>
-          <ResponseURL>icap://[::1]:1344/avscan</ResponseURL>
-          <SendClientIP>1</SendClientIP>
-          <SendUsername>0</SendUsername>
-          <EncodeUsername>0</EncodeUsername>
-          <UsernameHeader>X-Username</UsernameHeader>
-          <EnablePreview>1</EnablePreview>
-          <PreviewSize>1024</PreviewSize>
-          <OptionsTTL>60</OptionsTTL>
-          <exclude/>
-        </icap>
-        <authentication>
-          <method/>
-          <realm>OPNsense proxy authentication</realm>
-          <credentialsttl>2</credentialsttl>
-          <children>5</children>
-        </authentication>
-      </forward>
-      </proxy>
-EOF;
-
-        libxml_disable_entity_loader(true);
-        $values = json_decode(json_encode(simplexml_load_string($proxy_data_json, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+        $proxy_data = 'a:3:{s:11:"@attributes";a:1:{s:7:"version";s:5:"1.0.0";}s:7:"general";a:13:{s:7:"enabled";s:1:"0";s:7:"icpPort";s:0:"";s:7:"logging";a:3:{s:6:"enable";a:2:{s:9:"accessLog";s:1:"1";s:8:"storeLog";s:1:"1";}s:12:"ignoreLogACL";s:0:"";s:6:"target";s:0:"";}s:19:"alternateDNSservers";s:0:"";s:10:"dnsV4First";s:1:"0";s:20:"forwardedForHandling";s:2:"on";s:21:"uriWhitespaceHandling";s:5:"strip";s:12:"useViaHeader";s:1:"1";s:15:"suppressVersion";s:1:"0";s:12:"VisibleEmail";s:21:"admin@localhost.local";s:15:"VisibleHostname";s:0:"";s:5:"cache";a:1:{s:5:"local";a:9:{s:7:"enabled";s:1:"0";s:9:"directory";s:16:"/var/squid/cache";s:9:"cache_mem";s:3:"256";s:19:"maximum_object_size";s:0:"";s:4:"size";s:3:"100";s:2:"l1";s:2:"16";s:2:"l2";s:3:"256";s:20:"cache_linux_packages";s:1:"0";s:21:"cache_windows_updates";s:1:"0";}}s:7:"traffic";a:5:{s:7:"enabled";s:1:"0";s:15:"maxDownloadSize";s:4:"2048";s:13:"maxUploadSize";s:4:"1024";s:26:"OverallBandwidthTrotteling";s:4:"1024";s:17:"perHostTrotteling";s:3:"256";}}s:7:"forward";a:17:{s:10:"interfaces";s:3:"lan";s:4:"port";s:4:"3128";s:11:"sslbumpport";s:4:"3129";s:7:"sslbump";s:1:"0";s:10:"sslurlonly";s:1:"0";s:14:"sslcertificate";s:0:"";s:14:"sslnobumpsites";s:0:"";s:25:"ssl_crtd_storage_max_size";s:1:"4";s:16:"sslcrtd_children";s:1:"5";s:13:"ftpInterfaces";s:0:"";s:7:"ftpPort";s:4:"2121";s:18:"ftpTransparentMode";s:1:"0";s:25:"addACLforInterfaceSubnets";s:1:"1";s:15:"transparentMode";s:1:"0";s:3:"acl";a:10:{s:14:"allowedSubnets";s:0:"";s:12:"unrestricted";s:0:"";s:11:"bannedHosts";s:0:"";s:9:"whiteList";s:0:"";s:9:"blackList";s:0:"";s:7:"browser";s:0:"";s:8:"mimeType";s:0:"";s:9:"safePorts";s:133:"80:http,21:ftp,443:https,70:gopher,210:wais,1025-65535:unregistered ports,280:http-mgmt,488:gss-http,591:filemaker,777:multiling http";s:8:"sslPorts";s:9:"443:https";s:10:"remoteACLs";a:2:{s:10:"blacklists";s:0:"";s:10:"UpdateCron";s:0:"";}}s:4:"icap";a:11:{s:6:"enable";s:1:"0";s:10:"RequestURL";s:24:"icap://[::1]:1344/avscan";s:11:"ResponseURL";s:24:"icap://[::1]:1344/avscan";s:12:"SendClientIP";s:1:"1";s:12:"SendUsername";s:1:"0";s:14:"EncodeUsername";s:1:"0";s:14:"UsernameHeader";s:10:"X-Username";s:13:"EnablePreview";s:1:"1";s:11:"PreviewSize";s:4:"1024";s:10:"OptionsTTL";s:2:"60";s:7:"exclude";s:0:"";}s:14:"authentication";a:4:{s:6:"method";s:0:"";s:5:"realm";s:29:"OPNsense proxy authentication";s:14:"credentialsttl";s:1:"2";s:8:"children";s:1:"5";}}}';
+        $values = unserialize($proxy_data);
         if(is_array($values)){
             $config['OPNsense']['proxy'] = $values;
             self::setFirewall();
@@ -325,105 +230,128 @@ EOF;
             if('0'==$data['general']['enabled']){
                 $config['OPNsense']['proxy']['general']['enabled'] = 0;
             }else{
+                $conf_data = $config['OPNsense']['proxy'];
+                $conf_data['general']['enabled'] = '1';
                 if(!isset($data['general']['logging']['enable']['accessLog']) ||
                     !Util::check0and1($data['general']['logging']['enable']['accessLog'])){
                     throw new AppException('PROXY_101');
                 }
+                $conf_data['general']['logging']['enable']['accessLog'] = $data['general']['logging']['enable']['accessLog'];
+
                 if(!isset($data['general']['logging']['enable']['storeLog']) ||
                     !Util::check0and1($data['general']['logging']['enable']['storeLog'])){
                     throw new AppException('PROXY_102');
                 }
+                $conf_data['general']['logging']['enable']['storeLog'] = $data['general']['logging']['enable']['storeLog'];
+
                 if(!isset($data['general']['dnsV4First']) ||
                     !Util::check0and1($data['general']['dnsV4First'])){
                     throw new AppException('PROXY_103');
                 }
+                $conf_data['general']['dnsV4First'] = $data['general']['dnsV4First'];
+
                 if(!isset($data['general']['forwardedForHandling']) ||
                     !in_array($data['general']['forwardedForHandling'], Proxy::FORWARDEDFORHANDLING)){
                     throw new AppException('PROXY_104');
                 }
+                $conf_data['general']['forwardedForHandling'] = $data['general']['forwardedForHandling'];
+
                 if(!isset($data['general']['uriWhitespaceHandling']) ||
                     !in_array($data['general']['uriWhitespaceHandling'], Proxy::URIWHITESPACEHANFLING)){
                     throw new AppException('PROXY_105');
                 }
+                $conf_data['general']['uriWhitespaceHandling'] = $data['general']['uriWhitespaceHandling'];
+
                 if(!isset($data['general']['suppressVersion']) ||
                     !Util::check0and1($data['general']['suppressVersion'])){
                     throw new AppException('PROXY_106');
                 }
+                $conf_data['general']['suppressVersion'] = $data['general']['suppressVersion'];
+
                 if(isset($data['general']['VisibleEmail']) && false === filter_var($data['general']['VisibleEmail'], FILTER_VALIDATE_EMAIL)){
                     throw new AppException('PROXY_107');
                 }
+                $conf_data['general']['VisibleEmail'] = $data['general']['VisibleEmail'];
 
                 if(!isset($data['general']['cache']['local']['cache_mem']) ||
                     !is_numeric($data['general']['cache']['local']['cache_mem'])){
                     throw new AppException('PROXY_108');
                 }
+                $conf_data['general']['cache']['local']['cache_mem'] = $data['general']['cache']['local']['cache_mem'];
+
                 $data['general']['cache']['local']['cache_mem'] = intval($data['general']['cache']['local']['cache_mem']);
                 if($data['general']['cache']['local']['cache_mem']>2048 ||
                     $data['general']['cache']['local']['cache_mem']<128){
                     throw new AppException('PROXY_108');
                 }
+                $conf_data['general']['cache']['local']['cache_mem'] = $data['general']['cache']['local']['cache_mem'];
 
                 if(!isset($data['general']['cache']['local']['cache_linux_packages']) ||
                     !Util::check0and1($data['general']['cache']['local']['cache_linux_packages'])){
                     throw new AppException('PROXY_109');
                 }
+                $conf_data['general']['cache']['local']['cache_linux_packages'] = $data['general']['cache']['local']['cache_linux_packages'];
 
                 if(!isset($data['general']['cache']['local']['cache_windows_updates']) ||
                     !Util::check0and1($data['general']['cache']['local']['cache_windows_updates'])){
                     throw new AppException('PROXY_110');
                 }
+                $conf_data['general']['cache']['local']['cache_windows_updates'] = $data['general']['cache']['local']['cache_windows_updates'];
                 //cache local disabled, set default value
-                $data['general']['cache']['local']['enabled'] = '0';
-                $data['general']['cache']['local']['directory'] = '/var/squid/cache';
-                $data['general']['cache']['local']['maximum_object_size'] = '';
-                $data['general']['cache']['local']['size'] = 100;
-                $data['general']['cache']['local']['l1'] = 16;
-                $data['general']['cache']['local']['l2'] = 256;
+                $conf_data['general']['cache']['local']['enabled'] = '0';
+                $conf_data['general']['cache']['local']['directory'] = '/var/squid/cache';
+                $conf_data['general']['cache']['local']['maximum_object_size'] = '';
+                $conf_data['general']['cache']['local']['size'] = 100;
+                $conf_data['general']['cache']['local']['l1'] = 16;
+                $conf_data['general']['cache']['local']['l2'] = 256;
 
                 if(!isset($data['general']['traffic']['enabled']) ||
                     !Util::check0and1($data['general']['traffic']['enabled'])){
                     throw new AppException('PROXY_111');
                 }
-                if('0' == $data['general']['traffic']['enabled']){
-                    $data['general']['traffic']['maxDownloadSize'] = $config['OPNsense']['proxy']['general']['traffic']['maxDownloadSize'];
-                    $data['general']['traffic']['maxUploadSize'] = $config['OPNsense']['proxy']['general']['traffic']['maxUploadSize'];
-                    $data['general']['traffic']['OverallBandwidthTrotteling'] = $config['OPNsense']['proxy']['general']['traffic']['OverallBandwidthTrotteling'];
-                    $data['general']['traffic']['perHostTrotteling'] = $config['OPNsense']['proxy']['general']['traffic']['perHostTrotteling'];
-                }else{
+                $conf_data['general']['traffic']['enabled'] = $data['general']['traffic']['enabled'];
+                if('0' != $data['general']['traffic']['enabled']){
                     if(!isset($data['general']['traffic']['maxDownloadSize']) ||
                         (!empty($data['general']['traffic']['maxDownloadSize']) && !is_numeric($data['general']['traffic']['maxDownloadSize']))
                     ){
                         throw new AppException('PROXY_112');
                     }
+                    $conf_data['general']['traffic']['maxDownloadSize'] = $data['general']['traffic']['maxDownloadSize'];
 
                     if(!isset($data['general']['traffic']['maxUploadSize']) ||
                         (!empty($data['general']['traffic']['maxUploadSize']) && !is_numeric($data['general']['traffic']['maxUploadSize']))
                     ){
                         throw new AppException('PROXY_113');
                     }
+                    $conf_data['general']['traffic']['maxUploadSize'] = $data['general']['traffic']['maxUploadSize'];
 
                     if(!isset($data['general']['traffic']['OverallBandwidthTrotteling']) ||
                         (!empty($data['general']['traffic']['OverallBandwidthTrotteling']) && !is_numeric($data['general']['traffic']['OverallBandwidthTrotteling']))
                     ){
                         throw new AppException('PROXY_114');
                     }
+                    $conf_data['general']['traffic']['OverallBandwidthTrotteling'] = $data['general']['traffic']['OverallBandwidthTrotteling'];
 
                     if(!isset($data['general']['traffic']['perHostTrotteling']) ||
                         (!empty($data['general']['traffic']['perHostTrotteling']) && !is_numeric($data['general']['traffic']['perHostTrotteling']))
                     ){
                         throw new AppException('PROXY_115');
                     }
+                    $conf_data['general']['traffic']['perHostTrotteling'] = $data['general']['traffic']['perHostTrotteling'];
 
                     if(empty($data['general']['traffic']['OverallBandwidthTrotteling']) &&
                         !empty($data['general']['traffic']['perHostTrotteling'])){
                         throw new AppException('PROXY_116');
                     }
+                    $conf_data['general']['traffic']['OverallBandwidthTrotteling'] = $data['general']['traffic']['OverallBandwidthTrotteling'];
+
                     if(empty($data['general']['traffic']['perHostTrotteling']) &&
                         !empty($data['general']['traffic']['OverallBandwidthTrotteling'])){
                         throw new AppException('PROXY_116');
                     }
+                    $conf_data['general']['traffic']['perHostTrotteling'] = $data['general']['traffic']['perHostTrotteling'];
                 }
-                $data['forward']['interfaces'] = 'lan';
+                $conf_data['forward']['interfaces'] = 'lan';
                 if(!isset($data['forward']['port']) ||
                     !is_numeric($data['forward']['port'])){
                     throw new AppException('PROXY_117');
@@ -432,6 +360,7 @@ EOF;
                 if($data['forward']['port']>65535 || $data['forward']['port']<1){
                     throw new AppException('PROXY_117');
                 }
+                $conf_data['forward']['port'] = $data['forward']['port'];
 
                 if(!isset($data['forward']['sslbumpport']) ||
                     !is_numeric($data['forward']['sslbumpport'])){
@@ -442,34 +371,48 @@ EOF;
                     $data['forward']['sslbumpport'] == $data['forward']['port']){
                     throw new AppException('PROXY_117');
                 }
+                $conf_data['forward']['sslbumpport'] = $data['forward']['sslbumpport'];
+
                 if(!isset($data['forward']['sslbump']) ||
                     !Util::check0and1($data['forward']['sslbump'])
                 ){
                     throw new AppException('PROXY_118');
                 }
+                $conf_data['forward']['sslbump'] = $data['forward']['sslbump'];
+
                 if(!isset($data['forward']['sslurlonly']) ||
                     !Util::check0and1($data['forward']['sslurlonly'])
                 ){
                     throw new AppException('PROXY_119');
                 }
+                $conf_data['forward']['sslurlonly'] = $data['forward']['sslurlonly'];
+
                 if(!isset($data['forward']['ssl_crtd_storage_max_size']) ||
                     !is_numeric($data['forward']['ssl_crtd_storage_max_size'])){
                     throw new AppException('PROXY_120');
                 }
+                $conf_data['forward']['ssl_crtd_storage_max_size'] = $data['forward']['ssl_crtd_storage_max_size'];
+
                 if(!isset($data['forward']['sslcrtd_children']) ||
                     !is_numeric($data['forward']['sslcrtd_children'])){
                     throw new AppException('PROXY_120');
                 }
+                $conf_data['forward']['sslcrtd_children'] = $data['forward']['sslcrtd_children'];
+
                 if(!isset($data['forward']['addACLforInterfaceSubnets']) ||
                     !Util::check0and1($data['forward']['addACLforInterfaceSubnets'])
                 ){
                     throw new AppException('PROXY_121');
                 }
+                $conf_data['forward']['addACLforInterfaceSubnets'] = $data['forward']['addACLforInterfaceSubnets'];
+
                 if(!isset($data['forward']['transparentMode']) ||
                     !Util::check0and1($data['forward']['transparentMode'])
                 ){
                     throw new AppException('PROXY_122');
                 }
+                $conf_data['forward']['transparentMode'] = $data['forward']['transparentMode'];
+
                 if(!isset($data['forward']['acl']['safePorts'])){
                     throw new AppException('PROXY_123');
                 }
@@ -482,6 +425,8 @@ EOF;
                         throw new AppException('PROXY_123');
                     }
                 }
+                $conf_data['forward']['acl']['safePorts'] = $data['forward']['acl']['safePorts'];
+
                 if(!isset($data['forward']['acl']['sslPorts'])){
                     throw new AppException('PROXY_124');
                 }
@@ -496,14 +441,24 @@ EOF;
                         }
                     }
                 }
-                //ftp proxy disabled, set default value
-                $data['forward']['ftpInterfaces'] = '';
-                $data['forward']['ftpPort'] = 2121;
-                $data['forward']['ftpTransparentMode'] = 0;
+                $conf_data['forward']['acl']['sslPorts'] = $data['forward']['acl']['sslPorts'];
+                //no check data
+                $conf_data['forward']['acl']['allowedSubnets'] = $data['forward']['acl']['allowedSubnets'];
+                $conf_data['forward']['acl']['unrestricted'] = $data['forward']['acl']['unrestricted'];
+                $conf_data['forward']['acl']['bannedHosts'] = $data['forward']['acl']['bannedHosts'];
+                $conf_data['forward']['acl']['whiteList'] = $data['forward']['acl']['whiteList'];
+                $conf_data['forward']['acl']['blackList'] = $data['forward']['acl']['blackList'];
+                $conf_data['forward']['acl']['browser'] = $data['forward']['acl']['browser'];
+                $conf_data['forward']['acl']['mimeType'] = $data['forward']['acl']['mimeType'];
 
-                $data['forward']['authentication'] = array('realm'=>'CSG2000P proxy authentication',
+                //ftp proxy disabled, set default value
+                $conf_data['forward']['ftpInterfaces'] = '';
+                $conf_data['forward']['ftpPort'] = 2121;
+                $conf_data['forward']['ftpTransparentMode'] = 0;
+
+                $conf_data['forward']['authentication'] = array('realm'=>'CSG2000P proxy authentication',
                     'credentialsttl'=>2,'children'=>'5');
-                $data['forward']['icap'] = array(
+                $conf_data['forward']['icap'] = array(
                     'enable'=>0,
                     'RequestURL'=>'icap://[::1]:1344/avscan',
                     'ResponseURL'=>'icap://[::1]:1344/avscan',
@@ -517,7 +472,7 @@ EOF;
                     'exclude'=>''
                 );
                 
-                $config['OPNsense']['proxy'] = $data;
+                $config['OPNsense']['proxy'] = $conf_data;
             }
             self::setFirewall();
             write_config();

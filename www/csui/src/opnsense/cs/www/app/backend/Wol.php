@@ -85,5 +85,33 @@ class Wol extends Csbackend
         return $result;
     }
 
+    public static function wakeup($data){
+        $result = 0;
+        try {
+            if (empty($data['mac']) || !is_macaddr($data['mac'])) {
+                throw new AppException('WOL_300');
+            }
+            if (empty($data['if'])) {
+                throw new AppException('WOL_301');
+            } else {
+                $ipaddr = get_interface_ip($data['if']);
+                if (!is_ipaddr($ipaddr)) {
+                    throw new AppException('WOL_302');
+                }
+            }
 
+            /* determine broadcast address */
+            $bcip = escapeshellarg(gen_subnet_max($ipaddr, get_interface_subnet($_POST['if'])));
+            /* Execute wol command and check return code. */
+            if (mwexec("/usr/local/bin/wol -i {$bcip} " . escapeshellarg($_POST['mac']))) {
+                throw new AppException('WOL_303');
+            }
+        }catch(AppException $aex){
+            $result = $aex->getMessage();
+        }catch(Exception $ex){
+            $result = 100;
+        }
+
+        return $result;
+    }
 }
