@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+    <Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.service'),$t('menu.wakeonlan')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+            <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+                <Alert>
+                    {{ $t('wakeonlan.help') }}
+                </Alert>
+            </Col>
+        </Row>
+        <div v-show="homepage">
+            <Row>
+                <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <Card>
+                        <p slot="title">
+                            {{ $t('wakeonlan.wake_on_lan') }}
+                        </p>
+                        <FormItem :label="$t('wakeonlan.interface')">
+                            <Select v-model="formValidate.interface">
+                                <Option v-for="port in portOption" :value="port.interface" :key="port.interface"> {{ port.name }}</Option>
+                            </Select>
+                        </FormItem>
+                        <FormItem :label="$t('wakeonlan.mac')" prop="mac">
+                            <Input v-model="formValidate.mac"></Input>
+                        </FormItem>
+                        <FormItem>
+                            <Button type="primary" @click="send('formValidate')" :loading="applyLoading">{{$t('wakeonlan.send')}}</Button>
+                        </FormItem>
+                    </Card>
+                </Form>
+                <br>
+                </Col>
+            </Row>
+            <Row>
+                <Button type="primary" @click="add">{{$t('wakeonlan.add_wol')}}</Button>
+            </Row>
+            <br>
+            <Row>
+                <Col>
+                <Table border ref="tableSelect" :columns="accountListColumns" :data="wakeonlanData" :no-data-text="$t('common.no_data')"></Table>
+                </Col>
+            </Row>
+        </div>
+        <div v-show="addpage">
+            <Row>
+                <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <Card>
+                        <p slot="title">
+                            {{$t('wakeonlan.add_wol')}}
+                        </p>
+                        <FormItem :label="$t('wakeonlan.interface')">
+                            <Select v-model="formValidate.addInterface">
+                                <Option v-for="port in portOption" :value="port.interface" :key="port.interface"> {{ port.name }}</Option>
+                            </Select>
+                        </FormItem>
+                        <FormItem :label="$t('wakeonlan.mac')" prop="addMac">
+                            <Input v-model="formValidate.addMac"></Input>
+                        </FormItem>
+                        <FormItem :label="$t('wakeonlan.descr')" prop="addDescr">
+                            <Input v-model="formValidate.addDescr"></Input>
+                        </FormItem>
+                        <FormItem>
+                            <Button type="primary" @click="saveAdding('formValidate')" :loading="saveLoading">{{ $t('wakeonlan.save') }}</Button>
+                            <Button type="primary" @click="notAdding">{{ $t('wakeonlan.cancel') }}</Button>
+                        </FormItem>
+                    </Card>
+                </Form>
+                </Col>
+            </Row>
+        </div>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+    </Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            var _this = this;
+            return {
+                globalConfig:globalConfig,
+                applyLoading:false,
+                saveLoading:false,
+                portOption:[],
+                homepage:true,
+                addpage:false,
+                formValidate: {
+                    interface:'',
+                    mac:'',
+                    addInterface:'',
+                    addMac:'',
+                    addDescr:''
+                },
+                wakeonlanData:[]
+            }
+        },
+        computed:{
+            ruleValidate:function(){
+                var _this = this;
+                return {
+                    mac:[
+                        {validator:function (r,v,f) {
+                            if(_this.homepage == true && _this.addpage == false){
+                                var _s = cs.mac(v);
+                                if(_s == 0){
+                                    f(_this.$t('wakeonlan.msg1'));
+                                }else if(_s != 99){
+                                    f(_this.$t('wakeonlan.msg2'));
+                                }
+                            }
+                            f();
+                        },trigger: 'blur'}
+                    ],
+                    addMac:[
+                        {validator:function (r,v,f) {
+                            if(_this.homepage == false && _this.addpage == true){
+                                var _s = cs.mac(v);
+                                if(_s == 0){
+                                    f(_this.$t('wakeonlan.msg1'));
+                                }else if(_s != 99){
+                                    f(_this.$t('wakeonlan.msg2'));
+                                }
+                            }
+                            f();
+                        },trigger: 'blur'}
+                    ],
+                    addDescr:[
+                        {validator:function (r,v,f) {
+                            if(_this.homepage == false && _this.addpage == true){
+                                var _s = cs.string(v);
+                                if(_s == 0){
+                                    f(_this.$t('wakeonlan.msg3'));
+                                }
+                            }
+                            f();
+                        },trigger: 'blur'}
+                    ]
+                }
+            },
+            accountListColumns: function() {
+                var _this = this;
+                return [{
+                    title: _this.$t('wakeonlan.interface'),
+                    key: 'interface',
+                    align: 'center'
+                }, {
+                    title: _this.$t('wakeonlan.mac'),
+                    key: 'mac',
+                    align: 'center',
+                    sortable: true
+                }, {
+                    title: _this.$t('wakeonlan.descr'),
+                    key: 'descr',
+                    align: 'center',
+                    sortable: true
+                },{
+                    title: _this.$t('wakeonlan.operation'),
+                    key: 'action',
+                    align: 'center',
+                    render: function(h, params) {
+                        var tmp = [];
+                        return[
+                            h('Button', {
+                                props: {
+                                    type: 'primary',
+                                    size: 'small'
+                                },
+                                style: {
+                                    marginRight: '5px'
+                                },
+                                nativeOn:{
+                                    click:function (){
+                                        var data = {};
+                                        data['mac']  = params.row.mac;
+                                        data['if']  = params.row.interface;
+                                        var postData = {"action":"wolWakeup","data":data};
+                                        uiPost.wolWakeup(postData,function(data){
+                                            if (9999 == data.rescode){
+                                                cs.loginOut();
+                                            }
+                                            if (0 == data.rescode) {
+                                                _this.$Message.success({content:_this.$t('wakeonlan.msg4'),onClose:function(){
+                                                    location.href = location.href;
+                                                }});
+                                            }else{
+                                                _this.$Message.error({content:_this.$t('wakeonlan.msg5')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                                            }
+                                        });
+                                    }
+                                }
+                            }, _this.$t('wakeonlan.awaken')),
+                            h('Poptip',{
+                                props: {
+                                    confirm: true,
+                                    title: _this.$t('wakeonlan.msg6'),
+                                    "ok-text":_this.$t('common.ok'),
+                                    "cancel-text":_this.$t('common.cancel')
+                                },
+                                style: {
+                                    marginRight: '5px'
+                                },
+                                on: {
+                                    "on-ok": function(){
+                                        var data = {};
+                                        data.id = params.row.id;
+                                        var postData = {"action":"delWolEntry","data":data};
+                                        _this.$Spin.show();   //关闭加载动画
+                                        uiPost.delWolEntry(postData,function(data){
+                                            if (9999 == data.rescode){
+                                                cs.loginOut();
+                                            }
+                                            _this.$Spin.hide();   //关闭加载动画
+                                            if (0 == data.rescode) {
+                                                _this.$Message.success({content:_this.$t('wakeonlan.msg7'),onClose:function(){
+                                                    location.href = location.href;
+                                                }});
+                                            }else{
+                                                _this.$Message.error({content:_this.$t('wakeonlan.msg8')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                                            }
+                                        });
+                                    }
+                                }
+                            },[
+                                h('Button', {
+                                    props: {
+                                        type: 'error',
+                                        size: 'small'
+                                    }
+                                },_this.$t('wakeonlan.delete'))
+                            ])
+                        ]
+                    }
+                }];
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postVar = {"action":"getLanWanInf","data":[]};
+            _this.$Spin.show();  //加载动画
+            uiPost.getLanWanInf(postVar,function(data){
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                _this.$Spin.hide();   //关闭加载动画
+                if (0 == data.rescode){
+                    _this.portOption = data.data;
+                    var postData = {"action":"getWolEntryList","data":[]};
+                    uiPost.getWolEntryList(postData,function(data){
+                        if (9999 == data.rescode){
+                            cs.loginOut();
+                        }
+                        _this.$Spin.hide();   //关闭加载动画
+                        if (0 == data.rescode){
+                            console.log(data.data);
+                            _this.wakeonlanData = data.data;
+                        }
+                    });
+                }
+            });
+
+        },
+        methods:{
+            add:function () {
+                var _this = this;
+                _this.addpage = true;
+                _this.homepage = false;
+            },
+            notAdding:function () {
+                location.href = location.href;
+            },
+            send:function (name){
+                var _this = this;
+                _this.$refs[name].validate(function(valid){
+                    if (valid){
+                        var data = {};
+                        data['if'] = _this.formValidate.interface;
+                        data['mac'] = _this.formValidate.mac;
+                        var postData = {"action":"wolWakeup","data":data};
+                        _this.applyLoading = true;
+                        uiPost.wolWakeup(postData,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('wakeonlan.msg9'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            } else {
+                                _this.$Message.error({content:_this.$t('wakeonlan.msg10')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
+                            _this.applyLoading = false;
+                        });
+                    }
+                });
+            },
+            saveAdding:function (name) {
+                var _this = this;
+                _this.$refs[name].validate(function(valid){
+                    if (valid){
+                        var data = {};
+                        data['interface'] = _this.formValidate.addInterface;
+                        data['mac'] = _this.formValidate.addMac;
+                        data['descr'] = _this.formValidate.addDescr;
+                        if(data['interface'] == ''){
+                            _this.$Message.error({content:_this.$t('wakeonlan.msg13'),duration:5});
+                            return false;
+                        }
+                        var postData = {"action":"addWolEntry","data":data};
+                        _this.saveLoading = true;
+                        uiPost.addWolEntry(postData,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('wakeonlan.msg11'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            } else {
+                                _this.$Message.error({content:_this.$t('wakeonlan.msg12')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
+                            _this.saveLoading = false;
+                        });
+                    }
+                });
+            }
+        }
+    };
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>

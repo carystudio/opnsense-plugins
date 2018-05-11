@@ -214,7 +214,7 @@
             <br>
             <Row>
                 <Col>
-                <Table border :columns="columns" :data="firmData" :no-data-text="$t('common.no_data')"></Table>
+                <Table border :columns="columns" :data="firmData" :no-data-text="$t('common.no_data')" :loading="firmDataloading"></Table>
                 </Col>
             </Row>
             <br>
@@ -250,6 +250,7 @@
                 applyLoading: false,
                 apscanLoading: false,
                 multipleHide: true,
+                firmDataloading:false,
                 centralData: [],
                 usbState:true,
                 setinfo:false,
@@ -1290,10 +1291,12 @@
                     data[i] = centdata[i].csid;
                 }
                 var postData = {"action":"getApUpgradeInfo","data":data};
+                _this.firmDataloading = true;
                 uiPost.getApUpgradeInfo(postData,function(data){
                     if (9999 == data.rescode){
                         cs.loginOut();
                     }
+                    _this.firmDataloading = false;
                     for (var j in data.data){
                         _this.firmData=data.data;
                     }
@@ -1382,7 +1385,7 @@
                 }
                 var k = 0;
                 for(var i in apdata){
-                    if(apdata[i].csid == csid){
+                    if(apdata[i].csid.includes(csid) || csid.includes(apdata[i].csid)){
                         k = 1;
                         break;
                     }

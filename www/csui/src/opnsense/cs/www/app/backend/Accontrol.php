@@ -394,6 +394,7 @@ class Accontrol extends Csbackend
                 $del = $dbh->prepare($delApFileSql);
                 $del->execute(array('csid'=>$csid));
                 $delApFileInfo = $sth->fetch(PDO::FETCH_ASSOC);
+
                 if($delApFileInfo){
                     $file = $apUpgradeInfo["filepath"];
                     if (unlink(Accontrol::FW_DIR.$file)){
@@ -422,11 +423,22 @@ class Accontrol extends Csbackend
             $apUpgradeInfos=array();
             $pdo = self::getPdo();
             $sum = 0;
+            $arr = array();
             foreach ($data as $key=>$val){
-                $apUpgradeSql = "select filepath as version from AP_UPGRADE where csid = '$val'";
-                $arr = array();
-                foreach ($pdo->query($apUpgradeSql,PDO::FETCH_ASSOC) as $k=>$row) {
-                    $arr[$sum] = $row;
+                if(strrpos($val,'-') === false){
+                    $valdata = $val;
+                }else{
+                    $valdata = substr($val,0,strrpos($val,'-'));
+                }
+                $apUpgradeSql = "select filepath as version from AP_UPGRADE where csid LIKE :csid";
+                $sth = $pdo->prepare($apUpgradeSql);
+                $sth->execute(array('csid'=>'%'.$valdata.'%'));
+                $apUpgradeInfo = $sth->fetch(PDO::FETCH_ASSOC);
+                if(!$apUpgradeInfo){
+                    continue;
+                }
+                foreach ($apUpgradeInfo as $k=>$row) {
+                    $arr[$sum][$k] = $row;
                     $sum++;
                 }
             }

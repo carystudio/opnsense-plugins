@@ -6856,6 +6856,30 @@ uiPost.prototype.doLogin = function(postVar,callback){
         this.url = '/webapi';
         return this.post(postVar,callback);
     };
+    uiPost.prototype.getWolEntryList = function(postVar,callback){
+        this.topicurl = 'getWolEntryList';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.addWolEntry = function(postVar,callback){
+        this.topicurl = 'addWolEntry';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.wolWakeup = function(postVar,callback){
+        this.topicurl = 'wolWakeup';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
+    uiPost.prototype.delWolEntry = function(postVar,callback){
+        this.topicurl = 'delWolEntry';
+        this.async = true; // true:异步，false:同步。
+        this.url = '/webapi';
+        return this.post(postVar,callback);
+    };
  
 	obj.uiPost = new uiPost();
 })(window);

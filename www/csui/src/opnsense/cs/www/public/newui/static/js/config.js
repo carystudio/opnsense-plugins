@@ -378,6 +378,12 @@ var menu = [
                 "href": "/newui/service/freeradius",
                 "lang": "freeradius",
                 "display":true
+            },
+            {
+                "id":"15-5",
+                "href": "/newui/service/wakeonlan",
+                "lang": "wakeonlan",
+                "display":true
             }
         ]
     },

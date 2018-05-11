@@ -101,9 +101,9 @@ class Wol extends Csbackend
             }
 
             /* determine broadcast address */
-            $bcip = escapeshellarg(gen_subnet_max($ipaddr, get_interface_subnet($_POST['if'])));
+            $bcip = escapeshellarg(gen_subnet_max($ipaddr, get_interface_subnet($data['if'])));
             /* Execute wol command and check return code. */
-            if (mwexec("/usr/local/bin/wol -i {$bcip} " . escapeshellarg($_POST['mac']))) {
+            if (mwexec("/usr/local/bin/wol -i {$bcip} " . escapeshellarg($data['mac']))) {
                 throw new AppException('WOL_303');
             }
         }catch(AppException $aex){
