@@ -114,6 +114,11 @@ class Network extends Csbackend
 
         if(false == self::$availableNic){
             $niclist = get_interface_list();
+            foreach($niclist as $tmp_if=>$tmp_infinfo){
+                if('ovpn'==substr($tmp_if,0,4)) {
+                    unset($niclist[$tmp_if]);
+                }
+            }
             foreach($config['interfaces'] as $if_name=>$if_info){
                 if('wan'==substr($if_info['descr'],0,3)){
                     if(isset($niclist[$config['interfaces'][$if_name]['if']])){
