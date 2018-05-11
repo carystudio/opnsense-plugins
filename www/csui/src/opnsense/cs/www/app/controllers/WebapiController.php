@@ -417,9 +417,20 @@ class WebapiController extends BaseController
                 $result['rescode'] = Dyndns::delDdns($para['data']);
             }else if('getProxy'==$action){
                 $result['rescode'] = Proxy::getConf();
-            }else if('setProxy'==$action){
+            }else if('setProxy'==$action) {
                 $this->checkData($para);
                 $result['rescode'] = Proxy::setConf($para['data']);
+            }else if('getWolEntryList'==$action){
+                $result['rescode'] = Wol::getEntryList();
+            }else if('addWolEntry'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Wol::addEntry($para['data']);
+            }else if('delWolEntry'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Wol::delEntry($para['data']);
+            }else if('wolWakeup'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Wol::wakeup($para['data']);
             }else if('startCapturePacket'==$action){
                 $this->checkData($para);
                 $result['rescode'] = Packet::setCapturePacketStart($para['data']);

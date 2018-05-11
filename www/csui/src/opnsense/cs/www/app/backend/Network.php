@@ -299,10 +299,12 @@ class Network extends Csbackend
                 }
                 if(strpos($interface,'wan')===0){//WAN接口才取DNS
                     $interfaceInfo['Dns'] = self::getWanDns($interface);
-                    if(isset($infinfo['monitor']) && !empty($infinfo['monitor'])){
-                        $interfaceInfo['Monitor'] = $infinfo['monitor'];
-                    }else{
-                        $interfaceInfo['Monitor'] = '';
+                    $wan_gateway = self::getWanGateway($infinfo);
+                    $interfaceInfo['Monitor'] = '';
+                    if($wan_gateway){
+                        if(!isset($wan_gateway['monitor_disable']) || '1'!=$wan_gateway['monitor_disable']){
+                            $interfaceInfo['Monitor'] = $wan_gateway['monitor'];
+                        }
                     }
                     $interfaceInfo['Tier'] = '1';
                     $interfaceInfo['Weight'] = '1';
@@ -775,6 +777,28 @@ class Network extends Csbackend
         return $result;
     }
 
+    private static function getWanGateway($waninfo){
+        global $config;
+
+        if('dhcp'==$waninfo['ipaddr']){
+            $gateway_name = strtoupper($waninfo['descr']).'_DHCP';
+        }else if('pppoe'==$waninfo['ipaddr']){
+            $gateway_name =strtoupper($waninfo['descr']).'_PPPOE';
+        }else{//static
+            $gateway_name = strtoupper($waninfo['descr']).'_STATIC';
+        }
+        if(isset($config['gateways']['gateway_item']) && is_array($config['gateways']['gateway_item'])){
+            foreach($config['gateways']['gateway_item'] as $idx=>$tmp_gw){
+                if($tmp_gw['name']==$gateway_name){
+                    return $tmp_gw;
+                }
+            }
+        }
+
+
+        return false;
+    }
+
     private static function setWanGateway($ifname, $waninfo, $monitorip=false, $wangw=false, $weight=1, $tier=1){
         global $config;
 
@@ -994,7 +1018,6 @@ class Network extends Csbackend
                 $wan['if'] = $data['Nic'];
                 $wan['enable'] = '1';
                 $wan['ipaddr']='dhcp';
-                $wan['gateway']='';
                 $wan['mtu'] = $mtu;
                 $wan['spoofmac'] = $data['MacClone'];
                 $wan['blockbogons'] = '1';
@@ -1189,12 +1212,13 @@ class Network extends Csbackend
 //                throw new AppException('Network_402');
 //            }
 
-            $netMask = Util::maskbit2ip($config['interfaces']['lan']['subnet']);
-            $netMask = sprintf("%u", ip2long($netMask));
+            $netMask = 32 - intval($config['interfaces']['lan']['subnet']);
             $long = sprintf("%u", ip2long($data['Ip']));
             $lanIp = sprintf("%u", ip2long($config['interfaces']['lan']['ipaddr']));
+            $ip_net = ($long>>$netMask)<<$netMask;
+            $lan_net = ($lanIp>>$netMask)<<$netMask;
 
-            if(($netMask & $long) != ($netMask & $lanIp)){
+            if($ip_net != $lan_net){
                 throw new AppException('Network_405');
             }
 
