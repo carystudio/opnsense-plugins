@@ -603,12 +603,12 @@
                                         var data = {};
                                         data.uuid = params.row.uuid;
                                         var postData = {"action":"delFrUser","data":data};
-//                                        _this.$Spin.show();   //关闭加载动画
+                                        _this.$Spin.show();   //加载动画
                                         uiPost.delFrUser(postData,function(data){
                                             if (9999 == data.rescode){
                                                 cs.loginOut();
                                             }
-//                                            _this.$Spin.hide();   //关闭加载动画
+                                            _this.$Spin.hide();   //关闭加载动画
                                             if (0 == data.rescode) {
                                                 _this.$Message.success({content:_this.$t('freeuser.del_success'),onClose:function(){
                                                     location.href = location.href;
@@ -771,10 +771,12 @@
                                         var data = {};
                                         data.uuid = params.row.uuid;
                                         var postData = {"action":"delClientCfg","data":data};
+                                        _this.$Spin.show();   //加载动画
                                         uiPost.delClientCfg(postData,function(data){
                                             if (9999 == data.rescode){
                                                 cs.loginOut();
                                             }
+                                            _this.$Spin.hide();   //关闭加载动画
                                             if (0 == data.rescode) {
                                                 _this.$Message.success({content:_this.$t('freeclient.del_success'),onClose:function(){
                                                     location.href = location.href;
@@ -853,10 +855,12 @@
                 console.log(data);
 
                 var postVar = {"action":"setFrGeneral","data":data};
+                _this.$Spin.show();   //加载动画
                 uiPost.setFrGeneral(postVar,function(data){
                     if (9999 == data.rescode){
                         cs.loginOut();
                     }
+                    _this.$Spin.hide();   //关闭加载动画
                     if (0 != data.rescode) {
                         _this.$Message.error({content:_this.$t('freegeneral.set_fail') +' '+ _this.$t('errorcode.'+data.rescode),duration:5});
                     }else{
@@ -894,10 +898,12 @@
                         data.sessionlimit_max_session_limit = _this.freeUserFormData.sessionlimit_max_session_limit;
 
                         var postVar = {"action":"setFrUser","data":data};
+                        _this.$Spin.show();   //加载动画
                         uiPost.setFrUser(postVar,function(data) {
                             if (9999 == data.rescode) {
                                 cs.loginOut();
                             }
+                            _this.$Spin.hide();   //关闭加载动画
                             if (0 == data.rescode) {
                                 _this.$Message.success({content:_this.frUserUuid ? _this.$t('freeuser.edit_success'):_this.$t('freeuser.add_success'),onClose:function(){
                                     location.href = location.href;
@@ -947,10 +953,12 @@
                         data.secret = _this.frClientFormDate.secret;
                         data.uuid = _this.frClientFormDate.uuid;
                         var postVar = {"action":"setFrClientCfg","data":data};
+                        _this.$Spin.show();   //加载动画
                         uiPost.setFrClientCfg(postVar,function(data){
                             if (9999 == data.rescode){
                                 cs.loginOut();
                             }
+                            _this.$Spin.hide();   //关闭加载动画
                             if (0 == data.rescode) {
                                 _this.$Message.success({content:_this.frClientEditName?_this.$t('freeclient.edit_success'):_this.$t('freeclient.add_success'),onClose:function(){
                                     location.href = location.href;
