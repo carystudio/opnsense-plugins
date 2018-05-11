@@ -441,12 +441,6 @@ var menu = [
                 "href": "/newui/firewall/time_rule",
                 "lang": "time_rule",
                 "display":false
-            },
-            {
-                "id":"8-10",
-                "href": "/newui/firewall/trafficshaper",
-                "lang": "trafficshaper",
-                "display":true
             }
         ]
     }, {

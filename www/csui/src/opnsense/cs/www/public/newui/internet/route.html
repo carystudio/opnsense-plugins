@@ -26,8 +26,8 @@
                     <Col>
                     <br>
                     <FormItem :label="$t('route.interface')" prop="routeInterface">
-                        <Select v-model="formValidate.routeInterface" >
-                            <Option value="lan1">lan1</Option>
+                        <Select v-model="formValidate.routeInterface" :key="$t('route.interface')">
+                            <Option v-for="(v,i) in interface" :value="v.name" :key="v.name">{{v.name}}</Option>
                         </Select>
                     </FormItem>
                     <FormItem :label="$t('route.ip')" prop="routeIp">
@@ -87,7 +87,7 @@
                 globalConfig:globalConfig,
                 arpLoading:true,
                 formValidate: {
-                    routeInterface:'',
+                    routeInterface:'lan',
                     routeIp:'',
                     routeMask:'',
                     gateway:'',
@@ -114,7 +114,8 @@
                     }
                 ],
                 arpData: [],
-                staticRouteData: []
+                staticRouteData: [],
+                interface:[]
             }
         },
         computed:{
@@ -250,6 +251,17 @@
                             }
                         }
                     });
+                }
+            });
+
+            /*取接口信息*/
+            var postVar = {"action":"getLanWanInf"};
+            uiPost.getLanWanInf(postVar,function(data) {
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                if (0 == data.rescode) {
+                    _this.interface = data.data;
                 }
             });
 

@@ -91,7 +91,42 @@ class Freeradius extends Csbackend
                     }
                 }
             }
+
+            $firewall = array();
+            $firewall['type'] = 'pass';
+            $firewall['ipprotocol'] = 'inet';
+            $firewall['statetype'] = 'keep state';
+            $firewall['descr'] = 'FREERADIUS_SERVICE_RULE';
+            $firewall['direction'] = 'any';
+            $firewall['quick'] = 'yes';
+            $firewall['floating'] = 'yes';
+            $firewall['log'] = '1';
+            $firewall['protocol'] = 'udp';
+            $firewall['source'] = array("any"=>'1');
+            $firewall['destination'] = array("any"=>'1',"port"=>"1812-1813");
+
+            $ruleFlag = false;
+            if(isset($config['filter']['rule'])){
+                foreach ($config['filter']['rule'] as $key=>$val){
+                    foreach ($val as $k=>$v){
+                        if('descr' == $k && 'FREERADIUS_SERVICE_RULE' == $val[$k]){
+                            $ruleFlag = true;
+                            if('1' != $data['enabled']) {
+                                unset($config['filter']['rule'][$key]);
+                                break;
+                            }
+                        }
+                    }
+                }
+                if('1' == $data['enabled'] && false === $ruleFlag){
+                    array_push($config['filter']['rule'],$firewall);
+                }
+            }
+
             write_config();
+            system_cron_configure();
+            filter_configure();
+            clear_subsystem_dirty('filter');
             self::reconfigure();
         }catch(AppException $aex){
             $result = $aex->getMessage();

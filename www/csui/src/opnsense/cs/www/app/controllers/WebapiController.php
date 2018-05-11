@@ -181,6 +181,28 @@ class WebapiController extends BaseController
             }else if('delQosCustom' == $action){
                 $this->checkData($para);
                 $result['rescode']  = Qos::delQosCustom($para['data']);
+            }else if('getTraShaCfg'==$action){
+                $result['rescode'] = Qos::getAdvCfg();
+            }else if('setTraShaPipeCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Qos::setPipe($para['data']);
+            }else if('delTraShaPipeCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Qos::delPipe($para['data']);
+            }else if('setTraShaQueueCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Qos::setQueue($para['data']);
+            }else if('delTraShaQueueCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Qos::delQueue($para['data']);
+            }else if('setTraShaRuleCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Qos::setRule($para['data']);
+            }else if('setTraShaConfig'==$action){
+                $result['rescode'] = Qos::setConfig();
+            }else if('delTraShaRulesCfg'==$action){
+                $this->checkData($para);
+                $result['rescode'] = Qos::delrule($para['data']);
             }else if('getFilterStatus' == $action){
                 $result['rescode']  = Firewall::getFilterStatus();
             }else if('addFilter' == $action){
@@ -436,28 +458,6 @@ class WebapiController extends BaseController
                 $result['rescode'] = Freeradius::setClient($para['data']);
             }else if('getFrRunStatus'==$action){
                 $result['rescode'] = Freeradius::getRunStatus();
-            }else if('getTraShaCfg'==$action){
-                $result['rescode'] = Trafficshaper::getTraShaCfg();
-            }else if('setTraShaPipeCfg'==$action){
-                $this->checkData($para);
-                $result['rescode'] = Trafficshaper::setPipe($para['data']);
-            }else if('delTraShaPipeCfg'==$action){
-                $this->checkData($para);
-                $result['rescode'] = Trafficshaper::delPipe($para['data']);
-            }else if('setTraShaQueueCfg'==$action){
-                $this->checkData($para);
-                $result['rescode'] = Trafficshaper::setQueue($para['data']);
-            }else if('delTraShaQueueCfg'==$action){
-                $this->checkData($para);
-                $result['rescode'] = Trafficshaper::delQueue($para['data']);
-            }else if('setTraShaRuleCfg'==$action){
-                $this->checkData($para);
-                $result['rescode'] = Trafficshaper::setRule($para['data']);
-            }else if('setTraShaConfig'==$action){
-                $result['rescode'] = Trafficshaper::setConfig();
-            }else if('delTraShaRulesCfg'==$action){
-                $this->checkData($para);
-                $result['rescode'] = Trafficshaper::delrule($para['data']);
             }else if('test' == $action){
                 $result['rescode'] = Dns::getErrors();
             }else{
