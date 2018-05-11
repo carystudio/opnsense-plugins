@@ -186,7 +186,7 @@ Vue.component('cs-left', {
             if ('10-11' == name) {
               this.logout();
               break;
-            }else if('8-10' == name){
+            }else if('7' == name){
                 localStorage.setItem('currentTab','1');
             }
             if (this.menus[i].sub[j].id == name) 

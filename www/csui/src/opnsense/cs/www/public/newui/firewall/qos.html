@@ -34,6 +34,7 @@
                             <RadioGroup v-model="formValidate.limitType" type="button">
                                 <Radio label="1">{{ $t('qos.intelligent') }}</Radio>
                                 <Radio label="2">{{ $t('qos.custom') }}</Radio>
+                                <Radio label="3">{{ $t('qos.advanced') }}</Radio>
                             </RadioGroup>
                         </FormItem>
                         <div v-show="formValidate.limitType == '1'">
@@ -94,9 +95,10 @@
                     </div>
                 </Form>
             </Card>
-            <br>
             </Col>
+            <br>
         </row>
+        <br>
         <Row v-show="formValidate.status && formValidate.limitType == '2'">
             <Col class="cs-btn-del">
             </Col>
@@ -105,10 +107,315 @@
             </Col>
         </Row>
 
-    </div>
+        <Row v-show="formValidate.limitType == '3' && formValidate.tempType == '3'">
+        <Card>
+            <div class="ivu-tabs ivu-tabs-card cs-tabs">
+                <div class="ivu-tabs-bar">
+                    <div class="ivu-tabs-nav-container">
+                        <div class="ivu-tabs-nav-wrap" style="position: relative;">
+                            <span class="ivu-tabs-nav-prev ivu-tabs-nav-scroll-disabled"><i class="ivu-icon ivu-icon-chevron-left"></i></span>  <span class="ivu-tabs-nav-next ivu-tabs-nav-scroll-disabled"><i class="ivu-icon ivu-icon-chevron-right"></i></span>
+                            <div class="ivu-tabs-nav-scroll">
+                                <div class="nav-text ivu-tabs-nav">
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':1==showCurrentTabs}" @click="tabsSwitch(1)">
+                                        {{ $t('traffic.pipe') }}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':2==showCurrentTabs}" @click="tabsSwitch(2)">
+                                        {{ $t('traffic.queue') }}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':3==showCurrentTabs}" @click="tabsSwitch(3)">
+                                        {{ $t('traffic.rule') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="ivu-tabs-content ivu-tabs-content-animated">
+                    <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 1">
+                        <Card>
+                            <Row>
+                                <Button type="primary" @click="addpipes">{{ $t('traffic.add_pipe') }}</Button>
+                            </Row>
+                            <br>
+                            <Row>
+                                <Col>
+                                <Form :label-width="globalConfig.labelWith" label-position="left">
+                                    <Table border :columns="pipesListColumns" :data="pipesListData" :no-data-text="$t('common.no_data')"></Table>
+                                </Form>
+                                <br>
+                                </Col>
+                            </Row>
+                        </Card>
+                    </div>
+
+                    <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 2">
+                        <Card>
+                            <Row>
+                                <Button type="primary" @click="addqueues">{{ $t('traffic.add_queue') }}</Button>
+                            </Row>
+                            <br>
+                            <Row>
+                                <Col>
+                                <Form :label-width="globalConfig.labelWith" label-position="left">
+                                    <Table border :columns="queuesListColumns" :data="queuesListData" :no-data-text="$t('common.no_data')"></Table>
+                                </Form>
+                                <br>
+                                </Col>
+                            </Row>
+                        </Card>
+                    </div>
+
+                    <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 3">
+                        <Card>
+                            <Row>
+                                <Button type="primary" @click="addrules">{{ $t('traffic.add_rule') }}</Button>
+                            </Row>
+                            <br>
+                            <Row>
+                                <Col>
+                                <Form :label-width="globalConfig.labelWith" label-position="left">
+                                    <Table border :columns="rulesListColumns" :data="rulesListData" :no-data-text="$t('common.no_data')"></Table>
+                                </Form>
+                                <br>
+                                </Col>
+                            </Row>
+                        </Card>
+                    </div>
+                </div>
+            </div>
+        </Card>
+        </Row>
+    </div>
+    <Modal
+            v-model="pipesEditList"
+            :title="$t('traffic.edit_pipe')"
+            :width="600"
+            :closable="false"
+    >
+        <Form ref="pipesFormDate" :model="pipesFormDate" :rules="pipesRuleValidate" :label-width="120" label-position="left">
+            <Col>
+            <FormItem :label="$t('traffic.enabled')">
+                <i-switch v-model="pipesFormDate.enabled" size="large" >
+                    <span slot="open">{{$t('common.enabled')}}</span>
+                    <span slot="close">{{$t('common.disabled')}}</span>
+                </i-switch>
+            </FormItem>
+            <FormItem :label="$t('traffic.bandwidth')" prop="bandwidth">
+                <Input v-model="pipesFormDate.bandwidth" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.bandwidthMetric')">
+                <Select v-model="pipesFormDate.bandwidthMetric">
+                    <Option value="bit">bit/s </Option>
+                    <Option value="Kbit">Kbit/s </Option>
+                    <Option value="Mbit">Mbit/s </Option>
+                </Select>
+            </FormItem>
+            <FormItem :label="$t('traffic.queue_num')" prop="queue">
+                <Input v-model="pipesFormDate.queue" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.mask')">
+                <Select v-model="pipesFormDate.mask" :key="$t('traffic.mask')">
+                    <Option value="none">{{ $t('traffic.none') }}</Option>
+                    <Option value="src-ip">{{ $t('traffic.msg20') }}</Option>
+                    <Option value="dst-ip">{{ $t('traffic.msg21') }} </Option>
+                </Select>
+            </FormItem>
+            <FormItem :label="$t('traffic.scheduler')">
+                <Select v-model="pipesFormDate.scheduler" :key="$t('traffic.scheduler')">
+                    <Option value="none">{{ $t('traffic.msg18') }}</Option>
+                    <Option value="fifo">FIFO </Option>
+                    <Option value="rr">{{ $t('traffic.msg19') }} </Option>
+                    <Option value="qfq">QFQ </Option>
+                    <!--<Option value="fq_codel">FlowQueue-CoDel </Option>-->
+                </Select>
+            </FormItem>
+            <FormItem :label="$t('traffic.codel_enable')">
+                <i-switch v-model="pipesFormDate.codel_enable" size="large" >
+                    <span slot="open">{{$t('common.enabled')}}</span>
+                    <span slot="close">{{$t('common.disabled')}}</span>
+                </i-switch>
+            </FormItem>
+            <FormItem :label="$t('traffic.codel_target')" prop="codel_target">
+                <Input v-model="pipesFormDate.codel_target" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.codel_interval')" prop="codel_interval">
+                <Input v-model="pipesFormDate.codel_interval" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.codel_ecn_enable')">
+                <i-switch v-model="pipesFormDate.codel_ecn_enable" size="large" >
+                    <span slot="open">{{$t('common.enabled')}}</span>
+                    <span slot="close">{{$t('common.disabled')}}</span>
+                </i-switch>
+            </FormItem>
+            <FormItem :label="$t('traffic.fqcodel_quantum')" prop="fqcodel_quantum">
+                <Input v-model="pipesFormDate.fqcodel_quantum" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.fqcodel_limit')" prop="fqcodel_limit">
+                <Input v-model="pipesFormDate.fqcodel_limit" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.fqcodel_flows')" prop="fqcodel_flows">
+                <Input v-model="pipesFormDate.fqcodel_flows" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.description')" prop="description">
+                <Input v-model="pipesFormDate.description" :maxlength="20"></Input>
+            </FormItem>
+            </Col>
+        </Form>
+        <div slot="footer">
+            <Button type="text" @click="pipesEditList=false">{{ $t('common.cancel') }}</Button>
+            <Button type="primary" @click="pipesOk('pipesFormDate')" :loading="pipesOkLoading">{{ $t('common.save') }}</Button>
+        </div>
+    </Modal>
+
+    <Modal
+            v-model="queuesEditList"
+            :title="$t('traffic.edit_queue')"
+            :width="600"
+            :closable="false"
+    >
+        <Form ref="queuesFormDate" :model="queuesFormDate" :rules="queuesRuleValidate" :label-width="120" label-position="left">
+            <Col>
+            <FormItem :label="$t('traffic.enabled')">
+                <i-switch v-model="queuesFormDate.enabled" size="large" >
+                    <span slot="open">{{$t('common.enabled')}}</span>
+                    <span slot="close">{{$t('common.disabled')}}</span>
+                </i-switch>
+            </FormItem>
+            <FormItem :label="$t('traffic.pipe')">
+                <Select v-model="queuesFormDate.pipe">
+                    <Option v-for="pipeArr in pipeArrOption" :value="pipeArr.uuid" :key="pipeArr.uuid"> {{ pipeArr.descr }}</Option>
+                </Select>
+            </FormItem>
+            <FormItem :label="$t('traffic.weight')" prop="weight">
+                <Input v-model="queuesFormDate.weight" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.mask')">
+                <Select v-model="queuesFormDate.mask" :key="$t('traffic.mask')">
+                    <Option value="none">{{ $t('traffic.none') }}</Option>
+                    <Option value="src-ip">{{ $t('traffic.msg20') }}</Option>
+                    <Option value="dst-ip">{{ $t('traffic.msg21') }} </Option>
+                </Select>
+            </FormItem>
+            <FormItem :label="$t('traffic.codel_enable')">
+                <i-switch v-model="queuesFormDate.codel_enable" size="large" >
+                    <span slot="open">{{$t('common.enabled')}}</span>
+                    <span slot="close">{{$t('common.disabled')}}</span>
+                </i-switch>
+            </FormItem>
+            <FormItem :label="$t('traffic.codel_target')" prop="codel_target">
+                <Input v-model="queuesFormDate.codel_target" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.codel_interval')" prop="codel_interval">
+                <Input v-model="queuesFormDate.codel_interval" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.codel_ecn_enable')">
+                <i-switch v-model="queuesFormDate.codel_ecn_enable" size="large" >
+                    <span slot="open">{{$t('common.enabled')}}</span>
+                    <span slot="close">{{$t('common.disabled')}}</span>
+                </i-switch>
+            </FormItem>
+            <FormItem :label="$t('traffic.description')" prop="description">
+                <Input v-model="queuesFormDate.description" :maxlength="20"></Input>
+            </FormItem>
+            </Col>
+        </Form>
+        <div slot="footer">
+            <Button type="text" @click="queuesEditList=false">{{ $t('common.cancel') }}</Button>
+            <Button type="primary" @click="queuesOk('queuesFormDate')" :loading="queuesOkLoading">{{ $t('common.save') }}</Button>
+        </div>
+    </Modal>
+
+    <Modal
+            v-model="rulesEditList"
+            :title="$t('traffic.edit_rule')"
+            :width="600"
+            :closable="false"
+    >
+        <Form ref="rulesFormDate" :model="rulesFormDate" :rules="rulesRuleValidate" :label-width="120" label-position="left">
+            <Col>
+            <FormItem :label="$t('traffic.sequence')" prop="sequence">
+                <Input v-model="rulesFormDate.sequence" :maxlength="20" :placeholder="$t('traffic.msg24')"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.interface')">
+                <Select v-model="rulesFormDate.interface">
+                    <Option v-for="port in portOption" :value="port.interface" :key="port.interface"> {{ port.name }}</Option>
+                </Select>
+            </FormItem>
+            <FormItem :label="$t('traffic.interface2')" v-show="false">
+                <Select v-model="rulesFormDate.interface2">
+                    <Option value="none">{{ $t('traffic.none') }}</Option>
+                    <Option v-for="port in portOption" :value="port.interface" :key="port.interface"> {{ port.name }}</Option>
+                </Select>
+            </FormItem>
+            <FormItem :label="$t('traffic.proto')">
+                <Select v-model="rulesFormDate.proto">
+                    <Option value="ip">ip</Option>
+                    <Option value="ip4">ipv4</Option>
+                    <Option value="ip6">ipv6</Option>
+                    <Option value="udp">udp</Option>
+                    <Option value="tcp">tcp</Option>
+                    <Option value="tcp_ack">{{ $t('traffic.msg22') }} </Option>
+                    <Option value="tcp_ack_not">{{ $t('traffic.msg23') }} </Option>
+                    <Option value="icmp">icmp</Option>
+                    <Option value="igmp">igmp</Option>
+                    <Option value="esp">esp</Option>
+                    <Option value="ah">ah</Option>
+                    <Option value="gre">gre</Option>
+                </Select>
+            </FormItem>
+            <FormItem :label="$t('traffic.source')" prop="source">
+                <Input v-model="rulesFormDate.source" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.source_not')">
+                <i-switch v-model="rulesFormDate.source_not" size="large" >
+                    <span slot="open">{{$t('common.enabled')}}</span>
+                    <span slot="close">{{$t('common.disabled')}}</span>
+                </i-switch>
+            </FormItem>
+            <FormItem :label="$t('traffic.src_port')" prop="src_port">
+                <Input v-model="rulesFormDate.src_port" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.destination')" prop="destination">
+                <Input v-model="rulesFormDate.destination" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.destination_not')">
+                <i-switch v-model="rulesFormDate.destination_not" size="large" >
+                    <span slot="open">{{$t('common.enabled')}}</span>
+                    <span slot="close">{{$t('common.disabled')}}</span>
+                </i-switch>
+            </FormItem>
+            <FormItem :label="$t('traffic.dst_port')" prop="dst_port">
+                <Input v-model="rulesFormDate.dst_port" :maxlength="20"></Input>
+            </FormItem>
+            <FormItem :label="$t('traffic.direction')">
+                <Select v-model="rulesFormDate.direction">
+                    <Option value="none">both</Option>
+                    <Option value="in">in</Option>
+                    <Option value="out">out</Option>
+                </Select>
+            </FormItem>
+            <FormItem :label="$t('traffic.target')">
+                <Select v-model="rulesFormDate.target">
+                    <Option v-for="target in targetArrOption" :value="target.uuid" :key="target.uuid"> {{ target.descr }}</Option>
+                </Select>
+            </FormItem>
+            <FormItem :label="$t('traffic.description')" prop="description">
+                <Input v-model="rulesFormDate.description" :maxlength="20"></Input>
+            </FormItem>
+            </Col>
+        </Form>
+        <div slot="footer">
+            <Button type="text" @click="rulesEditList=false">{{ $t('common.cancel') }}</Button>
+            <Button type="primary" @click="rulesOk('rulesFormDate')" :loading="rulesOkLoading">{{ $t('common.save') }}</Button>
+        </div>
+    </Modal>
     <!-- 这个不能删除，用于底部显示 -->
-    <slot name="footer"></slot>
+    <Row>
+        <Col style="position: fixed;bottom: 0;" offset="5">
+            <slot name="footer"></slot>
+        </Col>
+    </Row>
     </Col>
 </script>
 <script src="/newui/plugin/vue.js"></script>
@@ -148,10 +455,165 @@
                 lanIp:'',
                 lanNetmask:'',
                 arpData: [],
-                qosListsData: []
+                qosListsData: [],
+
+                //Advanced
+                currentTab:'',
+                showCurrentTabs:'1',
+                pipesEditList:false,
+                queuesEditList:false,
+                rulesEditList:false,
+                pipesOkLoading:false,
+                queuesOkLoading:false,
+                rulesOkLoading:false,
+                pipesFormDate:{
+                    enabled:false,
+                    bandwidth:'',
+                    bandwidthMetric:'',
+                    queue:'',
+                    mask:'none',
+                    scheduler:'none',
+                    codel_enable:false,
+                    codel_target:'',
+                    codel_interval:'',
+                    codel_ecn_enable:false,
+                    fqcodel_quantum:'',
+                    fqcodel_limit:'',
+                    fqcodel_flows:'',
+                    description:''
+                },
+                queuesFormDate:{
+                    enabled:false,
+                    pipe:'',
+                    weight:'',
+                    mask:'none',
+                    codel_enable:false,
+                    codel_target:'',
+                    codel_interval:'',
+                    codel_ecn_enable:false,
+                    description:''
+                },
+                rulesFormDate:{
+                    sequence:'',
+                    interface:'wan',
+                    interface2:'',
+                    proto:'',
+                    source:'',
+                    source_not:false,
+                    src_port:'',
+                    destination:'',
+                    destination_not:false,
+                    dst_port:'',
+                    direction:'none',
+                    target:'',
+                    description:''
+                },
+                pipesuuid:'',
+                queuesuuid:'',
+                rulesuuid:'',
+                pipeArrOption:[],       //管道下拉框
+                targetArrOption:[],     //目标下拉框
+                portOption:[],
+                pipesListData:[],
+                queuesListData:[],
+                rulesListData:[]
+
             }
         },
         computed:{
+            pipesRuleValidate:function () {
+                var _this = this;
+                return{
+                    bandwidth: [
+                        { required: true, message: _this.$t('traffic.msg1'), trigger: 'blur' },
+                        { validator:function(r, v, f) {
+                            var _s = cs.num(v);
+                            if(0 == _s){
+                                f(_this.$t('traffic.msg1'));
+                            }else if(1 == _s){
+                                f(_this.$t('traffic.msg2'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    queue:[
+                        { validator:function(r, v, f) {
+                            var _s = cs.num_range(v,2,100);
+                            if(1 == _s){
+                                f(_this.$t('traffic.msg4'));
+                            }else if(2 == _s){
+                                f(_this.$t('traffic.msg5'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    description: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if(0 == _s){
+                                f(_this.$t('traffic.msg6'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ]
+                }
+            },
+            queuesRuleValidate:function () {
+                var _this = this;
+                return{
+                    weight: [
+                        { required: true, message: _this.$t('traffic.msg7'), trigger: 'blur' },
+                        { validator:function(r, v, f) {
+                            var _s = cs.num(v);
+                            if(0 == _s){
+                                f(_this.$t('traffic.msg7'));
+                            }else if(1 == _s){
+                                f(_this.$t('traffic.msg8'));
+                            }else if(v < 1 || v >100){
+                                f(_this.$t('traffic.msg9'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    description: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if(0 == _s){
+                                f(_this.$t('traffic.msg10'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ]
+                }
+            },
+            rulesRuleValidate:function () {
+                var _this = this;
+                return {
+                    sequence: [
+                        { required: true, message: _this.$t('traffic.msg11'), trigger: 'blur' },
+                        { validator:function(r, v, f) {
+                            var _s = cs.num(v);
+                            if(0 == _s){
+                                f(_this.$t('traffic.msg11'));
+                            }else if(1 == _s){
+                                f(_this.$t('traffic.msg12'));
+                            }else if(v == 0){
+                                f(_this.$t('traffic.msg25'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ],
+                    description: [
+                        { validator:function(r, v, f) {
+                            var _s = cs.string(v);
+                            if(0 == _s){
+                                f(_this.$t('traffic.msg17'));
+                            }
+                            f();
+                        },trigger: 'blur' }
+                    ]
+                }
+            },
             ruleValidate: function(){
                 var _this = this;
                 return{
@@ -327,16 +789,451 @@
                         ]);
                     }
                 }];
+            },
+            pipesListColumns:function () {
+                var _this = this;
+                return [
+                    {
+                        type: 'selection',
+                        width: 60,
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.state'),
+                        key: 'enabled',
+                        align: 'center',
+                        render: function(h, params){
+                            if('1' == params.row.enabled){
+                                return h('p', _this.$t('traffic.enabled'));
+                            }else{
+                                return h('p', _this.$t('traffic.disable'));
+                            }
+                        }
+                    }, {
+                        title: _this.$t('traffic.number'),
+                        key: 'number',
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.bandwidth'),
+                        key: 'bandwidth',
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.bandwidthMetric'),
+                        key: 'bandwidthMetric',
+                        align: 'center',
+                        render: function(h, params){
+                            if('bit' == params.row.bandwidthMetric){
+                                return h('p', 'bit/s');
+                            }else if('Kbit' == params.row.bandwidthMetric){
+                                return h('p', 'Kbit/s');
+                            }else if('Mbit' == params.row.bandwidthMetric){
+                                return h('p', 'Mbit/s');
+                            }
+                        }
+                    }, {
+                        title: _this.$t('traffic.mask'),
+                        key: 'mask',
+                        align: 'center',
+                        render: function(h, params){
+                            if('src-ip' == params.row.mask){
+                                return h('p', 'source');
+                            }else if('dst-ip' == params.row.mask){
+                                return h('p', 'destination');
+                            }else{
+                                return h('p', _this.$t('traffic.none'));
+                            }
+                        }
+                    }, {
+                        title: _this.$t('traffic.description'),
+                        key: 'description',
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.operation'),
+                        key: 'uuid',
+                        align: 'center',
+                        render: function (h, params) {
+                            return [
+                                h('Icon', {
+                                    props: {
+                                        type: 'edit'
+                                    },
+                                    style: {
+                                        cursor: 'pointer',
+                                        marginRight: '5px'
+                                    },
+                                    nativeOn: {
+                                        click: function () {
+                                            _this.pipesEditList = true;
+                                            _this.pipesuuid = params.row.uuid;
+                                            if('1' == params.row.enabled){
+                                                _this.pipesFormDate.enabled = true;
+                                            }else{
+                                                _this.pipesFormDate.enabled = false;
+                                            }
+                                            _this.pipesFormDate.bandwidth = params.row.bandwidth;
+                                            _this.pipesFormDate.bandwidthMetric = params.row.bandwidthMetric;
+                                            _this.pipesFormDate.queue = params.row.queue;
+                                            if('none' != params.row.mask || '' != params.row.mask){
+                                                _this.pipesFormDate.mask = params.row.mask;
+                                            }else{
+                                                _this.pipesFormDate.mask = 'none';
+                                            }
+                                            if(params.row.scheduler || '' != params.row.scheduler){
+                                                _this.pipesFormDate.scheduler = params.row.scheduler;
+                                            }else{
+                                                _this.pipesFormDate.scheduler = 'none';
+                                            }
+                                            if('1' == params.row.codel_enable){
+                                                _this.pipesFormDate.codel_enable = true;
+                                            }else {
+                                                _this.pipesFormDate.codel_enable = false;
+                                            }
+                                            _this.pipesFormDate.codel_target = params.row.codel_target;
+                                            _this.pipesFormDate.codel_interval = params.row.codel_interval;
+                                            if('1' == params.row.codel_ecn_enable){
+                                                _this.pipesFormDate.codel_ecn_enable = true;
+                                            }else {
+                                                _this.pipesFormDate.codel_ecn_enable = false;
+                                            }
+                                            _this.pipesFormDate.fqcodel_quantum = params.row.fqcodel_quantum;
+                                            _this.pipesFormDate.fqcodel_limit = params.row.fqcodel_limit;
+                                            _this.pipesFormDate.fqcodel_flows = params.row.fqcodel_flows;
+                                            _this.pipesFormDate.description = params.row.description;
+                                        }
+                                    }
+                                }),
+                                h('Poptip', {
+                                    props: {
+                                        confirm: true,
+                                        title: _this.$t('freeclient.del_sure'),
+                                        "ok-text": _this.$t('common.ok'),
+                                        "cancel-text": _this.$t('common.cancel')
+                                    },
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    on: {
+                                        "on-ok": function () {
+                                            var data = {};
+                                            data.uuid = params.row.uuid;
+                                            var postVar = {"action": "delTraShaPipeCfg", "data": data};
+                                            _this.$Spin.show();  //加载动画
+                                            uiPost.delTraShaPipeCfg(postVar, function (data) {
+                                                if (9999 == data.rescode) {
+                                                    cs.loginOut();
+                                                }
+                                                _this.$Spin.hide();   //关闭加载动画
+                                                if (0 == data.rescode) {
+                                                    _this.$Message.success({content:_this.$t('traffic.del_success'),onClose:function(){
+                                                        location.href = location.href;
+                                                    }});
+                                                }else{
+                                                    _this.$Message.error({content:_this.$t('traffic.del_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                                                }
+                                            });
+                                        }
+                                    }
+                                }, [
+                                    h('Icon', {
+                                        props: {
+                                            type: 'ios-trash-outline'
+                                        },
+                                        style: {
+                                            cursor: 'pointer',
+                                            marginRight: '5px'
+                                        }
+                                    })
+                                ])
+                            ]
+                        }
+                    }
+                ]
+            },
+            queuesListColumns:function () {
+                var _this = this;
+                return [
+                    {
+                        type: 'selection',
+                        width: 60,
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.state'),
+                        key: 'enabled',
+                        align: 'center',
+                        render: function(h, params){
+                            if('1' == params.row.enabled){
+                                return h('p', _this.$t('traffic.enabled'));
+                            }else{
+                                return h('p', _this.$t('traffic.disable'));
+                            }
+                        }
+                    }, {
+                        title: _this.$t('traffic.number'),
+                        key: 'number',
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.pipe'),
+                        key: 'pipeArr',
+                        align: 'center',
+                        render: function (h, params) {
+                            if(params.row.pipeArr){
+                                return h("p",params.row.pipeArr[0].descr);
+                            }else{
+                                return [];
+                            }
+                        }
+                    }, {
+                        title: _this.$t('traffic.weight'),
+                        key: 'weight',
+                        align: 'center'
+                    },  {
+                        title: _this.$t('traffic.description'),
+                        key: 'description',
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.operation'),
+                        key: 'uuid',
+                        align: 'center',
+                        render: function (h, params) {
+                            return [
+                                h('Icon', {
+                                    props: {
+                                        type: 'edit'
+                                    },
+                                    style: {
+                                        cursor: 'pointer',
+                                        marginRight: '5px'
+                                    },
+                                    nativeOn: {
+                                        click: function () {
+                                            _this.queuesEditList = true;
+                                            _this.queuesuuid = params.row.uuid;
+                                            if('1' == params.row.enabled){
+                                                _this.queuesFormDate.enabled = true;
+                                            }else{
+                                                _this.queuesFormDate.enabled = false;
+                                            }
+                                            _this.queuesFormDate.pipe = params.row.pipe[0];
+                                            _this.queuesFormDate.weight = params.row.weight;
+                                            if('none' != params.row.mask || '' != params.row.mask){
+                                                _this.queuesFormDate.mask = params.row.mask;
+                                            }else{
+                                                _this.queuesFormDate.mask = 'none';
+                                            }
+                                            if('1' == params.row.codel_enable){
+                                                _this.queuesFormDate.codel_enable = true;
+                                            }else{
+                                                _this.queuesFormDate.codel_enable = false;
+                                            }
+                                            _this.queuesFormDate.codel_target = params.row.codel_target;
+                                            _this.queuesFormDate.codel_interval = params.row.codel_interval;
+                                            if('1' == params.row.codel_ecn_enable){
+                                                _this.queuesFormDate.codel_ecn_enable = true;
+                                            }else{
+                                                _this.queuesFormDate.codel_ecn_enable = false;
+                                            }
+                                            _this.queuesFormDate.description = params.row.description;
+
+                                        }
+                                    }
+                                }),
+                                h('Poptip', {
+                                    props: {
+                                        confirm: true,
+                                        title: _this.$t('freeclient.del_sure'),
+                                        "ok-text": _this.$t('common.ok'),
+                                        "cancel-text": _this.$t('common.cancel')
+                                    },
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    on: {
+                                        "on-ok": function () {
+                                            var data = {};
+                                            data.uuid = params.row.uuid;
+                                            var postVar = {"action": "delTraShaQueueCfg", "data": data};
+                                            _this.$Spin.show();  //加载动画
+                                            uiPost.delTraShaQueueCfg(postVar, function (data) {
+                                                if (9999 == data.rescode) {
+                                                    cs.loginOut();
+                                                }
+                                                _this.$Spin.hide();   //关闭加载动画
+                                                if (0 == data.rescode) {
+                                                    _this.$Message.success({content:_this.$t('traffic.del_success'),onClose:function(){
+                                                        location.href = location.href;
+                                                    }});
+                                                }else{
+                                                    _this.$Message.error({content:_this.$t('traffic.del_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                                                }
+                                            });
+                                        }
+                                    }
+                                }, [
+                                    h('Icon', {
+                                        props: {
+                                            type: 'ios-trash-outline'
+                                        },
+                                        style: {
+                                            cursor: 'pointer',
+                                            marginRight: '5px'
+                                        }
+                                    })
+                                ])
+                            ]
+                        }
+                    }
+                ]
+            },
+            rulesListColumns:function () {
+                var _this = this;
+                return [
+                    {
+                        type: 'selection',
+                        width: 60,
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.sequence'),
+                        key: 'sequence',
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.interface'),
+                        key: 'interface',
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.proto'),
+                        key: 'proto',
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.source'),
+                        key: 'source',
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.destination'),
+                        key: 'destination',
+                        align: 'center'
+                    },  {
+                        title: _this.$t('traffic.target'),
+                        key: 'targetArr',
+                        align: 'center',
+                        render: function (h, params) {
+                            if(params.row.targetArr){
+                                return h("p",params.row.targetArr.descr);
+                            }else{
+                                return [];
+                            }
+                        }
+                    }, {
+                        title: _this.$t('traffic.description'),
+                        key: 'description',
+                        align: 'center'
+                    }, {
+                        title: _this.$t('traffic.operation'),
+                        key: 'uuid',
+                        align: 'center',
+                        render: function (h, params) {
+                            return [
+                                h('Icon', {
+                                    props: {
+                                        type: 'edit'
+                                    },
+                                    style: {
+                                        cursor: 'pointer',
+                                        marginRight: '5px'
+                                    },
+                                    nativeOn: {
+                                        click: function () {
+                                            _this.rulesEditList = true;
+                                            _this.rulesuuid = params.row.uuid;
+                                            _this.rulesFormDate.sequence = params.row.sequence;
+                                            _this.rulesFormDate.interface = params.row.interface;
+                                            if(params.row.interface2){
+                                                _this.rulesFormDate.interface2 = params.row.interface2;
+                                            }else{
+                                                _this.rulesFormDate.interface2 = 'none';
+                                            }
+                                            _this.rulesFormDate.proto = params.row.proto;
+                                            _this.rulesFormDate.source = params.row.source;
+                                            if('1' == params.row.source_not){
+                                                _this.rulesFormDate.source_not = true;
+                                            }else{
+                                                _this.rulesFormDate.source_not = false;
+                                            }
+                                            _this.rulesFormDate.src_port = params.row.src_port;
+                                            _this.rulesFormDate.destination = params.row.destination;
+                                            if('1' == params.row.destination_not){
+                                                _this.rulesFormDate.destination_not = true;
+                                            }else{
+                                                _this.rulesFormDate.destination_not = false;
+                                            }
+                                            _this.rulesFormDate.dst_port = params.row.dst_port;
+                                            if(params.row.direction && 'direction' != params.row.direction){
+                                                _this.rulesFormDate.direction = params.row.direction;
+                                            }else{
+                                                _this.rulesFormDate.direction = 'none';
+                                            }
+                                            _this.rulesFormDate.target = params.row.target;
+                                            _this.rulesFormDate.description = params.row.description;
+
+                                        }
+                                    }
+                                }),
+                                h('Poptip', {
+                                    props: {
+                                        confirm: true,
+                                        title: _this.$t('freeclient.del_sure'),
+                                        "ok-text": _this.$t('common.ok'),
+                                        "cancel-text": _this.$t('common.cancel')
+                                    },
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    on: {
+                                        "on-ok": function () {
+                                            var data = {};
+                                            data.uuid = params.row.uuid;
+                                            var postVar = {"action": "delTraShaRulesCfg", "data": data};
+                                            _this.$Spin.show();  //加载动画
+                                            uiPost.delTraShaRulesCfg(postVar, function (data) {
+                                                if (9999 == data.rescode) {
+                                                    cs.loginOut();
+                                                }
+                                                _this.$Spin.hide();   //关闭加载动画
+                                                if (0 == data.rescode) {
+                                                    _this.$Message.success({content:_this.$t('traffic.del_success'),onClose:function(){
+                                                        location.href = location.href;
+                                                    }});
+                                                }else{
+                                                    _this.$Message.error({content:_this.$t('traffic.del_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                                                }
+                                            });
+                                        }
+                                    }
+                                }, [
+                                    h('Icon', {
+                                        props: {
+                                            type: 'ios-trash-outline'
+                                        },
+                                        style: {
+                                            cursor: 'pointer',
+                                            marginRight: '5px'
+                                        }
+                                    })
+                                ])
+                            ]
+                        }
+                    }
+                ]
             }
         },
         created:function() {
             var _this = this;
+            _this.currentTab = localStorage.getItem('currentTab') ? localStorage.getItem('currentTab') : '1';
             var postData = {"action":"getQosStatus","data":{}};
+            _this.$Spin.show();  //加载动画
             uiPost.getQosStatus(postData,function(data){
-                console.log(data);
                 if (9999 == data.rescode){
                     cs.loginOut();
                 }
+                _this.$Spin.hide();   //关闭加载动画
                 if (0 == data.rescode) {
                     if('0' == data.data.Type){
                         _this.formValidate.status = false;
@@ -352,7 +1249,30 @@
                             for(var i in _this.qosListsData){
                                 _this.qosListsData[i].idx = Number(i)+1;
                             }
-                            console.log(_this.qosListsData);
+                        }else if('3' == data.data.Type){
+                            var getLWInfoData = {"action":"getLanWanInf","data":[]};
+                            uiPost.getLanWanInf(getLWInfoData,function(data){
+                                if (9999 == data.rescode){
+                                    cs.loginOut();
+                                }
+                                if (0 == data.rescode){
+                                    _this.portOption = data.data;
+                                }
+                            });
+
+                            var postVar = {"action":"getTraShaCfg","data":{}};
+                            uiPost.getTraShaCfg(postVar, function (data) {
+                                if (9999 == data.rescode) {
+                                    cs.loginOut();
+                                }
+                                if(0 == data.rescode){
+                                    _this.pipesListData = data.data.pipes;
+                                    _this.queuesListData = data.data.queues;
+                                    _this.rulesListData = data.data.rules;
+                                    _this.pipeArrOption = data.data.descr.pdescr;
+                                    _this.targetArrOption = data.data.descr.pdescr.concat(data.data.descr.qdescr);
+                                }
+                            });
                         }else{
                             _this.formValidate.totalUplinkSpeed = data.data.Up;
                             _this.formValidate.totalDownlinkSpeed = data.data.Down;
@@ -361,11 +1281,237 @@
                 }
             });
         },
+        watch:{
+            currentTab :function () {
+                var _this = this;
+                _this.showCurrentTabs = localStorage.getItem('currentTab') ? localStorage.getItem('currentTab') : '1';
+            }
+        },
         methods: {
+            tabsSwitch: function(index) {
+                var _this = this;
+                _this.showCurrentTabs = index;
+                localStorage.setItem('currentTab',this.showCurrentTabs);
+            },
+            addpipes: function () {
+                var _this = this;
+                _this.pipesFormDate.enabled = true;
+                _this.pipesFormDate.bandwidth = '';
+                _this.pipesFormDate.bandwidthMetric = 'Kbit';
+                _this.pipesFormDate.queue = '';
+                _this.pipesFormDate.mask = 'none';
+                _this.pipesFormDate.scheduler = 'none';
+                _this.pipesFormDate.codel_enable = false;
+                _this.pipesFormDate.codel_target = '';
+                _this.pipesFormDate.codel_interval = '';
+                _this.pipesFormDate.codel_ecn_enable = false;
+                _this.pipesFormDate.fqcodel_quantum = '';
+                _this.pipesFormDate.fqcodel_limit = '';
+                _this.pipesFormDate.fqcodel_flows = '';
+                _this.pipesFormDate.description = '';
+
+                _this.pipesEditList = true;
+            },
+            addqueues: function () {
+                var _this = this;
+                _this.queuesFormDate.enabled = true;
+                console.log(_this.pipeArrOption);
+                if(_this.pipeArrOption.length > 0){
+                    _this.queuesFormDate.pipe = _this.pipeArrOption[0].uuid;
+                }else{
+                    _this.queuesFormDate.pipe = '';
+                }
+                _this.queuesFormDate.weight = '100';
+                _this.queuesFormDate.mask = 'none';
+                _this.queuesFormDate.codel_enable = false;
+                _this.queuesFormDate.codel_target = '';
+                _this.queuesFormDate.codel_interval = '';
+                _this.queuesFormDate.codel_ecn_enable = false;
+                _this.queuesFormDate.description = '';
+
+                _this.queuesEditList = true;
+            },
+            addrules: function () {
+                var _this = this;
+                _this.rulesFormDate.sequence = '';
+                _this.rulesFormDate.interface = 'wan';
+                _this.rulesFormDate.interface2 = 'none';
+                _this.rulesFormDate.proto = 'ip';
+                _this.rulesFormDate.source = '';
+                _this.rulesFormDate.source_not = false;
+                _this.rulesFormDate.src_port = '';
+                _this.rulesFormDate.destination = '';
+                _this.rulesFormDate.destination_not = false;
+                _this.rulesFormDate.dst_port = '';
+                _this.rulesFormDate.direction = 'none';
+                if(_this.targetArrOption.length > 0){
+                    _this.rulesFormDate.target = _this.targetArrOption[0].uuid;
+                }else{
+                    _this.rulesFormDate.target = '';
+                }
+                _this.rulesFormDate.description = '';
+
+                _this.rulesEditList = true;
+            },
+            pipesOk:function (name) {
+                var _this = this;
+                _this.$refs[name].validate(function(valid){
+                    if(valid){
+                        var data = {};
+                        data.uuid = _this.pipesuuid;
+                        if(true == _this.pipesFormDate.enabled){
+                            data.enabled = '1';
+                        }else{
+                            data.enabled = '0';
+                        }
+                        data.bandwidth = _this.pipesFormDate.bandwidth;
+                        data.bandwidthMetric = _this.pipesFormDate.bandwidthMetric;
+                        data.queue = _this.pipesFormDate.queue;
+                        data.mask = _this.pipesFormDate.mask;
+
+                        if(_this.pipesFormDate.scheduler && 'none' != _this.pipesFormDate.scheduler){
+                            data.scheduler = _this.pipesFormDate.scheduler;
+                        }else{
+                            data.scheduler = '';
+                        }
+                        if(true == _this.pipesFormDate.codel_enable){
+                            data.codel_enable = '1';
+                        }else{
+                            data.codel_enable = '0';
+                        }
+                        data.codel_target = _this.pipesFormDate.codel_target;
+                        data.codel_interval = _this.pipesFormDate.codel_interval;
+                        if(true == _this.pipesFormDate.codel_ecn_enable){
+                            data.codel_ecn_enable = '1';
+                        }else{
+                            data.codel_ecn_enable = '0';
+                        }
+                        data.fqcodel_quantum = _this.pipesFormDate.fqcodel_quantum;
+                        data.fqcodel_limit = _this.pipesFormDate.fqcodel_limit;
+                        data.fqcodel_flows = _this.pipesFormDate.fqcodel_flows;
+                        data.description = _this.pipesFormDate.description;
+                        var postVar = {"action": "setTraShaPipeCfg", "data": data};
+                        _this.pipesOkLoading = true;
+                        uiPost.setTraShaPipeCfg(postVar, function (data) {
+                            if (9999 == data.rescode) {
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('traffic.save_success'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            }else{
+                                _this.$Message.error({content:_this.$t('traffic.save_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
+                            _this.pipesOkLoading = false;
+                        });
+                    }
+                });
+            },
+            queuesOk:function (name) {
+                var _this = this;
+                _this.$refs[name].validate(function(valid){
+                    if(valid){
+                        var data = {};
+                        data.uuid = _this.queuesuuid;
+                        if(true == _this.queuesFormDate.enabled){
+                            data.enabled = '1';
+                        }else{
+                            data.enabled = '0';
+                        }
+                        data.pipe = _this.queuesFormDate.pipe;
+                        data.weight = _this.queuesFormDate.weight;
+                        data.mask = _this.queuesFormDate.mask;
+                        if(true == _this.queuesFormDate.codel_enable){
+                            data.codel_enable = '1';
+                        }else{
+                            data.codel_enable = '0';
+                        }
+                        data.codel_target = _this.queuesFormDate.codel_target;
+                        data.codel_interval = _this.queuesFormDate.codel_interval;
+                        if(true == _this.queuesFormDate.codel_ecn_enable){
+                            data.codel_ecn_enable = '1';
+                        }else{
+                            data.codel_ecn_enable = '0';
+                        }
+                        data.description = _this.queuesFormDate.description;
+                        var postVar = {"action": "setTraShaQueueCfg", "data": data};
+                        _this.queuesOkLoading = true;
+                        uiPost.setTraShaQueueCfg(postVar, function (data) {
+                            if (9999 == data.rescode) {
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('traffic.save_success'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            }else{
+                                _this.$Message.error({content:_this.$t('traffic.save_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
+                            _this.queuesOkLoading = false;
+                        });
+                    }
+                });
+            },
+            rulesOk:function (name) {
+                var _this = this;
+                _this.$refs[name].validate(function(valid){
+                    if(valid){
+                        var data = {};
+                        data.uuid = _this.rulesuuid;
+                        data.sequence = _this.rulesFormDate.sequence;
+                        data.interface = _this.rulesFormDate.interface;
+                        if(_this.rulesFormDate.interface2 && 'none' != _this.rulesFormDate.interface2){
+                            data.interface2 = _this.rulesFormDate.interface2;
+                        }else{
+                            data.interface2 = '';
+                        }
+                        data.proto = _this.rulesFormDate.proto;
+                        data.source = _this.rulesFormDate.source;
+                        if(true == _this.rulesFormDate.source_not){
+                            data.source_not = '1';
+                        }else{
+                            data.source_not = '0';
+                        }
+                        data.src_port = _this.rulesFormDate.src_port;
+
+                        data.destination = _this.rulesFormDate.destination;
+                        if(true == _this.rulesFormDate.destination_not){
+                            data.destination_not = '1';
+                        }else{
+                            data.destination_not = '0';
+                        }
+                        data.dst_port = _this.rulesFormDate.dst_port;
+                        if(_this.rulesFormDate.direction && 'none' != _this.rulesFormDate.direction){
+                            data.direction = _this.rulesFormDate.direction;
+                        }else{
+                            data.direction = '';
+                        }
+                        data.target = _this.rulesFormDate.target;
+                        data.description = _this.rulesFormDate.description;
+                        var postVar = {"action": "setTraShaRuleCfg", "data": data};
+                        _this.rulesOkLoading = true;
+                        uiPost.setTraShaRuleCfg(postVar, function (data) {
+                            if (9999 == data.rescode) {
+                                cs.loginOut();
+                            }
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('traffic.save_success'),onClose:function(){
+//                                    window.sessionStorage["shownum"] =  JSON.stringify('3');
+                                    location.href = location.href;
+                                }});
+                            }else{
+                                _this.$Message.error({content:_this.$t('traffic.save_fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
+                            _this.rulesOkLoading = false;
+                        });
+                    }
+                });
+            },
             submitStatus:function(){
                 if(false == this.formValidate.status){
                     var postData = {"action":"setQos","data":{"Type":"0"}};
-                    console.log(postData);
+                    this.formValidate.tempType = '0';
                     uiPost.setQos(postData);
                 }
             },
@@ -429,10 +1575,14 @@
                             data.Type = '1';
                             data.Up = _this.formValidate.totalUplinkSpeed;
                             data.Down = _this.formValidate.totalDownlinkSpeed;
-                        }else{
+                        }else if('2' == _this.formValidate.limitType){
                             data.Type = '2';
                             data.Up = _this.formValidate.singleUplinkSpeed;
                             data.Down = _this.formValidate.singleDownlinkSpeed;
+                        }else{
+                            data.Type = '3';
+                            data.Up = 1000000;
+                            data.Down = 1000000;
                         }
 
                         var upRet = cs.num_range(data.Up,1,1000000);
@@ -441,7 +1591,6 @@
                             return false;
                         }
                         var postData = {"action":"setQos","data":data};
-                        console.log(postData);
                         _this.applyLoading = true;
                         uiPost.setQos(postData,function(data){
                             if (9999 == data.rescode){

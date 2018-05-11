@@ -1348,7 +1348,7 @@ class Network extends Csbackend
             if(is_ipaddr($config['interfaces'][$ifname]['ipaddr'])){
                 $inf_net = $config['interfaces'][$ifname]['ipaddr'].'/'.$config['interfaces'][$ifname]['subnet'];
             }else{
-                $infinfo = get_interface_info($ifname);
+                $infinfo = self::getInfStatus($ifname);
                 $inf_net = $infinfo['ipaddr'].'/'.$infinfo['subnet'];
             }
             $subnet = $data['Ip'].'/'.$netmask;

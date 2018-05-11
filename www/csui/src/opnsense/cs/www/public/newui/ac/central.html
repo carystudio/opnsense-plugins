@@ -66,21 +66,6 @@
             <FormItem :label="$t('central.apname')" prop="apname" v-if="multipleHide">
                 <Input v-model="formSetinfo.apname" ></Input>
             </FormItem>
-            <!--<FormItem :label="$t('central.authpwd')" prop="authpwd">-->
-            <!--<Input v-model="formSetinfo.authpwd"></Input>-->
-            <!--</FormItem>-->
-            <!--<FormItem :label="$t('central.change_passwd')">-->
-            <!--<Input v-model="formSetinfo.changePasswd" ></Input>-->
-            <!--</FormItem>-->
-            <!--<FormItem :label="$t('central.ipaddr')" prop="ipaddr" v-if="multipleHide">-->
-            <!--<Input v-model="formSetinfo.ipaddr" ></Input>-->
-            <!--</FormItem>-->
-            <!--<FormItem :label="$t('central.default_gateway')" prop="gateway">-->
-            <!--<Input v-model="formSetinfo.gateway" ></Input>-->
-            <!--</FormItem>-->
-            <!--<FormItem label="DNS" prop="dns">-->
-            <!--<Input v-model="formSetinfo.dns" ></Input>-->
-            <!--</FormItem>-->
             <FormItem :label="$t('central.ssid',[''])" prop="ssid2">
                 <Input v-model="formSetinfo.ssid2" ></Input>
             </FormItem>
@@ -89,10 +74,6 @@
                     <span slot="open">{{$t('central.encryption')}}</span>
                     <span slot="close">{{$t('central.unencrypted')}}</span>
                 </i-switch>
-                <!--<Select v-model="formSetinfo.securityMode2" slot="prepend" style="width: 80px">-->
-                    <!--<Option value="0">{{ $t('central.none_security') }}</Option>-->
-                    <!--<Option value="1">{{ $t('central.security_psk') }}</Option>-->
-                <!--</Select>-->
                 </Input>
             </FormItem>
             <FormItem :label="$t('central.password')" prop="security2"  v-show="formSetinfo.securityMode2 == '1'" >
@@ -119,20 +100,11 @@
                 <span> ({{$t('central.range')}} 0 - 4094,{{$t('central.default')}} 0)</span>
             </FormItem>
             <FormItem :label="$t('central.wlan_set')" prop="wlanset">
-                <!--<div v-if="getWlanState">-->
                     <Select v-model="wlanset" :disabled="getWlanState">
                         <Option value="1">2.4G</Option>
                         <Option value="2">5G</Option>
                         <Option value="3">2.4G+5G</Option>
                     </Select>
-                <!--</div>-->
-                <!--<div v-else>-->
-                    <!--<Select v-model="formSetinfo.wlanset">-->
-                        <!--<Option value="1">2.4G</Option>-->
-                        <!--<Option value="2">5G</Option>-->
-                        <!--<Option value="3">2.4G+5G</Option>-->
-                    <!--</Select>-->
-                <!--</div>-->
             </FormItem>
             <div v-show="wlanset != '2'">
                 <FormItem :label="$t('central.band2')" prop="band2">
@@ -251,7 +223,11 @@
         </div>
     </Modal>
     <!-- 这个不能删除，用于底部显示 -->
-    <slot name="footer"></slot>
+    <Row>
+        <Col style="position: fixed;bottom: 0;" offset="5">
+            <slot name="footer"></slot>
+        </Col>
+    </Row>
     </Col>
 </script>
 <script src="/newui/plugin/vue.js"></script>
@@ -297,38 +273,6 @@
                 channelsStatus165:false,
                 band_width5:'2',
                 band5:'14',
-                /*formSetinfo: {
-                    apname: '',
-                    ssid2: '',
-                    authpwd: 'admin',
-                    changePasswd: '',
-                    ipaddr: '',
-                    gateway: '',
-                    dns: '',
-                    country2g:"CN",
-                    country5g:"CN",
-                    security2: '',
-                    securityMode2: '0',
-                    hidessid:false,
-                    wifi_quarantine:false,
-                    maxusernumber:'32',
-                    vlanid:'0',
-                    wlanset:'3',
-                    band2:'9',
-                    channel2: '0',
-                    band_width2:'0',
-                    tx_power2: '100',
-                    beacon2g:'100',
-                    band5:'14',
-//                    ssid5: '',
-                    security5: '',
-//                    securityMode5: '',
-                    channel5: '0',
-                    band_width5:'2',
-                    tx_power5: '100',
-                    beacon5g:'100',
-                    other:[]
-                },*/
                 letctlAuthpwd:'admin',
                 timingRebootSelect:'',
                 upload: {

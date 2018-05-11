@@ -70,7 +70,11 @@
     </div>
 
     <!-- 这个不能删除，用于底部显示 -->
-    <slot name="footer"></slot>
+	<Row>
+		<Col style="position: fixed;bottom: 0;" offset="5">
+			<slot name="footer"></slot>
+		</Col>
+	</Row>
     <span style="display: none;">{{ submitStatus }}</span>
 </Col>
 </script>

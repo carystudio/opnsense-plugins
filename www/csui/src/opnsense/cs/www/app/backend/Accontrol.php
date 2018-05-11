@@ -237,6 +237,7 @@ class Accontrol extends Csbackend
                     throw new AppException('update apstate error');
                 }
             }
+            $res = 0;
         } catch (AppException $aex) {
             $res = $aex->getMessage();
         } catch (Exception $ex) {
