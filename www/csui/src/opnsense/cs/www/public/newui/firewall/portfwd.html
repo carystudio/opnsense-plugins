@@ -85,6 +85,8 @@
     <Modal
             v-model="showModel"
             :title="$t('portfwd.modal_title')"
+            :ok-text="$t('common.confirm')"
+            :cancel-text="$t('common.cancel')"
             @on-ok="ok"
             @on-cancel="cancel">
         <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable" :no-data-text="$t('common.no_data')">
