@@ -508,7 +508,7 @@ var messages = {
         },
         "wan":{
             "title":"WAN Setting",
-            "help":"This page is used to configure the parameters for Internet network which connects to the WAN port of your device. Here you may change the access method to DHCP, Static IP, PPPoE...",
+            "help":"This page is used to configure the parameters for Internet network which connects to the WAN port of your device. Here you may change the access method to DHCP, Static IP, PPPoE. To add multi wan, pleas goto 'LAN Setup', 'LAN Port' delete the port you want to use first",
             "wanport":"WAN Port",
             "network_binding":"Network Card Dinding",
             "delete":"Delete",
@@ -3248,7 +3248,7 @@ var messages = {
         },
         "wan":{
             "title":"广域网设置",
-            "help":"本页面用于设置互联网的参数，即跟本设备的WAN端口相连接的网络。在这里，您可以将访问方式更改成DHCP、静态IP、PPPoE等。",
+            "help":"本页面用于设置互联网的参数，即跟本设备的WAN端口相连接的网络。在这里，您可以将访问方式更改成DHCP、静态IP、PPPoE等。 要添加多WAN请先到局域网设置,LAN端口删除要用的网口",
             "wanport":"WAN端口",
             "network_binding":"网卡绑定",
             "delete":"删除",
