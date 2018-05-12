@@ -1129,7 +1129,7 @@
                                             _this.formValidatePhase2.remoteidType = params.row.remoteid_type;
                                             _this.formValidatePhase2.remoteidAddress = params.row.remoteid_address;
                                             if(params.row.remoteid_netbits){
-                                                _this.formValidatePhase2.remoteidNetbits = params.row.remoteid_netbits;
+                                                _this.formValidatePhase2.remoteidNetbits = Number(params.row.remoteid_netbits);
                                             }
                                             _this.formValidatePhase2.protocol = params.row.protocol;
 
