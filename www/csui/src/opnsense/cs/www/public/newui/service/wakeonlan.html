@@ -36,7 +36,10 @@
                             </Select>
                         </FormItem>
                         <FormItem :label="$t('wakeonlan.mac')" prop="mac">
-                            <Input v-model="formValidate.mac"></Input>
+                            <Row>
+                                <Col span="19"><Input v-model="formValidate.mac"></Input></Col>
+                                <Col span="4" offset="1"><Button long @click="showClientList">{{ $t('wakeonlan.scan') }}</Button></Col>
+                            </Row>
                         </FormItem>
                         <FormItem>
                             <Button type="primary" @click="send('formValidate')" :loading="applyLoading">{{$t('wakeonlan.send')}}</Button>
@@ -70,7 +73,10 @@
                             </Select>
                         </FormItem>
                         <FormItem :label="$t('wakeonlan.mac')" prop="addMac">
-                            <Input v-model="formValidate.addMac"></Input>
+                            <Row>
+                                <Col span="19"><Input v-model="formValidate.addMac"></Input></Col>
+                                <Col span="4" offset="1"><Button long @click="showClientList">{{ $t('wakeonlan.scan') }}</Button></Col>
+                            </Row>
                         </FormItem>
                         <FormItem :label="$t('wakeonlan.descr')" prop="addDescr">
                             <Input v-model="formValidate.addDescr"></Input>
@@ -85,6 +91,14 @@
             </Row>
         </div>
     </div>
+    <Modal
+            v-model="showModel"
+            :title="$t('wakeonlan.modal_title')"
+            :ok-text="$t('common.confirm')"
+            :cancel-text="$t('common.cancel')"
+            @on-ok="ok">
+        <Table highlight-row :loading="arpLoading" :columns="arpColumns" @on-current-change="selectTable" :data="arpData"  :no-data-text="$t('common.no_data')"></Table>
+    </Modal>
     <!-- 这个不能删除，用于底部显示 -->
     <slot name="footer"></slot>
     </Col>
@@ -111,14 +125,35 @@
                 portOption:[],
                 homepage:true,
                 addpage:false,
+                arpLoading:true,
+                showModel:false,
+                mac:'',
+                arpColumns: [
+                    {
+                        title: '#',
+                        key: 'idx',
+                        sortable:true
+                    },
+                    {
+                        title: 'IP',
+                        key: 'ip',
+                        sortable:true
+                    },
+                    {
+                        title: 'MAC',
+                        key: 'mac',
+                        sortable:true
+                    }
+                ],
                 formValidate: {
-                    interface:'',
+                    interface:'wan',
                     mac:'',
-                    addInterface:'',
+                    addInterface:'wan',
                     addMac:'',
                     addDescr:''
                 },
-                wakeonlanData:[]
+                wakeonlanData:[],
+                arpData:[]
             }
         },
         computed:{
@@ -126,6 +161,7 @@
                 var _this = this;
                 return {
                     mac:[
+                        { required: true, message: this.$t('wakeonlan.msg1'), trigger: 'blur' },
                         {validator:function (r,v,f) {
                             if(_this.homepage == true && _this.addpage == false){
                                 var _s = cs.mac(v);
@@ -268,7 +304,6 @@
                 if (9999 == data.rescode){
                     cs.loginOut();
                 }
-                _this.$Spin.hide();   //关闭加载动画
                 if (0 == data.rescode){
                     _this.portOption = data.data;
                     var postData = {"action":"getWolEntryList","data":[]};
@@ -278,7 +313,6 @@
                         }
                         _this.$Spin.hide();   //关闭加载动画
                         if (0 == data.rescode){
-                            console.log(data.data);
                             _this.wakeonlanData = data.data;
                         }
                     });
@@ -287,6 +321,29 @@
 
         },
         methods:{
+            selectTable:function (obj) {
+                this.mac = obj.mac;
+            },
+            ok:function () {
+                this.formValidate.mac = this.mac;
+                this.formValidate.addMac = this.mac;
+                console.log(this.mac);
+            },
+            showClientList:function(){
+                var _this = this;
+                _this.showModel = true;
+                var postData = {"action":"getArpInfo", "data":{"except":"gateway"}};
+                uiPost.getArpInfo(postData,function(data) {
+                    var tempArr = [];
+                    for(var x in data.data){
+                        tempArr[x] = data.data[x];
+                        tempArr[x].idx = ''+( Number(x) + 1 );
+                    }
+                    _this.arpData = tempArr;
+
+                    _this.arpLoading = false;
+                });
+            },
             add:function () {
                 var _this = this;
                 _this.addpage = true;

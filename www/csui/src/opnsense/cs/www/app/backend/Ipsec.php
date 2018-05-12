@@ -470,6 +470,9 @@ class Ipsec extends Csbackend
             }
             if(!isset($phase1['ikeid']) || !isset($phase1['p1index'])){
                 $phase1['ikeid'] = self::ipsec_ikeid_next();
+                if(!isset($config['ipsec']['phase1'])){
+                    $config['ipsec'] = array("phase1"=>array());
+                }
                 $config['ipsec']['phase1'][] = $phase1;
             }else{
                 $p1index = $phase1['p1index'];
