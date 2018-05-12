@@ -3,6 +3,7 @@ require_once("services.inc");
 require_once("config.inc");
 require_once("system.inc");
 require_once ('util.inc');
+require_once("filter.inc");
 require_once("interfaces.inc");
 require_once('plugins.inc.d/dyndns.inc');
 
@@ -215,6 +216,8 @@ class Proxy extends Csbackend
                 $backend->configdRun("proxy start");
             }
         }
+
+        filter_configure();
     }
 
     public static function setConf($data){
@@ -372,6 +375,7 @@ class Proxy extends Csbackend
                     throw new AppException('PROXY_117');
                 }
                 $conf_data['forward']['sslbumpport'] = $data['forward']['sslbumpport'];
+                $conf_data['forward']['sslcertificate'] = '592fa6d7bf05a';
 
                 if(!isset($data['forward']['sslbump']) ||
                     !Util::check0and1($data['forward']['sslbump'])
