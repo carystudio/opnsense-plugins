@@ -4412,7 +4412,7 @@ uiPost.prototype.getCrpcConfig = function(postVar,callback){
     this.topicurl = 'getCrpcConfig';
     this.async = true; // true:异步，false:同步。
     if (globalConfig.debug) {
-        this.url = '/data/getCrpcConfig.json';
+        this.url = '/newui/data/getCrpcConfig.json';
     }
     return this.post(postVar,callback);
 };

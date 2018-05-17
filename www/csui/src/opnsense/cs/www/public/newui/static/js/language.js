@@ -4,7 +4,7 @@ var messages = {
             newui:"New UI",
             index:"System Status",
             status:"System Status",
-            wechat_manager:"wechat manage",
+            wechat_manager:"Wechat Manage",
             crp:"crp service exception",
             opmode:"Operation Mode",
             internet:"Network",
@@ -249,6 +249,10 @@ var messages = {
             "MSG_database_diff": "The database file error, please to import this equipment database file!",
             "msg6":"Database update success!",
             "msg7":"Database update failed!"
+        },
+        "wechat_manager":{
+            "help":"This page is used to display WeChat qr code.",
+            "show_wechatqr":"showWechatQR"
         },
         "index":{
             "title":"System Status",
@@ -3066,6 +3070,10 @@ var messages = {
             "MSG_database_diff": "数据库文件错误，请重新导入本设备的数据库文件！",
             "msg6":"数据库更新成功！",
             "msg7":"数据库更新失败！"
+        },
+        "wechat_manager":{
+            "help":"本页面用于显示微信二维码。",
+            "show_wechatqr":"显示二维码"
         },
         "index":{
             "title":"系统状态",
