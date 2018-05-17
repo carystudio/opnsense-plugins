@@ -109,9 +109,11 @@ class Proxy extends Csbackend
                     'associated-rule-id'=>Proxy::RULE_ASSOCID_HTTPS
                 );
                 $config['nat']['rule'][] = $nat_rule_http;
-                $config['nat']['rule'][] = $nat_rule_https;
                 $config['filter']['rule'][] = $filter_rule_http;
-                $config['filter']['rule'][] = $filter_rule_https;
+                if('1' == $config['OPNsense']['proxy']['forward']['sslbump']){
+                    $config['nat']['rule'][] = $nat_rule_https;
+                    $config['filter']['rule'][] = $filter_rule_https;
+                }
             }
         }
     }
