@@ -592,5 +592,24 @@ cs.prototype.post= function (URL, PARAMS){
 	return temp;
 };
 
-obj.cs = new cs();
+/**
+ * 校验是否为邮箱地址
+ *
+ * @Author   Jeff       <Jeff@carystudio.com>
+ * @DateTime 2018-05-16
+ * @param    {String}   email		邮箱地址
+ * @return   {Number}
+ * 0: 不能为空 <br/>
+ * 1: 无效，不是一个合法的邮箱 <br/>
+ * 99: 有效
+ */
+cs.prototype.isEmail= function (email){
+	var ret = 99;
+	if(email == undefined || email=="") { ret = 0;  return ret; }//不能为空
+	var reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
+	if(!reg.test(email)) ret = 1;//无效，不是一个合法的邮箱
+	return ret;
+};
+
+	obj.cs = new cs();
 })(window);

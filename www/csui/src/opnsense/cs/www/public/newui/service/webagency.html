@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Carystudio</title>
-  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
-  <link rel="stylesheet" href="/newui/static/css/style.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Carystudio</title>
+    <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+    <link rel="stylesheet" href="/newui/static/css/style.css">
 </head>
 <body>
 <div id="app"></div>
 
 <script type="text/x-template" id="main">
-<Col class="cs-container" span="20" >
+    <Col class="cs-container" span="20" >
     <slot name="breadcrumb"  :breadcrumb="[$t('menu.service'),$t('menu.webagency')]"></slot>
     <!-- 这个不能删除，用于面包屑显示 -->
     <div class="cs-content">
         <Row>
             <Col  :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg" >
-                <Alert>
-                  {{ $t('webagency.help') }}
-                </Alert>
+            <Alert>
+                {{ $t('webagency.help') }}
+            </Alert>
             </Col>
         </Row>
         <Row :gutter="26">
@@ -43,6 +43,9 @@
                                     </div>
                                     <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':4==showCurrentTabs}" @click="tabsSwitch(4)">
                                         {{ $t('webagency.Access_control_list') }}
+                                    </div>
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':5==showCurrentTabs}" @click="tabsSwitch(5)" v-show="formValidate.general_enabled">
+                                        {{ $t('webagency.virus_detection') }}
                                     </div>
                                 </div>
                             </div>
@@ -200,7 +203,7 @@
                         </div>
 
                         <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 3">
-                           <Card>
+                            <Card>
                                 <!--<FormItem label="代理接口">
                                     &lt;!&ndash;proxy.forward.interfaces&ndash;&gt;
                                     <Select v-model="formValidate.interfaces" filterable>
@@ -266,7 +269,7 @@
                         </div>
 
                         <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 4">
-                           <Card>
+                            <Card>
                                 <FormItem :label="$t('webagency.allowedSubnets')" prop="allowedSubnets">
                                     <!--proxy.forward.acl.allowedSubnets-->
                                     <Input v-model="formValidate.allowedSubnets" clearable type="textarea" :rows="2"></Input>
@@ -306,6 +309,89 @@
                                 </FormItem>
                             </Card>
                         </div>
+
+                        <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 5">
+                            <Card>
+                                <FormItem :label="$t('webagency.virus_detection')">
+                                    <i-switch v-model="formValidate.icap_enabled" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.access_log_records')">
+                                    <i-switch v-model="formValidate.icap_enable_accesslog" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.cache')">
+                                    <i-switch v-model="formValidate.clam_cache" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.scan_maxfilesize')" prop="clam_maxfilesize">
+                                    <Input v-model="formValidate.clam_maxfilesize"><span slot="append">M</span></Input>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.icap_servername')" prop="icap_servername">
+                                    <Input v-model="formValidate.icap_servername"></Input>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.scanpe')">
+                                    <i-switch v-model="formValidate.clam_scanpe" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.scan_exe_link')">
+                                    <i-switch v-model="formValidate.clam_scanelf" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.scanole2')">
+                                    <i-switch v-model="formValidate.clam_scanole2" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.scanpdf')">
+                                    <i-switch v-model="formValidate.clam_scanpdf" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.scanswf')">
+                                    <i-switch v-model="formValidate.clam_scanswf" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.scanxmldocs')">
+                                    <i-switch v-model="formValidate.clam_scanxmldocs" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.scanhwp3')">
+                                    <i-switch v-model="formValidate.clam_scanhwp3" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.scanhtml')">
+                                    <i-switch v-model="formValidate.clam_scanhtml" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                                <FormItem :label="$t('webagency.scanarchive')">
+                                    <i-switch v-model="formValidate.clam_scanarchive" size="large" >
+                                        <span slot="open"> {{ $t('webagency.open') }}</span>
+                                        <span slot="close"> {{ $t('webagency.close') }}</span>
+                                    </i-switch>
+                                </FormItem>
+                            </Card>
+                        </div>
                     </div>
                 </Form>
             </div>
@@ -320,7 +406,7 @@
 
     <!-- 这个不能删除，用于底部显示 -->
     <slot name="footer"></slot>
-</Col>
+    </Col>
 </script>
 <script src="/newui/plugin/vue.js"></script>
 <script src="/newui/plugin/vue-i18n.js"></script>
@@ -334,441 +420,524 @@
 <script src="/newui/static/js/common.js"></script>
 <script src="/newui/static/js/topicurl.js"></script>
 <script>
-var cs_main = {
-  template:"#main",
-  data:function(){
-    return {
-        globalConfig:globalConfig,
-        interfacesOption:{},
-        sslcertificateOption:{},
-        showCurrentTabs:'1',
-        applyLoading:false,
+    var cs_main = {
+        template:"#main",
+        data:function(){
+            return {
+                globalConfig:globalConfig,
+                interfacesOption:{},
+                sslcertificateOption:{},
+                showCurrentTabs:'1',
+                applyLoading:false,
 
-        formValidate:{
-            general_enabled:false,
-            icpPort:'',
-            accessLog:false,
-            target:'',
-            storeLog:false,
-            ignoreLogACL:'',
-            alternateDNSservers:'',
-            dnsV4First:false,
-            useViaHeader:false,
-            forwardedForHandling:'0',
-            VisibleHostname:'',
-            VisibleEmail:'',
-            suppressVersion:false,
-            uriWhitespaceHandling:'none',
-            cache_mem:'',
-            cache_linux_packages:false,
-            cache_windows_updates:false,
-            traffic_enabled:false,
-            maxDownloadSize:'',
-            maxUploadSize:'',
-            OverallBandwidthTrotteling:'',
-            perHostTrotteling:'',
-            interfaces:'',
-            port:'',
-            transparentMode:false,
-            sslbump:false,
-            sslurlonly:false,
-            sslbumpport:'',
-            sslcertificate:'',
-            sslnobumpsites:'',
-            ssl_crtd_storage_max_size:'',
-            sslcrtd_children:'',
-            addACLforInterfaceSubnets:false,
-            allowedSubnets:'',
-            unrestricted:'',
-            bannedHosts:'',
-            whiteList:'',
-            blackList:'',
-            browser:'',
-            mimeType:'',
-            safePorts:'',
-            sslPorts:''
-        }
-    }
-  },
-    computed:{
-        ruleValidate:function (){
-            var _this = this;
-            return{
-                VisibleEmail:[
-                    {validator:function (r,v,f) {
-                        if(_this.formValidate.general_enabled == true){
-                            var _s = cs.string(v);
-                            if(_s == 0){
-                                f(_this.$t('webagency.msg1'));
-                            }
-                        }
-                        f();
-                    },trigger: 'blur'}
-                ],
-                cache_mem:[
-                    {validator:function (r,v,f) {
-                        if(_this.formValidate.general_enabled == true){
-                            var _s = cs.num(v);
-                            if(_s == 0){
-                                f(_this.$t('webagency.msg2'));
-                            }else if(_s ==1){
-                                f(_this.$t('webagency.msg3'));
-                            }else if( v <128 || v >2048){
-                                f(_this.$t('webagency.msg4'));
-                            }
-                        }
-                        f();
-                    },trigger:'blur'}
-                ],
-                maxDownloadSize:[
-                    {validator:function (r,v,f) {
-                        if(_this.formValidate.general_enabled == true){
-                            if(_this.formValidate.traffic_enabled == true){
-                                var _s = cs.num(v);
-                                if(_s == 0){
-                                    f(_this.$t('webagency.msg5'));
-                                }else if(_s ==1){
-                                    f(_this.$t('webagency.msg6'));
-                                }
-                            }
-                        }
-                        f();
-                    },trigger:'blur'}
-                ],
-                maxUploadSize:[
-                    {validator:function (r,v,f) {
-                        if(_this.formValidate.general_enabled == true){
-                            if(_this.formValidate.traffic_enabled == true){
-                                var _s = cs.num(v);
-                                if(_s == 0){
-                                    f(_this.$t('webagency.msg7'));
-                                }else if(_s ==1){
-                                    f(_this.$t('webagency.msg8'));
-                                }
-                            }
-                        }
-                        f();
-                    },trigger:'blur'}
-                ],
-                OverallBandwidthTrotteling:[
-                    {validator:function (r,v,f) {
-                        if(_this.formValidate.general_enabled == true){
-                            if(_this.formValidate.traffic_enabled == true){
-                                if(v){
-                                    var _s = cs.num(v);
-                                    if(_s ==1){
-                                        f(_this.$t('webagency.msg10'));
-                                    }
-                                }
-                            }
-                        }
-                        f();
-                    },trigger:'blur'}
-                ],
-                perHostTrotteling:[
-                    {validator:function (r,v,f) {
-                        if(_this.formValidate.general_enabled == true){
-                            if(_this.formValidate.traffic_enabled == true){
-                                if(v){
-                                    var _s = cs.num(v);
-                                    if(_s ==1){
-                                        f(_this.$t('webagency.msg12'));
-                                    }
-                                }
+                formValidate:{
+                    general_enabled:false,
+                    icpPort:'',
+                    accessLog:false,
+                    target:'',
+                    storeLog:false,
+                    ignoreLogACL:'',
+                    alternateDNSservers:'',
+                    dnsV4First:false,
+                    useViaHeader:false,
+                    forwardedForHandling:'0',
+                    VisibleHostname:'',
+                    VisibleEmail:'',
+                    suppressVersion:false,
+                    uriWhitespaceHandling:'none',
+                    cache_mem:'',
+                    cache_linux_packages:false,
+                    cache_windows_updates:false,
+                    traffic_enabled:false,
+                    maxDownloadSize:'',
+                    maxUploadSize:'',
+                    OverallBandwidthTrotteling:'',
+                    perHostTrotteling:'',
+                    interfaces:'',
+                    port:'',
+                    transparentMode:false,
+                    sslbump:false,
+                    sslurlonly:false,
+                    sslbumpport:'',
+                    sslcertificate:'',
+                    sslnobumpsites:'',
+                    ssl_crtd_storage_max_size:'',
+                    sslcrtd_children:'',
+                    addACLforInterfaceSubnets:false,
+                    allowedSubnets:'',
+                    unrestricted:'',
+                    bannedHosts:'',
+                    whiteList:'',
+                    blackList:'',
+                    browser:'',
+                    mimeType:'',
+                    safePorts:'',
+                    sslPorts:'',
 
-                            }
-                        }
-                        f();
-                    },trigger:'blur'}
-                ],
-                port:[
-                    {validator:function (r,v,f) {
-                        if(_this.formValidate.general_enabled == true){
-                            var _s = cs.num(v);
-                            if(_s == 0){
-                                f(_this.$t('webagency.msg13'));
-                            }else if(_s ==1){
-                                f(_this.$t('webagency.msg14'));
-                            }else if( v <1 || v >65535){
-                                f(_this.$t('webagency.msg15'));
-                            }
-                        }
-                        f();
-                    },trigger:'blur'}
-                ],
-                sslbumpport:[
-                    {validator:function (r,v,f) {
-                        if(_this.formValidate.general_enabled == true){
-                            var _s = cs.num(v);
-                            if(_s == 0){
-                                f(_this.$t('webagency.msg16'));
-                            }else if(_s ==1){
-                                f(_this.$t('webagency.msg17'));
-                            }else if( v <1 || v >65535){
-                                f(_this.$t('webagency.msg18'));
-                            }else if(v == _this.formValidate.port){
-                                f(_this.$t('webagency.msg19'));
-                            }
-                        }
-                        f();
-                    },trigger:'blur'}
-                ],
-                ssl_crtd_storage_max_size:[
-                    {validator:function (r,v,f) {
-                        if(_this.formValidate.general_enabled == true){
-                            var _s = cs.num(v);
-                            if(_s == 0){
-                                f(_this.$t('webagency.msg20'));
-                            }else if(_s ==1){
-                                f(_this.$t('webagency.msg21'));
-                            }
-                        }
-                        f();
-                    },trigger:'blur'}
-                ],
-                sslcrtd_children:[
-                    {validator:function (r,v,f) {
-                        if(_this.formValidate.general_enabled == true){
-                            var _s = cs.num(v);
-                            if(_s == 0){
-                                f(_this.$t('webagency.msg22'));
-                            }else if(_s ==1){
-                                f(_this.$t('webagency.msg23'));
-                            }
-                        }
-                        f();
-                    },trigger:'blur'}
-                ],
-                safePorts:[
-                    {validator:function (r,v,f) {
-                        if(_this.formValidate.general_enabled == true){
-                            var _s = cs.string(v);
-                            if(_s == 0){
-                                f(_this.$t('webagency.msg24'));
-                            }
-                        }
-                        f();
-                    },trigger:'blur'}
-                ]
-
+                    //ICAP
+                    icap_enabled:false,
+                    icap_enable_accesslog:true,
+                    icap_servername:'',
+                    clam_cache:true,
+                    clam_scanpe:true,
+                    clam_scanelf:true,
+                    clam_maxfilesize:"25M",
+                    clam_scanole2:true,
+                    clam_scanpdf:true,
+                    clam_scanswf:true,
+                    clam_scanxmldocs:true,
+                    clam_scanhwp3:true,
+                    clam_scanhtml:true,
+                    clam_scanarchive:true
+                }
             }
-        }
-
-    },
-    methods:{
-        tabsSwitch: function(index) {
-            this.showCurrentTabs = index;
         },
-        handleSubmit: function (name){
-            var _this = this;
-            this.$refs[name].validate(function(valid){
-                if (valid){
-                    var data = {};
-                    data['general']= {};
-                    data['general']['logging']={};
-                    data['general']['logging']['enable']={};
-                    data['general']['cache']={};
-                    data['general']['cache']['local']={};
-                    data['general']['traffic']={};
-                    data['forward']={};
-                    data['forward']['acl']={};
-                    if(false == _this.formValidate.general_enabled){
-                        data['general']['enabled']= '0';
-                    }else {
-                        data['general']['enabled']= '1';
-                        (true == _this.formValidate.accessLog)?
-                                data['general']['logging']['enable']['accessLog'] = '1':
-                                data['general']['logging']['enable']['accessLog'] = '0';
-                        (true == _this.formValidate.storeLog)?
-                                data['general']['logging']['enable']['storeLog'] = '1':
-                                data['general']['logging']['enable']['storeLog'] = '0';
-                        (true == _this.formValidate.dnsV4First)?
-                                data['general']['dnsV4First'] = '1':
-                                data['general']['dnsV4First'] = '0';
-                        (true == _this.formValidate.useViaHeader)?
-                                data['general']['useViaHeader'] = '1':
-                                data['general']['useViaHeader'] = '0';
-                        if(_this.formValidate.forwardedForHandling == '0'){
-                            data['general']['forwardedForHandling'] = '';
-                        }else{
-                            data['general']['forwardedForHandling'] = _this.formValidate.forwardedForHandling;
+        computed:{
+            ruleValidate:function (){
+                var _this = this;
+                return{
+                    VisibleEmail:[
+                        { required: true, message: _this.$t('webagency.msg1'), trigger: 'blur' },
+                        {validator:function (r,v,f) {
+                            if(_this.formValidate.general_enabled == true){
+                                var _s = cs.string(v);
+                                if(_s == 0){
+                                    f(_this.$t('webagency.msg1'));
+                                }
+                            }
+                            f();
+                        },trigger: 'blur'}
+                    ],
+                    cache_mem:[
+                        {validator:function (r,v,f) {
+                            if(_this.formValidate.general_enabled == true){
+                                var _s = cs.num(v);
+                                if(_s == 0){
+                                    f(_this.$t('webagency.msg2'));
+                                }else if(_s ==1){
+                                    f(_this.$t('webagency.msg3'));
+                                }else if( v <128 || v >2048){
+                                    f(_this.$t('webagency.msg4'));
+                                }
+                            }
+                            f();
+                        },trigger:'blur'}
+                    ],
+                    maxDownloadSize:[
+                        {validator:function (r,v,f) {
+                            if(_this.formValidate.general_enabled == true){
+                                if(_this.formValidate.traffic_enabled == true){
+                                    var _s = cs.num(v);
+                                    if(_s == 0){
+                                        f(_this.$t('webagency.msg5'));
+                                    }else if(_s ==1){
+                                        f(_this.$t('webagency.msg6'));
+                                    }
+                                }
+                            }
+                            f();
+                        },trigger:'blur'}
+                    ],
+                    maxUploadSize:[
+                        {validator:function (r,v,f) {
+                            if(_this.formValidate.general_enabled == true){
+                                if(_this.formValidate.traffic_enabled == true){
+                                    var _s = cs.num(v);
+                                    if(_s == 0){
+                                        f(_this.$t('webagency.msg7'));
+                                    }else if(_s ==1){
+                                        f(_this.$t('webagency.msg8'));
+                                    }
+                                }
+                            }
+                            f();
+                        },trigger:'blur'}
+                    ],
+                    OverallBandwidthTrotteling:[
+                        {validator:function (r,v,f) {
+                            if(_this.formValidate.general_enabled == true){
+                                if(_this.formValidate.traffic_enabled == true){
+                                    if(v){
+                                        var _s = cs.num(v);
+                                        if(_s ==1){
+                                            f(_this.$t('webagency.msg10'));
+                                        }
+                                    }
+                                }
+                            }
+                            f();
+                        },trigger:'blur'}
+                    ],
+                    perHostTrotteling:[
+                        {validator:function (r,v,f) {
+                            if(_this.formValidate.general_enabled == true){
+                                if(_this.formValidate.traffic_enabled == true){
+                                    if(v){
+                                        var _s = cs.num(v);
+                                        if(_s ==1){
+                                            f(_this.$t('webagency.msg12'));
+                                        }
+                                    }
+
+                                }
+                            }
+                            f();
+                        },trigger:'blur'}
+                    ],
+                    port:[
+                        {validator:function (r,v,f) {
+                            if(_this.formValidate.general_enabled == true){
+                                var _s = cs.num(v);
+                                if(_s == 0){
+                                    f(_this.$t('webagency.msg13'));
+                                }else if(_s ==1){
+                                    f(_this.$t('webagency.msg14'));
+                                }else if( v <1 || v >65535){
+                                    f(_this.$t('webagency.msg15'));
+                                }
+                            }
+                            f();
+                        },trigger:'blur'}
+                    ],
+                    sslbumpport:[
+                        {validator:function (r,v,f) {
+                            if(_this.formValidate.general_enabled == true){
+                                var _s = cs.num(v);
+                                if(_s == 0){
+                                    f(_this.$t('webagency.msg16'));
+                                }else if(_s ==1){
+                                    f(_this.$t('webagency.msg17'));
+                                }else if( v <1 || v >65535){
+                                    f(_this.$t('webagency.msg18'));
+                                }else if(v == _this.formValidate.port){
+                                    f(_this.$t('webagency.msg19'));
+                                }
+                            }
+                            f();
+                        },trigger:'blur'}
+                    ],
+                    ssl_crtd_storage_max_size:[
+                        {validator:function (r,v,f) {
+                            if(_this.formValidate.general_enabled == true){
+                                var _s = cs.num(v);
+                                if(_s == 0){
+                                    f(_this.$t('webagency.msg20'));
+                                }else if(_s ==1){
+                                    f(_this.$t('webagency.msg21'));
+                                }
+                            }
+                            f();
+                        },trigger:'blur'}
+                    ],
+                    sslcrtd_children:[
+                        {validator:function (r,v,f) {
+                            if(_this.formValidate.general_enabled == true){
+                                var _s = cs.num(v);
+                                if(_s == 0){
+                                    f(_this.$t('webagency.msg22'));
+                                }else if(_s ==1){
+                                    f(_this.$t('webagency.msg23'));
+                                }
+                            }
+                            f();
+                        },trigger:'blur'}
+                    ],
+                    safePorts:[
+                        {validator:function (r,v,f) {
+                            if(_this.formValidate.general_enabled == true){
+                                var _s = cs.string(v);
+                                if(_s == 0){
+                                    f(_this.$t('webagency.msg24'));
+                                }
+                            }
+                            f();
+                        },trigger:'blur'}
+                    ],
+                    clam_maxfilesize:[
+                        {validator:function (r,v,f) {
+                            var _s = cs.num_range(v,1,10000);
+                            if(0 == _s){
+                                f(_this.$t('webagency.msg36'));
+                            }else if(0 != _s && 99 != _s) {
+                                f(_this.$t('webagency.msg37'));
+                            }
+                            f();
+                        },trigger:'blur'}
+                    ],
+                    icap_servername:[
+                        {validator:function (r,v,f) {
+                            var _s = cs.isEmail(v);
+                            if(0 != _s && 1 == _s) {
+                                f(_this.$t('webagency.msg38'));
+                            }
+                            f();
+                        },trigger:'blur'}
+                    ]
+                }
+            }
+
+        },
+        methods:{
+            tabsSwitch: function(index) {
+                this.showCurrentTabs = index;
+            },
+            handleSubmit: function (name){
+                var _this = this;
+                this.$refs[name].validate(function(valid){
+                    if (valid){
+                        var data = {};
+                        data['general']= {};
+                        data['general']['logging']={};
+                        data['general']['logging']['enable']={};
+                        data['general']['cache']={};
+                        data['general']['cache']['local']={};
+                        data['general']['traffic']={};
+                        data['forward']={};
+                        data['forward']['acl']={};
+                        if(false == _this.formValidate.general_enabled){
+                            data['general']['enabled']= '0';
+                        }else {
+                            data['general']['enabled']= '1';
+                            (true == _this.formValidate.accessLog)?
+                                    data['general']['logging']['enable']['accessLog'] = '1':
+                                    data['general']['logging']['enable']['accessLog'] = '0';
+                            (true == _this.formValidate.storeLog)?
+                                    data['general']['logging']['enable']['storeLog'] = '1':
+                                    data['general']['logging']['enable']['storeLog'] = '0';
+                            (true == _this.formValidate.dnsV4First)?
+                                    data['general']['dnsV4First'] = '1':
+                                    data['general']['dnsV4First'] = '0';
+                            (true == _this.formValidate.useViaHeader)?
+                                    data['general']['useViaHeader'] = '1':
+                                    data['general']['useViaHeader'] = '0';
+                            if(_this.formValidate.forwardedForHandling == '0'){
+                                data['general']['forwardedForHandling'] = '';
+                            }else{
+                                data['general']['forwardedForHandling'] = _this.formValidate.forwardedForHandling;
+                            }
+                            data['general']['logging']['ignoreLogACL'] = _this.formValidate.ignoreLogACL;
+                            data['general']['alternateDNSservers'] = _this.formValidate.alternateDNSservers;
+                            data['general']['VisibleEmail'] = _this.formValidate.VisibleEmail;
+                            data['general']['VisibleHostname'] = _this.formValidate.VisibleHostname;
+                            (true == _this.formValidate.suppressVersion)?
+                                    data['general']['suppressVersion'] = '1':
+                                    data['general']['suppressVersion'] = '0';
+                            if(_this.formValidate.uriWhitespaceHandling == 'none'){
+                                data['general']['uriWhitespaceHandling'] = '';
+                            }else{
+                                data['general']['uriWhitespaceHandling'] = _this.formValidate.uriWhitespaceHandling;
+                            }
+                            data['general']['cache']['local']['cache_mem'] = _this.formValidate.cache_mem;
+                            (true == _this.formValidate.cache_linux_packages)?
+                                    data['general']['cache']['local']['cache_linux_packages'] = '1':
+                                    data['general']['cache']['local']['cache_linux_packages'] = '0';
+                            (true == _this.formValidate.cache_windows_updates)?
+                                    data['general']['cache']['local']['cache_windows_updates'] = '1':
+                                    data['general']['cache']['local']['cache_windows_updates'] = '0';
+                            (true == _this.formValidate.traffic_enabled)?
+                                    data['general']['traffic']['enabled'] = '1':
+                                    data['general']['traffic']['enabled'] = '0';
+                            data['general']['traffic']['maxDownloadSize'] = _this.formValidate.maxDownloadSize;
+                            data['general']['traffic']['maxUploadSize'] = _this.formValidate.maxUploadSize;
+                            data['general']['traffic']['OverallBandwidthTrotteling'] = _this.formValidate.OverallBandwidthTrotteling;
+                            data['general']['traffic']['perHostTrotteling'] = _this.formValidate.perHostTrotteling;
+                            data['forward']['port'] = _this.formValidate.port;
+                            data['forward']['sslbumpport'] = _this.formValidate.sslbumpport;
+                            (true == _this.formValidate.sslbump)?
+                                    data['forward']['sslbump'] = '1':
+                                    data['forward']['sslbump'] = '0';
+                            (true == _this.formValidate.sslurlonly)?
+                                    data['forward']['sslurlonly'] = '1':
+                                    data['forward']['sslurlonly'] = '0';
+                            data['forward']['ssl_crtd_storage_max_size'] = _this.formValidate.ssl_crtd_storage_max_size;
+                            data['forward']['sslnobumpsites'] = _this.formValidate.sslnobumpsites;
+                            data['forward']['sslcrtd_children'] = _this.formValidate.sslcrtd_children;
+                            (true == _this.formValidate.addACLforInterfaceSubnets)?
+                                    data['forward']['addACLforInterfaceSubnets'] = '1':
+                                    data['forward']['addACLforInterfaceSubnets'] = '0';
+                            (true == _this.formValidate.transparentMode)?
+                                    data['forward']['transparentMode'] = '1':
+                                    data['forward']['transparentMode'] = '0';
+                            data['forward']['acl']['safePorts'] = _this.formValidate.safePorts;
+                            data['forward']['acl']['sslPorts'] = _this.formValidate.sslPorts;
                         }
-                        data['general']['logging']['ignoreLogACL'] = _this.formValidate.ignoreLogACL;
-                        data['general']['alternateDNSservers'] = _this.formValidate.alternateDNSservers;
-                        data['general']['VisibleEmail'] = _this.formValidate.VisibleEmail;
-                        data['general']['VisibleHostname'] = _this.formValidate.VisibleHostname;
-                        (true == _this.formValidate.suppressVersion)?
-                                data['general']['suppressVersion'] = '1':
-                                data['general']['suppressVersion'] = '0';
-                        if(_this.formValidate.uriWhitespaceHandling == 'none'){
-                            data['general']['uriWhitespaceHandling'] = '';
-                        }else{
-                            data['general']['uriWhitespaceHandling'] = _this.formValidate.uriWhitespaceHandling;
+                        data['forward']['acl']['allowedSubnets'] = _this.formValidate.allowedSubnets;
+                        data['forward']['acl']['unrestricted'] = _this.formValidate.unrestricted;
+                        data['forward']['acl']['bannedHosts'] = _this.formValidate.bannedHosts;
+                        data['forward']['acl']['whiteList'] = _this.formValidate.whiteList;
+                        data['forward']['acl']['blackList'] = _this.formValidate.blackList;
+                        data['forward']['acl']['browser'] = _this.formValidate.browser;
+                        data['forward']['acl']['mimeType'] = _this.formValidate.mimeType;
+
+
+                        /*ICAP*/
+                        if(_this.formValidate.general_enabled){
+                            data['ICAP'] = {};
+                            if(_this.formValidate.icap_enabled){
+                                data['ICAP']['enabled'] = '1';
+                            }else{
+                                data['ICAP']['enabled'] = '0';
+                            }
+                            if(_this.formValidate.icap_enable_accesslog){
+                                data['ICAP']['enable_accesslog'] = '1';
+                            }else{
+                                data['ICAP']['enable_accesslog'] = '0';
+                            }
+                            data['ICAP']['servername'] = _this.formValidate.icap_servername;
+
+                            data['CLAMAV'] = {};
+                            if(_this.formValidate.clam_cache){
+                                data['CLAMAV']['disablecache'] = '0';
+                            }else{
+                                data['CLAMAV']['disablecache'] = '1';
+                            }
+                            data['ICAP']['maxobjectsize'] = _this.formValidate.clam_maxfilesize;
+                            data['CLAMAV']['maxfilesize'] = data['ICAP']['maxobjectsize'];
+                            data['CLAMAV']['scanpe'] = _this.formValidate.clam_scanpe == true ? '1':'0';
+                            data['CLAMAV']['scanelf'] = _this.formValidate.clam_scanelf == true ? '1':'0';
+                            data['CLAMAV']['scanole2'] = _this.formValidate.clam_scanole2 == true ? '1':'0';
+                            data['CLAMAV']['scanpdf'] = _this.formValidate.clam_scanpdf == true ? '1':'0';
+                            data['CLAMAV']['scanswf'] = _this.formValidate.clam_scanswf == true ? '1':'0';
+                            data['CLAMAV']['scanxmldocs'] = _this.formValidate.clam_scanxmldocs == true ? '1':'0';
+                            data['CLAMAV']['scanhwp3'] = _this.formValidate.clam_scanhwp3 == true ? '1':'0';
+                            data['CLAMAV']['scanhtml'] = _this.formValidate.clam_scanhtml == true ? '1':'0';
+                            data['CLAMAV']['scanarchive'] = _this.formValidate.clam_scanarchive == true ? '1':'0';
+
                         }
-                        data['general']['cache']['local']['cache_mem'] = _this.formValidate.cache_mem;
-                        (true == _this.formValidate.cache_linux_packages)?
-                                data['general']['cache']['local']['cache_linux_packages'] = '1':
-                                data['general']['cache']['local']['cache_linux_packages'] = '0';
-                        (true == _this.formValidate.cache_windows_updates)?
-                                data['general']['cache']['local']['cache_windows_updates'] = '1':
-                                data['general']['cache']['local']['cache_windows_updates'] = '0';
-                        (true == _this.formValidate.traffic_enabled)?
-                                data['general']['traffic']['enabled'] = '1':
-                                data['general']['traffic']['enabled'] = '0';
-                        data['general']['traffic']['maxDownloadSize'] = _this.formValidate.maxDownloadSize;
-                        data['general']['traffic']['maxUploadSize'] = _this.formValidate.maxUploadSize;
-                        data['general']['traffic']['OverallBandwidthTrotteling'] = _this.formValidate.OverallBandwidthTrotteling;
-                        data['general']['traffic']['perHostTrotteling'] = _this.formValidate.perHostTrotteling;
-                        data['forward']['port'] = _this.formValidate.port;
-                        data['forward']['sslbumpport'] = _this.formValidate.sslbumpport;
-                        (true == _this.formValidate.sslbump)?
-                                data['forward']['sslbump'] = '1':
-                                data['forward']['sslbump'] = '0';
-                        (true == _this.formValidate.sslurlonly)?
-                                data['forward']['sslurlonly'] = '1':
-                                data['forward']['sslurlonly'] = '0';
-                        data['forward']['ssl_crtd_storage_max_size'] = _this.formValidate.ssl_crtd_storage_max_size;
 
+                        var postData = {"action":"setProxy","data":data};
+                        console.log(postData);
+                        _this.applyLoading = true;
+//                        _this.$Spin.show();  //加载动画
+                        uiPost.setProxy(postData,function(data){
+                            if (9999 == data.rescode){
+                                cs.loginOut();
+                            }
+//                            _this.$Spin.hide();   //关闭加载动画
+                            if (0 == data.rescode) {
+                                _this.$Message.success({content:_this.$t('openvpn.success'),onClose:function(){
+                                    location.href = location.href;
+                                }});
+                            } else {
+                                _this.$Message.error({content:_this.$t('openvpn.fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
+                            }
+                            _this.applyLoading = false;
+                        });
 
-                        data['forward']['sslnobumpsites'] = _this.formValidate.sslnobumpsites;
-
-
-
-                        data['forward']['sslcrtd_children'] = _this.formValidate.sslcrtd_children;
-                        (true == _this.formValidate.addACLforInterfaceSubnets)?
-                                data['forward']['addACLforInterfaceSubnets'] = '1':
-                                data['forward']['addACLforInterfaceSubnets'] = '0';
-                        (true == _this.formValidate.transparentMode)?
-                                data['forward']['transparentMode'] = '1':
-                                data['forward']['transparentMode'] = '0';
-                        data['forward']['acl']['safePorts'] = _this.formValidate.safePorts;
-                        data['forward']['acl']['sslPorts'] = _this.formValidate.sslPorts;
                     }
-                    data['forward']['acl']['allowedSubnets'] = _this.formValidate.allowedSubnets;
-                    data['forward']['acl']['unrestricted'] = _this.formValidate.unrestricted;
-                    data['forward']['acl']['bannedHosts'] = _this.formValidate.bannedHosts;
-                    data['forward']['acl']['whiteList'] = _this.formValidate.whiteList;
-                    data['forward']['acl']['blackList'] = _this.formValidate.blackList;
-                    data['forward']['acl']['browser'] = _this.formValidate.browser;
-                    data['forward']['acl']['mimeType'] = _this.formValidate.mimeType;
+                });
+            }
+        },
+        created:function() {
+            var _this = this;
+            var postVar = {"action":"getProxy","data":[]};
+            _this.$Spin.show();  //加载动画
+            uiPost.getProxy(postVar,function(data){
+                if (9999 == data.rescode){
+                    cs.loginOut();
+                }
+                _this.$Spin.hide();   //关闭加载动画
+                if (0 == data.rescode){
+                    if ('1' == data.data.general.enabled){
+                        _this.formValidate.general_enabled = true;
+                    }
+                    _this.formValidate.icpPort = data.data.general.icpPort;
+                    if('1' == data.data.general.logging.enable.accessLog){
+                        _this.formValidate.accessLog = true;
+                    }
+                    _this.formValidate.target = data.data.general.logging.target;   /**/
+                    if('1' == data.data.general.logging.enable.storeLog){
+                        _this.formValidate.storeLog = true;
+                    }
+                    _this.formValidate.ignoreLogACL = data.data.general.logging.ignoreLogACL;
+                    _this.formValidate.alternateDNSservers = data.data.general.alternateDNSservers;
+                    if('1' == data.data.general.dnsV4First){
+                        _this.formValidate.dnsV4First = true;
+                    }
+                    if('1' == data.data.general.useViaHeader){
+                        _this.formValidate.useViaHeader = true;
+                    }
+                    if(data.data.general.forwardedForHandling == ''){
+                        _this.formValidate.forwardedForHandling = '0';
+                    }else{
+                        _this.formValidate.forwardedForHandling = data.data.general.forwardedForHandling;
+                    }
+                    _this.formValidate.VisibleHostname = data.data.general.VisibleHostname;
+                    _this.formValidate.VisibleEmail = data.data.general.VisibleEmail;
+                    if('1' == data.data.general.suppressVersion){
+                        _this.formValidate.suppressVersion = true;
+                    }
+                    if(data.data.general.uriWhitespaceHandling == ''){
+                        _this.formValidate.uriWhitespaceHandling = 'none';
+                    }else{
+                        _this.formValidate.uriWhitespaceHandling = data.data.general.uriWhitespaceHandling;
+                    }
+                    _this.formValidate.cache_mem = data.data.general.cache.local.cache_mem;
+                    if('1' == data.data.general.cache.local.cache_linux_packages){
+                        _this.formValidate.cache_linux_packages = true;
+                    }
+                    if('1' == data.data.general.cache.local.cache_windows_updates){
+                        _this.formValidate.cache_windows_updates = true;
+                    }
+                    /*第二*/
+                    if('1' == data.data.general.traffic.enabled){
+                        _this.formValidate.traffic_enabled = true;
+                    }
+                    _this.formValidate.maxDownloadSize = data.data.general.traffic.maxDownloadSize;
+                    _this.formValidate.maxUploadSize = data.data.general.traffic.maxUploadSize;
+                    _this.formValidate.OverallBandwidthTrotteling = data.data.general.traffic.OverallBandwidthTrotteling;
+                    _this.formValidate.perHostTrotteling = data.data.general.traffic.perHostTrotteling;
+                    /*第三*/
+                    _this.formValidate.interfaces = data.data.forward.interfaces;
+                    _this.formValidate.port = data.data.forward.port;
+                    if('1' == data.data.forward.transparentMode){
+                        _this.formValidate.transparentMode = true;
+                    }
+                    if('1' == data.data.forward.sslbump){
+                        _this.formValidate.sslbump = true;
+                    }
+                    if('1' == data.data.forward.sslurlonly){
+                        _this.formValidate.sslurlonly = true;
+                    }
+                    _this.formValidate.sslbumpport = data.data.forward.sslbumpport;
+                    _this.formValidate.sslcertificate = data.data.forward.sslcertificate;
+                    _this.formValidate.sslnobumpsites = data.data.forward.sslnobumpsites;
+                    _this.formValidate.ssl_crtd_storage_max_size = data.data.forward.ssl_crtd_storage_max_size;
+                    _this.formValidate.sslcrtd_children = data.data.forward.sslcrtd_children;
+                    if('1' == data.data.forward.addACLforInterfaceSubnets){
+                        _this.formValidate.addACLforInterfaceSubnets = true;
+                    }
+                    /*第四*/
+                    _this.formValidate.allowedSubnets = data.data.forward.acl.allowedSubnets;
+                    _this.formValidate.unrestricted = data.data.forward.acl.unrestricted;
+                    _this.formValidate.bannedHosts = data.data.forward.acl.bannedHosts;
+                    _this.formValidate.whiteList = data.data.forward.acl.whiteList;
+                    _this.formValidate.blackList = data.data.forward.acl.blackList;
+                    _this.formValidate.browser = data.data.forward.acl.browser;
+                    _this.formValidate.mimeType = data.data.forward.acl.mimeType;
+                    _this.formValidate.safePorts = data.data.forward.acl.safePorts;
+                    _this.formValidate.sslPorts = data.data.forward.acl.sslPorts;
 
-
-                    var postData = {"action":"setProxy","data":data};
-                    console.log(postData);
-                    _this.applyLoading = true;
-                    uiPost.setProxy(postData,function(data){
-                        if (9999 == data.rescode){
-                            cs.loginOut();
-                        }
-                        if (0 == data.rescode) {
-                            _this.$Message.success({content:_this.$t('openvpn.success'),onClose:function(){
-                                location.href = location.href;
-                            }});
-                        } else {
-                            _this.$Message.error({content:_this.$t('openvpn.fail')+' '+_this.$t('errorcode.'+data.rescode),duration:5});
-                        }
-                        _this.applyLoading = false;
-                    });
-
+                    /*ICAP*/
+                    _this.formValidate.icap_enabled = data.data.ICAP.enabled == '1' ? true : false;
+                    _this.formValidate.clam_cache = data.data.ICAP.disablecache == '1' ? false :true;
+                    _this.formValidate.icap_enable_accesslog = data.data.ICAP.enable_accesslog == '1' ? true :false;
+                    _this.formValidate.clam_scanpe = data.data.ICAP.scanpe == '1' ? true :false;
+                    _this.formValidate.clam_scanelf = data.data.ICAP.scanelf == '1' ? true :false;
+                    _this.formValidate.clam_maxfilesize = data.data.ICAP.maxfilesize.substr(0,data.data.ICAP.maxfilesize.length-1);
+                    _this.formValidate.icap_servername = data.data.ICAP.servername;
+                    _this.formValidate.clam_scanole2 = data.data.ICAP.scanole2 == '1' ? true :false;
+                    _this.formValidate.clam_scanpdf = data.data.ICAP.scanpdf == '1' ? true :false;
+                    _this.formValidate.clam_scanswf = data.data.ICAP.scanswf == '1' ? true :false;
+                    _this.formValidate.clam_scanxmldocs = data.data.ICAP.scanxmldocs == '1' ? true :false;
+                    _this.formValidate.clam_scanhwp3 = data.data.ICAP.scanhwp3 == '1' ? true :false;
+                    _this.formValidate.clam_scanhtml = data.data.ICAP.scanhtml == '1' ? true :false;
+                    _this.formValidate.clam_scanarchive = data.data.ICAP.scanarchive == '1' ? true :false;
                 }
             });
         }
-    },
-    created:function() {
-        var _this = this;
-        var postVar = {"action":"getProxy","data":[]};
-        _this.$Spin.show();  //加载动画
-        uiPost.getProxy(postVar,function(data){
-            console.log(data);
-            if (9999 == data.rescode){
-                cs.loginOut();
-            }
-            _this.$Spin.hide();   //关闭加载动画
-            if (0 == data.rescode){
-                if ('1' == data.data.general.enabled){
-                    _this.formValidate.general_enabled = true;
-                }
-                _this.formValidate.icpPort = data.data.general.icpPort;
-                if('1' == data.data.general.logging.enable.accessLog){
-                    _this.formValidate.accessLog = true;
-                }
-                _this.formValidate.target = data.data.general.logging.target;   /**/
-                if('1' == data.data.general.logging.enable.storeLog){
-                    _this.formValidate.storeLog = true;
-                }
-                _this.formValidate.ignoreLogACL = data.data.general.logging.ignoreLogACL;
-                _this.formValidate.alternateDNSservers = data.data.general.alternateDNSservers;
-                if('1' == data.data.general.dnsV4First){
-                    _this.formValidate.dnsV4First = true;
-                }
-                if('1' == data.data.general.useViaHeader){
-                    _this.formValidate.useViaHeader = true;
-                }
-                if(data.data.general.forwardedForHandling == ''){
-                    _this.formValidate.forwardedForHandling = '0';
-                }else{
-                    _this.formValidate.forwardedForHandling = data.data.general.forwardedForHandling;
-                }
-                _this.formValidate.VisibleHostname = data.data.general.VisibleHostname;
-                _this.formValidate.VisibleEmail = data.data.general.VisibleEmail;
-                if('1' == data.data.general.suppressVersion){
-                    _this.formValidate.suppressVersion = true;
-                }
-                if(data.data.general.uriWhitespaceHandling == ''){
-                    _this.formValidate.uriWhitespaceHandling = 'none';
-                }else{
-                    _this.formValidate.uriWhitespaceHandling = data.data.general.uriWhitespaceHandling;
-                }
-                _this.formValidate.cache_mem = data.data.general.cache.local.cache_mem;
-                if('1' == data.data.general.cache.local.cache_linux_packages){
-                    _this.formValidate.cache_linux_packages = true;
-                }
-                if('1' == data.data.general.cache.local.cache_windows_updates){
-                    _this.formValidate.cache_windows_updates = true;
-                }
-                /*第二*/
-                if('1' == data.data.general.traffic.enabled){
-                    _this.formValidate.traffic_enabled = true;
-                }
-                _this.formValidate.maxDownloadSize = data.data.general.traffic.maxDownloadSize;
-                _this.formValidate.maxUploadSize = data.data.general.traffic.maxUploadSize;
-                _this.formValidate.OverallBandwidthTrotteling = data.data.general.traffic.OverallBandwidthTrotteling;
-                _this.formValidate.perHostTrotteling = data.data.general.traffic.perHostTrotteling;
-                /*第三*/
-                _this.formValidate.interfaces = data.data.forward.interfaces;
-                _this.formValidate.port = data.data.forward.port;
-                if('1' == data.data.forward.transparentMode){
-                    _this.formValidate.transparentMode = true;
-                }
-                if('1' == data.data.forward.sslbump){
-                    _this.formValidate.sslbump = true;
-                }
-                if('1' == data.data.forward.sslurlonly){
-                    _this.formValidate.sslurlonly = true;
-                }
-                _this.formValidate.sslbumpport = data.data.forward.sslbumpport;
-                _this.formValidate.sslcertificate = data.data.forward.sslcertificate;
-                _this.formValidate.sslnobumpsites = data.data.forward.sslnobumpsites;
-                _this.formValidate.ssl_crtd_storage_max_size = data.data.forward.ssl_crtd_storage_max_size;
-                _this.formValidate.sslcrtd_children = data.data.forward.sslcrtd_children;
-                if('1' == data.data.forward.addACLforInterfaceSubnets){
-                    _this.formValidate.addACLforInterfaceSubnets = true;
-                }
-                /*第四*/
-                _this.formValidate.allowedSubnets = data.data.forward.acl.allowedSubnets;
-                _this.formValidate.unrestricted = data.data.forward.acl.unrestricted;
-                _this.formValidate.bannedHosts = data.data.forward.acl.bannedHosts;
-                _this.formValidate.whiteList = data.data.forward.acl.whiteList;
-                _this.formValidate.blackList = data.data.forward.acl.blackList;
-                _this.formValidate.browser = data.data.forward.acl.browser;
-                _this.formValidate.mimeType = data.data.forward.acl.mimeType;
-                _this.formValidate.safePorts = data.data.forward.acl.safePorts;
-                _this.formValidate.sslPorts = data.data.forward.acl.sslPorts;
-            }
-        });
-    }
 
-};
+    };
 </script>
 <script src="/newui/static/js/main.js"></script>
 </body>
