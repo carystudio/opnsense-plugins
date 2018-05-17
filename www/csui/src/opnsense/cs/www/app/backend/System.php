@@ -54,10 +54,89 @@ class System extends Csbackend
                 }
             }
         }
-        
+
+        $cpu = self::system_api_cpu_stats();
+        $kernel = self::system_api_kernel();
+        $sysTime = self::getGwTime();
+
+        $used = $kernel['memory']['used'];
+        $total = $kernel['memory']['total'];
+        $memory = floor(100 * ($used/$total)) ."% ( ". floor($used/1024/1024) . " / " . floor($total/1024/1024) . " MB )";
+
+        $statusInfo['system']['cpu'] = $cpu['used'];
+        $statusInfo['system']['memory'] = $memory;
+        $statusInfo['system']['systime'] = $sysTime['Time'];
+
         return $statusInfo;
     }
 
+    private static function system_api_cpu_stats()
+    {
+        $cpustats = array();
+        // take a short snapshot to calculate cpu usage
+        $diff = array('user', 'nice', 'sys', 'intr', 'idle');
+        $cpuTicks1 = array_combine($diff, explode(" ", get_single_sysctl('kern.cp_time')));
+        usleep(100000);
+        $cpuTicks2 = array_combine($diff, explode(" ", get_single_sysctl('kern.cp_time')));
+        $totalStart = array_sum($cpuTicks1);
+        $totalEnd = array_sum($cpuTicks2);
+        if ($totalEnd <= $totalStart) {
+            // if for some reason the measurement is invalid, assume nothing has changed (all 0)
+            $totalEnd = $totalStart;
+        }
+        $cpustats['used'] = floor(100 * (($totalEnd - $totalStart) - ($cpuTicks2['idle'] - $cpuTicks1['idle'])) / ($totalEnd - $totalStart));
+        $cpustats['user'] = floor(100 * (($cpuTicks2['user'] - $cpuTicks1['user'])) / ($totalEnd - $totalStart));
+        $cpustats['nice'] = floor(100 * (($cpuTicks2['nice'] - $cpuTicks1['nice'])) / ($totalEnd - $totalStart));
+        $cpustats['sys'] = floor(100 * (($cpuTicks2['sys'] - $cpuTicks1['sys'])) / ($totalEnd - $totalStart));
+        $cpustats['intr'] = floor(100 * (($cpuTicks2['intr'] - $cpuTicks1['intr'])) / ($totalEnd - $totalStart));
+        $cpustats['idle'] = floor(100 * (($cpuTicks2['idle'] - $cpuTicks1['idle'])) / ($totalEnd - $totalStart));
+
+        // cpu model and count
+        $cpustats['model'] = get_single_sysctl("hw.model");
+        $cpustats['cpus'] = get_single_sysctl('kern.smp.cpus');
+
+        // cpu frequency
+        $tmp = get_single_sysctl('dev.cpu.0.freq_levels');
+        $cpustats['max.freq'] = !empty($tmp) ? explode("/", explode(" ", $tmp)[0])[0] : "-";
+        $tmp = get_single_sysctl('dev.cpu.0.freq');
+        $cpustats['cur.freq'] = !empty($tmp) ? $tmp : "-";
+        $cpustats['freq_translate'] = sprintf(gettext("Current: %s MHz, Max: %s MHz"), $cpustats['cur.freq'], $cpustats['max.freq']);
+
+        // system load
+        exec("/usr/bin/uptime | /usr/bin/sed 's/^.*: //'", $load_average);
+        $cpustats['load'] = explode(',', $load_average[0]);
+
+        return $cpustats;
+    }
+
+    private static function system_api_kernel()
+    {
+        global $config;
+        $result = array();
+
+        $result['pf'] = array();
+        $result['pf']['maxstates'] = !empty($config['system']['maximumstates']) ? $config['system']['maximumstates'] : default_state_size();
+        exec('/sbin/pfctl -si |grep "current entries" 2>/dev/null', $states);
+        $result['pf']['states'] = count($states) >  0 ? filter_var($states[0], FILTER_SANITIZE_NUMBER_INT) : 0;
+
+        $result['mbuf'] = array();
+        exec('/usr/bin/netstat -mb | /usr/bin/grep "mbuf clusters in use"', $mbufs);
+        $result['mbuf']['total'] = count($mbufs) > 0 ? explode('/', $mbufs[0])[2] : 0;
+        $result['mbuf']['max'] = count($mbufs) > 0 ? explode(' ', explode('/', $mbufs[0])[3])[0] : 0;
+
+        $totalMem = get_single_sysctl("vm.stats.vm.v_page_count");
+        $inactiveMem = get_single_sysctl("vm.stats.vm.v_inactive_count");
+        $cachedMem = get_single_sysctl("vm.stats.vm.v_cache_count");
+        $freeMem = get_single_sysctl("vm.stats.vm.v_free_count");
+        $result['memory']['total'] = get_single_sysctl('hw.physmem');
+        if ($totalMem != 0) {
+            $result['memory']['used'] = round(((($totalMem - ($inactiveMem + $cachedMem + $freeMem))) / $totalMem)*$result['memory']['total'], 0);
+        } else {
+            $result['memory']['used'] = gettext('N/A');
+        }
+
+        return $result;
+    }
 
     public static function getGwTime(){
         global $config;
