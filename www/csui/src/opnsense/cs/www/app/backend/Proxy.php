@@ -157,6 +157,26 @@ class Proxy extends Csbackend
         unset($proxy['forward']['ftpTransparentMode']);
         unset($proxy['forward']['acl']['remoteACLs']);
 
+        $cicap = $config['OPNsense']['cicap'];
+        $clamav = $config['OPNsense']['clamav'];
+
+        $icap = array();
+        $icap['enabled'] = $cicap['general']['enabled'];
+        $icap['enable_accesslog'] = $cicap['general']['enable_accesslog'];
+        $icap['servername'] = $cicap['general']['servername'];
+        $icap['maxfilesize'] = $clamav['general']['maxfilesize'];
+        $icap['scanarchive'] = $clamav['general']['scanarchive'];
+        $icap['scanelf'] = $clamav['general']['scanelf'];
+        $icap['scanhtml'] = $clamav['general']['scanhtml'];
+        $icap['scanhwp3'] = $clamav['general']['scanhwp3'];
+        $icap['scanole2'] = $clamav['general']['scanole2'];
+        $icap['scanpdf'] = $clamav['general']['scanpdf'];
+        $icap['scanpe'] = $clamav['general']['scanpe'];
+        $icap['scanswf'] = $clamav['general']['scanswf'];
+        $icap['scanxmldocs'] = $clamav['general']['scanxmldocs'];
+        $icap['disablecache'] = $clamav['general']['disablecache'];
+
+        $proxy['ICAP'] = $icap;
         return $proxy;
     }
 
@@ -222,6 +242,120 @@ class Proxy extends Csbackend
         filter_configure();
     }
 
+    private static function cicapStatus()
+    {
+        global $config;
+
+        $backend = new Backend();
+        $response = $backend->configdRun("cicap status");
+
+        if (strpos($response, "not running") > 0) {
+            if ((string)$config['OPNsense']['cicap']['general']['enabled'] == 1) {
+                $status = "stopped";
+            } else {
+                $status = "disabled";
+            }
+        } elseif (strpos($response, "is running") > 0) {
+            $status = "running";
+        } elseif ((string)$config['OPNsense']['cicap']['general']['enabled'] == 0) {
+            $status = "disabled";
+        } else {
+            $status = "unkown";
+        }
+
+        return array("status" => $status);
+    }
+
+    private static function cicapConfigure()
+    {
+        global $config;
+
+        $backend = new Backend();
+
+        // stop cicap if it is running or not
+        $response = $backend->configdRun("cicap stop");
+
+        // generate template
+        $backend->configdRun('template reload OPNsense/CICAP');
+
+        // (res)start daemon
+        if ((string)$config['OPNsense']['cicap']['general']['enabled'] == 1) {
+            $response = $backend->configdRun("cicap start");
+        }
+
+        return array("status" => "ok");
+    }
+
+    private static function clamavStatus()
+    {
+        global $config;
+
+        $backend = new Backend();
+        $response = $backend->configdRun("clamav status");
+
+        if (strpos($response, "not running") > 0) {
+            if ((string)$config['OPNsense']['clamav']['general']['enabled'] == 1) {
+                $status = "stopped";
+            } else {
+                $status = "disabled";
+            }
+        } elseif (strpos($response, "is running") > 0) {
+            $status = "running";
+        } elseif ((string)$config['OPNsense']['clamav']['general']['enabled'] == 0) {
+            $status = "disabled";
+        } else {
+            $status = "unkown";
+        }
+
+        return array("status" => $status);
+    }
+
+    private static function clanavConfigure()
+    {
+        global $config;
+
+        $backend = new Backend();
+
+        // stop clamav if it is running or not
+        $response = $backend->configdRun("clamav stop");
+
+        // (res)start daemon
+        if ((string)$config['OPNsense']['clamav']['general']['enabled'] == 1) {
+            // generate template
+            $backend->configdRun('template reload OPNsense/ClamAV');
+            $response = $backend->configdRun("clamav start");
+        }
+
+        return array("status" => "ok");
+
+    }
+
+    private static function icapConfigure(){
+        global $config;
+
+        $backend = new Backend();
+
+//        $clamavStatus = self::clamavStatus();
+//        $cicapStatus = self::cicapStatus();
+
+        $backend->configdRun("clamav stop");
+        $backend->configdRun("cicap stop");
+
+        // generate template
+        $backend->configdRun('template reload OPNsense/ClamAV');
+        $backend->configdRun('template reload OPNsense/CICAP');
+
+        // (res)start daemon
+        if ((string)$config['OPNsense']['clamav']['general']['enabled'] == 1) {
+            if(!file_exists("/usr/local/opnsense/cs/script/icap_tmp.txt")){
+                file_put_contents("/usr/local/opnsense/cs/script/icap_tmp.txt",'/bin/sh /usr/local/opnsense/cs/script/seticap.sh start');
+            }
+//            exec('/bin/sh /usr/local/opnsense/cs/script/seticap.sh start');
+        }
+
+        return array("status" => "ok");
+    }
+
     public static function setConf($data){
         global $config;
 
@@ -234,6 +368,8 @@ class Proxy extends Csbackend
             }
             if('0'==$data['general']['enabled']){
                 $config['OPNsense']['proxy']['general']['enabled'] = 0;
+                $config['OPNsense']['cicap']['general']['enabled'] = 0;
+                $config['OPNsense']['clamav']['general']['enabled'] = 0;
             }else{
                 $conf_data = $config['OPNsense']['proxy'];
                 $conf_data['general']['enabled'] = '1';
@@ -419,6 +555,16 @@ class Proxy extends Csbackend
                 }
                 $conf_data['forward']['transparentMode'] = $data['forward']['transparentMode'];
 
+                if(isset($data['ICAP'])){
+                    if(!isset($data['ICAP']['enabled']) || !Util::check0and1($data['ICAP']['enabled'])){
+                        throw new AppException('PROXY_200');    //ICAP开启参数错误
+                    }
+                    if('1' == $data['ICAP']['enabled']){
+                        $conf_data['forward']['transparentMode'] = '1';
+                        $conf_data['forward']['sslbump'] = '1';
+                    }
+                }
+
                 if(!isset($data['forward']['acl']['safePorts'])){
                     throw new AppException('PROXY_123');
                 }
@@ -447,6 +593,66 @@ class Proxy extends Csbackend
                         }
                     }
                 }
+
+                $icapEnabled = '0';
+                if(isset($data['general']['enabled']) && '1' == $data['general']['enabled']){
+                    if(!isset($data['ICAP']['enabled']) || !Util::check0and1($data['ICAP']['enabled'])){
+                        throw new AppException('PROXY_200');     //ICAP开启参数错误
+                    }
+                    $icapEnabled = $data['ICAP']['enabled'];
+
+                    if(!isset($data['ICAP']['enable_accesslog']) || !Util::check0and1($data['ICAP']['enable_accesslog'])){
+                        throw new AppException('PROXY_201');     //ICAP访问日志开启参数错误
+                    }
+                    if(!isset($data['CLAMAV']['disablecache']) || !Util::check0and1($data['CLAMAV']['disablecache'])){
+                        throw new AppException('PROXY_202');     //ICAP缓存参数不正确
+                    }
+                    if(!isset($data['CLAMAV']['maxfilesize']) || !is_numeric($data['CLAMAV']['maxfilesize'])){
+                        throw new AppException('PROXY_203');     //病毒检测最大扫描文件参数不正确
+                    }
+                    if($data['CLAMAV']['maxfilesize'] < 1 || $data['CLAMAV']['maxfilesize'] > 10000){
+                        throw new AppException('PROXY_203');     //病毒检测最大扫描文件参数不正确
+                    }
+                    $data['CLAMAV']['maxfilesize'] = $data['CLAMAV']['maxfilesize'].'M';
+                    $data['ICAP']['maxobjectsize'] = $data['ICAP']['maxobjectsize'].'M';
+                    if(!isset($data['ICAP']['servername'])){
+                        throw new AppException('PROXY_212');     //ICAP管理员邮箱参数错误
+                    }
+                    if($data['CLAMAV']['maxfilesize'] != $data['ICAP']['maxobjectsize']){
+                        throw new AppException('PROXY_203');    //病毒检测最大扫描文件参数不正确
+                    }
+                    if(!isset($data['CLAMAV']['scanpe']) || !is_numeric($data['CLAMAV']['scanpe'])){
+                        throw new AppException('PROXY_204');    //扫描可执行文件参数不正确
+                    }
+                    if(!isset($data['CLAMAV']['scanelf']) || !is_numeric($data['CLAMAV']['scanelf'])){
+                        throw new AppException('PROXY_205');    //Scan executeable and linking format参数不正确
+                    }
+                    if(!isset($data['CLAMAV']['scanole2']) || !is_numeric($data['CLAMAV']['scanole2'])){
+                        throw new AppException('PROXY_206');    //扫描OLE2文件参数不正确
+                    }
+                    if(!isset($data['CLAMAV']['scanpdf']) || !is_numeric($data['CLAMAV']['scanpdf'])){
+                        throw new AppException('PROXY_207');    //扫描PDF文件参数不正确
+                    }
+                    if(!isset($data['CLAMAV']['scanswf']) || !is_numeric($data['CLAMAV']['scanswf'])){
+                        throw new AppException('PROXY_208');    //扫描SWF文件参数不正确
+                    }
+                    if(!isset($data['CLAMAV']['scanxmldocs']) || !is_numeric($data['CLAMAV']['scanxmldocs'])){
+                        throw new AppException('PROXY_209');    //扫描XMLDOCS文件参数不正确
+                    }
+                    if(!isset($data['CLAMAV']['scanhwp3']) || !is_numeric($data['CLAMAV']['scanhwp3'])){
+                        throw new AppException('PROXY_210');    //扫描HWP3文件参数不正确
+                    }
+                    if(!isset($data['CLAMAV']['scanhtml']) || !is_numeric($data['CLAMAV']['scanhtml'])){
+                        throw new AppException('PROXY_211');    //扫描HWP3文件参数不正确
+                    }
+                    if(!isset($data['CLAMAV']['scanarchive']) || !is_numeric($data['CLAMAV']['scanarchive'])){
+                        throw new AppException('PROXY_211');    //扫描HWP3文件参数不正确
+                    }
+
+                    self::setCICAP($data);
+                    self::setClamAv($data);
+                }
+
                 $conf_data['forward']['acl']['sslPorts'] = $data['forward']['acl']['sslPorts'];
                 //no check data
                 $conf_data['forward']['acl']['allowedSubnets'] = $data['forward']['acl']['allowedSubnets'];
@@ -465,9 +671,9 @@ class Proxy extends Csbackend
                 $conf_data['forward']['authentication'] = array('realm'=>'CSG2000P proxy authentication',
                     'credentialsttl'=>2,'children'=>'5');
                 $conf_data['forward']['icap'] = array(
-                    'enable'=>0,
-                    'RequestURL'=>'icap://[::1]:1344/avscan',
-                    'ResponseURL'=>'icap://[::1]:1344/avscan',
+                    'enable'=>$icapEnabled,
+                    'RequestURL'=>'icap://127.0.0.1:1344/avscan',
+                    'ResponseURL'=>'icap://127.0.0.1:1344/avscan',
                     'SendClientIP'=>1,
                     'SendUsername'=>0,
                     'EncodeUsername'=>0,
@@ -482,6 +688,7 @@ class Proxy extends Csbackend
             }
             self::setFirewall();
             write_config();
+            self::icapConfigure();
             self::configure();
         }catch(AppException $aex){
             $result = $aex->getMessage();
@@ -490,6 +697,111 @@ class Proxy extends Csbackend
         }
 
         return $result;
+    }
+
+    private static function setCICAP($data){
+        global $config;
+
+        $data = $data["ICAP"];
+        if(!isset($config['OPNsense']['cicap'])){
+            $CICAP_INIT = array(
+                "antivirus"=>array(
+                    "@attributes"=>array("version"=>"1.0.0"),
+                    "enable_clamav"=>"1",
+                    "scanfiletypes"=>"TEXT,DATA,EXECUTABLE,ARCHIVE,GIF,JPEG,MSOFFICE",
+                    "sendpercentdata"=>"5",
+                    "startsendpercentdataafter"=>"2M",
+                    "allow204responses"=>"1",
+                    "passonerror"=>"0",
+                    "maxobjectsize"=>"5M",
+                ),
+                "general"=>array(
+                    "@attributes"=>array("version"=>"1.0.1"),
+                    "enabled"=>"0",
+                    "timeout"=>"300",
+                    "maxkeepaliverequests"=>"100",
+                    "keepalivetimeout"=>"600",
+                    "startservers"=>"3",
+                    "maxservers"=>"10",
+                    "minsparethreads"=>"10",
+                    "maxsparethreads"=>"20",
+                    "threadsperchild"=>"10",
+                    "maxrequestsperchild"=>"0",
+                    "listenaddress"=>"127.0.0.1",
+                    "serveradmin"=>"",
+                    "servername"=>"",
+                    "enable_accesslog"=>"1",
+                    "localSquid"=>"1"
+                )
+            );
+            $config['OPNsense']['cicap'] = $CICAP_INIT;
+        }
+
+        $config['OPNsense']['cicap']['general']['enabled'] = $data['enabled'];
+        $config['OPNsense']['cicap']['general']['servername'] = $data['servername'];
+        $config['OPNsense']['cicap']['general']['enable_accesslog'] = $data['enable_accesslog'];
+        $config['OPNsense']['cicap']['antivirus']['maxobjectsize'] = $data['maxobjectsize'];
+
+        write_config();
+    }
+
+    private static function setClamAv($data){
+        global $config;
+
+        if(!isset($config['OPNsense']['clamav'])){
+            $CLAMAV_INIT = array(
+                "general"=>array(
+                    "@attributes"=>array("version"=>"1.0.0"),
+                    "enabled"=>'0',
+                    "fc_enabled"=>'1',
+                    "enabletcp"=>"1",
+                    "maxthreads"=>"10",
+                    "maxqueue"=>"100",
+                    "idletimeout"=>"30",
+                    "maxdirrecursion"=>"20",
+                    "followdirsym"=>"0",
+                    "followfilesym"=>"0",
+                    "disablecache"=>"1",
+                    "scanpe"=>"1",
+                    "scanelf"=>"1",
+                    "detectbroken"=>"0",
+                    "scanole2"=>"1",
+                    "ole2blockmarcros"=>"0",
+                    "scanpdf"=>"1",
+                    "scanswf"=>"1",
+                    "scanxmldocs"=>"1",
+                    "scanhwp3"=>"1",
+                    "scanmailfiles"=>"1",
+                    "scanhtml"=>"1",
+                    "scanarchive"=>"1",
+                    "arcblockenc"=>"0",
+                    "maxscansize"=>"100M",
+                    "maxfilesize"=>"25M",
+                    "maxrecursion"=>"16",
+                    "maxfiles"=>"10000",
+                    "fc_logverbose"=>"0",
+                    "fc_databasemirror"=>"database.clamav.net",
+                    "fc_timeout"=>"60"
+                ),
+            );
+
+            $config['OPNsense']['clamav'] = $CLAMAV_INIT;
+        }
+
+        $config['OPNsense']['clamav']['general']['enabled'] = $data['ICAP']['enabled'];
+        $config['OPNsense']['clamav']['general']['disablecache'] = $data['CLAMAV']['disablecache'];
+        $config['OPNsense']['clamav']['general']['maxfilesize'] = $data['CLAMAV']['maxfilesize'];
+        $config['OPNsense']['clamav']['general']['scanpe'] = $data['CLAMAV']['scanpe'];
+        $config['OPNsense']['clamav']['general']['scanelf'] = $data['CLAMAV']['scanelf'];
+        $config['OPNsense']['clamav']['general']['scanole2'] = $data['CLAMAV']['scanole2'];
+        $config['OPNsense']['clamav']['general']['scanpdf'] = $data['CLAMAV']['scanpdf'];
+        $config['OPNsense']['clamav']['general']['scanswf'] = $data['CLAMAV']['scanswf'];
+        $config['OPNsense']['clamav']['general']['scanxmldocs'] = $data['CLAMAV']['scanxmldocs'];
+        $config['OPNsense']['clamav']['general']['scanhwp3'] = $data['CLAMAV']['scanhwp3'];
+        $config['OPNsense']['clamav']['general']['scanhtml'] = $data['CLAMAV']['scanhtml'];
+        $config['OPNsense']['clamav']['general']['scanarchive'] = $data['CLAMAV']['scanarchive'];
+
+        write_config();
     }
 
     public static function delDdns($data){
