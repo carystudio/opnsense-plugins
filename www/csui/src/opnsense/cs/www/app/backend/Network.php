@@ -64,9 +64,27 @@ class Network extends Csbackend
         'Network_705'=>'网卡不正确'
     );
 
+    const COMM_DNS = array('114.114.114.114', '223.5.5.5', '223.6.6.6', '180.76.76.76', '1.1.1.1');
+
     private static $availableNic = false;
     private static $infInfo = array();
     private static $infStatus = false;
+
+    private static function getOneCommDns(){
+        global $config;
+
+        $comm_dns = array();
+        if(is_array($config['system']['dnsserver'])){
+            $comm_dns = $config['system']['dnsserver'];
+        }
+        $avail_dns = array_diff(Network::COMM_DNS, $comm_dns);
+        $one_dns = false;
+        if($avail_dns){
+            $one_dns = array_pop($avail_dns);
+        }
+
+        return $one_dns;
+    }
     
     public static function getInfStatus($inf=false){
     	if(!self::$infStatus){
@@ -120,12 +138,25 @@ class Network extends Csbackend
                 }
             }
             foreach($config['interfaces'] as $if_name=>$if_info){
+                if($if_info['descr'] == $include){
+                    continue ;
+                }
                 if('wan'==substr($if_info['descr'],0,3)){
                     if(isset($niclist[$config['interfaces'][$if_name]['if']])){
                         unset($niclist[$config['interfaces'][$if_name]['if']]);
                     }
-                }
-				if('pppoe'==substr($if_info['if'],0,5)){
+                }else if('lan'==substr($if_info['descr'],0,3)){
+                    if('bridge' == substr($if_info['if'], 0, 5)){
+                        foreach($config['bridges']['bridged'] as $bridge_idx=>$bridge){
+                            if($bridge['bridgeif'] == $if_info['if']){
+                                $lan_ifs = explode(',', $bridge['members']);
+                                if(count($lan_ifs)<=1){
+                                    unset($niclist[$config['interfaces'][$lan_ifs[0]]['if']]);
+                                }
+                            }
+                        }
+                    }
+                }else if('pppoe'==substr($if_info['if'],0,5)){
                     foreach($config['ppps']['ppp'] as $idx=>$ppp){
                         if($ppp['if'] == $if_info['if']){
                             unset($niclist[$config['ppps']['ppp'][$idx]['ports']]);
@@ -133,6 +164,7 @@ class Network extends Csbackend
                     }
                 }
             }
+            /*
 			if(false == $include){
                 if(isset($config['bridges']['bridged'][0]['members'])){
                     $lan_ifs = trim($config['bridges']['bridged'][0]['members']);
@@ -144,7 +176,7 @@ class Network extends Csbackend
                         }
                     }
                 }
-            }
+            }*/
 
             self::$availableNic = $niclist;
         }
@@ -156,7 +188,6 @@ class Network extends Csbackend
         global $config;
 
         $wanInfo = array();
-        $wanInfo['AvailableNic'] = self::getAvailableNic();
         $wanInfo['Interfaces'] = array();
         $niclist = get_interface_list();
         foreach($config['interfaces'] as $idx=>$infinfo){
@@ -173,6 +204,12 @@ class Network extends Csbackend
             }
 
         }
+        if(count($wanInfo['Interfaces'])<4){
+            $wanInfo['AvailableNic'] = self::getAvailableNic();
+        }else{
+            $wanInfo['AvailableNic'] = array();
+        }
+
 
         return $wanInfo;
     }
@@ -825,12 +862,24 @@ class Network extends Csbackend
                     throw new AppException('Network_303');
                 }
             }
+            $updated_bridges = array();
+            foreach($config['bridges']['bridged'] as $bridge_idx=>$bridge){
+                $lan_ifs = explode(',', $bridge['members']);
+                if(array_search($ifname, $lan_ifs) !== false) {//接口在这个桥里
+                    $lan_ifs = array_diff($lan_ifs, array($ifname));//把接口从这个桥删除
+                    if(count($lan_ifs)<1){
+                        throw new AppException('Network_304');
+                    }
+                    $config['bridges']['bridged'][$bridge_idx]['members'] = implode(',', $lan_ifs);
+                    $updated_bridges[] = $config['bridges']['bridged'][$bridge_idx];
+                }
+            }
 
             $wan['if'] = $nic;
             $wan['descr'] = $inf;
             $wan['enable'] = '1';
             $wan['ipaddr']='dhcp';
-            $wan['gateway']='';
+            $wan['gateway']=strtoupper($inf).'_DHCP';
             $wan['mtu'] = 1500;
             $wan['spoofmac'] = '';
             $wan['blockbogons'] = '1';
@@ -853,10 +902,30 @@ class Network extends Csbackend
             $wan['adv_dhcp_config_file_override'] = '';
             $wan['adv_dhcp_config_file_override_path'] = '';
             $config['interfaces'][$ifname] = $wan;
+            if(!is_array($config['system']['dnsserver'])){
+                $config['system']['dnsserver'] = array();
+            }
+            $dns_server = self::getOneCommDns();
+            if($dns_server){
+                $config['system']['dnsserver'][count($config['system']['dnsserver'])] = $dns_server;
+                $config['system']['dns'.count($config['system']['dnsserver']).'gw'] = strtoupper($wan['descr']).'_DHCP';
+                self::setWanGateway($ifname, $wan, $dns_server);
+            }else{
+                self::setWanGateway($ifname, $wan);
+            }
 
 			self::setMultiWan();
             write_config();
             self::applyGatewayConfig();
+            foreach($updated_bridges as $updated_bridge){
+                interface_bridge_configure($updated_bridge);
+                foreach($config['interfaces'] as $if_idx=>$ifinfo){
+                    if($ifinfo['if'] == $updated_bridge['bridgeif']){
+                        interface_bring_down($if_idx, false, $ifinfo);
+                        interface_configure($if_idx, true);
+                    }
+                }
+            }
 
             interface_configure($ifname, true);
             plugins_configure('newwanip');
@@ -941,6 +1010,12 @@ class Network extends Csbackend
                         foreach($config['gateways']['gateway_item'] as $gn=>$gateway){
                             if($gateway['interface']==$ifname && strpos($gateway['name'], strtoupper($if))===0){
                                 unset($config['gateways']['gateway_item'][$gn]);
+                                for($i=4; $i>0; $i--){
+                                    if($config['system']['dns'.$i.'gw'] == $gateway['name']){
+                                        $config['system']['dns'.$i.'gw'] = 'none';
+                                        unset($config['system']['dnsserver'][$i-1]);
+                                    }
+                                }
                             }
                         }
                     }
@@ -970,13 +1045,11 @@ class Network extends Csbackend
                 self::setMultiWan();
                 write_config();
 
-                /* If we are in firewall/routing mode (not single interface)
-                 * then ensure that we are not running DHCP on the wan which
-                 * will make a lot of ISP's unhappy.
-                 */
-                if (!empty($config['interfaces']['lan']) && !empty($config['dhcpd']['wan']) && !empty($config['dhcpd']['wan'])) {
-                    unset($config['dhcpd']['wan']);
-                }
+                self::applyGatewayConfig();
+                /* sync filter configuration */
+                setup_gateways_monitor();
+                filter_configure();
+                rrd_configure();
             }
         } catch (AppException $aex) {
             $result = $aex->getMessage();
