@@ -153,6 +153,8 @@ class WebapiController extends BaseController
             }else if('delStaticDhcp' == $action){
                 $this->checkData($para);
                 $result['rescode']  = Network::delStaticDhcp($para['data']);
+            }else if ('getDhcpCliList' == $action) {
+                $result['rescode'] = Network::getDhcpClients();
             }else if('getStatusInfo' == $action){
                 $result['rescode']  = System::getStatusInfo();
             }else if('reboot' == $action){

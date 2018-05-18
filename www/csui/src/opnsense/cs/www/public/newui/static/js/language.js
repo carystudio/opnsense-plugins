@@ -325,7 +325,10 @@ var messages = {
             "memory_usage":"Memory Usage",
             "systime":"System Time",
             "rx_byte":"Rx Bytes",
-            "tx_byte":"Tx Bytes"
+            "tx_byte":"Tx Bytes",
+            "mintor_ip":"Monitoring IP",
+            "loss":"Packetloss",
+            "online":"Online"
         },
         "qos":{
             "title":"QoS",
@@ -3145,7 +3148,10 @@ var messages = {
             "memory_usage":"内存使用率",
             "systime":"系统时间",
             "rx_byte":"接收字节",
-            "tx_byte":"发送字节"
+            "tx_byte":"发送字节",
+            "mintor_ip":"监视IP",
+            "loss":"丢包",
+            "online":"在线"
         },
         "qos":{
             "title":"QoS",

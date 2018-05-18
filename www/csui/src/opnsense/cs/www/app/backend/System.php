@@ -44,7 +44,9 @@ class System extends Csbackend
         $statusInfo['interface']        = array();
         $pfctl_counters = json_decode(configd_run("filter list counters json"), true);
         $statusInfo['packages'] = $pfctl_counters;
+        $monitorStatus = self::getMonitoringStatus();
         foreach($config['interfaces'] as $inf=>$infinfo){
+
             $statusInfo['interface'][$infinfo['descr']]   = Network::getInfInfo($infinfo['descr']);
             if('static'!=$statusInfo['interface'][$infinfo['descr']]['Protocol']){
                 if(file_exists('/var/etc/nameserver_'.$statusInfo['interface'][$infinfo['descr']]['Nic'])){
@@ -52,6 +54,15 @@ class System extends Csbackend
                     $dnsserver = str_replace("\n", ' ', trim($dnsserver));
                     $statusInfo['interface'][$infinfo['descr']]['Dns'] = $dnsserver;
                 }
+                $monStatus = "none";
+                $monLoss = "0.0 %";
+                if(isset($monitorStatus[$infinfo['if']]['status'])){
+                    $monStatus = $monitorStatus[$infinfo['if']]['status'];
+                    $monLoss = $monitorStatus[$infinfo['if']]['loss'];
+                }
+
+                $statusInfo['interface'][$infinfo['descr']]['MonitorStatus'] = $monStatus;
+                $statusInfo['interface'][$infinfo['descr']]['MonitorLoss'] = $monLoss;
             }
         }
 
@@ -66,8 +77,49 @@ class System extends Csbackend
         $statusInfo['system']['cpu'] = $cpu['used'];
         $statusInfo['system']['memory'] = $memory;
         $statusInfo['system']['systime'] = $sysTime['Time'];
-
+        
         return $statusInfo;
+    }
+
+    private static function getMonitoringStatus(){
+        // fetch gateways and let's pretend the order is safe to use...
+        $a_gateways = return_gateways_array(true, false, true);
+        $gateways_status = return_gateways_status(true);
+        legacy_html_escape_form_data($a_gateways);
+        $monStatus = array();
+        foreach ($a_gateways as $gname => $gateway){
+            if(0===strpos($gname, 'STATIC')){
+               continue;
+            }
+            $arrTmp = array();
+            if ($gateways_status[$gname]) {
+                $status = $gateways_status[$gname];
+                if (stristr($status['status'], "force_down")) {
+                    $online = gettext("Offline (forced)");
+                } elseif (stristr($status['status'], "down")) {
+                    $online = gettext("Offline");
+                } elseif (stristr($status['status'], "loss")) {
+                    $online = gettext("Warning, Packetloss").': '.$status['loss'];
+                } elseif (stristr($status['status'], "delay")) {
+                    $online = gettext("Warning, Latency").': '.$status['delay'];
+                } elseif ($status['status'] == "none") {
+                    $online = gettext("Online");
+                }
+            } else if (isset($gateway['monitor_disable'])) {
+                $online = gettext("Online");
+            } else {
+                $online = gettext("Pending");
+            }
+
+            $arrTmp['gateway'] = isset($gateway['gateway'])?$gateway['gateway']:'';
+            $arrTmp['monitor'] = isset($gateway['monitor'])?$gateway['monitor']:'';
+            $arrTmp['srcip'] = isset($gateways_status[$gname]['srcip'])?$gateways_status[$gname]['srcip']:'';
+            $arrTmp['loss'] = isset($gateways_status[$gname]['loss'])?$gateways_status[$gname]['loss']:'';
+            $arrTmp['status'] = isset($gateways_status[$gname]['status'])?$gateways_status[$gname]['status']:'';
+
+            $monStatus[$gateway['interface']] = $arrTmp;
+        }
+        return $monStatus;
     }
 
     private static function system_api_cpu_stats()

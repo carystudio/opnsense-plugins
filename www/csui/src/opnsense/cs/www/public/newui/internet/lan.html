@@ -32,7 +32,7 @@
 
                     <FormItem :label="$t('lan.lanport')">
                         <Select v-model="netSelCardDinding" multiple>
-                            <Option v-for="(item,idx) in nics" :value="idx">{{ idx }} | {{item.mac}}</Option>
+                            <Option v-for="(item,idx) in nics" :key="idx" :value="idx">{{ idx }} | {{item.mac}}</Option>
                         </Select>
                     </FormItem>
 
@@ -48,8 +48,8 @@
                     </FormItem>
                     <FormItem :label="$t('lan.eip')" prop="dhcpEnd">
                         <Row>
-                            <!-- <Col span="19">--><Input v-model="formValidate.dhcpEnd" ></Input><!--</Col>-->
-                            <!--<Col span="4" offset="1"><Button long @click="showGetModel">{{ $t('lan.show') }}</Button></Col>-->
+                            <Col span="18"><Input v-model="formValidate.dhcpEnd" ></Input></Col>
+                            <Col span="5" offset="1"><Button long @click="showGetModel">{{ $t('lan.show') }}</Button></Col>
                         </Row>
                     </FormItem>
                     <FormItem :label="$t('lan.lease_time')">
@@ -80,7 +80,7 @@
             :cancelText="$t('common.cancel')"
             @on-ok="ok"
             @on-cancel="cancel">
-        <Table highlight-row :columns="dhcpColumns" :data="getDhcpCliList" @on-current-change="selectTable">
+        <Table highlight-row :columns="dhcpColumns" :data="getDhcpCliList" @on-current-change="selectTable" :no-data-text="$t('common.no_data')">
         </Table>
     </Modal>
     <!-- 这个不能删除，用于底部显示 -->
@@ -123,8 +123,8 @@
                 showModel:false,
                 dhcpColumns: [
                     {
-                        title: '#',
-                        key: 'idx'
+                        title: 'ID',
+                        type: 'index'
                     },
                     {
                         title: 'IP',
@@ -326,9 +326,9 @@
             },
             showGetModel:function(){
                 var _this = this;
-                uiPost.getDhcpCliList(function(data){
-                    data = data.slice(1);
-                    _this.getDhcpCliList = data;
+                var postVar = {"action":"getDhcpCliList","data":{}};
+                uiPost.getDhcpCliList(postVar,function(data){
+                    _this.getDhcpCliList = data.data;
                     _this.showModel = true;
                 });
             }

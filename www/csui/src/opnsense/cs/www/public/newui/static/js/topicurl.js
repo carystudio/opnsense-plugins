@@ -3681,9 +3681,7 @@ uiPost.prototype.delStaticDhcpConfig = function(postVar,callback){
 uiPost.prototype.getDhcpCliList = function(postVar,callback){
     this.topicurl = 'getDhcpCliList';
     this.async = true; // true:异步，false:同步。
-    if (globalConfig.debug) {
-        this.url = '/data/dhcpclient.json';
-    }
+    this.url = '/webapi';
     return this.post(postVar,callback);
 };
 

@@ -356,6 +356,18 @@
                                 if (params.row.name == _this.$t('index.mac_address')) {
                                     return h('div', niclist[temp[idx].Nic].mac);
                                 }
+
+                                if (params.row.name == _this.$t('index.mintor_ip')) {
+                                    var status = '';
+                                    if(temp[idx].Monitor){
+                                        if('loss' == temp[idx].MonitorStatus){
+                                            status = temp[idx].Monitor + ' ( ' + _this.$t('index.loss') + ': ' + temp[idx].MonitorLoss + ' )';
+                                        }else if("none" == temp[idx].MonitorStatus){
+                                            status = temp[idx].Monitor + ' ( ' + _this.$t('index.online') + ' )';
+                                        }
+                                    }
+                                    return h('div', status);
+                                }
                             }
                         }];
                     }
@@ -394,6 +406,10 @@
                                 value: ""
                             }, {
                                 name: this.$t('index.mac_address'),
+                                index: i,
+                                value: ""
+                            }, {
+                                name: this.$t('index.mintor_ip'),
                                 index: i,
                                 value: ""
                             }
