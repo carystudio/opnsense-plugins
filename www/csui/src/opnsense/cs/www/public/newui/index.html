@@ -94,12 +94,12 @@
                     </div>
 
                     <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 5">
-                        <Table stripe :show-header="false" :columns="statisticsColumns" :loading="loading1" :data="statisticsData"></Table>
+                        <Table stripe :show-header="false" :columns="statisticsColumns" :loading="loading1" :data="statisticsData" :no-data-text="$t('common.no_data')"></Table>
                     </div>
 
                     <div class="ivu-tabs-tabpane" v-show="showCurrentTabs == 3">
                         <RadioGroup v-model="tab" type="button">
-                            <Radio v-for="item in extInfo" :label="item.idx">{{ $t('realtime.net_info') }}{{item.idx}}</Radio>
+                            <Radio v-for="item in extInfo" :key="item.idx" :label="item.idx">{{ $t('realtime.net_info') }}{{item.idx}}</Radio>
                             <Radio label="0">{{ $t('realtime.net_lan_info') }}</Radio>
                         </RadioGroup>
                         <Row>
@@ -107,21 +107,21 @@
                                 <Col v-show="tab != 0 && item.idx == tab">
                                 <div :id="item.idName" style="width: 763px;height: 450px;"></div>
                                 <Row class="cs-table" >
-                                    <Col span="6" class="right">{{ $t('realtime.type') }}:</Col>
-                                    <Col span="6">{{ loadChartsData.type }}</Col>
-                                    <Col span="6" class="right">{{ $t('realtime.status') }}:</Col>
+                                    <Col span="6" style="text-align:right;padding-right:20px;">{{ $t('realtime.type') }}:</Col>
+                                    <Col span="4">{{ loadChartsData.type }}</Col>
+                                    <Col span="4" style="text-align:right;padding-right:20px;">{{ $t('realtime.status') }}:</Col>
                                     <Col span="6">{{ loadChartsData.status }}</Col>
                                 </Row>
                                 <Row class="cs-table">
-                                    <Col span="6" class="right">{{ $t('realtime.ip') }}:</Col>
-                                    <Col span="6">{{ loadChartsData.ip }}</Col>
-                                    <Col span="6" class="right">{{ $t('realtime.gate') }}:</Col>
+                                    <Col span="6" style="text-align:right;padding-right:20px;">{{ $t('realtime.ip') }}:</Col>
+                                    <Col span="4">{{ loadChartsData.ip }}</Col>
+                                    <Col span="4" style="text-align:right;padding-right:20px;">{{ $t('realtime.gate') }}:</Col>
                                     <Col span="6">{{ loadChartsData.gateway }}</Col>
                                 </Row>
                                 <Row class="cs-table">
-                                    <Col span="6" class="right">{{ $t('realtime.up') }}:</Col>
-                                    <Col span="6">{{ loadChartsData.up }}</Col>
-                                    <Col span="6" class="right">{{ $t('realtime.down') }}:</Col>
+                                    <Col span="6" style="text-align:right;padding-right:20px;">{{ $t('realtime.up') }}:</Col>
+                                    <Col span="4">{{ loadChartsData.up }}</Col>
+                                    <Col span="4" style="text-align:right;padding-right:20px;">{{ $t('realtime.down') }}:</Col>
                                     <Col span="6">{{ loadChartsData.down }}</Col>
                                 </Row>
                                 </Col>
@@ -194,6 +194,7 @@
                 linksChartsData: {
                     connections: []
                 },
+                connectionsTmp:[],
                 timer: {},
                 timerNum: 0,
                 start: false,
@@ -242,6 +243,34 @@
                             params.row.value = builtTime.substring(0,4)+'-'+builtTime.substring(4,6)+'-'+builtTime.substring(6,8);
                             return h('div', params.row.value);
                         }
+                        if (params.row.name == _this.$t('index.cpu_usage')) {
+                            var cpu = "";
+                            if(_this.system.cpu){
+                                cpu = _this.system.cpu+"%"
+                            }else{
+                                cpu = '--';
+                            }
+                            params.row.value = cpu;
+                            return h('div', params.row.value);
+                        }
+                        if (params.row.name == _this.$t('index.memory_usage')) {
+                            var memory = _this.system.memory;
+                            if(!memory){
+                                memory = '--';
+                            }
+                            params.row.value = memory;
+                            return h('div', params.row.value);
+                        }
+                        if (params.row.name == _this.$t('index.systime')) {
+                            var systime = _this.system.systime;
+                            if(systime){
+                                systime = systime.substr(0,4) + '-' + systime.substr(4,2) + '-' + systime.substr(6,2) + ' ' + systime.substr(8,2) + ':' + systime.substr(10,2) + ':' + systime.substr(12,2);
+                            }else{
+                                systime = '--';
+                            }
+                           params.row.value = systime;
+                            return h('div', params.row.value);
+                        }
                     }
                 }]
             },
@@ -257,6 +286,15 @@
                     value: ''
                 }, {
                     name: this.$t('index.build_time'),
+                    value: ''
+                }, {
+                    name: this.$t('index.cpu_usage'),
+                    value: ''
+                }, {
+                    name: this.$t('index.memory_usage'),
+                    value: ''
+                }, {
+                    name: this.$t('index.systime'),
                     value: ''
                 }]
             },
@@ -433,7 +471,7 @@
                     key: 'value1',
                     render: function(h, params) {
                         if (params.row.name == "") {
-                            params.row.value1 = _this.$t('index.rx_packets');
+                            params.row.value1 = _this.$t('index.rx_byte');
                         }
                         return h('div', params.row.value1);
                     }
@@ -442,7 +480,7 @@
                     key: 'value2',
                     render: function(h, params) {
                         if (params.row.name == "") {
-                            params.row.value2 = _this.$t('index.tx_packets');
+                            params.row.value2 = _this.$t('index.tx_byte');
                         }
                         return h('div', params.row.value2);
                     }
@@ -462,8 +500,8 @@
                             if(!temp[x].Nic[j]){
                                 continue;
                             }
-                            lanInpkts += pack[temp[x].Nic[j]].inpkts;
-                            lanOutpkts += pack[temp[x].Nic[j]].outpkts;
+                            lanInpkts += pack[temp[x].Nic[j]].inbytes;
+                            lanOutpkts += pack[temp[x].Nic[j]].outbytes;
                         }
                         break;
                     }
@@ -471,9 +509,9 @@
                 for(var i in temp){
                     if(i.substring(0,3) == "lan" || i.substring(0,3) == "wan"){
                         if(i.substring(0,3) == "wan"){
-                            dataObj += ',{ "name": "'+ i +'","value1": "' + pack[temp[i].Nic].inpkts + '","value2": "' + pack[temp[i].Nic].outpkts + '"}';
+                            dataObj += ',{ "name": "'+ i +'","value1": "' + cs.bytesToSize(pack[temp[i].Nic].inbytes/8) + '","value2": "' + cs.bytesToSize(pack[temp[i].Nic].outbytes/8) + '"}';
                         }else{
-                            dataObj += ',{ "name": "'+ i +'","value1": "' + lanInpkts + '","value2": "' + lanOutpkts + '"}';
+                            dataObj += ',{ "name": "'+ i +'","value1": "' + cs.bytesToSize(lanInpkts/8) + '","value2": "' + cs.bytesToSize(lanOutpkts/8) + '"}';
                         }
                     }
                 }
@@ -598,13 +636,10 @@
                     if (9999 == data.rescode){
                         cs.loginOut();
                     }
-                    console.log(data);
                     if (0 == data.rescode)
                     {
                         _this.system = data.data.system;
                         _this.interface = data.data.interface;
-                        console.log('------------------_this.interface----------------');
-                        console.log(_this.interface);
                         _this.niclist = data.data.niclist;
                         _this.packages = data.data.packages;
                         var idx = 0;
@@ -622,7 +657,6 @@
                                 idx++;
                             }
                         }
-                        console.log(_this.interface);
                     }
                 });
             },1000);
@@ -683,7 +717,7 @@
                         yAxis: [{
                             type: 'value',
                             min: 0,
-                            name: "B/s"
+                            name: "KB/s"
                         }],
                         legend: {
                             type: "plain",
@@ -776,8 +810,8 @@
                     _this.loadChartsData[_this.tab-1].load_y.shift();
                     _this.loadChartsData[_this.tab-1].load_y1.shift();
                     _this.loadChartsData[_this.tab-1].load_x.push(_this.formatDate('mm:ss', data.timestamp));
-                    _this.loadChartsData[_this.tab-1].load_y.push(data.up);
-                    _this.loadChartsData[_this.tab-1].load_y1.push(data.down);
+                    _this.loadChartsData[_this.tab-1].load_y.push(data.up/1024);
+                    _this.loadChartsData[_this.tab-1].load_y1.push(data.down/1024);
                     _this.loadChartsData[_this.tab-1].e_load_charts.setOption({
                         xAxis: [{
                             data: _this.loadChartsData[_this.tab-1].load_x
@@ -816,7 +850,7 @@
                         data: this.linksChartsData.links_x
                     }],
                     yAxis: [{
-                        name: "B/s",
+                        name: "KB/s",
                         type: 'value',
                         min: 0
                     }],
@@ -891,8 +925,8 @@
                     _this.linksChartsData.links_y.shift();
                     _this.linksChartsData.links_y1.shift();
                     _this.linksChartsData.links_x.push(_this.linksChartsData.links_x_i++);
-                    _this.linksChartsData.links_y.push(parseInt(data.statistics.upload/8));
-                    _this.linksChartsData.links_y1.push(parseInt(data.statistics.download/8));
+                    _this.linksChartsData.links_y.push(parseInt(data.statistics.upload/(8*1024)));
+                    _this.linksChartsData.links_y1.push(parseInt(data.statistics.download/(8*1024)));
                     _this.linksChartsData.e_links_charts.setOption({
                         xAxis: [{
                             data: _this.linksChartsData.links_x
@@ -903,7 +937,27 @@
                             data: _this.linksChartsData.links_y1
                         }]
                     });
-                    _this.linksChartsData.connections = data.connections;
+
+                    if(_this.connectionsTmp.length < 1){
+                        _this.connectionsTmp = data.connections;
+                    }else{
+                        var tmpArr = [];
+                        for (var i in _this.connectionsTmp){
+                            tmpArr[i] = _this.connectionsTmp[i].src;
+                        }
+                        for (var x in data.connections){
+                            var idxof = $.inArray(data.connections[x].src,tmpArr);
+                            if( idxof >= 0){
+                                _this.connectionsTmp[idxof].count_download = Number(_this.connectionsTmp[idxof].count_download) + Number(data.connections[x].count_download);
+                                _this.connectionsTmp[idxof].count_upload = Number(_this.connectionsTmp[idxof].count_upload) + Number(data.connections[x].count_upload);
+                                _this.connectionsTmp[idxof].download = data.connections[x].download;
+                                _this.connectionsTmp[idxof].upload = data.connections[x].upload;
+                            }else{
+                                _this.connectionsTmp.push(data.connections[x]);
+                            }
+                        }
+                    }
+                    _this.linksChartsData.connections = _this.connectionsTmp;
                 });
             },
             showLinksModel: function(params) {

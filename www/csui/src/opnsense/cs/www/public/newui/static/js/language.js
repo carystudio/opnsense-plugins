@@ -4,7 +4,7 @@ var messages = {
             newui:"New UI",
             index:"System Status",
             status:"System Status",
-            wechat_manager:"wechat manage",
+            wechat_manager:"Wechat Manage",
             crp:"crp service exception",
             opmode:"Operation Mode",
             internet:"Network",
@@ -56,7 +56,7 @@ var messages = {
             reboot_schedule:"Reboot Schedule",
             schedule:"Reboot Schedule",
             logout:"Logout",
-            ac:"AC System Management",
+            ac:"Centralize Management",
             central:"Centralize Management",
             database:"Database Mmanagement",
             realtime:"realtime Info",
@@ -250,6 +250,10 @@ var messages = {
             "msg6":"Database update success!",
             "msg7":"Database update failed!"
         },
+        "wechat_manager":{
+            "help":"This page is used to display WeChat qr code.",
+            "show_wechatqr":"showWechatQR"
+        },
         "index":{
             "title":"System Status",
             "localhost":"Localhost",
@@ -316,7 +320,12 @@ var messages = {
             "wifi_clients":"Wireless Clients",
             "statistics":"Statistics",
             "rx_packets":"Rx Packets",
-            "tx_packets":"Tx Packets"
+            "tx_packets":"Tx Packets",
+            "cpu_usage":"CPU Usage",
+            "memory_usage":"Memory Usage",
+            "systime":"System Time",
+            "rx_byte":"Rx Bytes",
+            "tx_byte":"Tx Bytes"
         },
         "qos":{
             "title":"QoS",
@@ -2849,7 +2858,7 @@ var messages = {
             openservers:"OpenVPN 服务器",
             openclients:"OpenVPN 客户端",
             webagency:"Web代理",
-            wakeonlan:"局域网内唤醒",
+            wakeonlan:"局域网唤醒",
             ipsec:"IPsec",
             dmz:"DMZ",
             time_rule:"时间规则",
@@ -2867,7 +2876,7 @@ var messages = {
             schedule:"定时重启",
             logout:"退出",
             collocation_ac:"AC系统管理",
-            ac:"AC系统管理",
+            ac:"集中管理",
             central:"集中管理",
             database:"数据库管理",
             realtime:"实时信息",
@@ -2878,9 +2887,9 @@ var messages = {
             pc:"电脑端",
             help:"帮助",
             mobile:"移动端",
-            portal:"portal设置",
+            portal:"认证设置",
             localaccount:"本地账号",
-            addaccounts:"添加本地账号",
+            addaccounts:"添加账号",
             loginuser:"登录用户",
             server:"本地服务器",
             pptp:"PPTP服务器",
@@ -3062,6 +3071,10 @@ var messages = {
             "msg6":"数据库更新成功！",
             "msg7":"数据库更新失败！"
         },
+        "wechat_manager":{
+            "help":"本页面用于显示微信二维码。",
+            "show_wechatqr":"显示二维码"
+        },
         "index":{
             "title":"系统状态",
             "localhost":"本机IP",
@@ -3127,7 +3140,12 @@ var messages = {
             "wifi_clients":"无线客户数",
             "statistics":"流量统计",
             "rx_packets":"接收包数",
-            "tx_packets":"发送包数"
+            "tx_packets":"发送包数",
+            "cpu_usage":"CPU使用率",
+            "memory_usage":"内存使用率",
+            "systime":"系统时间",
+            "rx_byte":"接收字节",
+            "tx_byte":"发送字节"
         },
         "qos":{
             "title":"QoS",

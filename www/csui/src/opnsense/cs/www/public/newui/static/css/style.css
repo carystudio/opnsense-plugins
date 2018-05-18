@@ -40,6 +40,13 @@
     min-height: 280px;
     background: #fff;
 }
+
+.cs-content .cs-showWechat{
+    min-height: 280px;
+    font-weight: bolder;
+    text-align: center;
+}
+
 .cs-progress-text-span{
     position: absolute;
     left: 0;
@@ -138,4 +145,12 @@ body .ivu-modal .ivu-select-dropdown{
 }
 .ivu-modal-body .ivu-form-item{
     margin-bottom: 4px;
+}
+
+.cs-showWechat .ivu-dropdown .ivu-select-dropdown{
+    position: absolute;
+    left: 308px !important;
+    top: 103px;
+    transform-origin: center top 0px;
+
 }

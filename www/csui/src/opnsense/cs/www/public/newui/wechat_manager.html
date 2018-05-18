@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carystudio</title>
+  <link rel="stylesheet" href="/newui/plugin/iview/styles/iview.css">
+  <link rel="stylesheet" href="/newui/static/css/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="main">
+<Col class="cs-container" span="20" >
+    <slot name="breadcrumb" :breadcrumb="[$t('menu.wechat_manager')]"></slot>
+    <!-- 这个不能删除，用于面包屑显示 -->
+    <div class="cs-content">
+        <Row>
+          <Col :xs="globalConfig.xs" :sm="globalConfig.sm" :md="globalConfig.md" :lg="globalConfig.lg">
+            <Card>
+            <Alert>
+             {{ $t('wechat_manager.help') }}
+            </Alert>
+            <Form ref="formValidate" :label-width="globalConfig.labelWith" label-position="left">
+              <div class="cs-showWechat">
+                <Dropdown trigger="click" @on-visible-change="getWechatQR">
+                    <div>
+                      <a> {{ $t('wechat_manager.show_wechatqr') }}
+                          <Icon type="qr-scanner"></Icon>
+                      </a>
+                    </div><br>
+                    <DropdownMenu slot="list">
+                        <div id="wechatQR"></div>
+                    </DropdownMenu>
+                </Dropdown>
+              </div>
+            </Form>
+          </Card>
+        </Col>
+        </Row>
+    </div>
+    <!-- 这个不能删除，用于底部显示 -->
+    <slot name="footer"></slot>
+</Col>
+</script>
+<script src="/newui/plugin/vue.js"></script>
+<script src="/newui/plugin/vue-i18n.js"></script>
+<script src="/newui/plugin/iview/iview.js"></script>
+<script src="/newui/plugin/jquery-1.11.3.min.js"></script>
+<script src="/newui/plugin/util.js"></script>
+<script src="/newui/static/js/language.js"></script>
+<script src="/newui/static/js/config.js"></script>
+<script src="/newui/static/js/layout.js"></script>
+<script src="/newui/static/js/common.js"></script>
+<script src="/newui/static/js/topicurl.js"></script>
+<script>
+var cs_main = {
+    template: "#main",
+    data: function() {
+        var _this = this;
+        return {
+            globalConfig: globalConfig
+        }
+    },
+    computed: {
+        
+    },
+    created: function() {
+      var _this = this;
+      
+    },
+    methods: {
+        getWechatQR:function(){
+          var _this = this;
+          uiPost.getCrpcConfig(function(data){
+            var qr = document.getElementById("wechatQR");
+            if (1 == data.status) {
+              qr.innerHTML = "";
+              new QRCode(qr,{
+                  text: data.url,
+                  width: 200,
+                  height: 200
+              });
+            }else{
+              qr.innerHTML = _this.$t("menu.crp")
+            }
+          });
+        }
+    }
+};
+</script>
+<script src="/newui/static/js/main.js"></script>
+</body>
+</html>
