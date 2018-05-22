@@ -15,9 +15,6 @@ start)
         /usr/local/opnsense/scripts/OPNsense/CICAP/setup.sh
         /usr/local/etc/rc.d/c-icap start
 	echo "start icap success"
-	if [ -e "/usr/local/opnsense/cs/script/icap_tmp.txt" ]; then
-	    rm /usr/local/opnsense/cs/script/icap_tmp.txt
-	fi
 	exit 0
         ;;
 stop)
