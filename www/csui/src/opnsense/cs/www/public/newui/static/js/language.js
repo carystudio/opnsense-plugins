@@ -2705,6 +2705,7 @@ var messages = {
             "PROXY_210": "Scanned HWP3 file parameters are incorrect",
             "PROXY_211": "Scanned HWP3 file parameters are incorrect",
             "PROXY_212": "ICAP administrator mailbox parameter error",
+            "PROXY_300":"Lack of memory can not open virus detection function",
 
             "WOL_100": "The interface parameter is incorrect",
             "WOL_101": "The MAC address parameter is incorrect",
@@ -5542,6 +5543,8 @@ var messages = {
             "PROXY_210":"扫描HWP3文件参数不正确",
             "PROXY_211":"扫描HWP3文件参数不正确",
             "PROXY_212":"ICAP管理员邮箱参数错误",
+
+            "PROXY_300":"内存不足无法开启病毒检测功能",
 
             "WOL_100":"接口参数不正确",
             "WOL_101":"MAC地址参数不正确",
