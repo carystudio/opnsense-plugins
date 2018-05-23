@@ -72,7 +72,8 @@ var cs_main = {
     methods: {
         getWechatQR:function(){
           var _this = this;
-          uiPost.getCrpcConfig(function(data){
+          var postVar = {"action":"getCrpcConfig","data":[]};
+          uiPost.getCrpcConfig(postVar,function(data){
             var qr = document.getElementById("wechatQR");
             if (1 == data.status) {
               qr.innerHTML = "";

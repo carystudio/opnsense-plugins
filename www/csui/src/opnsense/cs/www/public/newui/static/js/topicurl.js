@@ -4409,6 +4409,7 @@ uiPost.prototype.acScanAp = function(postVar,callback){
 uiPost.prototype.getCrpcConfig = function(postVar,callback){
     this.topicurl = 'getCrpcConfig';
     this.async = true; // true:异步，false:同步。
+    this.url = '/webapi';
     if (globalConfig.debug) {
         this.url = '/newui/data/getCrpcConfig.json';
     }

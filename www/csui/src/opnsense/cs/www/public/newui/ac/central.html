@@ -62,23 +62,141 @@
             :closable="false"
             :mask-closable="false"
     >
-        <Form ref="formSetinfo" :model="formSetinfo" :label-width="120" :rules="ruleSetinfo" label-position="left">
-            <FormItem :label="$t('central.apname')" prop="apname" v-if="multipleHide">
+        <Form ref="formSetinfo" :model="formSetinfo" :rules="ruleSetinfo" :label-width="120" label-position="left">
+            <FormItem :label="$t('central.apname')" v-if="multipleHide" prop="apname">
                 <Input v-model="formSetinfo.apname" ></Input>
             </FormItem>
-            <FormItem :label="$t('central.ssid',[''])" prop="ssid2">
-                <Input v-model="formSetinfo.ssid2" ></Input>
+            <!--定时重启-->
+            <FormItem :label="$t('central.reboot_mode')">
+                <Select v-model="rebootmode">
+                    <Option value="0">{{ $t('central.disable') }}</Option>
+                    <Option value="1">{{ $t('central.timing_reboot') }}</Option>
+                    <Option value="2">{{ $t('central.reboot_countdown') }}</Option>
+                </Select>
             </FormItem>
-            <FormItem :label="$t('central.security',[''])" >
-                <i-switch v-model="securityMode2" size="large" >
+            <FormItem :label="$t('central.week')"  v-if="rebootmode == '1'">
+                <Select v-model="formSetinfo.week">
+                    <Option value="255">{{ $t('central.all') }}</Option>
+                    <Option value="128">{{ $t('central.sun') }}</Option>
+                    <Option value="2">{{ $t('central.mon') }}</Option>
+                    <Option value="4">{{ $t('central.tue') }}</Option>
+                    <Option value="8">{{ $t('central.wed') }}</Option>
+                    <Option value="16">{{ $t('central.thu') }}</Option>
+                    <Option value="32">{{ $t('central.fri') }}</Option>
+                    <Option value="64">{{ $t('central.sat') }}</Option>
+                </Select>
+            </FormItem>
+            <FormItem :label="$t('central.time')"  v-if="rebootmode == '1'">
+                <row>
+                    <Col span="6">
+                    <Select  v-model="formSetinfo.time[0]">
+                        <Option v-for="(i,v) in 24" :key="i" :value="v">{{v}}</Option>
+                    </Select>
+                    </Col>
+                    <Col span="2">&nbsp;&nbsp;&nbsp;:</Col>
+                    <Col span="6">
+                    <Select  v-model="formSetinfo.time[1]">
+                        <Option v-for="(i,v) in 60" :key="i" :value="v">{{v}}</Option>
+                    </Select>
+                    </Col>
+                    <Col span="7"><Span>{{$t('central.times')}}</Span></Col>
+                </row>
+            </FormItem>
+            <FormItem :label="$t('central.reboot_countdown')" prop="timedown" v-if="rebootmode == '2'">
+                <row>
+                    <Col span="8">
+                    <Input v-model="formSetinfo.timedown"></Input>
+                    </Col>
+                    <Col span="8">
+                    <Span>{{$t('central.hour')}}</Span>
+                    </Col>
+                </row>
+            </FormItem>
+            <!--定时重启END-->
+            <FormItem :label="$t('central.wlan_set')" prop="wlanset">
+                <Select v-model="wlanset" :disabled="getWlanState">
+                    <Option value="1">2.4G</Option>
+                    <Option value="2">5G</Option>
+                </Select>
+            </FormItem>
+            <FormItem :label="$t('central.ssid')" prop="ssid">
+                <Input v-model="formSetinfo.ssid" ></Input>
+            </FormItem>
+            <FormItem :label="$t('central.security')" >
+                <i-switch v-model="securityMode" size="large" >
                     <span slot="open">{{$t('central.encryption')}}</span>
                     <span slot="close">{{$t('central.unencrypted')}}</span>
                 </i-switch>
                 </Input>
             </FormItem>
-            <FormItem :label="$t('central.password')" prop="security2"  v-show="formSetinfo.securityMode2 == '1'" >
-                <Input v-model="formSetinfo.security2"></Input>
+            <FormItem :label="$t('central.password')" prop="security"  v-show="formSetinfo.securityMode == '1'" >
+                <Input v-model="formSetinfo.security"></Input>
             </FormItem>
+
+            <div v-show="wlanset == '1'">
+                <FormItem :label="$t('central.band2')" prop="band2">
+                    <Select v-model="formSetinfo.band2">
+                        <Option value="1">2.4 GHz (B)</Option>
+                        <Option value="4">2.4 GHz (G)</Option>
+                        <Option value="6">2.4 GHz (N)</Option>
+                        <Option value="9">2.4 GHz (B+G+N)</Option>
+                    </Select>
+                </FormItem>
+                <FormItem :label="$t('central.channels')" prop="channel2">
+                    <Select v-model="formSetinfo.channel2" :key="$t('central.channels')" placement="top">
+                        <Option value="0">{{ $t('central.auto_select') }}</Option>
+                        <Option v-for="i in 13" :key="i" :value="i">{{ i }}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem :label="$t('central.bandwidth2')" prop="band_width2">
+                    <Select v-model="formSetinfo.band_width2">
+                        <Option value="0">20M</Option>
+                        <Option value="1">20M/40M</Option>
+                    </Select>
+                </FormItem>
+                <FormItem :label="$t('central.tx_powers')" prop="tx_power2">
+                    <Select v-model="formSetinfo.tx_power2" placement="top">
+                        <Option v-for="i in txPower" :key="i" :value="i">{{ i+'%' }}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem v-show="false" :label="$t('central.beacon')" prop="beacon2g">
+                    <Input v-model="formSetinfo.beacon2g"  style="width: 80px"></Input>
+                    <span> ({{$t('central.range')}} 20 - 999,{{$t('central.default')}} 100)</span>
+                </FormItem>
+            </div>
+            <div v-show="wlanset == '2'">
+                <FormItem :label="$t('central.band5')" prop="band5">
+                    <Select v-model="band5">
+                        <Option value="2">802.11A</Option>
+                        <Option value="8">802.11A/N</Option>
+                        <Option value="14">802.11A/N/AC</Option>
+                    </Select>
+                </FormItem>
+                <FormItem :label="$t('central.channels')" prop="channel5">
+                      <Select v-model="formSetinfo.channel5" :key="$t('central.channels')" placement="top">
+                          <Option value="0">{{ $t('central.auto_select') }}</Option>
+                          <Option v-for="i in channel5Arr" :key="i" :value="i">{{ i }}</Option>
+                          <Option v-show="channelsStatus165" value="165">165</Option>
+                      </Select>
+                  </FormItem>
+                <FormItem :label="$t('central.bandwidth5')" prop="band_width5">
+                    <Select v-model="band_width5">
+                        <Option value="0">20M</Option>
+                        <Option value="1">20M/40M</Option>
+                        <Option value="2">80M</Option>
+                    </Select>
+                </FormItem>
+                <FormItem :label="$t('central.tx_powers')" prop="tx_power5">
+                    <Select v-model="formSetinfo.tx_power5" placement="top">
+                        <Option v-for="i in txPower" :key="i" :value="i">{{ i+'%'}}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem v-show="false" :label="$t('central.beacon')" prop="beacon5g">
+                    <Input v-model="formSetinfo.beacon5g"  style="width: 80px"></Input>
+                    <span> ({{$t('central.range')}} 20 - 999,{{$t('central.default')}} 100)</span>
+                </FormItem>
+            </div>
+
             <FormItem :label="$t('central.broad_ssid')" prop="hidessid">
                 <i-switch v-model="formSetinfo.hidessid" size="large" >
                     <span slot="open">{{ $t('central.enabled') }}</span>
@@ -99,77 +217,6 @@
                 <Input v-model="formSetinfo.vlanid"  style="width: 80px"></Input>
                 <span> ({{$t('central.range')}} 0 - 4094,{{$t('central.default')}} 0)</span>
             </FormItem>
-            <FormItem :label="$t('central.wlan_set')" prop="wlanset">
-                    <Select v-model="wlanset" :disabled="getWlanState">
-                        <Option value="1">2.4G</Option>
-                        <Option value="2">5G</Option>
-                        <Option value="3">2.4G+5G</Option>
-                    </Select>
-            </FormItem>
-            <div v-show="wlanset != '2'">
-                <FormItem :label="$t('central.band2')" prop="band2">
-                    <Select v-model="formSetinfo.band2">
-                        <Option value="1">2.4 GHz (B)</Option>
-                        <Option value="4">2.4 GHz (G)</Option>
-                        <Option value="6">2.4 GHz (N)</Option>
-                        <Option value="9">2.4 GHz (B+G+N)</Option>
-                    </Select>
-                </FormItem>
-                <FormItem :label="$t('central.channels',['2.4G'])" prop="channel2">
-                    <Select v-model="formSetinfo.channel2" :key="$t('central.channels',['2.4G'])" placement="top">
-                        <Option value="0">{{ $t('central.auto_select') }}</Option>
-                        <Option v-for="i in 13" :key="i" :value="i">{{ i }}</Option>
-                    </Select>
-                </FormItem>
-                <FormItem :label="$t('central.bandwidth2')" prop="band_width2">
-                    <Select v-model="formSetinfo.band_width2">
-                        <Option value="0">20M</Option>
-                        <Option value="1">20M/40M</Option>
-                    </Select>
-                </FormItem>
-                <FormItem :label="$t('central.tx_powers',['2.4G'])" prop="tx_power2">
-                    <Select v-model="formSetinfo.tx_power2" placement="top">
-                        <Option v-for="i in txPower" :key="i" :value="i">{{ i+'%' }}</Option>
-                    </Select>
-                </FormItem>
-                <FormItem v-show="false" :label="'2.4G ' + $t('central.beacon')" prop="beacon2g">
-                    <Input v-model="formSetinfo.beacon2g"  style="width: 80px"></Input>
-                    <span> ({{$t('central.range')}} 20 - 999,{{$t('central.default')}} 100)</span>
-                </FormItem>
-            </div>
-            <div v-show="wlanset != '1'">
-                <FormItem :label="$t('central.band5')" prop="band5">
-                    <Select v-model="band5">
-                        <Option value="2">802.11A</Option>
-                        <Option value="8">802.11A/N</Option>
-                        <Option value="14">802.11A/N/AC</Option>
-                    </Select>
-                </FormItem>
-                <FormItem :label="$t('central.channels',['5G'])" prop="channel5">
-                    <Select v-model="formSetinfo.channel5" :key="$t('central.channels',['5G'])" placement="top">
-                        <Option value="0">{{ $t('central.auto_select') }}</Option>
-                        <Option v-for="i in channel5Arr" :key="i" :value="i">{{ i }}</Option>
-                        <Option v-show="channelsStatus165" value="165">165</Option>
-                    </Select>
-                </FormItem>
-                <FormItem :label="$t('central.bandwidth5')" prop="band_width5">
-                    <Select v-model="band_width5">
-                        <Option value="0">20M</Option>
-                        <Option value="1">20M/40M</Option>
-                        <Option value="2">80M</Option>
-                    </Select>
-                </FormItem>
-
-                <FormItem :label="$t('central.tx_powers',['5G'])" prop="tx_power5">
-                    <Select v-model="formSetinfo.tx_power5" placement="top">
-                        <Option v-for="i in txPower" :key="i" :value="i">{{ i+'%'}}</Option>
-                    </Select>
-                </FormItem>
-                <FormItem v-show="false" :label="'5G ' + $t('central.beacon')" prop="beacon5g">
-                    <Input v-model="formSetinfo.beacon5g"  style="width: 80px"></Input>
-                    <span> ({{$t('central.range')}} 20 - 999,{{$t('central.default')}} 100)</span>
-                </FormItem>
-            </div>
         </Form>
         <div slot="footer">
             <Button type="text" @click="setinfo=false">{{ $t('common.cancel') }}</Button>
@@ -268,9 +315,9 @@
 
                 ledStatus:false,
                 wlanState:false,
-                wlanset:'3',
+                wlanset:'1',
                 showModel:false,
-                securityMode2:false,
+                securityMode:false,
                 channelsStatus165:false,
                 band_width5:'2',
                 band5:'14',
@@ -330,8 +377,10 @@
             }
             }
             ],
-            firmData:[],
-            percent: 0
+                firmData:[],
+                percent: 0,
+                rebootmode:'0',
+                wlanStatus:[]
             }
         },
         computed: {
@@ -345,7 +394,8 @@
             formSetinfo:function () {
                 return {
                     apname: '',
-                    ssid2: '',
+                    rebootmode:'0',
+                    ssid: '',
                     authpwd: 'admin',
                     changePasswd: '',
                     ipaddr: '',
@@ -353,34 +403,36 @@
                     dns: '',
                     country2g:"CN",
                     country5g:"CN",
-                    security2: '',
-                    securityMode2: '0',
+                    security: '',
+                    securityMode: '0',
                     hidessid:true,
                     wifi_quarantine:false,
                     maxusernumber:'32',
                     vlanid:'0',
-//                    wlanset:'3',
                     band2:'9',
                     channel2: '0',
                     band_width2:'0',
                     tx_power2: '100',
                     beacon2g:'100',
                     band5:'14',
-//                    ssid5: '',
                     security5: '',
-//                    securityMode5: '',
                     channel5: '0',
                     band_width5:'2',
                     tx_power5: '100',
                     beacon5g:'100',
-                    other:[]
+                    other:[],
+
+                    //reboot
+                    week:'255',
+                    time:[0,0],
+                    timedown:'1'
                 };
             },
             ruleSetinfo:function(){
                 var _this = this;
                 return {
                     apname: [{ validator: function(r, v, f) {
-                        if (v == '') {
+                        if (v.length == 0) {
                             f(_this.$t('central.msg4'));
                         }
                         if (v.length>32) {
@@ -390,8 +442,9 @@
                     },
                         trigger: 'blur'
                     }],
-                    ssid2: [{ validator: function(r, v, f) {
-                        if (v == '') {
+                    ssid: [{ validator: function(r, v, f) {
+                        var _s = cs.ssid(v);
+                        if (0 == _s) {
                             f(_this.$t('central.msg7'));
                         }
                         f();
@@ -647,21 +700,23 @@
                     key: 'apstate',
                     sortable: true,
                     render: function(h, params) {
-                        var apState = '';
-                        if(params.row.apstate == 0X1FF) {
-                            apState = _this.$t('central.user_online');
+                        var apstatus = '';
+                        if(!(params.row.apstate & (1<<8)) ) {
+                            apstatus = _this.$t('central.no_same_segment');
+                        }else if(params.row.apstatus == '0') {
+                            apstatus = _this.$t('central.user_online');
+                        }else if(params.row.apstatus == '2') {
+                            apstatus = _this.$t('central.user_rebooting');
+                        }else if(params.row.apstatus == '3') {
+                            apstatus = _this.$t('central.user_updateing');
+                        }else if(params.row.apstatus == '4') {
+                            apstatus = _this.$t('central.user_configing');
+                        }else if(params.row.apstatus == '5') {
+                            apstatus = _this.$t('central.user_no_authority');
                         }else {
-                            if(!(params.row.apstate & (1<<8)) ) {
-                                apState = _this.$t('central.no_same_segment');
-                            }else if(!(params.row.apstate & (1<<7) )) {
-                                apState = _this.$t('central.no_authority');
-                            }else if(params.row.hftimes<7) {
-                                apState = _this.$t('central.configuration');
-                            }else {
-                                apState = _this.$t('central.offline');
-                            }
+                            apstatus = _this.$t('central.user_offline');
                         }
-                        return h('div',apState);
+                        return h('div',apstatus);
                     }
                 },
                 {
@@ -716,7 +771,6 @@
                                                 click:function () {
                                                     var newapname = _this.apname[params.index];
                                                     var apname = params.row.apname;
-                                                    console.log(params);
 
                                                     if(!newapname ){
                                                         _this.$Message.error(_this.$t('central.msg8'));
@@ -786,13 +840,46 @@
         },
         watch:{
             wlanset:function () {
-                console.log(this.wlanset);
+                var _this = this;
+
+                var temp = this.selectData;
+                if (temp.length == 1) {
+                    var apInfo = _this.wlanStatus;
+                    if ('1' == _this.wlanset) {
+                        apInfo = _this.wlanStatus['APS2G'];
+                    } else {
+                        apInfo = _this.wlanStatus['APS5G'];
+                    }
+
+                    _this.formSetinfo.ssid = apInfo.ssid;
+
+                    if ('0' == apInfo.encryption) {
+                        _this.formSetinfo.securityMode = '0';
+                        _this.securityMode = false;
+                    } else {
+                        _this.formSetinfo.securityMode = '1';
+                        _this.securityMode = true;
+                    }
+                    _this.formSetinfo.security = apInfo.passphrase;
+                    if ('0' == apInfo.hide) {
+                        _this.formSetinfo.hidessid = true;
+                    } else {
+                        _this.formSetinfo.hidessid = false;
+                    }
+                    if ('0' == apInfo.isolate) {
+                        _this.formSetinfo.wifi_quarantine = false;
+                    } else {
+                        _this.formSetinfo.wifi_quarantine = true;
+                    }
+                    _this.formSetinfo.maxusernumber = apInfo.stanum;
+                    _this.formSetinfo.vlanid = apInfo.vlanid;
+                }
             },
-            securityMode2:function () {
-                if(this.securityMode2){
-                    this.formSetinfo.securityMode2 = '1';
+            securityMode:function () {
+                if(this.securityMode){
+                    this.formSetinfo.securityMode = '1';
                 }else{
-                    this.formSetinfo.securityMode2 = '0'
+                    this.formSetinfo.securityMode = '0'
                 }
             },
             band_width5:function () {
@@ -818,6 +905,10 @@
                     }
                     _this.channelsStatus165 = false;
                 }
+            },
+            rebootmode:function () {
+                var _this = this;
+                _this.formSetinfo.rebootmode = _this.rebootmode;
             }
         },
         methods: {
@@ -895,7 +986,17 @@
                     return false;
                 }
                 if (temp.length == 1) {
-                    this.formSetinfo.apname    = temp[0].apname;
+                    if(temp[0].apname){
+                        this.formSetinfo.apname = temp[0].apname;
+                    }else{
+                        this.formSetinfo.apname = '';
+                    }
+                    _this.rebootmode = temp[0].schmode;
+                    _this.formSetinfo.week = temp[0].schweek;
+                    _this.formSetinfo.time[0] = Number(temp[0].schhour);
+                    _this.formSetinfo.time[1] = Number(temp[0].schminute);
+                    _this.formSetinfo.timedown = temp[0].rechour;
+
                     var data = {};
                     data.apid = temp[0].id;
                     var postVar = {"action" : "getApStatusConfig","data":data};
@@ -906,33 +1007,52 @@
                         }
                         if (0 == data.rescode) {
                             data = data.data;
-                            if(data.WLAN_STATUS){
-                                _this.formSetinfo.ssid2    = data.WLAN_STATUS.ssid;
 
-                                if('0' == data.WLAN_STATUS.encryption){
-                                    _this.formSetinfo.securityMode2 = '0';
-                                    _this.securityMode2 = false;
+                            if('1' == temp[0].aptype){
+                                _this.wlanset    = '1';
+                                _this.wlanState = true;
+                            }else if('2' == temp[0].aptype){
+                                _this.wlanset    = '2';
+                                _this.wlanState = true;
+                            }else{
+                                _this.wlanset    = '1';
+                                _this.wlanState = false;
+                            }
+
+                            if(data.WLAN_STATUS){
+                                var apInfo = {};
+                                _this.wlanStatus = data.WLAN_STATUS;
+                                if('1' == _this.wlanset){
+                                    apInfo = _this.wlanStatus['APS2G'];
                                 }else{
-                                    _this.formSetinfo.securityMode2 = '1';
-                                    _this.securityMode2 = true;
+                                    apInfo = _this.wlanStatus['APS5G'];
                                 }
-                                _this.formSetinfo.security2    = data.WLAN_STATUS.passphrase;
-                                if('0' == data.WLAN_STATUS.hide){
+
+                                _this.formSetinfo.ssid    = apInfo.ssid;
+
+                                if('0' == apInfo.encryption){
+                                    _this.formSetinfo.securityMode = '0';
+                                    _this.securityMode = false;
+                                }else{
+                                    _this.formSetinfo.securityMode = '1';
+                                    _this.securityMode = true;
+                                }
+                                _this.formSetinfo.security    = apInfo.passphrase;
+                                if('0' == apInfo.hide){
                                     _this.formSetinfo.hidessid = true;
                                 }else{
                                     _this.formSetinfo.hidessid = false;
                                 }
-                                if('0' == data.WLAN_STATUS.isolate){
+                                if('0' == apInfo.isolate){
                                     _this.formSetinfo.wifi_quarantine = false;
                                 }else{
                                     _this.formSetinfo.wifi_quarantine = true;
                                 }
-                                _this.formSetinfo.maxusernumber    = data.WLAN_STATUS.stanum;
-                                _this.formSetinfo.vlanid    = data.WLAN_STATUS.vlanid;
+                                _this.formSetinfo.maxusernumber    = apInfo.stanum;
+                                _this.formSetinfo.vlanid    = apInfo.vlanid;
                             }
 
                             if(data.WIFI0_STATUS){
-//                            _this.formSetinfo.wlanset    = data.WIFI0_STATUS.vlanid;
                                 _this.formSetinfo.band2    = data.WIFI0_STATUS.wirelessmode;
                                 _this.formSetinfo.country2g    = data.WIFI0_STATUS.country;
                                 _this.formSetinfo.channel2    = data.WIFI0_STATUS.channel;
@@ -942,24 +1062,11 @@
 
                             if(data.WIFI1_STATUS){
                                 _this.formSetinfo.band5    = data.WIFI1_STATUS.wirelessmode;
-//                            _this.formSetinfo.wlanset    = data.WIFI1_STATUS.vlanid;
                                 _this.formSetinfo.country5g    = data.WIFI1_STATUS.country;
                                 _this.formSetinfo.channel5    = data.WIFI1_STATUS.channel;
                                 _this.formSetinfo.band_width5    = data.WIFI1_STATUS.htmode;
                                 _this.formSetinfo.tx_power5    = data.WIFI1_STATUS.txpower;
                             }
-
-                            if('1' == temp[0].aptype){
-                                _this.wlanset    = '1';
-                                _this.wlanState = true;
-                            }else if('2' == temp[0].aptype){
-                                _this.wlanset    = '2';
-                                _this.wlanState = true;
-                            }else{
-                                _this.wlanset    = '3';
-                                _this.wlanState = false;
-                            }
-
                         }
 
                     });
@@ -968,15 +1075,15 @@
                 }else{
                     _this.wlanState = false;
                     _this.formSetinfo.apname    = '';
-                    _this.formSetinfo.ssid2    = '';
-                    _this.formSetinfo.securityMode2    = '0';
-                    _this.securityMode2 = false;
-                    _this.formSetinfo.security2    = '';
+                    _this.formSetinfo.ssid    = '';
+                    _this.formSetinfo.securityMode    = '0';
+                    _this.securityMode = false;
+                    _this.formSetinfo.security    = '';
                     _this.formSetinfo.hidessid    = true;
                     _this.formSetinfo.wifi_quarantine    = false;
                     _this.formSetinfo.maxusernumber    = '32';
                     _this.formSetinfo.vlanid    = '0';
-                    _this.wlanset    = '3';
+                    _this.wlanset    = '1';
 
                     _this.formSetinfo.band2    = '9';
                     _this.formSetinfo.country2g    = 'CN';
@@ -1011,7 +1118,18 @@
                 data.apid = idArr.join(',');
                 data.apname = _this.formSetinfo.apname;
 
-                var res = cs.ssid(_this.formSetinfo.ssid2);
+                if(_this.formSetinfo.rebootmode == '2') {
+                    if (99 != cs.num(_this.formSetinfo.timedown)) {
+                        _this.$Message.error({content: _this.$t('ac_central.msg27'), duration: 5});
+                        return false;
+                    }
+                    if (99 != cs.num_range(_this.formSetinfo.timedown, 1, 240)) {
+                        _this.$Message.error({content: _this.$t('ac_central.msg26'), duration: 5});
+                        return false;
+                    }
+                }
+
+                var res = cs.ssid(_this.formSetinfo.ssid);
                 if(0 == res){
                     _this.$Message.error({content:_this.$t('central.msg10'),duration:5});
                     return false;
@@ -1019,15 +1137,24 @@
                     _this.$Message.error({content:_this.$t('central.msg11'),duration:5});
                     return false;
                 }
-                data.ssid = _this.formSetinfo.ssid2;
-                data.encryption = _this.formSetinfo.securityMode2;
-                if('1' == _this.formSetinfo.securityMode2){
-                    var res = cs.string(_this.formSetinfo.security2);
-                    if(99 != res || _this.formSetinfo.security2.length < 8 || _this.formSetinfo.security2.length > 63){
+
+                var sch = {};
+                sch.schMode = _this.formSetinfo.rebootmode;
+                sch.schWeek = _this.formSetinfo.week;
+                sch.schHour = String(_this.formSetinfo.time[0]);
+                sch.schMinute = String(_this.formSetinfo.time[1]);
+                sch.recHour = _this.formSetinfo.timedown;
+                data.rebooSchedule = sch;
+
+                data.ssid = _this.formSetinfo.ssid;
+                data.encryption = _this.formSetinfo.securityMode;
+                if('1' == _this.formSetinfo.securityMode){
+                    var res = cs.string(_this.formSetinfo.security);
+                    if(99 != res || _this.formSetinfo.security.length < 8 || _this.formSetinfo.security.length > 63){
                         _this.$Message.error({content:_this.$t('central.msg12'),duration:5});
                         return false;
                     }
-                    data.wlanKey = _this.formSetinfo.security2;
+                    data.wlanKey = _this.formSetinfo.security;
                 }else{
                     data.wlanKey = '';
                 }
@@ -1060,19 +1187,21 @@
                 data.vlanid = _this.formSetinfo.vlanid;
                 data.usefor = _this.wlanset;
 
-                data.wirelessmode2g = _this.formSetinfo.band2;
-                data.country2g = _this.formSetinfo.country2g;
-                data.channel2g = _this.formSetinfo.channel2;
-                data.htbw2g = _this.formSetinfo.band_width2;
-                data.txpower2g = _this.formSetinfo.tx_power2;
-                data.beacon2g = _this.formSetinfo.beacon2g;
-
-                data.wirelessmode5g = _this.formSetinfo.band5;
-                data.country5g = _this.formSetinfo.country5g;
-                data.channel5g = _this.formSetinfo.channel5;
-                data.htbw5g = _this.formSetinfo.band_width5;
-                data.txpower5g = _this.formSetinfo.tx_power5;
-                data.beacon5g = _this.formSetinfo.beacon2g;
+                if('1' == _this.wlanset){
+                    data.wirelessmode = _this.formSetinfo.band2;
+                    data.country = _this.formSetinfo.country2g;
+                    data.channel = _this.formSetinfo.channel2;
+                    data.htbw = _this.formSetinfo.band_width2;
+                    data.txpower = _this.formSetinfo.tx_power2;
+                    data.beacon = _this.formSetinfo.beacon2g;
+                }else{
+                    data.wirelessmode = _this.formSetinfo.band5;
+                    data.country = _this.formSetinfo.country5g;
+                    data.channel = _this.formSetinfo.channel5;
+                    data.htbw = _this.formSetinfo.band_width5;
+                    data.txpower = _this.formSetinfo.tx_power5;
+                    data.beacon = _this.formSetinfo.beacon5g;
+                }
 
                 var postData = { "action": "setQuick","data":data };
 
@@ -1362,9 +1491,6 @@
             handleUpload: function(file) {
                 this.upload.file = file;
             },
-           /* exceededSize: function() {
-                this.$Message.error({content:this.$t('config.msg3'),duration: 5});
-            },*/
             formatError: function() {
                 this.$Message.error({content:this.$t('central.msg19',[this.upload.format.join('、')]),duration: 5});
             },

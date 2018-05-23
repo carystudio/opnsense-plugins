@@ -81,9 +81,10 @@ class Accontrol extends Csbackend
      * 功能：更新APLIST表中的apstate字段
      *  @params:
      *      $config：配置数值 (int)
-     *      $id：APLIST的id
+     *      $id：APLIST的id,
+     *      $apstatus: 设置状态
      * */
-    private function setConfig($cfg,$id){
+    private function setConfig($cfg,$id,$apstatus='0'){
         $dbh = self::getPdo();
         $sql = "select * from APLIST WHERE id = '" . $id . "'";
         $arrInfo = array();
@@ -92,7 +93,7 @@ class Accontrol extends Csbackend
             foreach ($row as $k=>$v){
                 if('apstate' == $k){
                     $apstate = $v & $cfg;
-                    $excSql = "update APLIST set apstate = '".$apstate."' where id = '".$id."'";
+                    $excSql = "update APLIST set apstate = '".$apstate."', apstatus=" .$apstatus." where id = '".$id."'";
                     $count = $dbh->exec($excSql);
                 }
             }
@@ -151,8 +152,9 @@ class Accontrol extends Csbackend
             $sth->execute(array('apname'=>$data['apname'], 'id'=>intval($data['apid'])));
             if(1 == $sth->rowCount()){
                 $apstate = self::setState($ap['apstate'], Accontrol::STATE_SYSTEM);
-                $sth = $pdo->prepare('UPDATE APLIST SET apstate=:apstate where id=:id');
-                $res = $sth->execute(array('apstate'=>$apstate, 'id'=>$ap['id']));
+                $apstatus = '4';
+                $sth = $pdo->prepare('UPDATE APLIST SET apstate=:apstate,apstatus=:apstatus where id=:id');
+                $res = $sth->execute(array('apstate'=>$apstate,'apstatus'=>$apstatus, 'id'=>$ap['id']));
                 if(false === $res){
                     throw new AppException('update apstate error');
                 }
@@ -174,7 +176,7 @@ class Accontrol extends Csbackend
         if($data){
             $deviceId = explode(',',$data['id']);
             foreach ($deviceId as $key=>$val){
-                Accontrol::setConfig(Accontrol::$CONFIG['REBOOT_COMMAND'],$val);
+                Accontrol::setConfig(Accontrol::$CONFIG['REBOOT_COMMAND'],$val,'2');
             }
             return $arr;
         }else{
@@ -206,7 +208,7 @@ class Accontrol extends Csbackend
                     if(0 == $conut){
                         throw new AppException('AcControl_002');
                     }
-                    Accontrol::setConfig(Accontrol::$CONFIG['SYSTEM_CONFIG'],$val);
+                    Accontrol::setConfig(Accontrol::$CONFIG['SYSTEM_CONFIG'],$val,'4');
                 }
             }else{
                 return false;
@@ -231,8 +233,9 @@ class Accontrol extends Csbackend
                 if($ap){
                     $ap['apstate'] = self::setState($ap['apstate'], Accontrol::STATE_RESET);
                 }
-                $sth = $pdo->prepare('UPDATE APLIST SET apstate=:apstate where id=:id');
-                $res = $sth->execute(array('apstate'=>$ap['apstate'], 'id'=>$ap['id']));
+                $ap['apstatus'] = '1';
+                $sth = $pdo->prepare('UPDATE APLIST SET apstate=:apstate,apstatus=:apstatus where id=:id');
+                $res = $sth->execute(array('apstate'=>$ap['apstate'],'apstatus'=>$ap['apstatus'], 'id'=>$ap['id']));
                 if(false === $res){
                     throw new AppException('update apstate error');
                 }
@@ -258,8 +261,9 @@ class Accontrol extends Csbackend
                 if($ap){
                     $ap['apstate'] = self::setState($ap['apstate'], Accontrol::STATE_UPGRADE);
                 }
-                $sth = $pdo->prepare('UPDATE APLIST SET apstate=:apstate where id=:id');
-                $res = $sth->execute(array('apstate'=>$ap['apstate'], 'id'=>$ap['id']));
+                $ap['apstatus'] = '3';
+                $sth = $pdo->prepare('UPDATE APLIST SET apstate=:apstate,apstatus=:apstatus where id=:id');
+                $res = $sth->execute(array('apstate'=>$ap['apstate'],'apstatus'=>$ap['apstatus'], 'id'=>$ap['id']));
                 if(false === $res){
                     throw new AppException('update apstate error');
                 }
@@ -278,7 +282,7 @@ class Accontrol extends Csbackend
             if($data['apid']) {
                 $pdo = self::getPdo();
                 //2.4G
-                $wifi0StatusSql = "select country,wirelessmode,htmode,channel,txpower,beacon from WIFI0_STATUS where apid=:id";
+                $wifi0StatusSql = "select country,wirelessmode,htmode,channel,txpower,beacon,clientnum from WIFI0_STATUS where apid=:id";
                 $sth = $pdo->prepare($wifi0StatusSql);
                 $sth->execute(array('id'=>intval($data['apid'])));
                 $wifi0StatusInfo = $sth->fetch(PDO::FETCH_ASSOC);
@@ -286,7 +290,7 @@ class Accontrol extends Csbackend
 
 
                 //5G
-                $wifi1StatusSql = "select country,wirelessmode,htmode,channel,txpower,beacon from WIFI1_STATUS where apid=:id";
+                $wifi1StatusSql = "select country,wirelessmode,htmode,channel,txpower,beacon,clientnum from WIFI1_STATUS where apid=:id";
                 $sth = $pdo->prepare($wifi1StatusSql);
                 $sth->execute(array('id'=>intval($data['apid'])));
                 $wifi1StatusInfo = $sth->fetch(PDO::FETCH_ASSOC);
@@ -296,9 +300,17 @@ class Accontrol extends Csbackend
                 $wlanStatusSql = "select * from WLAN_STATUS where apid = :id";
                 $sth = $pdo->prepare($wlanStatusSql);
                 $sth->execute(array('id'=>intval($data['apid'])));
-                $wlanStatusInfo = $sth->fetch(PDO::FETCH_ASSOC);
+                $wlanStatusInfo = array();
+                while ($val = $sth->fetch(PDO::FETCH_ASSOC)){
+                    if('1' == $val['usefor']){
+                        $wlanStatusInfo['APS2G'] = $val;
+                    }else if('2' == $val['usefor']){
+                        $wlanStatusInfo['APS5G'] = $val;
+                    }else{
+                        $wlanStatusInfo = $val;
+                    }
+                }
                 $res['WLAN_STATUS'] = $wlanStatusInfo;
-
             }
 
         } catch (AppException $aex) {
@@ -322,41 +334,41 @@ class Accontrol extends Csbackend
                 $pdo = self::getPdo();
 
 
-                $sql = "update WLAN_STATUS set ssid=:ssid,hide=:hide,isolate=:isolate,encryption=:encryption,passphrase=:passphrase,stanum=:stanum,vlanid=:vlanid,usefor=:usefor where apid=:apid";
+                $sql = "update WLAN_STATUS set ssid=:ssid,hide=:hide,isolate=:isolate,encryption=:encryption,passphrase=:passphrase,stanum=:stanum,vlanid=:vlanid where apid=:apid AND usefor=:usefor";
                 $sth = $pdo->prepare($sql);
                 $pdo ->beginTransaction();
-                $sth->execute(array('ssid'=>$data['ssid'],'hide'=>$data['hedden'],'isolate'=>$data['noforward'],'encryption'=>$data['encryption'],'passphrase'=>$data['wlanKey'],'stanum'=>$data['maxstanum'],'vlanid'=>$data['vlanid'],'usefor'=>$data['usefor'], 'apid'=>intval($ap['id'])));
+                $sth->execute(array('ssid'=>$data['ssid'],'hide'=>$data['hedden'],'isolate'=>$data['noforward'],'encryption'=>$data['encryption'],'passphrase'=>$data['wlanKey'],'stanum'=>$data['maxstanum'],'vlanid'=>$data['vlanid'], 'apid'=>intval($ap['id']),'usefor'=>$data['usefor']));
 
                 if('1' == $ap['aptype']){
                     $sql1 = "update WIFI0_STATUS set wirelessmode=:wirelessmode,country=:country,channel=:channel, htmode=:htmode,txpower=:txpower,beacon=:beacon where apid=:apid";
                     $sth1 = $pdo->prepare($sql1);
-                    $sth1->execute(array('wirelessmode'=>$data['wirelessmode2g'],'country'=>$data['country2g'],'channel'=>$data['channel2g'],'htmode'=>$data['htbw2g'],'txpower'=>$data['txpower2g'],'beacon'=>$data['beacon2g'], 'apid'=>intval($ap['id'])));
+                    $sth1->execute(array('wirelessmode'=>$data['wirelessmode'],'country'=>$data['country'],'channel'=>$data['channel'],'htmode'=>$data['htbw'],'txpower'=>$data['txpower'],'beacon'=>$data['beacon'], 'apid'=>intval($ap['id'])));
                 }else if('2' == $ap['aptype']){
                     $sql2 = "update WIFI1_STATUS set wirelessmode=:wirelessmode,country=:country,channel=:channel, htmode=:htmode,txpower=:txpower,beacon=:beacon where apid=:apid";
                     $sth2 = $pdo->prepare($sql2);
-                    $sth2->execute(array('wirelessmode'=>$data['wirelessmode5g'],'country'=>$data['country5g'],'channel'=>$data['channel5g'],'htmode'=>$data['htbw5g'],'txpower'=>$data['txpower5g'],'beacon'=>$data['beacon5g'], 'apid'=>intval($ap['id'])));
+                    $sth2->execute(array('wirelessmode'=>$data['wirelessmode'],'country'=>$data['country'],'channel'=>$data['channel'],'htmode'=>$data['htbw'],'txpower'=>$data['txpower'],'beacon'=>$data['beacon'], 'apid'=>intval($ap['id'])));
                 }else{
                     $sql1 = "update WIFI0_STATUS set wirelessmode=:wirelessmode,country=:country,channel=:channel, htmode=:htmode,txpower=:txpower,beacon=:beacon where apid=:apid";
                     $sth1 = $pdo->prepare($sql1);
-                    $sth1->execute(array('wirelessmode'=>$data['wirelessmode2g'],'country'=>$data['country2g'],'channel'=>$data['channel2g'],'htmode'=>$data['htbw2g'],'txpower'=>$data['txpower2g'],'beacon'=>$data['beacon2g'], 'apid'=>intval($ap['id'])));
+                    $sth1->execute(array('wirelessmode'=>$data['wirelessmode'],'country'=>$data['country'],'channel'=>$data['channel'],'htmode'=>$data['htbw'],'txpower'=>$data['txpower'],'beacon'=>$data['beacon'], 'apid'=>intval($ap['id'])));
 
                     $sql2 = "update WIFI1_STATUS set wirelessmode=:wirelessmode,country=:country,channel=:channel, htmode=:htmode,txpower=:txpower,beacon=:beacon where apid=:apid";
                     $sth2 = $pdo->prepare($sql2);
-                    $sth2->execute(array('wirelessmode'=>$data['wirelessmode5g'],'country'=>$data['country5g'],'channel'=>$data['channel5g'],'htmode'=>$data['htbw5g'],'txpower'=>$data['txpower5g'],'beacon'=>$data['beacon5g'], 'apid'=>intval($ap['id'])));
+                    $sth2->execute(array('wirelessmode'=>$data['wirelessmode'],'country'=>$data['country'],'channel'=>$data['channel'],'htmode'=>$data['htbw'],'txpower'=>$data['txpower'],'beacon'=>$data['beacon'], 'apid'=>intval($ap['id'])));
                 }
 
                 if(strlen($data['apname'])>0){
-                    $sql3 = "UPDATE APLIST set apname=:apname where id=:id";
+                    $sql3 = "UPDATE APLIST set apname=:apname,schmode=:schmode,schweek=:schweek,schhour=:schhour,schminute=:schminute,rechour=:rechour where id=:id";
                     $sth3 = $pdo->prepare($sql3);
-                    $sth3->execute(array('apname'=>$data['apname'], 'id'=>intval($ap['id'])));
+                    $sth3->execute(array('apname'=>$data['apname'],'schmode'=>$data['rebooSchedule']['schMode'],'schweek'=>$data['rebooSchedule']['schWeek'],'schhour'=>$data['rebooSchedule']['schHour'],'schminute'=>$data['rebooSchedule']['schMinute'],'rechour'=>$data['rebooSchedule']['recHour'], 'id'=>intval($ap['id'])));
                 }
 
                 $apstate = self::setState($ap['apstate'], Accontrol::STATE_SYSTEM);
                 $apstate = self::setState($apstate, Accontrol::STATE_WLAN);
                 $apstate = self::setState($apstate, Accontrol::STATE_RADIO);
 
-                $sth4 = $pdo->prepare('UPDATE APLIST SET apstate=:apstate where id=:id');
-                $res = $sth4->execute(array('apstate'=>$apstate, 'id'=>$ap['id']));
+                $sth4 = $pdo->prepare('UPDATE APLIST SET apstate=:apstate,apstatus=:apstatus where id=:id');
+                $res = $sth4->execute(array('apstate'=>$apstate,'apstatus'=>'4', 'id'=>$ap['id']));
                 if(false === $res){
                     throw new AppException('update apstate error');
                 }

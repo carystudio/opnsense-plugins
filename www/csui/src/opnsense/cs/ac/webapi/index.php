@@ -7,6 +7,10 @@ var_dump($ap);
 */
 $postcontent = file_get_contents('php://input', 'r');
 $data = json_decode($postcontent, true);
+//if(file_exists('/usr/local/opnsense/cs/tmp/acap.log')){
+//	file_put_contents('/usr/local/opnsense/cs/tmp/acap.log',date("Y-m-d h:i:s").' '.json_encode($data)."\n\r",FILE_APPEND);
+//}
+
 try{
 	if(!is_array($data)||!isset($data['action'])){
 		throw new AppException('wrong data.'.$postcontent);
@@ -26,22 +30,68 @@ try{
 			}
 			$ap['uptime'] = time();
 
-			$ap = Db::createAp($ap);
+			$apWifiInfo = array();
+			if(isset($data['APS2G'])){
+				//WLAN_STATUS
+				$apWifiInfo['APS2G']['usefor'] = 1;
+				if(isset($data['APS2G']["SSIDS"])){
+					$apWifiInfo['APS2G']['ssid'] = $data['APS2G']["SSIDS"][0]['SSID'];
+					$apWifiInfo['APS2G']['hide'] = $data['APS2G']["SSIDS"][0]["HideSSID"];
+					$apWifiInfo['APS2G']['isolate'] = $data['APS2G']["SSIDS"][0]["NoForward"];
+					$apWifiInfo['APS2G']['encryption'] = $data['APS2G']["SSIDS"][0]["EncrypType"];
+					$apWifiInfo['APS2G']['passphrase'] = $data['APS2G']["SSIDS"][0]["WlanKey"];
+					$apWifiInfo['APS2G']['stanum'] = $data['APS2G']["SSIDS"][0]["MaxStaNum"];
+					$apWifiInfo['APS2G']['vlanid'] = $data['APS2G']["SSIDS"][0]["VlanID"];
+				}
+
+				//WIFI0_STATUS
+				$apWifiInfo['APS2G']['country'] = $data['APS2G']["CountryCode"];
+				$apWifiInfo['APS2G']['htmode'] = $data['APS2G']["HT_BW"];
+				$apWifiInfo['APS2G']['channel'] = $data['APS2G']["Channel"];
+				$apWifiInfo['APS2G']['txpower'] = $data['APS2G']["TxPower"];
+				$apWifiInfo['APS2G']['clientnum'] = $data['APS2G']["StaNum"];
+			}
+
+			if(isset($data['APS5G'])){
+				//WLAN_STATUS
+				$apWifiInfo['APS5G']['usefor'] = 2;
+				if(isset($data['APS5G']["SSIDS"])){
+					$apWifiInfo['APS5G']['ssid'] = $data['APS5G']["SSIDS"][0]['SSID'];
+					$apWifiInfo['APS5G']['hide'] = $data['APS5G']["SSIDS"][0]["HideSSID"];
+					$apWifiInfo['APS5G']['isolate'] = $data['APS5G']["SSIDS"][0]["NoForward"];
+					$apWifiInfo['APS5G']['encryption'] = $data['APS5G']["SSIDS"][0]["EncrypType"];
+					$apWifiInfo['APS5G']['passphrase'] = $data['APS5G']["SSIDS"][0]["WlanKey"];
+					$apWifiInfo['APS5G']['stanum'] = $data['APS5G']["SSIDS"][0]["MaxStaNum"];
+					$apWifiInfo['APS5G']['vlanid'] = $data['APS5G']["SSIDS"][0]["VlanID"];
+				}
+
+				//WIFI0_STATUS
+				$apWifiInfo['APS5G']['country'] = $data['APS5G']["CountryCode"];
+				$apWifiInfo['APS5G']['htmode'] = $data['APS5G']["HT_BW"];
+				$apWifiInfo['APS5G']['channel'] = $data['APS5G']["Channel"];
+				$apWifiInfo['APS5G']['txpower'] = $data['APS5G']["TxPower"];
+				$apWifiInfo['APS5G']['clientnum'] = $data['APS5G']["StaNum"];
+			}
+			
+			if(isset($data['rebooSchedule'])){
+				$ap['schmode'] = $data['rebooSchedule']['mode']?$data['rebooSchedule']['mode']:'0';
+				$ap['schweek'] = $data['rebooSchedule']['week']?$data['rebooSchedule']['week']:'255';
+				$ap['schhour'] = $data['rebooSchedule']['hour']?$data['rebooSchedule']['hour']:'0';
+				$ap['schminute'] = $data['rebooSchedule']['minute']?$data['rebooSchedule']['minute']:'0';
+				$ap['rechour'] = $data['rebooSchedule']['recHour']?$data['rebooSchedule']['recHour']:'1';
+			}else{
+				$ap['schmode'] = '0';
+				$ap['schweek'] = '255';
+				$ap['schhour'] = '0';
+				$ap['schminute'] = '0';
+				$ap['rechour'] = '1';
+			}
+
+			$ap = Db::createAp($ap,$apWifiInfo);
+
 			if (!$ap) {
 				throw new AppException('save ap data error');
 			}
-		}else{
-			$apNewInfo = array();
-			$apNewInfo['uptime'] = time();
-			$apNewInfo['id'] = $ap['id'];
-			$apNewInfo['apstate'] = $ap['apstate'];
-			foreach ($GET_FIELDS as $getvar => $dbvar) {
-				if('apName' != $getvar && 'apIp' != $getvar){
-					$apNewInfo[$dbvar] = $data[$getvar];
-				}
-			}
-			Db::updateApInfo($apNewInfo);
-			$ap = Db::getApByMac($data['apMac']);
 		}
 		$result = Action::getAction($ap);
 	}else {
