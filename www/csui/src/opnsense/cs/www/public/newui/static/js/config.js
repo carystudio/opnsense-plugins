@@ -505,7 +505,7 @@ var menu = [
     },
     {
         "id":"16",
-        "href": "/newui/wechat_manager",
+        "href": "/newui/service/wechat_manager",
         "icon": "qr-scanner",
         "lang": "wechat_manager",
         "display":true,

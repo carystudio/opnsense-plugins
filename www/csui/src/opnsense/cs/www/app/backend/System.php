@@ -469,9 +469,13 @@ class System extends Csbackend
         return 0;
     }
 
-    public static function getArpInfo($data=null){
+    public static function getArpInfo($data=false){
         global $config;
-        exec("/usr/sbin/arp -n -a",$arp);
+        if($data && is_array($data) && isset($data['interface'])){
+            exec("/usr/sbin/arp -n -a -i ".$config['interfaces'][$data['interface']]['if'],$arp);
+        }else{
+            exec("/usr/sbin/arp -n -a",$arp);
+        }
         $arpinfo = array();
         $infos = array();
         foreach ($arp as $k=>$v){

@@ -865,7 +865,7 @@ var cs_main = {
             var data ={};
             data.Interface = "wan";
             data.Nic = _this.netSelCardDinding;
-            var postVar = {"action":"setInterfaceBind", "data":data};
+            var postVar = {"action":"addWanInterface", "data":data};
             _this.bingWanBtnEnable = 1;
             uiPost.setInterfaceBind(postVar,function(data) {
                 if (9999 == data.rescode){

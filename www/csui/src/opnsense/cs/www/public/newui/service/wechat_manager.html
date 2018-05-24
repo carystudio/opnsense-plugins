@@ -75,10 +75,10 @@ var cs_main = {
           var postVar = {"action":"getCrpcConfig","data":[]};
           uiPost.getCrpcConfig(postVar,function(data){
             var qr = document.getElementById("wechatQR");
-            if (1 == data.status) {
+            if (0 == data.rescode) {
               qr.innerHTML = "";
               new QRCode(qr,{
-                  text: data.url,
+                  text: data.data.url,
                   width: 200,
                   height: 200
               });

@@ -142,6 +142,9 @@ class WebapiController extends BaseController
             } else if ('setLanInfo' == $action) {
                 $this->checkData($para);
                 $result['rescode'] = Network::setLanInfo($para['data']);
+            } else if ('addLanInterface' == $action) {
+                $this->checkData($para);
+                $result['rescode'] = Network::addLanInterface($para['data']);
             } else if ('setWanInfo' == $action) {
                 $this->checkData($para);
                 $result['rescode']  = Network::setWanInfo($para['data']);
@@ -304,13 +307,13 @@ class WebapiController extends BaseController
             }else if('upgradeFirmware' == $action) {
                 $this->checkData($para);
                 $result['rescode'] = Firmware::upgradeFirmware($para['data']);
-            }else if('setInterfaceBind'==$action){
+            }else if('addWanInterface'==$action){
                 $this->checkData($para);
-                $result['rescode'] = Network::setInterfaceBind($para['data']);
-            }else if('delInterfaceBind'==$action){
+                $result['rescode'] = Network::addWanInterface($para['data']);
+            }else if('delInterface'==$action){
                 $this->checkData($para);
-                $result['rescode'] = Network::delInterfaceBind($para['data']);
-                }else if('getNetInfo'==$action){
+                $result['rescode'] = Network::delInterface($para['data']);
+            }else if('getNetInfo'==$action){
                 $result['rescode'] = Network::getNetInfo($para['data']);
             }else if('getLinksData'==$action) {
                 $result['rescode'] = Network::getLinksData($para['data']);
@@ -469,8 +472,10 @@ class WebapiController extends BaseController
             }else if('setFrClientCfg'==$action){
                 $this->checkData($para);
                 $result['rescode'] = Freeradius::setClient($para['data']);
-            }else if('getFrRunStatus'==$action){
+            }else if('getFrRunStatus'==$action) {
                 $result['rescode'] = Freeradius::getRunStatus();
+            }else if('getCrpcConfig'==$action){
+                $result['rescode'] = Crps::getCrpcUrl();
             }else if('test' == $action){
                 $result['rescode'] = Dns::getErrors();
             }else{

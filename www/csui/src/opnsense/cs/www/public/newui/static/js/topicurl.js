@@ -4412,6 +4412,8 @@ uiPost.prototype.getCrpcConfig = function(postVar,callback){
     this.url = '/webapi';
     if (globalConfig.debug) {
         this.url = '/newui/data/getCrpcConfig.json';
+    }else{
+        this.url = '/webapi'
     }
     return this.post(postVar,callback);
 };
