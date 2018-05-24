@@ -646,12 +646,13 @@
             var _this = this;
 
             var postData = {"action":"getStatusInfo", "data":{}};
-
+            _this.$Spin.show();  //加载动画
             setInterval(function() {
                 uiPost.getStatusInfo(postData,function(data) {
                     if (9999 == data.rescode){
                         cs.loginOut();
                     }
+                    _this.$Spin.hide();   //关闭加载动画
                     if (0 == data.rescode)
                     {
                         _this.system = data.data.system;

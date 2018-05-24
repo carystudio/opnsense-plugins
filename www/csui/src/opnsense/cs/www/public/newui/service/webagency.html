@@ -44,7 +44,7 @@
                                     <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':4==showCurrentTabs}" @click="tabsSwitch(4)">
                                         {{ $t('webagency.Access_control_list') }}
                                     </div>
-                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':5==showCurrentTabs}" @click="tabsSwitch(5)" v-show="formValidate.general_enabled">
+                                    <div :class="{'ivu-tabs-tab':true,'ivu-tabs-tab-active':5==showCurrentTabs}" @click="tabsSwitch(5)" v-show="formValidate.general_enabled && memoryFlag">
                                         {{ $t('webagency.virus_detection') }}
                                     </div>
                                 </div>
@@ -429,6 +429,7 @@
                 sslcertificateOption:{},
                 showCurrentTabs:'1',
                 applyLoading:false,
+                memoryFlag:false,
 
                 formValidate:{
                     general_enabled:false,
@@ -838,6 +839,13 @@
                 }
                 _this.$Spin.hide();   //关闭加载动画
                 if (0 == data.rescode){
+
+                    if(data.data.memory[0] > 1800){
+                        _this.memoryFlag = true;
+                    }else{
+                        _this.memoryFlag = false;
+                    }
+
                     if ('1' == data.data.general.enabled){
                         _this.formValidate.general_enabled = true;
                     }

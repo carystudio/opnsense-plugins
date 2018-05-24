@@ -177,6 +177,8 @@ class Proxy extends Csbackend
         $icap['disablecache'] = $clamav['general']['disablecache'];
 
         $proxy['ICAP'] = $icap;
+
+        $proxy['memory'] = get_memory();
         return $proxy;
     }
 
@@ -564,7 +566,6 @@ class Proxy extends Csbackend
                     }
                     if('1' == $data['ICAP']['enabled']){
                         $conf_data['forward']['transparentMode'] = '1';
-                        $conf_data['forward']['sslbump'] = '1';
                     }
                 }
 
@@ -599,6 +600,10 @@ class Proxy extends Csbackend
 
                 $icapEnabled = '0';
                 if(isset($data['general']['enabled']) && '1' == $data['general']['enabled']){
+                    $memory = get_memory();
+                    if($memory[0] < 1800){
+                        throw new AppException('PROXY_300');     //内存不足，无法开启病毒检测功能
+                    }
                     if(!isset($data['ICAP']['enabled']) || !Util::check0and1($data['ICAP']['enabled'])){
                         throw new AppException('PROXY_200');     //ICAP开启参数错误
                     }
@@ -742,8 +747,10 @@ class Proxy extends Csbackend
 
         $config['OPNsense']['cicap']['general']['enabled'] = $data['enabled'];
         $config['OPNsense']['cicap']['general']['servername'] = $data['servername'];
+        $config['OPNsense']['cicap']['general']['listenaddress'] = "127.0.0.1";
         $config['OPNsense']['cicap']['general']['enable_accesslog'] = $data['enable_accesslog'];
         $config['OPNsense']['cicap']['antivirus']['maxobjectsize'] = $data['maxobjectsize'];
+        $config['OPNsense']['cicap']['antivirus']['enable_clamav'] = '1';
 
         write_config();
     }
@@ -792,6 +799,7 @@ class Proxy extends Csbackend
         }
 
         $config['OPNsense']['clamav']['general']['enabled'] = $data['ICAP']['enabled'];
+        $config['OPNsense']['clamav']['general']['fc_enabled'] = '1';
         $config['OPNsense']['clamav']['general']['disablecache'] = $data['CLAMAV']['disablecache'];
         $config['OPNsense']['clamav']['general']['maxfilesize'] = $data['CLAMAV']['maxfilesize'];
         $config['OPNsense']['clamav']['general']['scanpe'] = $data['CLAMAV']['scanpe'];
