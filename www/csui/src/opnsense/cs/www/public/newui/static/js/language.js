@@ -649,6 +649,10 @@ var messages = {
             "show":"Show Clients",
             "countdown":"Count down [ye-time] s",
             "modal_title":"DHCP Client List",
+            "add_success":"Add success! ",
+            "add_fail":"Add failure! ",
+            "lan_port":"LAN Interface",
+            "default_select_lang":"Please choose",
             "msg1":"{0} cannot be empty,please try again!",
             "msg2":"is invalid, Its format must be made up of'xxx.xxx.xxx.xxx'!",
             "msg3":"is invalid, paragraph 1 must be 1-254 numbers!",
@@ -663,7 +667,9 @@ var messages = {
             "msg12":"Invalid Start IP address, Tt and the current subnet mask, gateway address does not match!",
             "msg13":"Invalid End IP address, Tt and the current subnet mask, gateway address does not match!",
             "msg14":"You set the LAN IP address and WAN IP in the same subnet??",
-            "msg15":"Please select the LAN port!"
+            "msg15":"Please select the LAN port!",
+            "msg16":"The LAN port of ",
+            "msg17":" can not be empty. Please allocate more lAN ports reasonably."
         },
         "static_dhcp":{
             "title":"Static DHCP Setting",
@@ -2467,6 +2473,17 @@ var messages = {
             'Network_704':'The network interface belongs to GIF, which can not be deleted',
             'Network_705':'Network card is not correct',
 
+            "Network_800":"LAN interface parameters are not correct!",
+            "Network_801":"The IP address parameter is not correct!",
+            "Network_802":"The subnet mask is not correct.",
+            "Network_803":"DHCP server parameters are not correct!",
+            "Network_804":"Many LAN parameters are wrong!",
+            "Network_805":"LAN interface binding parameter error!",
+            "Network_806":"LAN interface binding parameter error!",
+            "Network_807":"LAN interface binding parameter error!",
+            "Network_808":"DHCP starting IP address parameter is incorrect!",
+            "Network_809":"DHCP end IP address parameter is incorrect!",
+
 
             'Portal_100':'Incorrectly opening parameters',
             'Portal_101':'Incorrect service type',
@@ -3494,6 +3511,10 @@ var messages = {
             "minutes":"分钟",
             "show":"显示客户端",
             "modal_title":"DHCP客户端列表",
+            "add_success":"添加成功！",
+            "add_fail":"添加失败！",
+            "lan_port":"LAN接口",
+            "default_select_lang":"请选择",
             "msg1":"{0}不能为空，请重试！",
             "msg2":"无效，它格式必须是'xxx.xxx.xxx.xxx'组成！",
             "msg3":"无效,第1段必须是1-254的数字！",
@@ -3508,7 +3529,9 @@ var messages = {
             "msg12":"您设置的起始IP地址无效，它和当前的子网掩码、网关地址不匹配！",
             "msg13":"您设置的结束IP地址无效，它和当前的子网掩码、网关地址不匹配！",
             "msg14":"您设置的LAN IP地址与WAN IP在同一子网内！",
-            "msg15":"请选择LAN端口！"
+            "msg15":"请选择LAN端口！",
+            "msg16":"",
+            "msg17":"的LAN端口不能为空，请合理分配多lAN端口！"
         },
         "static_dhcp":{
             "title":"静态DHCP设置",
@@ -5328,6 +5351,17 @@ var messages = {
             'Network_703':'网络接口属于gre,不能删除',
             'Network_704':'网络接口属于gif,不能删除',
             'Network_705':'网卡不正确',
+
+            "Network_800":"LAN接口参数不正确！",
+            "Network_801":"IP地址参数不正确！",
+            "Network_802":"子网掩码参数不正确！",
+            "Network_803":"DHCP服务器参数不正确！",
+            "Network_804":"多LAN参数错误！",
+            "Network_805":"LAN接口绑定参数错误！",
+            "Network_806":"LAN接口绑定参数错误！",
+            "Network_807":"LAN接口绑定参数错误！",
+            "Network_808":"DHCP起始IP地址参数不正确！",
+            "Network_809":"DHCP结束IP地址参数不正确！",
 
 
             'Portal_100':'开启参数不正确',

@@ -243,8 +243,12 @@ class Network extends Csbackend
         return $new;
     }
 
-    public static function getDhcpClients(){
+    public static function getDhcpClients($posData){
         global $config;
+
+        if(!isset($posData['ip']) || !isset($posData['netmask'])){
+           return '';
+        }
 
         $dhcpClients = array();
 
@@ -419,12 +423,20 @@ class Network extends Csbackend
         }
 
         $arrTmp = array();
+        $lanIp = sprintf("%u", ip2long($posData['ip']));
+        $lanNetMask = 32 - Util::maskip2bit($posData['netmask']);
+        $ip_net = ($lanIp>>$lanNetMask)<<$lanNetMask;
         foreach ($leases as $key=>$val){
             foreach ($val as $k=>$v){
                 if('online' != $k){
                     continue;
                 }
                 if("online" == $val['online']){
+                    $ip = sprintf("%u", ip2long($val['ip']));
+                    $lan_net = ($ip>>$lanNetMask)<<$lanNetMask;
+                    if($lan_net != $ip_net){
+                        continue;
+                    }
                     $arrTmp['ip'] = $val['ip'];
                     $arrTmp['mac'] = $val['mac'];
                     array_push($dhcpClients,$arrTmp);

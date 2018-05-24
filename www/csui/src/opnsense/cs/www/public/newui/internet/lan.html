@@ -23,15 +23,20 @@
                     {{ $t('lan.help') }}
                 </Alert>
                 <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="globalConfig.labelWith" label-position="left">
+                    <FormItem :label="$t('lan.lan_port')">
+                        <RadioGroup v-model="switchLanPort" type="button">
+                            <Radio v-for="(item,idx) in interfaces" :key="item.Interface" :label="item.Interface">{{item.Interface}}</Radio>
+                        </RadioGroup>
+                        <Button :disabled="showAddBtnFlag != '1'" type="ghost" icon="plus-round" @click="addLanBtn()"></Button>
+                    </FormItem>
                     <FormItem :label="$t('lan.ip')" prop="lanIp">
                         <Input v-model="formValidate.lanIp" ></Input>
                     </FormItem>
                     <FormItem :label="$t('lan.mask')" prop="lanNetmask">
                         <Input v-model="formValidate.lanNetmask" ></Input>
                     </FormItem>
-
                     <FormItem :label="$t('lan.lanport')">
-                        <Select v-model="netSelCardDinding" multiple>
+                        <Select v-model="netSelCardDinding" multiple :placeholder="$t('lan.default_select_lang')">
                             <Option v-for="(item,idx) in nics" :key="idx" :value="idx">{{ idx }} | {{item.mac}}</Option>
                         </Select>
                     </FormItem>
@@ -47,9 +52,12 @@
                         <Input v-model="formValidate.dhcpStart" ></Input>
                     </FormItem>
                     <FormItem :label="$t('lan.eip')" prop="dhcpEnd">
-                        <Row>
+                        <Row v-if="switchLanPort != 'add'">
                             <Col span="18"><Input v-model="formValidate.dhcpEnd" ></Input></Col>
                             <Col span="5" offset="1"><Button long @click="showGetModel">{{ $t('lan.show') }}</Button></Col>
+                        </Row>
+                        <Row v-else>
+                            <Input v-model="formValidate.dhcpEnd" ></Input>
                         </Row>
                     </FormItem>
                     <FormItem :label="$t('lan.lease_time')">
@@ -112,6 +120,10 @@
                 interfaces:{},
                 tmpLanIp:'',
                 oldLanIp:'',
+
+                switchLanPort:'lan1',
+                showAddBtnFlag:'1',
+
                 formValidate: {
                     lanIp:'',
                     lanNetmask:'',
@@ -136,7 +148,9 @@
                     }
                 ],
                 getDhcpCliList: [],
-                percent:0
+                percent:0,
+                lanIp:'',
+                lanNetmask:''
             }
         },
         computed:{
@@ -212,6 +226,18 @@
                     _this.formValidate.dhcpLease = _this.interfaces[0].DhcpLeasetime ?  ''+_this.interfaces[0].DhcpLeasetime : "86400" ;
                     _this.formValidate.dhcpStart = _this.interfaces[0].DhcpStart;
                     _this.formValidate.dhcpEnd = _this.interfaces[0].DhcpEnd;
+
+                    _this.lanIp = _this.interfaces[0].Ip;
+                    _this.lanNetmask = _this.interfaces[0].Netmask;
+
+                    /*显示多LAN添加按钮*/
+                    var i = 0;
+                    for(var x in _this.nics){
+                        i++;
+                    }
+                    if(_this.interfaces.length >= i){
+                        _this.showAddBtnFlag = '0';
+                    }
                 }
             });
         },
@@ -238,43 +264,74 @@
                     _this.formValidate.dhcpStart = addr['start'];
                     _this.formValidate.dhcpEnd = addr['end'];
                 }
+            },
+            switchLanPort:function () {
+                var _this = this;
+                for (var i in _this.interfaces){
+                    if(_this.switchLanPort == _this.interfaces[i].Interface){
+                        _this.netSelCardDinding = _this.interfaces[i].Nic;
+                        _this.formValidate.lanIp = _this.interfaces[i].Ip;
+                        _this.oldLanIp = _this.interfaces[i].Ip;
+                        _this.tmpLanIp = _this.formValidate.lanIp;
+                        _this.formValidate.lanNetmask = _this.interfaces[i].Netmask;
+                        _this.formValidate.dhcp = (_this.interfaces[i].DhcpSvrEnable=="1")?true:false;
+                        _this.formValidate.dhcpLease = _this.interfaces[i].DhcpLeasetime ?  ''+_this.interfaces[i].DhcpLeasetime : "86400" ;
+                        _this.formValidate.dhcpStart = _this.interfaces[i].DhcpStart;
+                        _this.formValidate.dhcpEnd = _this.interfaces[i].DhcpEnd;
+
+                        _this.lanIp = _this.interfaces[i].Ip;
+                        _this.lanNetmask = _this.interfaces[i].Netmask;
+                    }
+                }
             }
         },
         methods:{
+            addLanBtn:function () {
+                var _this = this;
+                _this.addLanFlag = '1';
+                _this.switchLanPort = 'add';
+
+
+                _this.netSelCardDinding = [];
+                _this.formValidate.lanIp = '';
+                _this.formValidate.lanNetmask = '';
+                _this.formValidate.dhcp = true;
+                _this.formValidate.dhcpLease = "86400" ;
+                _this.formValidate.dhcpStart = '';
+                _this.formValidate.dhcpEnd = '';
+            },
             handleSubmit: function(name) {
                 var _this = this;
 
                 if(_this.netSelCardDinding.length <= 0){
-                    this.$Message.error(this.$t('lan.msg15'));
+                    _this.$Message.error(this.$t('lan.msg15'));
                     return false;
                 }
 
-                if (1 == this.formValidate.dhcp) {
+                if (1 == _this.formValidate.dhcp) {
                     if(cs.ip_range(this.formValidate.dhcpStart,this.formValidate.dhcpEnd) == 0){
-                        this.$Message.error({content:_this.$t('lan.msg7'),duration:5});
+                        _this.$Message.error({content:_this.$t('lan.msg7'),duration:5});
                         return false;
                     }
-                    if(this.formValidate.dhcpStart == this.formValidate.lanIp || this.formValidate.dhcpEnd == this.formValidate.lanIp){
-                        this.$Message.error({content:_this.$t('lan.msg10'),duration:5});
+                    if(_this.formValidate.dhcpStart == _this.formValidate.lanIp || _this.formValidate.dhcpEnd == _this.formValidate.lanIp){
+                        _this.$Message.error({content:_this.$t('lan.msg10'),duration:5});
                         return false;
                     }
-                    if(0 == cs.ip_subnet(this.formValidate.lanIp,this.formValidate.lanNetmask,this.formValidate.dhcpStart)){
-                        this.$Message.error({content:_this.$t('lan.msg12'),duration:5});
+                    if(0 == cs.ip_subnet(_this.formValidate.lanIp,_this.formValidate.lanNetmask,_this.formValidate.dhcpStart)){
+                        _this.$Message.error({content:_this.$t('lan.msg12'),duration:5});
                         return false;
                     }
-                    if(0 == cs.ip_subnet(this.formValidate.lanIp,this.formValidate.lanNetmask,this.formValidate.dhcpEnd)){
-                        this.$Message.error({content:_this.$t('lan.msg13'),duration:5});
+                    if(0 == cs.ip_subnet(_this.formValidate.lanIp,_this.formValidate.lanNetmask,_this.formValidate.dhcpEnd)){
+                        _this.$Message.error({content:_this.$t('lan.msg13'),duration:5});
                         return false;
                     }
-                    if(1 == cs.ip_subnet(this.formValidate.lanIp,this.formValidate.lanNetmask,this.wanIp)){
-                        this.$Message.error({content:_this.$t('lan.msg14'),duration:5});
+                    if(1 == cs.ip_subnet(_this.formValidate.lanIp,_this.formValidate.lanNetmask,_this.wanIp)){
+                        _this.$Message.error({content:_this.$t('lan.msg14'),duration:5});
                         return false;
                     }
                 }
 
-                _this.$Spin.show();  //加载动画
-                this.applyLoading = true;
-                this.$refs[name].validate(function(valid){
+                _this.$refs[name].validate(function(valid){
                     if (valid) {
                         var lanip = _this.formValidate.lanIp;
                         var postVar = {};
@@ -284,28 +341,81 @@
                         postVar.DhcpStart  = _this.formValidate.dhcpStart;
                         postVar.DhcpEnd    = _this.formValidate.dhcpEnd;
                         postVar.DhcpReleaseTime  = _this.formValidate.dhcpLease;
-                        postVar.Interface = _this.interfaces[0].Interface;
+                        if(_this.switchLanPort == 'add'){
+                            postVar.Interface = 'lan';
+                        }else{
+                            postVar.Interface = _this.switchLanPort;
+                        }
                         postVar.Nic = _this.netSelCardDinding;
-                        var postData = {"action":"setLanInfo","data":postVar};
-                        console.log(postData);
 
-                        uiPost.setLanInfo(postData,function (data) {
-                            _this.$Spin.hide();   //关闭加载动画
-                            if(_this.oldLanIp != _this.tmpLanIp){
-                                location.href = 'http://'+_this.tmpLanIp+'/newui/internet/lan.html';
+                        var nicsInfo = {};
+                        for(var i in _this.interfaces){
+                            nicsInfo[_this.interfaces[i].Interface] = [];
+                            if(postVar.Interface == _this.interfaces[i].Interface){
+                                nicsInfo[_this.interfaces[i].Interface] = _this.netSelCardDinding;
+                            }else{
+                                nicsInfo[_this.interfaces[i].Interface] = _this.interfaces[i].Nic;
                             }
-                            if (9999 == data.rescode){
-                                cs.loginOut();
+                        }
+                        for(var x in nicsInfo){
+                            if(postVar.Interface != x){
+                                for(var z in postVar.Nic){
+                                    var idxof = $.inArray(postVar.Nic[z],nicsInfo[x]);
+                                    if(idxof >= 0 ){
+                                        nicsInfo[x].splice(idxof,1);
+                                    }
+                                }
                             }
-                            _this.applyLoading = false;
-                            if (0 == data.rescode) {
-                                location.href = 'http://'+_this.tmpLanIp+'/newui/internet/lan.html';
-                            }
-                        });
+                        }
 
-                    } else {
-                        // _this.$Message.error();
-                        _this.applyLoading = false;
+                        for(var u in nicsInfo){
+                            if(nicsInfo[u].length <= 0){
+                                _this.$Message.error({content:_this.$t('lan.msg16') + u + _this.$t('lan.msg17'),duration:5,onClose:function () {
+                                    location.href = location.href;
+                                }});
+                                return false;
+                            }
+                        }
+
+                        postVar.member = {};
+                        postVar.member = nicsInfo;
+
+                        _this.$Spin.show();  //加载动画
+                        _this.applyLoading = true;
+                        var postData = {};
+                        if(_this.switchLanPort == 'add'){
+                            postData = {"action":"addLanInterface","data":postVar};
+                            uiPost.addLanInterface(postData,function (data) {
+                                if (9999 == data.rescode){
+                                    cs.loginOut();
+                                }
+                                _this.$Spin.hide();   //关闭加载动画
+                                _this.applyLoading = false;
+                                if (0 == data.rescode) {
+                                    _this.$Message.success({content:_this.$t('lan.add_success'),onClose:function(){
+                                        location.href = location.href;
+                                    }});
+                                }else {
+                                    _this.$Message.error({content:_this.$t('lan.add_fail')+' '+ _this.$t('errorcode.'+data.rescode),duration:5});
+                                }
+                            });
+                        }else{
+                            postData = {"action":"setLanInfo","data":postVar};
+                            uiPost.setLanInfo(postData,function (data) {
+                                _this.$Spin.hide();   //关闭加载动画
+                                if(_this.oldLanIp != _this.tmpLanIp){
+                                    location.href = 'http://'+_this.tmpLanIp+'/newui/internet/lan.html';
+                                }
+                                if (9999 == data.rescode){
+                                    cs.loginOut();
+                                }
+                                _this.applyLoading = false;
+                                if (0 == data.rescode) {
+                                    location.href = 'http://'+_this.tmpLanIp+'/newui/internet/lan.html';
+                                }
+                            });
+                        }
+
                     }
                 })
             },
@@ -326,7 +436,10 @@
             },
             showGetModel:function(){
                 var _this = this;
-                var postVar = {"action":"getDhcpCliList","data":{}};
+                var data = {};
+                data.ip = _this.lanIp;
+                data.netmask = _this.lanNetmask;
+                var postVar = {"action":"getDhcpCliList","data":data};
                 uiPost.getDhcpCliList(postVar,function(data){
                     _this.getDhcpCliList = data.data;
                     _this.showModel = true;
