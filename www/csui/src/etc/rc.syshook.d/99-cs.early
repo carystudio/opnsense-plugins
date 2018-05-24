@@ -5,6 +5,7 @@ else
 fi
 echo "csui_enable=\"YES\"">/etc/rc.conf.d/csui
 echo "csac_enable=\"YES\"">/etc/rc.conf.d/csac
+echo "crpc_enable=\"YES\"">/etc/rc.conf.d/crpc
 chmod +x /usr/local/etc/rc.d/csui
 chmod +x /usr/local/etc/rc.d/csac
 chmod +x /usr/local/etc/rc.d/captiveportal

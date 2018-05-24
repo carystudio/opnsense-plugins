@@ -34,6 +34,11 @@
                     <!--{{ $t('static_dhcp.add_rule') }}
                     <hr>-->
                     <br>
+                    <FormItem :label="$t('static_dhcp.interface')" prop="staticIp">
+                        <Select v-model="formValidate.interface">
+                            <Option v-for="inf in interfaces" :value="inf.Name" :key="inf.Descr"> {{ inf.Descr }}</Option>
+                        </Select>
+                    </FormItem>
                     <FormItem :label="$t('static_dhcp.ip')" prop="staticIp">
                         <Input v-model="formValidate.staticIp" ></Input>
                     </FormItem>
@@ -120,7 +125,8 @@
                     }
                 ],
                 arpData: [],
-                staticDhcpData: []
+                staticDhcpData: [],
+                interfaces: []
             }
         },
         computed:{
@@ -173,12 +179,16 @@
                 var _this = this;
                 return [{
                     type: 'selection',
-                    key: 'Mac',
+                    key: 'id',
                     width:'100',
                     sortable: true
                 }, {
                     title: 'ID',
                     key: 'idx',
+                    sortable: true
+                }, {
+                    title: this.$t('static_dhcp.interface'),
+                    key: 'Interface',
                     sortable: true
                 }, {
                     title: this.$t('static_dhcp.ip'),
@@ -230,9 +240,11 @@
                     cs.loginOut();
                 }
                 if (0 == data.rescode) {
-                    _this.staticDhcpData = data.data;
+                    _this.staticDhcpData = data.data.Staticdhcplist;
+                    _this.interfaces = data.data.Interface;
                     for(var i in _this.staticDhcpData){
-                        _this.staticDhcpData[i].idx = ''+( Number(i) + 1 );
+                        _this.staticDhcpData[i].idx = Number(i) + 1;
+                        _this.staticDhcpData[i].id = i;
                         console.log(_this.staticDhcpData);
                     }
                 }
@@ -256,6 +268,7 @@
                             }
                         }
                         var data = {};
+                        data.Interface = _this.formValidate.interface;
                         data.Ip = _this.formValidate.staticIp;
                         data.Mac = _this.formValidate.staticMac;
                         data.Descr = _this.formValidate.description;
@@ -281,7 +294,7 @@
             showClientList:function () {
                 var _this = this;
                 this.showModel = true;
-                var postData = {"action":"getArpInfo", "data":{"except":"gateway"}};
+                var postData = {"action":"getArpInfo", "data":{"except":"gateway","interface":_this.formValidate.interface}};
                 uiPost.getArpInfo(postData,function(data) {
                     if (9999 == data.rescode){
                         cs.loginOut();
@@ -315,8 +328,8 @@
             deleteData:function (obj) {
                 var _this = this;
                 var macData = [];
-                macData[0] = obj.row.Mac;
-                var postData = {"action":"delStaticDhcp","data":{"Mac":macData}};
+                macData[0] = _this.staticDhcpData[obj.row.id];
+                var postData = {"action":"delStaticDhcp","data":macData};
                 console.log(postData);
                 /*删除单个*/
                 uiPost.delStaticDhcp(postData,function(data){
@@ -336,11 +349,11 @@
                         var macData = [];
                         for(var i=0; i<getSelection.length; i++)
                         {
-                            macData[i] = getSelection[i].Mac;
+                            macData[i] = _this.staticDhcpData[getSelection[i].id];
                         }
                         console.log(macData);
 
-                        var postData = {"action":"delStaticDhcp","data":{"Mac":macData}};
+                        var postData = {"action":"delStaticDhcp","data":macData};
                         /*全选删除*/
                         uiPost.delStaticDhcp(postData,function(data){
                             if (9999 == data.rescode){

@@ -4411,6 +4411,8 @@ uiPost.prototype.getCrpcConfig = function(postVar,callback){
     this.async = true; // true:异步，false:同步。
     if (globalConfig.debug) {
         this.url = '/newui/data/getCrpcConfig.json';
+    }else{
+        this.url = '/webapi'
     }
     return this.post(postVar,callback);
 };
