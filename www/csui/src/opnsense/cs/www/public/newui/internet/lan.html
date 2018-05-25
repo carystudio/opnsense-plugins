@@ -151,7 +151,18 @@
                 getDhcpCliList: [],
                 percent:0,
                 lanIp:'',
-                lanNetmask:''
+                lanNetmask:'',
+
+                addLanInfo:{
+                    netSelCardDinding:[],
+                    lanIp:'',
+                    lanNetmask:'',
+                    dhcp:true,
+                    dhcpLease:"86400",
+                    dhcpStart:'',
+                    dhcpEnd:''
+                },
+                nicsInfo:{}
             }
         },
         computed:{
@@ -244,9 +255,54 @@
             });
         },
         watch:{
+            netSelCardDinding:function () {
+                var _this = this;
+                _this.nicsInfo = {};
+                for(var i in _this.interfaces){
+                    _this.nicsInfo[_this.interfaces[i].Interface] = [];
+                    if(_this.switchLanPort == _this.interfaces[i].Interface){
+                        _this.nicsInfo[_this.interfaces[i].Interface] = _this.netSelCardDinding;
+                    }else{
+                        _this.nicsInfo[_this.interfaces[i].Interface] = _this.interfaces[i].Nic;
+                    }
+                }
+                for(var x in _this.nicsInfo){
+                    if(_this.switchLanPort != x){
+                        if('add' == _this.switchLanPort){
+                            /*add*/
+                            for(var z in _this.addLanInfo.netSelCardDinding){
+                                var idxof = $.inArray(_this.addLanInfo.netSelCardDinding[z],_this.nicsInfo[x]);
+                                if(idxof >= 0 ){
+                                    _this.nicsInfo[x].splice(idxof,1);
+                                }
+                            }
+                        }else{
+                            /*当前选择*/
+                            for(var s in _this.netSelCardDinding){
+                                var idsof = $.inArray(_this.netSelCardDinding[s],_this.nicsInfo[x]);
+                                if(idsof >= 0 ){
+                                    _this.nicsInfo[x].splice(idsof,1);
+                                }
+                                var ids = $.inArray(_this.netSelCardDinding[s],_this.addLanInfo.netSelCardDinding);
+                                if(ids >= 0 ){
+                                    _this.addLanInfo.netSelCardDinding.splice(ids,1);
+                                }
+                            }
+                        }
+                    }
+                }
+                for (var i in _this.nicsInfo){
+                    if(_this.switchLanPort == i){
+                        _this.netSelCardDinding = _this.nicsInfo[i];
+                    }
+                }
+                for(var o in _this.interfaces){
+                    _this.interfaces[o].Nic = _this.nicsInfo[this.interfaces[o].Interface]
+                }
+            },
             "formValidate.lanIp":function () {
                 var _this = this;
-                _this.tmpLanIp = this.formValidate.lanIp;
+                _this.tmpLanIp = _this.formValidate.lanIp;
                 if(cs.ip(_this.tmpLanIp) != 99){
                     return false;
                 }
@@ -254,6 +310,11 @@
                 if(addr['start'] && addr['end']){
                     _this.formValidate.dhcpStart = addr['start'];
                     _this.formValidate.dhcpEnd = addr['end'];
+                }
+                if(_this.switchLanPort == 'add'){
+                    _this.addLanInfo.lanIp = _this.formValidate.lanIp;
+                    _this.addLanInfo.dhcpStart = _this.formValidate.dhcpStart;
+                    _this.addLanInfo.dhcpEnd = _this.formValidate.dhcpEnd;
                 }
             },
             "formValidate.lanNetmask":function () {
@@ -266,9 +327,29 @@
                     _this.formValidate.dhcpStart = addr['start'];
                     _this.formValidate.dhcpEnd = addr['end'];
                 }
+                if(_this.switchLanPort == 'add'){
+                    _this.addLanInfo.lanNetmask = _this.formValidate.lanNetmask;
+                    _this.addLanInfo.dhcpStart = _this.formValidate.dhcpStart;
+                    _this.addLanInfo.dhcpEnd = _this.formValidate.dhcpEnd;
+                }
+            },
+            "formValidate.dhcpLease":function () {
+                var _this = this;
+                if(_this.switchLanPort == 'add'){
+                    _this.addLanInfo.dhcpLease = _this.formValidate.dhcpLease;
+                }
             },
             switchLanPort:function () {
                 var _this = this;
+                if("add" == _this.switchLanPort){
+                    _this.addLanInfo.netSelCardDinding = _this.netSelCardDinding;
+                    _this.addLanInfo.lanIp = _this.formValidate.lanIp;
+                    _this.addLanInfo.lanNetmask = _this.formValidate.lanNetmask;
+                    _this.addLanInfo.dhcp = _this.formValidate.dhcp;
+                    _this.addLanInfo.dhcpLease = _this.formValidate.dhcpLease;
+                    _this.addLanInfo.dhcpStart = _this.formValidate.dhcpStart;
+                    _this.addLanInfo.dhcpEnd = _this.formValidate.dhcpEnd;
+                }
                 for (var i in _this.interfaces){
                     if(_this.switchLanPort == _this.interfaces[i].Interface){
                         _this.netSelCardDinding = _this.interfaces[i].Nic;
@@ -318,13 +399,13 @@
                 _this.switchLanPort = 'add';
 
 
-                _this.netSelCardDinding = [];
-                _this.formValidate.lanIp = '';
-                _this.formValidate.lanNetmask = '';
-                _this.formValidate.dhcp = true;
-                _this.formValidate.dhcpLease = "86400" ;
-                _this.formValidate.dhcpStart = '';
-                _this.formValidate.dhcpEnd = '';
+                _this.netSelCardDinding = _this.addLanInfo.netSelCardDinding;
+                _this.formValidate.lanIp = _this.addLanInfo.lanIp;
+                _this.formValidate.lanNetmask = _this.addLanInfo.lanNetmask;
+                _this.formValidate.dhcp = _this.addLanInfo.dhcp;
+                _this.formValidate.dhcpLease = _this.addLanInfo.dhcpLease ;
+                _this.formValidate.dhcpStart = _this.addLanInfo.dhcpStart;
+                _this.formValidate.dhcpEnd = _this.addLanInfo.dhcpEnd;
             },
             handleSubmit: function(name) {
                 var _this = this;
@@ -372,37 +453,35 @@
                         }
                         postVar.Nic = _this.netSelCardDinding;
 
-                        var nicsInfo = {};
+                        _this.nicsInfo = {};
                         for(var i in _this.interfaces){
-                            nicsInfo[_this.interfaces[i].Interface] = [];
+                            _this.nicsInfo[_this.interfaces[i].Interface] = [];
                             if(postVar.Interface == _this.interfaces[i].Interface){
-                                nicsInfo[_this.interfaces[i].Interface] = _this.netSelCardDinding;
+                                _this.nicsInfo[_this.interfaces[i].Interface] = _this.netSelCardDinding;
                             }else{
-                                nicsInfo[_this.interfaces[i].Interface] = _this.interfaces[i].Nic;
+                                _this.nicsInfo[_this.interfaces[i].Interface] = _this.interfaces[i].Nic;
                             }
                         }
-                        for(var x in nicsInfo){
+                        for(var x in _this.nicsInfo){
                             if(postVar.Interface != x){
                                 for(var z in postVar.Nic){
-                                    var idxof = $.inArray(postVar.Nic[z],nicsInfo[x]);
+                                    var idxof = $.inArray(postVar.Nic[z],_this.nicsInfo[x]);
                                     if(idxof >= 0 ){
-                                        nicsInfo[x].splice(idxof,1);
+                                        _this.nicsInfo[x].splice(idxof,1);
                                     }
                                 }
                             }
                         }
 
-                        for(var u in nicsInfo){
-                            if(nicsInfo[u].length <= 0){
-                                _this.$Message.error({content:_this.$t('lan.msg16') + u + _this.$t('lan.msg17'),duration:5,onClose:function () {
-                                    location.href = location.href;
-                                }});
+                        for(var u in _this.nicsInfo){
+                            if(_this.nicsInfo[u].length <= 0){
+                                _this.$Message.error({content:_this.$t('lan.msg16') + u + _this.$t('lan.msg17'),duration:5});
                                 return false;
                             }
                         }
 
                         postVar.member = {};
-                        postVar.member = nicsInfo;
+                        postVar.member = _this.nicsInfo;
 
                         _this.$Spin.show();  //加载动画
                         _this.applyLoading = true;
