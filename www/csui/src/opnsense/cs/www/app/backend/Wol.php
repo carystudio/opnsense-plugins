@@ -22,6 +22,7 @@ class Wol extends Csbackend
         $entrys = $config['wol']['wolentry'];
         foreach($entrys as $idx=>$entry){
             $entrys[$idx]['id'] = $idx;
+            $entrys[$idx]['descrInterface'] = $config['interfaces'][$entry['interface']]['descr'];
         }
 
         return $entrys;

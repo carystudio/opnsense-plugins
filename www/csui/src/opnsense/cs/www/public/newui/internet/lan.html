@@ -121,6 +121,8 @@
                 interfaces:{},
                 tmpLanIp:'',
                 oldLanIp:'',
+                oldLanPort:'',
+                sameLan:'',
 
                 switchLanPort:'lan1',
                 showAddBtnFlag:'1',
@@ -232,8 +234,6 @@
 
                     _this.netSelCardDinding = _this.interfaces[0].Nic;
                     _this.formValidate.lanIp = _this.interfaces[0].Ip;
-                    _this.oldLanIp = _this.interfaces[0].Ip;
-                    _this.tmpLanIp = _this.formValidate.lanIp;
                     _this.formValidate.lanNetmask = _this.interfaces[0].Netmask;
                     _this.formValidate.dhcp = (_this.interfaces[0].DhcpSvrEnable=="1")?true:false;
                     _this.formValidate.dhcpLease = _this.interfaces[0].DhcpLeasetime ?  ''+_this.interfaces[0].DhcpLeasetime : "86400" ;
@@ -242,6 +242,20 @@
 
                     _this.lanIp = _this.interfaces[0].Ip;
                     _this.lanNetmask = _this.interfaces[0].Netmask;
+
+                    var tmp = location.host.split(':');
+                    if(tmp.length > 1){
+                        _this.oldLanIp = tmp[0];
+                        _this.oldLanPort = tmp[1];
+                    }else{
+                        _this.oldLanIp = tmp[0];
+                    }
+                    for (var v in _this.interfaces){
+                        if(_this.oldLanIp == _this.interfaces[v].Ip){
+                            _this.tmpLanIp = _this.interfaces[v].Ip;
+                            _this.sameLan = _this.interfaces[v].Interface;
+                        }
+                    }
 
                     /*显示多LAN添加按钮*/
                     var i = 0;
@@ -302,11 +316,13 @@
             },
             "formValidate.lanIp":function () {
                 var _this = this;
-                _this.tmpLanIp = _this.formValidate.lanIp;
-                if(cs.ip(_this.tmpLanIp) != 99){
-                    return false;
+                if(_this.switchLanPort == _this.sameLan){
+                    _this.tmpLanIp = _this.formValidate.lanIp;
+                    if(cs.ip(_this.tmpLanIp) != 99){
+                        return false;
+                    }
                 }
-                var addr = cs.getAddrPool(_this.tmpLanIp,_this.formValidate.lanNetmask);
+                var addr = cs.getAddrPool(_this.formValidate.lanIp,_this.formValidate.lanNetmask);
                 if(addr['start'] && addr['end']){
                     _this.formValidate.dhcpStart = addr['start'];
                     _this.formValidate.dhcpEnd = addr['end'];
@@ -319,10 +335,10 @@
             },
             "formValidate.lanNetmask":function () {
                 var _this = this;
-                if(cs.ip(_this.tmpLanIp) != 99 || cs.mask(_this.formValidate.lanNetmask) != 99){
+                if(cs.ip(_this.formValidate.lanIp) != 99 || cs.mask(_this.formValidate.lanNetmask) != 99){
                     return false;
                 }
-                var addr = cs.getAddrPool(_this.tmpLanIp,_this.formValidate.lanNetmask);
+                var addr = cs.getAddrPool(_this.formValidate.lanIp,_this.formValidate.lanNetmask);
                 if(addr['start'] && addr['end']){
                     _this.formValidate.dhcpStart = addr['start'];
                     _this.formValidate.dhcpEnd = addr['end'];
@@ -354,8 +370,6 @@
                     if(_this.switchLanPort == _this.interfaces[i].Interface){
                         _this.netSelCardDinding = _this.interfaces[i].Nic;
                         _this.formValidate.lanIp = _this.interfaces[i].Ip;
-                        _this.oldLanIp = _this.interfaces[i].Ip;
-                        _this.tmpLanIp = _this.formValidate.lanIp;
                         _this.formValidate.lanNetmask = _this.interfaces[i].Netmask;
                         _this.formValidate.dhcp = (_this.interfaces[i].DhcpSvrEnable=="1")?true:false;
                         _this.formValidate.dhcpLease = _this.interfaces[i].DhcpLeasetime ?  ''+_this.interfaces[i].DhcpLeasetime : "86400" ;
@@ -505,16 +519,29 @@
                         }else{
                             postData = {"action":"setLanInfo","data":postVar};
                             uiPost.setLanInfo(postData,function (data) {
-                                _this.$Spin.hide();   //关闭加载动画
-                                if(_this.oldLanIp != _this.tmpLanIp){
-                                    location.href = 'http://'+_this.tmpLanIp+'/newui/internet/lan.html';
-                                }
                                 if (9999 == data.rescode){
                                     cs.loginOut();
                                 }
                                 _this.applyLoading = false;
-                                if (0 == data.rescode) {
-                                    location.href = 'http://'+_this.tmpLanIp+'/newui/internet/lan.html';
+                                _this.$Spin.hide();   //关闭加载动画
+                                if (data.rescode) {
+                                    if('0' == data.rescode){
+                                        if(_this.oldLanIp != _this.tmpLanIp){
+                                            if(_this.oldLanPort == ''){
+                                                location.href = 'http://'+_this.tmpLanIp+'/newui/internet/lan.html';
+                                            }else{
+                                                location.href = 'http://'+_this.tmpLanIp+':'+_this.oldLanPort+'/newui/internet/lan.html';
+                                            }
+                                        }
+                                    }else{
+                                        _this.$Message.error({content:_this.$t('lan.set_fail')+' '+ _this.$t('errorcode.'+data.rescode),duration:5});
+                                    }
+                                }else{
+                                    if(_this.oldLanPort == ''){
+                                        location.href = 'http://'+_this.tmpLanIp+'/newui/internet/lan.html';
+                                    }else{
+                                        location.href = 'http://'+_this.tmpLanIp+':'+_this.oldLanPort+'/newui/internet/lan.html';
+                                    }
                                 }
                             });
                         }

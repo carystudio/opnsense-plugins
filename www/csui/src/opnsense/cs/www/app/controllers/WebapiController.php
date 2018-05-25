@@ -315,9 +315,9 @@ class WebapiController extends BaseController
                 $this->checkData($para);
                 $result['rescode'] = Network::delInterface($para['data']);
             }else if('getNetInfo'==$action){
-                $result['rescode'] = Network::getNetInfo($para['data']);
+                $result['rescode'] = Network::getNetInfo();
             }else if('getLinksData'==$action) {
-                $result['rescode'] = Network::getLinksData($para['data']);
+                $result['rescode'] = Network::getLinksData();
             }else if('getLanWanInf' == $action){
                 $result['rescode'] = Network::getLanWanInf();
             }else if("scanAp" == $action){
