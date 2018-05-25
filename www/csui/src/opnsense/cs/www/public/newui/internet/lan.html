@@ -208,10 +208,12 @@
         created:function() {
             var _this = this;
             var portData = {"action":"getLanInfo", "data":{}};
+            _this.$Spin.show();
             uiPost.getLanInfo(portData,function(data) {
                 if (9999 == data.rescode){
                     cs.loginOut();
                 }
+                _this.$Spin.hide();   //关闭加载动画
                 if (0 == data.rescode)
                 {
                     _this.interfaces = data.data.Interfaces;
@@ -326,37 +328,35 @@
             },
             handleSubmit: function(name) {
                 var _this = this;
-
-                if(_this.netSelCardDinding.length <= 0){
-                    _this.$Message.error(this.$t('lan.msg15'));
-                    return false;
-                }
-
-                if (1 == _this.formValidate.dhcp) {
-                    if(cs.ip_range(this.formValidate.dhcpStart,this.formValidate.dhcpEnd) == 0){
-                        _this.$Message.error({content:_this.$t('lan.msg7'),duration:5});
-                        return false;
-                    }
-                    if(_this.formValidate.dhcpStart == _this.formValidate.lanIp || _this.formValidate.dhcpEnd == _this.formValidate.lanIp){
-                        _this.$Message.error({content:_this.$t('lan.msg10'),duration:5});
-                        return false;
-                    }
-                    if(0 == cs.ip_subnet(_this.formValidate.lanIp,_this.formValidate.lanNetmask,_this.formValidate.dhcpStart)){
-                        _this.$Message.error({content:_this.$t('lan.msg12'),duration:5});
-                        return false;
-                    }
-                    if(0 == cs.ip_subnet(_this.formValidate.lanIp,_this.formValidate.lanNetmask,_this.formValidate.dhcpEnd)){
-                        _this.$Message.error({content:_this.$t('lan.msg13'),duration:5});
-                        return false;
-                    }
-                    if(1 == cs.ip_subnet(_this.formValidate.lanIp,_this.formValidate.lanNetmask,_this.wanIp)){
-                        _this.$Message.error({content:_this.$t('lan.msg14'),duration:5});
-                        return false;
-                    }
-                }
-
                 _this.$refs[name].validate(function(valid){
                     if (valid) {
+                        if(_this.netSelCardDinding.length <= 0){
+                            _this.$Message.error(_this.$t('lan.msg15'));
+                            return false;
+                        }
+                        if (1 == _this.formValidate.dhcp) {
+                            if(cs.ip_range(_this.formValidate.dhcpStart,_this.formValidate.dhcpEnd) == 0){
+                                _this.$Message.error({content:_this.$t('lan.msg7'),duration:5});
+                                return false;
+                            }
+                            if(_this.formValidate.dhcpStart == _this.formValidate.lanIp || _this.formValidate.dhcpEnd == _this.formValidate.lanIp){
+                                _this.$Message.error({content:_this.$t('lan.msg10'),duration:5});
+                                return false;
+                            }
+                            if(0 == cs.ip_subnet(_this.formValidate.lanIp,_this.formValidate.lanNetmask,_this.formValidate.dhcpStart)){
+                                _this.$Message.error({content:_this.$t('lan.msg12'),duration:5});
+                                return false;
+                            }
+                            if(0 == cs.ip_subnet(_this.formValidate.lanIp,_this.formValidate.lanNetmask,_this.formValidate.dhcpEnd)){
+                                _this.$Message.error({content:_this.$t('lan.msg13'),duration:5});
+                                return false;
+                            }
+                            if(1 == cs.ip_subnet(_this.formValidate.lanIp,_this.formValidate.lanNetmask,_this.wanIp)){
+                                _this.$Message.error({content:_this.$t('lan.msg14'),duration:5});
+                                return false;
+                            }
+                        }
+
                         var lanip = _this.formValidate.lanIp;
                         var postVar = {};
                         postVar.Ip      = _this.formValidate.lanIp;
