@@ -835,7 +835,7 @@ var cs_main = {
                         var data ={};
                         data.Interface = _this.interface[i].Interface;
                         data.Nic = _this.interface[i].Nic;
-                        var postVar = {"action":"delInterfaceBind","data":data};
+                        var postVar = {"action":"delInterface","data":data};
                         uiPost.delInterfaceBind(postVar,function(data) {
                             if (9999 == data.rescode){
                                 cs.loginOut();

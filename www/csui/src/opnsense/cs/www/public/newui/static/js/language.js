@@ -653,6 +653,9 @@ var messages = {
             "add_fail":"Add failure! ",
             "lan_port":"LAN Interface",
             "default_select_lang":"Please choose",
+            "delete":"Delete",
+            "del_success":"Delete success",
+            "del_fail":"Delete failure",
             "msg1":"{0} cannot be empty,please try again!",
             "msg2":"is invalid, Its format must be made up of'xxx.xxx.xxx.xxx'!",
             "msg3":"is invalid, paragraph 1 must be 1-254 numbers!",
@@ -669,7 +672,8 @@ var messages = {
             "msg14":"You set the LAN IP address and WAN IP in the same subnet??",
             "msg15":"Please select the LAN port!",
             "msg16":"The LAN port of ",
-            "msg17":" can not be empty. Please allocate more lAN ports reasonably."
+            "msg17":" can not be empty. Please allocate more lAN ports reasonably.",
+            "msg18":"There is no interface!"
         },
         "static_dhcp":{
             "title":"Static DHCP Setting",
@@ -3516,6 +3520,9 @@ var messages = {
             "add_fail":"添加失败！",
             "lan_port":"LAN接口",
             "default_select_lang":"请选择",
+            "delete":"删除",
+            "del_success":"删除成功！",
+            "del_fail":"删除失败！",
             "msg1":"{0}不能为空，请重试！",
             "msg2":"无效，它格式必须是'xxx.xxx.xxx.xxx'组成！",
             "msg3":"无效,第1段必须是1-254的数字！",
@@ -3532,7 +3539,8 @@ var messages = {
             "msg14":"您设置的LAN IP地址与WAN IP在同一子网内！",
             "msg15":"请选择LAN端口！",
             "msg16":"",
-            "msg17":"的LAN端口不能为空，请合理分配多lAN端口！"
+            "msg17":"的LAN端口不能为空，请合理分配多lAN端口！",
+            "msg18":"不存在该接口！"
         },
         "static_dhcp":{
             "title":"静态DHCP设置",

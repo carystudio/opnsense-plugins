@@ -28,6 +28,7 @@
                             <Radio v-for="(item,idx) in interfaces" :key="item.Interface" :label="item.Interface">{{item.Interface}}</Radio>
                         </RadioGroup>
                         <Button :disabled="showAddBtnFlag != '1'" type="ghost" icon="plus-round" @click="addLanBtn()"></Button>
+                        <Button v-if="switchLanPort != 'lan1' && switchLanPort != 'add'" type="ghost" @click="delLanBtn()">{{$t("lan.delete")}}</Button>
                     </FormItem>
                     <FormItem :label="$t('lan.ip')" prop="lanIp">
                         <Input v-model="formValidate.lanIp" ></Input>
@@ -213,7 +214,6 @@
                 }
                 if (0 == data.rescode)
                 {
-                    console.log(data);
                     _this.interfaces = data.data.Interfaces;
                     _this.nics = data.data.Nics;
 
@@ -286,6 +286,30 @@
             }
         },
         methods:{
+            delLanBtn:function () {
+                var _this = this;
+                if(_this.switchLanPort == 'add'){
+                    _this.$Message.error({content:_this.$t("lan.msg18"),duration:5});
+                    return false;
+                }
+                var data = {};
+                data.Interface = _this.switchLanPort;
+                var postVar = {"action":"delInterface","data":data};
+                _this.$Spin.show();
+                uiPost.delLanInterface(postVar,function (data) {
+                    if (9999 == data.rescode){
+                        cs.loginOut();
+                    }
+                    _this.$Spin.hide();   //关闭加载动画
+                    if (0 == data.rescode) {
+                        _this.$Message.success({content:_this.$t('lan.del_success'),onClose:function(){
+                            location.href = location.href;
+                        }});
+                    }else {
+                        _this.$Message.error({content:_this.$t('lan.del_fail')+' '+ _this.$t('errorcode.'+data.rescode),duration:5});
+                    }
+                });
+            },
             addLanBtn:function () {
                 var _this = this;
                 _this.addLanFlag = '1';
