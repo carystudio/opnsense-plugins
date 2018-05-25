@@ -684,8 +684,34 @@ class Network extends Csbackend
             if ('1' != $data['DhcpSvrEnable'] && '0' != $data['DhcpSvrEnable']) {
                 throw new AppException('Network_103');
             }
+
+            foreach($config['interfaces'] as $ifname=>$if_info){//检查是否全部lan接口的网口绑定参数都有
+                if(strpos($if_info['descr'], 'lan') === 0){
+                    if((!isset($data['member'][$if_info['descr']]))){
+                        throw new AppException('Network_107');
+                    }
+                }
+            }
+            $availe_nics = array_keys(self::getAvailableNic('lan'));
+            foreach($data['member'] as $inf=>$members){//更新LAN接口绑定的网卡
+                if(!is_array($members) || count($members)<=0){
+                    throw new AppException('Network_108');
+                }
+                if(array_diff($members, $availe_nics)){//网口不是可用的
+                    throw new AppException('Network_108');
+                }
+                if(!self::setLanMember($inf, $members)){//更新接口网桥的网口
+                    throw new AppException('Network_109');
+                }
+                $availe_nics = array_diff($availe_nics, $members);
+            }
+            if(count($data['Nic']) != count($data['member'][$data['Interface']]) || array_diff($data['Nic'], $data['member'][$data['Interface']])){//网口不是可用的
+                throw new AppException('Network_110');
+            }
+
+
             $lan = array();
-            $lan['if'] = 'bridge0';
+            $lan['if'] = '';
             $lan['descr'] = $data['Interface'];
             $lan['enable'] = '1';
             $lan['spoofmac'] = '';
@@ -700,20 +726,14 @@ class Network extends Csbackend
                     $if_members[] = $if_name;
                 }
             }
-			$old_members = explode(',', $config['bridges']['bridged'][0]['members']);
-            foreach($old_members as $ifname){
-                unset($config['interfaces'][$ifname]['enable']);
-            }
-            foreach($if_members as $ifname){
-                $config['interfaces'][$ifname]['enable'] = '1';
-            }
-            $config['bridges']['bridged'][0]['members'] = implode(',', $if_members);
 
             $seted = false;
             foreach($config['interfaces'] as $infidx=>$tmp_infinfo){
                 if ($tmp_infinfo['descr'] == $data['Interface']) {
                     $ifname = $infidx;
+                    $lan['if'] = $tmp_infinfo['if'];
                     $config['interfaces'][$infidx] = $lan;
+
                     if ('1' == $data['DhcpSvrEnable']) {
                         if (!is_ipaddr($data['DhcpStart'])) {
                             throw new AppException('Network_104');
@@ -767,12 +787,19 @@ class Network extends Csbackend
             write_config();
 
             Portal::reconfigureAction();
-            interface_bridge_configure($config['bridges']['bridged'][0]);
-            if (isset($lan['enable']) && isset($ifname)) {
-                interface_bring_down($ifname, false, $lan);
-                interface_configure($ifname, true);
-            } else if(isset($ifname)) {
-                interface_bring_down($ifname, true, $lan);
+            foreach($config['bridges']['bridged'] as $bridge){
+                interface_bridge_configure($bridge);
+            }
+
+            foreach($config['interfaces'] as $if_idx=>$reconf_if){
+                if(strpos($reconf_if['descr'], 'lan')==0){
+                    if (isset($reconf_if['enable'])) {
+                        interface_bring_down($if_idx);
+                        interface_configure($if_idx, true);
+                    } else {
+                        interface_bring_down($if_idx, true, $reconf_if);
+                    }
+                }
             }
 
             setup_gateways_monitor();
@@ -952,14 +979,14 @@ class Network extends Csbackend
                 throw new AppException('Network_805');
             }
             $availe_nics = array_keys(self::getAvailableNic('lan'));
-            foreach($data['member'] as $if_name=>$members){//更新LAN接口绑定的网卡
+            foreach($data['member'] as $inf=>$members){//更新LAN接口绑定的网卡
                 if(!is_array($members)){
                     throw new AppException('Network_805');
                 }
                 if(array_diff($members, $availe_nics)){
                     throw new AppException('Network_805');
                 }
-                if(!self::setLanMember($if_name, $members)){
+                if(!self::setLanMember($inf, $members)){
                     throw new AppException('Network_806');
                 }
                 $availe_nics = array_diff($availe_nics, $members);
