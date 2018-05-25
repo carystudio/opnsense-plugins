@@ -1252,7 +1252,7 @@ class Network extends Csbackend
                 }else{
                     $bridgeif = $config['interfaces'][$ifname]['if'];
                     foreach($config['bridges']['bridged'] as $bridge_idx=>$bridge){
-                        if($bridge['bridgeif'] = $bridgeif){
+                        if($bridge['bridgeif'] == $bridgeif){
                             $ifs = explode(',', $bridge['members']);
                             foreach($ifs as $a_if){
                                 self::resetInterface($a_if, $config['interfaces'][$a_if]['if']);
