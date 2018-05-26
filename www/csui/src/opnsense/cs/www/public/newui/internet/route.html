@@ -374,6 +374,8 @@
                     }
                     if (0 == data.rescode) {
                         _this.staticRouteData.splice(obj.index, 1);
+                    }else{
+                        _this.$Message.error({content:_this.$t('route.del_fail')+_this.$t('errorcode.'+data.rescode),duration:5});
                     }
                 });
             },
