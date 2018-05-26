@@ -674,7 +674,9 @@ var messages = {
             "msg15":"Please select the LAN port!",
             "msg16":"The LAN port of ",
             "msg17":" can not be empty. Please allocate more lAN ports reasonably.",
-            "msg18":"There is no interface!"
+            "msg18":"There is no interface!",
+            "msg19":"is invalid, not a legitimate IP address!",
+            "msg20":"is invalid, can not be empty!"
         },
         "static_dhcp":{
             "title":"Static DHCP Setting",
@@ -3542,7 +3544,9 @@ var messages = {
             "msg15":"请选择LAN端口！",
             "msg16":"",
             "msg17":"的LAN端口不能为空，请合理分配多lAN端口！",
-            "msg18":"不存在该接口！"
+            "msg18":"不存在该接口！",
+            "msg19":"无效，不是合法的IP地址！",
+            "msg20":"无效，不能为空！"
         },
         "static_dhcp":{
             "title":"静态DHCP设置",

@@ -34,7 +34,7 @@
                         <Input v-model="formValidate.lanIp" ></Input>
                     </FormItem>
                     <FormItem :label="$t('lan.mask')" prop="lanNetmask">
-                        <Input v-model="formValidate.lanNetmask" ></Input>
+                        <Input v-model="formValidate.lanNetmask" @on-blur="checkData('formValidate')"></Input>
                     </FormItem>
                     <FormItem :label="$t('lan.lanport')">
                         <Select v-model="netSelCardDinding" multiple :placeholder="$t('lan.default_select_lang')">
@@ -174,12 +174,15 @@
                     lanIp: [
                         { required: true, message: this.$t('lan.msg1',[this.$t('lan.ip')]), trigger: 'blur' },
                         { validator:function(r, v, f) {
-                            var _s = cs.ip(v);
-                            if(_s != 99) {
-                                f(_this.$t('lan.ip')+_this.$t('lan["msg'+(_s+1)+'"]'));
+                            var _s = cs.ipWithMask(v,_this.formValidate.lanNetmask);
+                            if(_s == 0) {
+                                f(_this.$t('lan.ip')+_this.$t('lan.msg20'));
+                            }else if(_s == 1){
+                                f(_this.$t('lan.ip')+_this.$t('lan.msg19'));
                             }else{
                                 f();
                             }
+                            f();
                         },trigger: 'blur' }
                     ],
                     lanNetmask: [
@@ -316,6 +319,9 @@
             },
             "formValidate.lanIp":function () {
                 var _this = this;
+                if('' == _this.formValidate.lanNetmask){
+                    _this.formValidate.lanNetmask = '255.255.255.0';
+                }
                 if(_this.switchLanPort == _this.sameLan){
                     _this.tmpLanIp = _this.formValidate.lanIp;
                     if(cs.ip(_this.tmpLanIp) != 99){
@@ -383,6 +389,13 @@
             }
         },
         methods:{
+            checkData:function (name) {
+                var _this = this;
+                _this.$refs[name].validate(function(valid) {
+                    if (valid) {
+                    }
+                });
+            },
             delLanBtn:function () {
                 var _this = this;
                 if(_this.switchLanPort == 'add'){
