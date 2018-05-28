@@ -656,6 +656,7 @@ var messages = {
             "delete":"Delete",
             "del_success":"Delete success",
             "del_fail":"Delete failure",
+            "set_fail":"Fail to set up! ",
             "msg1":"{0} cannot be empty,please try again!",
             "msg2":"is invalid, Its format must be made up of'xxx.xxx.xxx.xxx'!",
             "msg3":"is invalid, paragraph 1 must be 1-254 numbers!",
@@ -673,7 +674,9 @@ var messages = {
             "msg15":"Please select the LAN port!",
             "msg16":"The LAN port of ",
             "msg17":" can not be empty. Please allocate more lAN ports reasonably.",
-            "msg18":"There is no interface!"
+            "msg18":"There is no interface!",
+            "msg19":"is invalid, not a legitimate IP address!",
+            "msg20":"is invalid, can not be empty!"
         },
         "static_dhcp":{
             "title":"Static DHCP Setting",
@@ -731,6 +734,7 @@ var messages = {
             "gateway":"Gateway",
             "add_success":"Add success",
             "add_fail":"Add failure",
+            "del_fail":"Delete failure ",
             "modal_title":"MAC List",
             "msg1":"IP Address is invalid, it must be 0-255 numbers and dots by the symbols! ",
             "msg2":"Null and void, the first section must be a number of 1-254!",
@@ -3523,6 +3527,7 @@ var messages = {
             "delete":"删除",
             "del_success":"删除成功！",
             "del_fail":"删除失败！",
+            "set_fail":"设置失败！",
             "msg1":"{0}不能为空，请重试！",
             "msg2":"无效，它格式必须是'xxx.xxx.xxx.xxx'组成！",
             "msg3":"无效,第1段必须是1-254的数字！",
@@ -3540,7 +3545,9 @@ var messages = {
             "msg15":"请选择LAN端口！",
             "msg16":"",
             "msg17":"的LAN端口不能为空，请合理分配多lAN端口！",
-            "msg18":"不存在该接口！"
+            "msg18":"不存在该接口！",
+            "msg19":"无效，不是合法的IP地址！",
+            "msg20":"无效，不能为空！"
         },
         "static_dhcp":{
             "title":"静态DHCP设置",
@@ -3594,6 +3601,7 @@ var messages = {
             "gateway":"默认网关",
             "add_success":"添加成功",
             "add_fail":"添加失败",
+            "del_fail":"删除失败",
             "modal_title":"MAC列表",
             "msg1":"IP地址无效，它必须是由0-255数字和圆点符号组成！",
             "msg2":"无效,第1段必须是1-254的数字！",

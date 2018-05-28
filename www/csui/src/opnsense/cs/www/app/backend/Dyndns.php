@@ -56,6 +56,7 @@ class Dyndns extends Csbackend
         }
         foreach($result as $idx=>$ddns){
             $result[$idx]['cached_ip'] = self::getCacheIp($ddns);
+            $result[$idx]['interfaceDescr'] = $config['interfaces'][$ddns['interface']]['descr'];
         }
 
         return $result;

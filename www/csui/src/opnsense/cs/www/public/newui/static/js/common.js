@@ -611,5 +611,66 @@ cs.prototype.isEmail= function (email){
 	return ret;
 };
 
+/**
+ * 校验IP地址,与子网掩码比较
+ *
+ * @Author   Jeff       <Jeff@carystudio.com>
+ * @DateTime 2018-5-26
+ * @param    {String}   ip                   校验的IP
+ * @param    {String}   mask                 比较的掩码
+ * @return   {Number}
+ * 0: 不能为空 <br/>
+ * 1: 无效，不是合法的IP地址<br/>
+ * 2: 无效，子网掩码长度不正确<br/>
+ * 99: 有效
+ */
+cs.prototype.ipWithMask = function (ip,mask){
+	var ret = 99;
+	if(undefined == ip || ip=="..." || ip == "") { ret = 0;  return ret; }
+	var reg=/^(?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))$/;
+	if(!reg.test(ip)) return 1;
+	var maskLen = this.maskip2bin(mask);
+	var diffNum = 32 - maskLen;
+	if(false == maskLen){
+		return 2;	//子网掩码不正确
+	}
+	var ipLong = this.ip2int(ip);
+	var diff = (ipLong << maskLen) >>> maskLen;
+	var diffmax = (this.ip2int('255.255.255.255') << maskLen) >>> maskLen;
+	if(diff <= 0 || diff >= diffmax){
+		ret = 1;
+	}
+	return ret;
+};
+
+/**
+ * 子网掩码转子网长度
+ *
+ * @Author   Jeff       <Jeff@carystudio.com>
+ * @DateTime 2018-5-26
+ * @param    {String}   mask                 子网掩码
+ * @return   {Number}	子网长度
+ * 	false:	不是合法的子网掩码
+ */
+cs.prototype.maskip2bin = function (mask){
+	var maskNum = this.ip2int(mask);
+	var maskBin = parseInt(maskNum).toString(2);
+	if(32 != maskBin.length){
+		return false;
+	}
+	var masklen=0;
+	var flag = '1';
+	for(var i=0; i<32; i++){
+		if('1'== maskBin[i]){
+			masklen++;
+			if('1' != flag){
+				return false;
+			}
+		}
+		flag = maskBin[i];
+	}
+	return masklen;
+};
+
 	obj.cs = new cs();
 })(window);
