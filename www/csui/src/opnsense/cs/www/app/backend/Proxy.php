@@ -751,6 +751,11 @@ class Proxy extends Csbackend
         $config['OPNsense']['cicap']['general']['enable_accesslog'] = $data['enable_accesslog'];
         $config['OPNsense']['cicap']['antivirus']['maxobjectsize'] = $data['maxobjectsize'];
         $config['OPNsense']['cicap']['antivirus']['enable_clamav'] = '1';
+        if('zh_CN' == $config['system']['language']){
+            exec('/bin/cp -f /usr/local/share/c_icap/templates/virus_scan/en/VIRUS_FOUND_cn /usr/local/share/c_icap/templates/virus_scan/en/VIRUS_FOUND');
+        }else{
+            exec('/bin/cp -f /usr/local/share/c_icap/templates/virus_scan/en/VIRUS_FOUND_en /usr/local/share/c_icap/templates/virus_scan/en/VIRUS_FOUND');
+        }
 
         write_config();
     }
