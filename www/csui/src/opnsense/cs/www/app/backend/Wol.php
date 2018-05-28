@@ -71,7 +71,7 @@ class Wol extends Csbackend
             }
             $entry['descr'] = $data['descr'];
             if(!isset($config['wol']) || !isset($config['wol']['wolentry']) || !is_array($config['wol']['wolentry'])){
-                $config['wol']['wolentry'] = array();
+                $config['wol'] = array('wolentry' => array());
             }
             $config['wol']['wolentry'][] = $entry;
 

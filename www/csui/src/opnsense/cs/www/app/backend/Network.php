@@ -103,7 +103,6 @@ class Network extends Csbackend
                 return false;
             }
         }
-
     }
 
     private static function applyGatewayConfig(){
@@ -681,6 +680,7 @@ class Network extends Csbackend
             if (false === $netmask) {
                 throw new AppException('Network_102');
             }
+
             if ('1' != $data['DhcpSvrEnable'] && '0' != $data['DhcpSvrEnable']) {
                 throw new AppException('Network_103');
             }
@@ -754,6 +754,9 @@ class Network extends Csbackend
             }
             if(!$seted){
                 throw new AppException('Network_106');
+            }
+            if(!self::checkSubnet($ifname, $data['Ip'], $netmask)){
+                throw new AppException('Network_107');
             }
             self::setup_lan_subnet_alias();
             $dnsmasq_restart = false;
@@ -952,6 +955,32 @@ class Network extends Csbackend
         $config['filter']['rule'][] = $default_rule;
     }
 
+    private static function checkSubnet($ifname, $ip, $netmask){
+        global $config;
+
+        $subnet = Util::getSubnetRange($ip, intval($netmask));
+        foreach($config['interfaces'] as $a_ifname=>$ifinfo){
+            if($a_ifname == $ifname){
+                continue;
+            }
+            if(substr($ifinfo['descr'],0,3) == 'wan'){
+                if(is_ipaddr($ifinfo['ipaddr'])){
+                    $if_subnet = Util::getSubnetRange($ifinfo['ipaddr'], intval($ifinfo['subnet']));
+                    if($if_subnet[0] <= $subnet[1] && $if_subnet[1]>=$subnet[0]){
+                        return false;
+                    }
+                }
+            }else if(substr($ifinfo['descr'],0,3) == 'lan'){
+                $if_subnet = Util::getSubnetRange($ifinfo['ipaddr'], intval($ifinfo['subnet']));
+                if($if_subnet[0] <= $subnet[1] && $if_subnet[1]>=$subnet[0]){
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public static function addLanInterface(Array $data){
         global $config;
 
@@ -967,6 +996,9 @@ class Network extends Csbackend
             $netmask = Util::maskip2bit($data['Netmask']);
             if (false === $netmask) {
                 throw new AppException('Network_802');
+            }
+            if(!self::checkSubnet('', $data['Ip'], $netmask)){
+                throw new AppException('Network_810');
             }
             if ('1' != $data['DhcpSvrEnable'] && '0' != $data['DhcpSvrEnable']) {
                 throw new AppException('Network_803');
@@ -1203,6 +1235,65 @@ class Network extends Csbackend
             'enable'=>'1');
     }
 
+    private static function isInterfaceUsed($ifname){
+        global $config;
+
+        $interface = $config['interfaces'][$ifname]['descr'];
+        if(isset($config['openvpn']['openvpn-server']) && is_array($config['openvpn']['openvpn-server'])){//openvpn server
+            foreach($config['openvpn']['openvpn-server'] as $ovpn_svr){
+                if($ovpn_svr['interface'] == $ifname && !isset($ovpn_svr['disable'])){
+                    return 'ovpnserver';
+                }
+            }
+        }
+        if(isset($config['openvpn']['openvpn-client']) && is_array($config['openvpn']['openvpn-client'])){//openvpn client
+            foreach($config['openvpn']['openvpn-client'] as $ovpn_client){
+                if($ovpn_client['interface'] == $ifname && !isset($ovpn_client['disable'])){
+                    return 'ovpnclient';
+                }
+            }
+        }
+
+        if(isset($config['ipsec']['enable']) && '1'==$config['ipsec']['enable'] && isset($config['ipsec']['phase1']) && is_array($config['ipsec']['phase1'])){//ipsec phase1
+            foreach($config['ipsec']['phase1'] as $phase1){
+                if($phase1['interface'] == $ifname){
+                    return 'ipsec';
+                }
+            }
+        }
+
+        if(isset($config['ipsec']['enable']) && '1'==$config['ipsec']['enable'] && isset($config['ipsec']['phase2']) && is_array($config['ipsec']['phase2'])){//ipsec phase2
+            foreach($config['ipsec']['phase2'] as $phase2){
+                if($phase2['localid']['type'] == $ifname){
+                    return 'ipsec';
+                }
+            }
+        }
+        if(isset($config['dyndnses']['dyndns']) && is_array($config['dyndnses']['dyndns'])){//ddns
+            foreach($config['dyndnses']['dyndns'] as $dyndns){
+                if($dyndns['interface'] == $ifname){
+                    return 'dyndns';
+                }
+            }
+        }
+        if(isset($config['wol']['wolentry']) && is_array($config['wol']['wolentry'])){//wol
+            foreach($config['wol']['wolentry'] as $wol){
+                if($wol['interface'] == $ifname){
+                    return 'wol';
+                }
+            }
+        }
+        if(isset($config['gateways']['gateway_item']) && is_array($config['gateways']['gateway_item'])){//static route
+            foreach($config['gateways']['gateway_item'] as $gateway){
+                if($gateway['interface'] == $ifname && strpos($gateway['name'],'STATIC') === 0){
+                    return 'staticroute';
+                }
+            }
+        }
+
+        return false;
+    }
+
     public static function delInterface($data){
         global $config;
 
@@ -1219,8 +1310,11 @@ class Network extends Csbackend
             }
             $is_wan = strpos($if, 'wan')===0;
             if(empty($ifname)){
-                var_dump($data);
                 throw new AppException('Network_700');
+            }
+            $inf_used = self::isInterfaceUsed($ifname);
+            if(false !== $inf_used){
+                throw new AppException($inf_used);
             }
             if (link_interface_to_group($ifname)) {
                 throw new AppException('Network_701');

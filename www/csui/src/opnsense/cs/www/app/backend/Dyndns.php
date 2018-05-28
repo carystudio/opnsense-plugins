@@ -100,10 +100,10 @@ class Dyndns extends Csbackend
             }
             $ddns['interface'] = $data['interface'];
 
-            if(isset($data['requestif']) && !empty($data['interface']) && !isset($config['interfaces'][$data['interface']])){
+            if(false && isset($data['requestif']) && !empty($data['requestif']) && !isset($config['interfaces'][$data['requestif']])){
                 throw new AppException('DDNS_103');
             }
-            $ddns['requestif'] = $data['requestif'];
+            $ddns['requestif'] = $ddns['interface'];
 
             if(!isset($data['host']) || empty($data['host'])){
                 throw new AppException('DDNS_104');

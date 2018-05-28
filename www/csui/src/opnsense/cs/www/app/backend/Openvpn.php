@@ -594,6 +594,7 @@ class Openvpn extends Csbackend
             write_config();
 
             openvpn_configure_single($data['vpnid']);
+            filter_configure();
         }catch(AppException $aex){
             $result = $aex->getMessage();
         }catch(Exception $ex){
@@ -677,11 +678,11 @@ class Openvpn extends Csbackend
                 throw new AppException('OVPN_109');
             }
 
-            if(!empty($data['tunnel_network']) && !Util::checkCidr($data['tunnel_network'], true, 'ipv4')){
+            if(!empty($data['tunnel_network']) && !Util::checkCidr($data['tunnel_network'], false, 'ipv4')){
                 throw new AppException('OVPN_111');
             }
             $data['tunnel_networkv6'] = '';
-            if(!empty($data['local_network']) && !Util::checkCidr($data['local_network'], false, 'ipv4')){
+            if(!empty($data['local_network']) && !Util::checkCidr($data['local_network'], true, 'ipv4')){
                 throw new AppException('OVPN_112');
             }
             $data['local_networkv6'] = '';
@@ -824,6 +825,7 @@ class Openvpn extends Csbackend
             write_config();
             openvpn_configure_single($data['vpnid']);
             openvpn_configure_csc();
+            filter_configure();
         } catch (AppException $aex) {
             $result = $aex->getMessage();
         } catch (Exception $ex) {

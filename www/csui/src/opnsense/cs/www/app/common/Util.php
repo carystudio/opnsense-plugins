@@ -52,6 +52,16 @@ class Util
         return $masklen;
     }
 
+    public static function getSubnetRange($ip, $mask){
+        $ip_long = ip2long($ip);
+        $subnet_lan = 32-$mask;
+        $ip_start = ($ip_long>>$subnet_lan)<<$subnet_lan;
+        $subnetmask=(1<<$subnet_lan)-1;
+        $ip_end = $ip_long | $subnetmask;
+
+        return array($ip_start, $ip_end);
+    }
+
     public static function getInterfaceName($num=0){
         if(false == self::$interface_name){
             $inf_list = get_interface_list();
