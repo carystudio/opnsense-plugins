@@ -253,6 +253,7 @@
                     }else{
                         _this.oldLanIp = tmp[0];
                     }
+                    _this.tmpLanIp = _this.oldLanIp;
                     for (var v in _this.interfaces){
                         if(_this.oldLanIp == _this.interfaces[v].Ip){
                             _this.tmpLanIp = _this.interfaces[v].Ip;

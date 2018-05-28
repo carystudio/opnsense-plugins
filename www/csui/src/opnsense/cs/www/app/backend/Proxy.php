@@ -339,8 +339,8 @@ class Proxy extends Csbackend
 
 //        $clamavStatus = self::clamavStatus();
 //        $cicapStatus = self::cicapStatus();
-        if(!is_dir("/tmp/watch_tmp")){
-            mkdir("/tmp/watch_tmp");
+        if(!is_dir("/usr/local/opnsense/cs/tmp/watch_tmp")){
+            mkdir("/usr/local/opnsense/cs/tmp/watch_tmp");
         }
 
         $backend->configdRun("clamav stop");
@@ -352,8 +352,8 @@ class Proxy extends Csbackend
 
         // (res)start daemon
         if ((string)$config['OPNsense']['clamav']['general']['enabled'] == 1) {
-            if(!file_exists("/tmp/watch_tmp/runicapcmd.txt")){
-                file_put_contents("/tmp/watch_tmp/runicapcmd.txt",'/bin/sh /usr/local/opnsense/cs/script/seticap.sh start');
+            if(!file_exists("/usr/local/opnsense/cs/tmp/watch_tmp/runicapcmd.txt")){
+                file_put_contents("/usr/local/opnsense/cs/tmp/watch_tmp/runicapcmd.txt",'/bin/sh /usr/local/opnsense/cs/script/seticap.sh start');
             }
 //            exec('/bin/sh /usr/local/opnsense/cs/script/seticap.sh start');
         }

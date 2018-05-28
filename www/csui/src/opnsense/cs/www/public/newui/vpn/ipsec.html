@@ -574,15 +574,15 @@
                         aes128gcm16:false,
                         aes192gcm16:false,
                         aes256gcm16:false,
-                        blowfish:true,
-                        '3des':true,
-                        cast128:true,
+                        blowfish:false,
+                        '3des':false,
+                        cast128:false,
                         des:false,
                         'null':false
                     },
-                    keylenAes:'auto',
+                    keylenAes:'256',
                     keylenBlowfish:'auto',
-                    hashAlgorithmOption:['hmac_md5','hmac_sha1'],
+                    hashAlgorithmOption:['hmac_sha256'],
                     pfsgroup:'0',
                     lifetime:'',
                     pinghost:'',
@@ -1124,7 +1124,7 @@
                                             _this.formValidatePhase2.localidType = params.row.localid_type;
                                             if(_this.formValidatePhase2.localidType == 'address' || _this.formValidatePhase2.localidType == 'network'){
                                                 _this.formValidatePhase2.localidAddress = params.row.localid_address;
-                                                _this.formValidatePhase2.localidNetbits = params.row.localid_netbits;
+                                                _this.formValidatePhase2.localidNetbits = Number(params.row.localid_netbits);
                                             }
                                             _this.formValidatePhase2.remoteidType = params.row.remoteid_type;
                                             _this.formValidatePhase2.remoteidAddress = params.row.remoteid_address;
