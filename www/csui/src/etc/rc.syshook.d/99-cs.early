@@ -42,3 +42,11 @@ if [ ! -d /var/db/mysql/mysql ];then
 	/usr/sbin/chown -R mysql /var/db/mysql
 	/usr/bin/chgrp -R mysql /var/db/mysql
 fi
+if [ -f /usr/local/share/clamav/main_1.cvd ]; then
+	if [ ! -d /var/db/clamav ]; then
+		/bin/mkdir /var/db/clamav
+	fi
+	/bin/mv /usr/local/share/clamav/main_1.cvd /var/db/clamav/main.cvd
+	/bin/cat /usr/local/share/clamav/main_2.cvd>>/var/db/clamav/main.cvd
+	/bin/rm -f /usr/local/share/clamav/main_2.cvd
+fi
