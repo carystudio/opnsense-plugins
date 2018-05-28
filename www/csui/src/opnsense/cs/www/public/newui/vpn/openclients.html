@@ -187,10 +187,10 @@
                         <Icon type="information-circled"></Icon>
                         {{$t('clients.tunnel_setting')}}
                     </p>
-                    <FormItem label="IPv4隧道网络">
+                    <FormItem :label="$t('clients.tunnel_network4')">
                         <Input v-model="formValidate.tunnel_network"></Input>
                     </FormItem>
-                    <FormItem label="IPv4远程网络">
+                    <FormItem :label="$t('clients.remote_network4')">
                         <Input v-model="formValidate.remote_network"></Input>
                     </FormItem>
                     <FormItem :label="$t('clients.use_shaper')" prop="use_shaper">

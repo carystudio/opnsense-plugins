@@ -1422,8 +1422,10 @@ var messages = {
             "bytes_recv":"Bytes Received",
             "link_status":"Status",
             "connection_status":"Connection Status",
+            "msg_sharedkey": "Peer to Peer(Shared Key)",
+            "tunnel_network4":"IPv4 Tunnel Network",
+            "remote_network4":"IPv4 Remote Network",
             "msg1":"Peer to Peer(SSL/TLS)",
-			"msg_sharedkey": "Peer to Peer(Shared Key)",
             "msg2":" none",
             "msg3":" basic",
             "msg4":"Second",
@@ -2853,7 +2855,14 @@ var messages = {
             "RADIUS_501":"IP address or network address parameter is incorrect!",
             "RADIUS_502":"The name parameter is not correct!",
             "RADIUS_503":"The key parameter is not correct!",
-            "RADIUS_504":"The name of the client already exists!"
+            "RADIUS_504":"The name of the client already exists!",
+
+            "ovpnserver":"The port is being used by the OpenVPN server, and the port cannot be deleted.",
+            "ovpnclient":"The port is being used by the OpenVPN client, and the port cannot be deleted.",
+            "ipsec":"IPsec is using this port and cannot delete the port!",
+            "dyndns":"Dynamic DNS is using this port and cannot delete the port!",
+            "wol":"LAN wakeup is using the port and cannot delete the port!",
+            "staticroute":"Static port settings are using this port, and the port cannot be deleted."
         },
         common:{
             "enabled":"Enabled",
@@ -4304,8 +4313,10 @@ var messages = {
             "bytes_recv":"接收字节",
             "link_status":"状态",
             "connection_status":"链接状态",
+            "msg_sharedkey": "端对端（共享密钥）",
+            "tunnel_network4":"IPv4隧道网络",
+            "remote_network4":"IPv4远程网络",
             "msg1":"端对端（SSL/TLS）",
-			"msg_sharedkey": "端对端（共享密钥）",
             "msg2":"没有",
             "msg3":"基础",
             "msg4":"秒",
@@ -5743,8 +5754,14 @@ var messages = {
             "RADIUS_501":"IP地址或网络地址参数不正确！",
             "RADIUS_502":"名称参数不正确！",
             "RADIUS_503":"密钥参数不正确！",
-            "RADIUS_504":"客户端名称已存在！"
+            "RADIUS_504":"客户端名称已存在！",
 
+            "ovpnserver":"OpenVPN服务器正在使用该端口，不能删除该端口！",
+            "ovpnclient":"OpenVPN客户端正在使用该端口，不能删除该端口！",
+            "ipsec":"IPsec正在使用该端口，不能删除该端口！",
+            "dyndns":"动态DNS正在使用该端口，不能删除该端口！",
+            "wol":"局域网唤醒正在使用该端口，不能删除该端口！",
+            "staticroute":"静态路由设置正在使用该端口，不能删除该端口！"
         },
         common:{
             enabled:"启用",
