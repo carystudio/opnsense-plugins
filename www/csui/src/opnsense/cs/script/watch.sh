@@ -9,12 +9,9 @@ do
         mkdir /tmp/watch_tmp/
     fi
     
-    if [ -s "/tmp/watch_tmp/" ];then
-        find /tmp/watch_tmp/ -type f -exec /bin/sh {} \;
-        rm /tmp/watch_tmp/*
-	cd $mypath
-    else
-#	echo "sleep 2s"
-	sleep 2
-    fi
+    for i in `ls /usr/local/opnsense/cs/tmp/watch_tmp`
+    do
+        /bin/sh /usr/local/opnsense/cs/tmp/watch_tmp/$i;
+        /bin/rm -f /usr/local/opnsense/cs/tmp/watch_tmp/$i
+    done
 done

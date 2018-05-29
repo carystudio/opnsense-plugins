@@ -265,7 +265,12 @@
                     cs.loginOut();
                 }
                 if (0 == data.rescode) {
-                    _this.interface = data.data;
+                    _this.interface = new Array();
+                    for(var i in data.data){
+                        if(data.data[i].name.indexOf('lan')==0){
+                            _this.interface.push(data.data[i]);
+                        }
+                    }
                 }
             });
 
