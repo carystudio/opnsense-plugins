@@ -129,11 +129,31 @@
                 lanIp: '',
                 lanNetmask: '',
                 showModel:false,
-                arpColumns: [
+                arpData: [],
+                portfwdData: [],
+                interface:[],
+                radioChecked:''
+            }
+        },
+        computed:{
+            arpColumns:function () {
+                var _this = this;
+                return [
                     {
-                        title: '#',
+                        title: _this.$t("portfwd.select"),
                         key: 'idx',
-                        sortable:true
+                        render: function(h, params) {
+                            return  h("Radio",{
+                                props:{
+                                    value:_this.radioChecked == params.row.idx?true:false
+                                },
+                                nativeOn:{
+                                    click:function () {
+                                        _this.selectTable(params.row);
+                                    }
+                                }
+                            });
+                        }
                     },
                     {
                         title: 'IP',
@@ -145,13 +165,8 @@
                         key: 'mac',
                         sortable:true
                     }
-                ],
-                arpData: [],
-                portfwdData: [],
-                interface:[]
-            }
-        },
-        computed:{
+                ]
+            },
             ruleValidate: function(){
                 var _this = this;
                 return{
@@ -385,6 +400,7 @@
                 });
             },
             selectTable:function (obj) {
+                this.radioChecked = obj.idx;
                 this.ip = obj.ip;
             },
             deleteData:function (obj) {

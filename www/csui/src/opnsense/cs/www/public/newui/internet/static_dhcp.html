@@ -75,7 +75,7 @@
             :title="$t('static_dhcp.modal_title')"
             @on-ok="ok"
             @on-cancel="cancel">
-        <Table highlight-row :loading="arpLoading" :columns="arpColumns" :data="arpData" @on-current-change="selectTable" :no-data-text="$t('common.no_data')"></Table>
+        <Table highlight-row :loading="arpLoading" :columns="arpColumns" @on-current-change="selectTable" :data="arpData" :no-data-text="$t('common.no_data')"></Table>
     </Modal>
     <!-- 这个不能删除，用于底部显示 -->
     <slot name="footer"></slot>
@@ -107,11 +107,33 @@
                 lanIp: '',
                 lanNetmask: '',
                 showModel:false,
-                arpColumns: [
+                arpData: [],
+                staticDhcpData: [],
+                interfaces: [],
+                staticIpTmp:'',
+                staticMacTmp:'',
+                radioChecked:''
+            }
+        },
+        computed:{
+            arpColumns:function () {
+                var _this = this;
+                return [
                     {
-                        title: '#',
+                        title: _this.$t("static_dhcp.select"),
                         key: 'idx',
-                        sortable:true
+                        render: function(h, params) {
+                            return  h("Radio",{
+                                props:{
+                                    value:_this.radioChecked == params.row.idx?true:false
+                                },
+                                nativeOn:{
+                                    click:function () {
+                                        _this.selectTable(params.row);
+                                    }
+                                }
+                            });
+                        }
                     },
                     {
                         title: 'IP',
@@ -123,13 +145,8 @@
                         key: 'mac',
                         sortable:true
                     }
-                ],
-                arpData: [],
-                staticDhcpData: [],
-                interfaces: []
-            }
-        },
-        computed:{
+                ]
+            },
             ruleValidate:function(){
                 var _this = this;
                 return {
@@ -309,12 +326,15 @@
                 });
             },
             ok:function () {
+                this.formValidate.staticIp = this.staticIpTmp;
+                this.formValidate.staticMac = this.staticMacTmp;
             },
             cancel:function () {
             },
             selectTable:function (obj) {
-                this.formValidate.staticIp = obj.ip;
-                this.formValidate.staticMac = obj.mac;
+                this.radioChecked = obj.idx;
+                this.staticIpTmp = obj.ip;
+                this.staticMacTmp = obj.mac;
             },
             submitStatus:function(){
                 var postVar = {};

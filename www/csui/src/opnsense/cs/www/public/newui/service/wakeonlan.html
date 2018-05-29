@@ -128,11 +128,37 @@
                 arpLoading:true,
                 showModel:false,
                 mac:'',
-                arpColumns: [
+                formValidate: {
+                    interface:'wan',
+                    mac:'',
+                    addInterface:'wan',
+                    addMac:'',
+                    addDescr:''
+                },
+                wakeonlanData:[],
+                arpData:[],
+                radioChecked:''
+            }
+        },
+        computed:{
+            arpColumns:function () {
+                var _this = this;
+                return [
                     {
-                        title: '#',
+                        title: _this.$t("wakeonlan.select"),
                         key: 'idx',
-                        sortable:true
+                        render: function(h, params) {
+                            return  h("Radio",{
+                                props:{
+                                    value:_this.radioChecked == params.row.idx?true:false
+                                },
+                                nativeOn:{
+                                    click:function () {
+                                        _this.selectTable(params.row);
+                                    }
+                                }
+                            });
+                        }
                     },
                     {
                         title: 'IP',
@@ -144,19 +170,8 @@
                         key: 'mac',
                         sortable:true
                     }
-                ],
-                formValidate: {
-                    interface:'wan',
-                    mac:'',
-                    addInterface:'wan',
-                    addMac:'',
-                    addDescr:''
-                },
-                wakeonlanData:[],
-                arpData:[]
-            }
-        },
-        computed:{
+                ]
+            },
             ruleValidate:function(){
                 var _this = this;
                 return {
@@ -322,6 +337,7 @@
         },
         methods:{
             selectTable:function (obj) {
+                this.radioChecked = obj.idx;
                 this.mac = obj.mac;
             },
             ok:function () {
