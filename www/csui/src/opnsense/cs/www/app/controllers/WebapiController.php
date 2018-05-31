@@ -501,6 +501,22 @@ class WebapiController extends BaseController
     public function genErrorAction(){
         $errors_zh = ApiError::ERROR_ZH;
         $errors_en = ApiError::ERROR_EN;
+
+        foreach ($errors_zh as $key=>$val){
+            if(!array_key_exists($key,$errors_en)){
+                $errors_en[$key] = $val;
+                echo 'key:'.$key.' value:'.$val."\r\n";
+                echo "Not in English! \r\n";
+            }
+        }
+        foreach ($errors_en as $key=>$val){
+            if(!array_key_exists($key,$errors_zh)){
+                $errors_zh[$key] = $val;
+                echo 'key:'.$key.' value:'.$val."\r\n";
+                echo "Not in Chinese! \r\n";
+            }
+        }
+
         $array_cn_str = '';
         foreach($errors_zh as $var=>$val){
             $array_cn_str.="\t\"$var\":\"$val\",\n";
