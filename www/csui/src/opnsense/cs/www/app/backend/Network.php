@@ -670,43 +670,43 @@ class Network extends Csbackend
         $result = false;
         try {
             if (strpos($data['Interface'], 'lan') !== 0) {
-                throw new AppException('Network_100');
+                throw new AppException('interface_name_error');
             }
 
             if (!is_ipaddr($data['Ip'])) {
-                throw new AppException('Network_101');
+                throw new AppException('ip_error');
             }
             $netmask = Util::maskip2bit($data['Netmask']);
             if (false === $netmask) {
-                throw new AppException('Network_102');
+                throw new AppException('netmask_error');
             }
 
             if ('1' != $data['DhcpSvrEnable'] && '0' != $data['DhcpSvrEnable']) {
-                throw new AppException('Network_103');
+                throw new AppException('dhcp_server_enabled_error');
             }
 
             foreach($config['interfaces'] as $ifname=>$if_info){//检查是否全部lan接口的网口绑定参数都有
                 if(strpos($if_info['descr'], 'lan') === 0){
                     if((!isset($data['member'][$if_info['descr']]))){
-                        throw new AppException('Network_107');
+                        throw new AppException('lan_interface_no_exist');
                     }
                 }
             }
             $availe_nics = array_keys(self::getAvailableNic('lan'));
             foreach($data['member'] as $inf=>$members){//更新LAN接口绑定的网卡
                 if(!is_array($members) || count($members)<=0){
-                    throw new AppException('Network_108');
+                    throw new AppException('lan_interface_least');
                 }
                 if(array_diff($members, $availe_nics)){//网口不是可用的
-                    throw new AppException('Network_108');
+                    throw new AppException('netport_unavailable');
                 }
                 if(!self::setLanMember($inf, $members)){//更新接口网桥的网口
-                    throw new AppException('Network_109');
+                    throw new AppException('update_interface_fail');
                 }
                 $availe_nics = array_diff($availe_nics, $members);
             }
             if(count($data['Nic']) != count($data['member'][$data['Interface']]) || array_diff($data['Nic'], $data['member'][$data['Interface']])){//网口不是可用的
-                throw new AppException('Network_110');
+                throw new AppException('netport_unavailable');
             }
 
 
@@ -736,10 +736,10 @@ class Network extends Csbackend
 
                     if ('1' == $data['DhcpSvrEnable']) {
                         if (!is_ipaddr($data['DhcpStart'])) {
-                            throw new AppException('Network_104');
+                            throw new AppException('dhcp_pool_start_ip_error');
                         }
                         if (!is_ipaddr($data['DhcpEnd'])) {
-                            throw new AppException('Network_105');
+                            throw new AppException('dhcp_pool_end_ip_error');
                         }
                         if (300 > intval($data['DhcpReleaseTime'])) {
                             $data['DhcpReleaseTime'] = 86400;
@@ -753,10 +753,10 @@ class Network extends Csbackend
                 }
             }
             if(!$seted){
-                throw new AppException('Network_106');
+                throw new AppException('interface_no_exist');
             }
             if(!self::checkSubnet($ifname, $data['Ip'], $netmask)){
-                throw new AppException('Network_107');
+                throw new AppException('lan_interface_no_exist');
             }
             self::setup_lan_subnet_alias();
             $dnsmasq_restart = false;
@@ -987,44 +987,44 @@ class Network extends Csbackend
         $result = false;
         try {
             if ('lan' != $data['Interface']) {
-                throw new AppException('Network_800');
+                throw new AppException('lan_interface_param_error');
             }
 
             if (!is_ipaddr($data['Ip'])) {
-                throw new AppException('Network_801');
+                throw new AppException('ip_param_error');
             }
             $netmask = Util::maskip2bit($data['Netmask']);
             if (false === $netmask) {
-                throw new AppException('Network_802');
+                throw new AppException('netmask_param_error');
             }
             if(!self::checkSubnet('', $data['Ip'], $netmask)){
-                throw new AppException('Network_810');
+                throw new AppException('netmask_error');
             }
             if ('1' != $data['DhcpSvrEnable'] && '0' != $data['DhcpSvrEnable']) {
-                throw new AppException('Network_803');
+                throw new AppException('dhcp_server_error');
             }
             $bridgeif = self::getNewBridgeName();
             if(!$bridgeif){
-                throw new AppException('Network_804');
+                throw new AppException('lans_param_error');
             }
             if(!isset($data['member']) || !is_array($data['member'])){
-                throw new AppException('Network_805');
+                throw new AppException('bind_lan_error');
             }
             $availe_nics = array_keys(self::getAvailableNic('lan'));
             foreach($data['member'] as $inf=>$members){//更新LAN接口绑定的网卡
                 if(!is_array($members)){
-                    throw new AppException('Network_805');
+                    throw new AppException('bind_lan_error');
                 }
                 if(array_diff($members, $availe_nics)){
-                    throw new AppException('Network_805');
+                    throw new AppException('bind_lan_error');
                 }
                 if(!self::setLanMember($inf, $members)){
-                    throw new AppException('Network_806');
+                    throw new AppException('bind_lan_error');
                 }
                 $availe_nics = array_diff($availe_nics, $members);
             }
             if(array_diff($data['Nic'], $availe_nics)){
-                throw new AppException('Network_807');
+                throw new AppException('bind_lan_error');
             }
             $if_members = array();
             foreach($config['interfaces'] as $if_name=>$if_info){
@@ -1064,10 +1064,10 @@ class Network extends Csbackend
             $config['interfaces'][$infidx] = $lan;
             if ('1' == $data['DhcpSvrEnable']) {
                 if (!is_ipaddr($data['DhcpStart'])) {
-                    throw new AppException('Network_808');
+                    throw new AppException('dhcp_startip_param_error');
                 }
                 if (!is_ipaddr($data['DhcpEnd'])) {
-                    throw new AppException('Network_809');
+                    throw new AppException('dhcp_endip_param_error');
                 }
                 if (300 > intval($data['DhcpReleaseTime'])) {
                     $data['DhcpReleaseTime'] = 86400;
@@ -1118,21 +1118,21 @@ class Network extends Csbackend
             $nic = $data['Nic'];
             $if = $data['Interface'];
             if('wan' != $if){
-                throw new AppException('Network_300');
+                throw new AppException('interface_error');
             }
             $nic_list = self::getAvailableNic();
             if(!isset($nic_list[$nic])){
-                throw new AppException('Network_301');
+                throw new AppException('netcard_unavailable');
             }
             $inf = self::getNewInterfaceName($if);
             if(''==$inf){
-                throw new AppException('Network_302');
+                throw new AppException('get_interface_fail');
             }
 			$ifname = '';
             foreach($config['interfaces'] as $ifname_tmp=>$ifinfo){
                 if($ifinfo['if'] == $nic){
                     if($ifinfo['if'] != $ifinfo['descr']){
-                        throw new AppException('Network_305');
+                        throw new AppException('interface_error');
                     }
                     $ifname = $ifname_tmp;
                     break;
@@ -1141,7 +1141,7 @@ class Network extends Csbackend
             if(empty($ifname)){
                 $ifname = self::getNewIfidx();
                 if(''==$ifname){
-                    throw new AppException('Network_303');
+                    throw new AppException('get_ident_fail');
                 }
             }
             $updated_bridges = array();
@@ -1150,7 +1150,7 @@ class Network extends Csbackend
                 if(array_search($ifname, $lan_ifs) !== false) {//接口在这个桥里
                     $lan_ifs = array_diff($lan_ifs, array($ifname));//把接口从这个桥删除
                     if(count($lan_ifs)<1){
-                        throw new AppException('Network_304');
+                        throw new AppException('netport_unavailable');
                     }
                     $config['bridges']['bridged'][$bridge_idx]['members'] = implode(',', $lan_ifs);
                     $updated_bridges[] = $config['bridges']['bridged'][$bridge_idx];
@@ -1310,23 +1310,23 @@ class Network extends Csbackend
             }
             $is_wan = strpos($if, 'wan')===0;
             if(empty($ifname)){
-                throw new AppException('Network_700');
+                throw new AppException('net_interface_no_exist');
             }
             $inf_used = self::isInterfaceUsed($ifname);
             if(false !== $inf_used){
                 throw new AppException($inf_used);
             }
             if (link_interface_to_group($ifname)) {
-                throw new AppException('Network_701');
+                throw new AppException('net_interface_group');
                 $input_errors[] = gettext("The interface is part of a group. Please remove it from the group to continue");
             } else if (link_interface_to_bridge($ifname)) {
-                throw new AppException('Network_702');
+                throw new AppException('net_interface_bridge');
                 $input_errors[] = gettext("The interface is part of a bridge. Please remove it from the bridge to continue");
             } else if (link_interface_to_gre($ifname)) {
-                throw new AppException('Network_703');
+                throw new AppException('net_interface_gre');
                 $input_errors[] = gettext("The interface is part of a gre tunnel. Please delete the tunnel to continue");
             } else if (link_interface_to_gif($ifname)) {
-                throw new AppException('Network_704');
+                throw new AppException('net_interface_gif');
                 $input_errors[] = gettext("The interface is part of a gif tunnel. Please delete the tunnel to continue");
             } else {
                 unset($config['interfaces'][$ifname]['enable']);
@@ -1344,12 +1344,12 @@ class Network extends Csbackend
                         }
                     }
                     if('pppoe'!=$config['interfaces'][$ifname]['ipaddr'] && $config['interfaces'][$ifname]['if'] != $nic){
-                        throw new AppException('Network_705');
+                        throw new AppException('net_card_error');
                     }else if('pppoe' == $config['interfaces'][$ifname]['ipaddr']){
                         if(isset($config['ppps']['ppp']) && is_array($config['ppps']['ppp'])){
                             foreach($config['ppps']['ppp'] as $idx=>$ppp){
                                 if($ppp['if'] == $config['interfaces'][$ifname]['if'] && $ppp['ports']!=$nic){
-                                    throw new AppException('Network_705');
+                                    throw new AppException('net_card_error');
                                 }else if($ppp['if'] == $config['interfaces'][$ifname]['if'] && $ppp['ports']==$nic){
                                     unset($config['ppps']['ppp'][$idx]);
                                 }
@@ -1604,7 +1604,7 @@ class Network extends Csbackend
                 }
             }
             if(empty($ifname)){
-                throw new AppException('Network_200');
+                throw new AppException('interface_no_exist');
             }
             $old_wan = $config['interfaces'][$ifname];
             $old_wan['ppps'] = $config['ppps'];
@@ -1613,17 +1613,17 @@ class Network extends Csbackend
                     foreach($config['ppps']['ppp'] as $ppp){
                         if($ppp['if'] == $old_wan['if']){
                             if($ppp['ports']!=$data['Nic']){
-                                throw new AppException('Network_201');
+                                throw new AppException('network_card_error');
                             }
                         }
                     }
                 }
             }else if($old_wan['if'] != $data['Nic']){
-                throw new AppException('Network_201');
+                throw new AppException('network_card_error');
             }
 
             if(strpos($data['Interface'], 'wan')!==0){
-                throw new AppException('Network_202');
+                throw new AppException('interface_name_error');
             }
 
             $mtu = intval($data['Mtu']);
@@ -1631,19 +1631,19 @@ class Network extends Csbackend
                 $mtu=1480;
             }
             if(!is_ipaddr($data['Dns'])){
-                throw new AppException('Network_203');
+                throw new AppException('dns1_error');
             }
             $weight = intval($data['Weight']);
             $tier = intval($data['Tier']);
             if($weight<1 || $weight>4){
-                throw new AppException('Network_210');
+                throw new AppException('weight_error');
             }
             if($tier<1 || $tier>4){
-                throw new AppException('Network_211');
+                throw new AppException('priority_error');
             }
             if(strlen($data['Monitor'])>0){
                 if(!is_ipaddr($data['Monitor'])) {
-                    throw new AppException('Network_204');
+                    throw new AppException('monitor_ip_error');
                 }
                 $monitor = $data['Monitor'];
             }else{
@@ -1651,7 +1651,7 @@ class Network extends Csbackend
             }
 			if(isset($data['MacClone']) && !empty($data['MacClone'])){
                 if(!is_macaddr($data['MacClone'])){
-                    throw new AppException('Network_213');
+                    throw new AppException('clonemac_error');
                 }
             }else{
                 $data['MacClone'] = '';
@@ -1697,13 +1697,13 @@ class Network extends Csbackend
             }else if('static'==$data['Protocol']){
                 $data['AutoDns'] = '0';
                 if(!is_ipaddr($data['Ip'])){
-                    throw new AppException('Network_205');
+                    throw new AppException('ip_error');
                 }
                 if(!is_ipaddr($data['Netmask'])){
-                    throw new AppException('Network_206');
+                    throw new AppException('netmask_error');
                 }
                 if(!is_ipaddr($data['Gateway'])){
-                    throw new AppException('Network_207');
+                    throw new AppException('gateway_error');
                 }
                 $wan['if'] = $data['Nic'];
                 $wan['enable'] = '1';
@@ -1722,7 +1722,7 @@ class Network extends Csbackend
                 }
             }else if('pppoe'==$data['Protocol']){
                 if(strlen($data['Username'])==0 || strlen($data['Password'])==0){
-                    throw new AppException('Network_208');
+                    throw new AppException('name_and_pwd_no_empty');
                 }
                 if('pppoe' == $old_wan['ipaddr']){
                     $wan['if'] = $old_wan['if'];
@@ -1744,7 +1744,7 @@ class Network extends Csbackend
                     $destroy = true;
                 }
             }else{
-                throw new AppException('Network_209');
+                throw new AppException('connect_mode_error');
             }
 
 
@@ -1767,7 +1767,7 @@ class Network extends Csbackend
                     $setdns = true;
                 }else{
                     if($config['system']['dnsserver'][$i] == $data['Dns']){
-                        throw new AppException('Network_212');
+                        throw new AppException('wan_specify_dns_error');
                     }
                 }
             }
@@ -1858,16 +1858,16 @@ class Network extends Csbackend
         $result = 0;
         try{
             if(!is_macaddr($data['Mac'])){
-                throw new AppException('Network_400');
+                throw new AppException('mac_error');
             }
             if(!is_ipaddr($data['Ip'])){
-                throw new AppException('Network_401');
+                throw new AppException('ip_error');
             }
             if(!isset($config['interfaces'][$data['Interface']])){
-                throw new AppException('Network_402');
+                throw new AppException('note_no_empty');
             }
 //            if(!isset($data['Descr']) || strlen($data['Descr'])==0){
-//                throw new AppException('Network_402');
+//                throw new AppException('note_no_empty');
 //            }
 
             $netMask = 32 - intval($config['interfaces'][$data['Interface']]['subnet']);
@@ -1877,16 +1877,16 @@ class Network extends Csbackend
             $lan_net = ($lanIp>>$netMask)<<$netMask;
 
             if($ip_net != $lan_net){
-                throw new AppException('Network_405');
+                throw new AppException('no_same_segment');
             }
 
             if ($config['dhcpd']['lan']['staticmap']){
                 foreach($config['dhcpd']['lan']['staticmap'] as $macip){
                     if($data['Mac'] == $macip['mac']){
-                        throw new AppException('Network_403');
+                        throw new AppException('mac_add_rule');
                     }
                     if($data['Ip'] == $macip['ipaddr']){
-                        throw new AppException('Network_404');
+                        throw new AppException('ip_add_rule');
                     }
                 }
             }
@@ -1908,7 +1908,7 @@ class Network extends Csbackend
         $result = 0;
         try{
             if (!is_array($data) || count($data)<=0) {
-                throw new AppException('Network_400');
+                throw new AppException('mac_error');
             }
             foreach($data as $staticDhcp){
                 foreach($config['dhcpd'][$staticDhcp['InterfaceName']]['staticmap'] as $idx=>$map){
@@ -1979,21 +1979,21 @@ class Network extends Csbackend
                 }
             }
             if(!$ifexist){
-                throw new AppException('Network_500');
+                throw new AppException('interface_name_error');
             }
 
             if(!is_ipaddr($data['Ip'])){
-                throw new AppException('Network_205');
+                throw new AppException('ip_error');
             }
             if(!is_ipaddr($data['Netmask'])){
-                throw new AppException('Network_206');
+                throw new AppException('netmask_error');
             }
             $netmask = Util::maskip2bit($data['Netmask']);
             if(false === $netmask){
-                throw new AppException('Network_206');
+                throw new AppException('netmask_error');
             }
             if(!is_ipaddr($data['Gateway'])){
-                throw new AppException('Network_207');
+                throw new AppException('gateway_error');
             }
             if(is_ipaddr($config['interfaces'][$ifname]['ipaddr'])){
                 $inf_net = $config['interfaces'][$ifname]['ipaddr'].'/'.$config['interfaces'][$ifname]['subnet'];
@@ -2003,16 +2003,16 @@ class Network extends Csbackend
             }
             $subnet = $data['Ip'].'/'.$netmask;
             if(!ip_in_subnet($data['Gateway'], $inf_net)){
-                throw new AppException('Network_501');
+                throw new AppException('gw_no_in_segment');
             }
 
             if(!isset($data['Descr']) || strlen($data['Descr'])==0){
-                throw new AppException('Network_502');
+                throw new AppException('static_route_no_empty');
             }
             if(isset($config['staticroutes'])&&isset($config['staticroutes']['route'])&&is_array($config['staticroutes']['route'])){
                 foreach($config['staticroutes']['route'] as $a_route){
                     if($a_route['network'] == $subnet){
-                        throw new AppException('Network_503');
+                        throw new AppException('static_route_exist');
                     }
                 }
             }else{
@@ -2094,22 +2094,22 @@ class Network extends Csbackend
                 }
             }
             if(empty($ifname)){
-                throw new AppException('Network_600');
+                throw new AppException('interface_no_exist');
             }
             if(!is_ipaddr($data['Ip'])){
-                throw new AppException('Network_205');
+                throw new AppException('ip_error');
             }
             if(!is_ipaddr($data['Netmask'])){
-                throw new AppException('Network_206');
+                throw new AppException('netmask_error');
             }
             $netmask = Util::maskip2bit($data['Netmask']);
             if(false === $netmask){
-                throw new AppException('Network_206');
+                throw new AppException('netmask_error');
             }
 
             if(!isset($config['staticroutes']) || !is_array($config['staticroutes']) ||
                 !isset($config['staticroutes']['route']) || !is_array($config['staticroutes']['route'])) {
-                throw new AppException('Network_601');
+                throw new AppException('static_route_no_exist');
             }
             $subnet=$data['Ip'].'/'.$netmask;
             $deleted = false;
@@ -2122,7 +2122,7 @@ class Network extends Csbackend
                 }
             }
             if(false === $deleted){
-                throw new AppException('Network_601');
+                throw new AppException('static_route_no_exist');
             }
             if(!empty($gatewayname)){
                 $gateway_useless = true;

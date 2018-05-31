@@ -216,13 +216,13 @@ class System extends Csbackend
 
         try{
             if(!is_numeric($data['Time']) || strlen($data['Time'])!=12|| '2'!=$data['Time'][0]){
-                throw new AppException('System_100');
+                throw new AppException('time_error');
             }
             if(!$data['timezone']){
-                throw new AppException('System_101');
+                throw new AppException('select_time_zone');
             }
             if(!$data['ntpServer']){
-                throw new AppException('System_102');
+                throw new AppException('enter_ntp_server');
             }
             $ntpServer = str_replace('*',' ',$data['ntpServer']);
             $config['system']['timeservers'] = trim($ntpServer);
@@ -306,7 +306,7 @@ class System extends Csbackend
         $result = 0;
         try{
             if(!file_exists('/tmp/file_config.conf')){
-                throw new AppException('System_300');
+                throw new AppException('conf_file_no_exist');
             }
 
             $filecontent = file_get_contents('/tmp/file_config.conf');
@@ -401,19 +401,19 @@ class System extends Csbackend
                 $month = isset($data['TimeMonth'])&&strlen($data['TimeMonth'])>0?intval($data['TimeMonth']):'*';
                 $week = isset($data['TimeWeek'])&&strlen($data['TimeWeek'])>0?intval($data['TimeWeek']):'*';
                 if('*'!=$min && ($min<0 || $min>59)){
-                    throw new AppException('System_200');
+                    throw new AppException('min_error');
                 }
                 if('*'!=$hour && ($hour<0 || $hour>23)){
-                    throw new AppException('System_201');
+                    throw new AppException('hour_error');
                 }
                 if('*'!=$date && ($date<1 || $date>31)){
-                    throw new AppException('System_202');
+                    throw new AppException('day_error');
                 }
                 if('*'!=$month && ($month<1 || $month>12)){
-                    throw new AppException('System_203');
+                    throw new AppException('month_error');
                 }
                 if('*'!=$week && ($week<0 || $week>6)){
-                    throw new AppException('System_204');
+                    throw new AppException('week_error');
                 }
                 $newjob = array();
                 $newjob['@attributes'] = Array('uuid'=> 'ebc6e274-6f04-4e1a-a39b-c6fdb6799c04');

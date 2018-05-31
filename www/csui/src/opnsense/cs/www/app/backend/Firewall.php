@@ -81,15 +81,15 @@ class Firewall extends Csbackend
         $result = 0;
         try{
             if(!in_array($data['Protocol'], self::$PROTOCOL)){
-                throw new AppException('Firewall_101');
+                throw new AppException('protocol_error');
             }
             if(!isset($data['Ip']) || !is_ipaddr($data['Ip'])){
-                throw new AppException('Firewall_102');
+                throw new AppException('ip_error');
             }
             $port_start = intval($data['PortStart']);
             $port_end = intval($data['PortEnd']);
             if($port_start<1 || $port_end>65535 || $port_end<$port_start){
-                throw new AppException('Firewall_103');
+                throw new AppException('port_error');
             }
             $oldrules = $config['filter']['rule'];
             $passrule = array();
@@ -131,7 +131,7 @@ class Firewall extends Csbackend
                         $a_rule['destination']['any'] == $rule['destination']['any'] &&
                         $a_rule['destination']['port'] == $rule['destination']['port'])
                     )){
-                    throw new AppException('Firewall_104');
+                    throw new AppException('rule_exist');
                 }
             }
             $config['filter']['rule'][] = $rule;
@@ -164,7 +164,7 @@ class Firewall extends Csbackend
                 }
             }
             if(!$deleted){
-                throw new AppException('Firewall_200');
+                throw new AppException('rule_no_exist');
             }
             self::apply();
         }catch(AppException $aex){
@@ -209,7 +209,7 @@ class Firewall extends Csbackend
         $result = 0;
         try{
             if(!isset($data['Interface'])){
-                throw new AppException('Firewall_300');
+                throw new AppException('interface_no_exist');
             }else {
                 $exist = false;
                 foreach($config['interfaces'] as $ifname=>$ifinfo){
@@ -219,22 +219,22 @@ class Firewall extends Csbackend
                     }
                 }
                 if(!$exist){
-                    throw new AppException('Firewall_300');
+                    throw new AppException('interface_no_exist');
                 }
             }
             if(!isset($data['Protocol']) || !in_array($data['Protocol'], self::$PROTOCOL)){
-                throw new AppException('Firewall_101');
+                throw new AppException('protocol_error');
             }
             $local_port = intval($data['LocalPort']);
             if($local_port>65536 || $local_port<1){
-                throw new AppException('Firewall_103');
+                throw new AppException('port_error');
             }
             if(!isset($data['RemoteIp']) || !is_ipaddr($data['RemoteIp'])){
-                throw new AppException('Firewall_301');
+                throw new AppException('forward_ip_error');
             }
             $remote_port = intval($data['RemotePort']);
             if($remote_port>65536 || $remote_port<1){
-                throw new AppException('Firewall_302');
+                throw new AppException('forward_port_error');
             }
             $natrule = array();
             $natrule['protocol'] = $data['Protocol'];
@@ -259,7 +259,7 @@ class Firewall extends Csbackend
                     $a_rule['local-port'] == $natrule['local-port'] &&
                     $a_rule['destination']['network'] == $natrule['destination']['network'] &&
                     $a_rule['destination']['port'] == $natrule['destination']['port']){
-                    throw new AppException('Firewall_303');
+                    throw new AppException('rule_exist');
                 }
             }
             $config['nat']['rule'][] = $natrule;
@@ -287,7 +287,7 @@ class Firewall extends Csbackend
                 }
             }
             if(!$deleted){
-                throw new AppException('Firewall_400');
+                throw new AppException('rule_no_exist');
             }
             self::apply();
         }catch(AppException $aex){
@@ -431,10 +431,10 @@ class Firewall extends Csbackend
             $webport = intval($data['Web']);
             $sshport = intval($data['Ssh']);
             if($webport<0 || $webport>65535){
-                throw new AppException('Firewall_500');
+                throw new AppException('web_port_error');
             }
             if($sshport<0 || $sshport>65535){
-                throw new AppException('Firewall_501');
+                throw new AppException('ssh_port_error');
             }
             self::initRemoteWeb($webport);
             self::initRemoteSsh($sshport);

@@ -499,19 +499,26 @@ class WebapiController extends BaseController
     }
 
     public function genErrorAction(){
-        $backends = array('Dns','Firewall','Firmware','L2tp','Network','Portal','Pptpd','Qos','System','User');
-        $array_str = "var data_msg_json = {\n";
-        foreach($backends as $backend){
-            $errors = $backend::getErrors();
-            foreach($errors as $var=>$val){
-                $array_str.="\t'$var':'$val',\n";
-            }
+        $errors_zh = ApiError::ERROR_ZH;
+        $errors_en = ApiError::ERROR_EN;
+        $array_cn_str = '';
+        foreach($errors_zh as $var=>$val){
+            $array_cn_str.="\t\"$var\":\"$val\",\n";
         }
-        $array_str.="}";
-        $specjs_path = APP_PATH.'public/js/spec.js';
+        $array_en_str = '';
+        foreach($errors_en as $var=>$val){
+            $array_en_str.="\t\"$var\":\"$val\",\n";
+        }
+        $specjs_path = APP_PATH.'public/newui/static/js/spec.js';
+        if(!file_exists($specjs_path)){
+            exec("/usr/bin/touch ".$specjs_path);
+        }
         $specjs_content = file_get_contents($specjs_path.'.tpl');
-        $specjs_content = str_replace('//{data_msg_json}',$array_str, $specjs_content);
+        $lanArr = array("//{messages_en}","//{messages_cn}");
+        $valArr = array($array_en_str,$array_cn_str);
+        $specjs_content = str_replace($lanArr,$valArr, $specjs_content);
         $res = file_put_contents($specjs_path,$specjs_content);
+        
         if($res){
             echo 'Gen Successfully!';
         }else{

@@ -402,67 +402,67 @@ class Openvpn extends Csbackend
                 $fieldname = trim($fieldname);
                 if(!in_array($fieldname, $fields)){
                     echo $fieldname;
-                    throw new AppException('OVPN_1');
+                    throw new AppException('params_error');
                 }
             }
             if (isset($data['disable'])){
                 if('yes' != $data['disable']) {
-                    throw new AppException('OVPN_200');
+                    throw new AppException('enabled_param_error');
                 }
             }
             if (!in_array($data['mode'], self::CLIENT_MODE)) {
-                throw new AppException('OVPN_201');
+                throw new AppException('server_mode_error');
             }
             if (!in_array($data['protocol'], array('TCP', 'UDP'))) {
-                throw new AppException('OVPN_202');
+                throw new AppException('protocol_param_error');
             }
             if (!in_array($data['dev_mode'], array('tun', 'tap'))) {
-                throw new AppException('OVPN_203');
+                throw new AppException('device_mode_error');
             }
             if(!isset($config['interfaces'][$data['interface']])){
-                throw new AppException('OVPN_204');
+                throw new AppException('interface_param_error');
             }
             if(empty($data['server_addr'])){
-                throw new AppException('OVPN_205');
+                throw new AppException('remote_server_addr_no_empty');
             }
             $data['server_port'] = intval($data['server_port']);
             if($data['server_port']>65535 || $data['server_port']<1){
-                throw new AppException('OVPN_206');
+                throw new AppException('remote_server_port_error');
             }
             if(isset($data['resolve_retry']) && 'yes' != $data['resolve_retry']){
-                throw new AppException('OVPN_207');
+                throw new AppException('retry_dns_error');
             }
             if(isset($data['proxy_addr']) && !empty($data['proxy_addr'])){
                 if(!isset($data['proxy_port'])){
-                    throw new AppException('OVPN_208');
+                    throw new AppException('proxy_port_error');
                 }
                 $data['proxy_port'] = intval($data['proxy_port']);
                 if($data['proxy_port']>65535 || $data['proxy_port']<1){
-                    throw new AppException('OVPN_208');
+                    throw new AppException('proxy_port_error');
                 }
             }else if(!empty($data['proxy_port'])){
-                throw new AppException('OVPN_208');
+                throw new AppException('proxy_port_error');
             }
             if(!in_array($data['proxy_authtype'], Openvpn::PROXY_AUTHTYPE)){
-                throw new AppException('OVPN_209');
+                throw new AppException('proxy_auth_error');
             }
             if('none' != $data['proxy_authtype'] && (empty($data['proxy_user']) || empty($data['proxy_passwd']))){
-                throw new AppException('OVPN_210');
+                throw new AppException('username_pwd_no_empty');
             }
             if(isset($data['local_port']) && !empty($data['local_port'])){
                 $data['local_port'] = intval($data['local_port']);
                 if($data['local_port']>65535 || $data['local_port']<1){
-                    throw new AppException('OVPN_211');
+                    throw new AppException('local_port_range_1_65535');
                 }
             }
 
             if('p2p_shared_key'!=$data['mode']){
                 if(!is_numeric($data['reneg-sec'])){
-                    throw new AppException('OVPN_212');
+                    throw new AppException('renegotiate_param_error');
                 }else{
                     $data['reneg-sec'] = intval($data['reneg-sec']);
                     if($data['reneg-sec']<0){
-                        throw new AppException('OVPN_212');
+                        throw new AppException('renegotiate_param_error');
                     }
                 }
             }else if(isset($data['reneg-sec'])){
@@ -471,82 +471,82 @@ class Openvpn extends Csbackend
 
             if('p2p_tls' == $data['mode']){
                 if(empty($data['ca'])){
-                    throw new AppException('OVPN_213');
+                    throw new AppException('certificate_auth_error');
                 }
                 $ca = base64_decode($data['ca']);
                 if(!$ca || !strstr($ca, "BEGIN CERTIFICATE") || !strstr($ca, "END CERTIFICATE")){
-                    throw new AppException('OVPN_213');
+                    throw new AppException('certificate_auth_error');
                 }
                 if(empty($data['cert'])){
-                    throw new AppException('OVPN_214');
+                    throw new AppException('client_ca_error');
                 }
                 $cert = base64_decode($data['cert']);
                 if(!$cert || empty($cert) || !strstr($cert, "BEGIN CERTIFICATE") || !strstr($cert, "END CERTIFICATE")){
-                    throw new AppException('OVPN_214');
+                    throw new AppException('client_ca_error');
                 }
                 if(empty($data['prv'])){
-                    throw new AppException('OVPN_215');
+                    throw new AppException('private_key_data_error');
                 }
                 $prv = base64_decode($data['prv']);
                 if(empty($prv) || !strstr($prv, "BEGIN PRIVATE KEY") || !strstr($prv, "END PRIVATE KEY")){
-                    throw new AppException('OVPN_215');
+                    throw new AppException('private_key_data_error');
                 }
                 $ca_subject = cert_get_subject($ca, false);
                 $subject = cert_get_subject($cert, false);
                 $issuer = cert_get_issuer($cert, false);
                 if($ca_subject != $issuer){
-                    throw new AppException('OVPN_216');
+                    throw new AppException('peer_certificate_auth_error');
                 }
             }else {
                 if(empty($data['shared_key'])){
-                    throw new AppException('OVPN_217');
+                    throw new AppException('pre_share_key_no_empty');
                 }
             }
 
             $cipherlist = self::getCipherlist();
             if (!isset($cipherlist[$data['crypto']])) {
-                throw new AppException('OVPN_218');
+                throw new AppException('encryp_algorithm_error');
             }
             $digestlist = self::getDigestlist();
             if (!isset($digestlist[$data['digest']])) {
-                throw new AppException('OVPN_219');
+                throw new AppException('Certification_algorithm_error');
             }
             $engines = self::getEnginelist();
             if ('none'!=$data['engine'] && !isset($engines[$data['engine']])) {
-                throw new AppException('OVPN_220');
+                throw new AppException('hardware_encryption_error');
             }
             if(isset($data['use_shaper']) &&!empty($data['use_shaper'])){
                 if(!is_numeric($data['use_shaper'])){
-                    throw new AppException('OVPN_221');
+                    throw new AppException('hard_out_limit_error');
                 }else{
                     $data['use_shaper'] = intval($data['use_shaper']);
                     if($data['use_shaper']<100 || $data['use_shaper']>104857600){
-                        throw new AppException('OVPN_221');
+                        throw new AppException('hard_out_limit_error');
                     }
                 }
             }
 
             if(!isset($openvpn_compression_modes[$data['compression']])){
-                throw new AppException('OVPN_222');
+                throw new AppException('compressed_error');
             }
             if (isset($data['passtos'])){
                 if('yes' != $data['passtos']) {
-                    throw new AppException('OVPN_223');
+                    throw new AppException('server_type_param_error');
                 }
             }
             if (isset($data['route_no_pull'])){
                 if('yes' != $data['route_no_pull']) {
-                    throw new AppException('OVPN_224');
+                    throw new AppException('withdraw_route_error');
                 }
             }
             if (isset($data['route_no_exec'])){
                 if('yes' != $data['route_no_exec']) {
-                    throw new AppException('OVPN_225');
+                    throw new AppException('add_or_remove_error');
                 }
             }
             $data['verbosity_level'] = intval($data['verbosity_level']);
             if(!isset($openvpn_verbosity_level[$data['verbosity_level']])){
-                throw new AppException('OVPN_118');
+                throw new AppException('redundancy_level_error');
             }
             $data['vpnid'] = Openvpn::VPNID_CLIENT;
             $data['description'] = 'openvpnclient1';
@@ -622,44 +622,44 @@ class Openvpn extends Csbackend
             foreach ($data as $fieldname=>$fieldval) {
                 $fieldname = trim($fieldname);
                 if(!in_array($fieldname, $fields)){
-                    throw new AppException('OVPN_1');
+                    throw new AppException('params_error');
                 }
             }
             if (isset($data['disable'])){
                 if('yes' != $data['disable']) {
-                    throw new AppException('OVPN_100');
+                    throw new AppException('enabled_param_error');
                 }
             }
             if('yes'!=$data['disable']){
                 unset($data['disable']);
             }
             if (!in_array($data['mode'], Openvpn::SERVER_MODE)) {
-                throw new AppException('OVPN_101');
+                throw new AppException('server_mode_error');
             }
             if (!in_array($data['protocol'], array('TCP', 'UDP'))) {
-                throw new AppException('OVPN_102');
+                throw new AppException('protocol_param_error');
             }
             $data['local_port'] = intval($data['local_port']);
             if ($data['local_port']>65535 || $data['local_port']<=0) {
-                throw new AppException('OVPN_103');
+                throw new AppException('port_range_1_65535');
             }
             if (!in_array($data['dev_mode'], array('tun', 'tap'))) {
-                throw new AppException('OVPN_104');
+                throw new AppException('device_mode_error');
             }
             $cipherlist = self::getCipherlist();
             if (!isset($cipherlist[$data['crypto']])) {
-                throw new AppException('OVPN_105');
+                throw new AppException('encryption_algorithm_error');
             }
             if(!isset($config['interfaces'][$data['interface']])){
-                throw new AppException('OVPN_106');
+                throw new AppException('interface_param_error');
             }
             if('p2p_shared_key'!=$data['mode']){
                 if(!in_array($data['dh_length'], array(1024, 2048, 4096))){
-                    throw new AppException('OVPN_107');
+                    throw new AppException('dh_length_error');
                 }
                 $data['cert_depth'] = intval($data['cert_depth']);
                 if($data['cert_depth']>5 || $data['cert_depth']<1){
-                    throw new AppException('OVPN_110');
+                    throw new AppException('certificate_depth_error');
                 }
             }else{
                 if(isset($data['dh_length'])){
@@ -671,31 +671,31 @@ class Openvpn extends Csbackend
             }
             $digestlist = self::getDigestlist();
             if (!isset($digestlist[$data['digest']])) {
-                throw new AppException('OVPN_108');
+                throw new AppException('certification_algorithm_error');
             }
             $engines = openvpn_get_engines();
             if ('none'!=$data['engine'] && !in_array($data['engine'], $engines)) {
-                throw new AppException('OVPN_109');
+                throw new AppException('hardware_encryption_error');
             }
 
             if(!empty($data['tunnel_network']) && !Util::checkCidr($data['tunnel_network'], false, 'ipv4')){
-                throw new AppException('OVPN_111');
+                throw new AppException('network_tunnelv4_error');
             }
             $data['tunnel_networkv6'] = '';
             if(!empty($data['local_network']) && !Util::checkCidr($data['local_network'], true, 'ipv4')){
-                throw new AppException('OVPN_112');
+                throw new AppException('local_networkv4_error');
             }
             $data['local_networkv6'] = '';
             if(!empty($data['remote_network']) && !Util::checkCidr($data['remote_network'], true, 'ipv4')){
-                throw new AppException('OVPN_113');
+                throw new AppException('remote_networkv4_error');
             }
             $data['remote_networkv6'] = '';
             $data['maxclients'] = intval($data['maxclients']);
             if($data['maxclients']<1 || $data['maxclients']>1024){
-                throw new AppException('OVPN_114');
+                throw new AppException('concurrent_range_1_1024');
             }
             if(!isset($openvpn_compression_modes[$data['compression']])){
-                throw new AppException('OVPN_115');
+                throw new AppException('compressed_error');
             }
             if(isset($data['client2client']) && 'yes'==$data['client2client']){
                 $data['client2client'] = 'yes';
@@ -740,7 +740,7 @@ class Openvpn extends Csbackend
                     }
                 }else if(!is_ipaddr($data['dns_server'.$i])){
                     echo $data['dns_server'.$i];
-                    throw new AppException('OVPN_116');
+                    throw new AppException('dns_server_error');
                 }
             }
             if(isset($data['push_register_dns']) && 'yes'==$data['push_register_dns']){
@@ -753,19 +753,19 @@ class Openvpn extends Csbackend
                 unset($data['ntp_server2']);
             }else{
                 if(!is_ipaddr($data['ntp_server1'])){
-                    throw new AppException('OVPN_117');
+                    throw new AppException('ntp_server_error');
                 }
                 if(empty($data['ntp_server2'])){
                     unset($data['ntp_server2']);
                 }else{
                     if(!is_ipaddr($data['ntp_server2'])){
-                        throw new AppException('OVPN_117');
+                        throw new AppException('ntp_server_error');
                     }
                 }
             }
             $data['verbosity_level'] = intval($data['verbosity_level']);
             if(!isset($openvpn_verbosity_level[$data['verbosity_level']])){
-                throw new AppException('OVPN_118');
+                throw new AppException('redundancy_level_error');
             }
             $data['reneg-sec'] = intval($data['reneg-sec']);
 
@@ -896,7 +896,7 @@ class Openvpn extends Csbackend
                 }
             }
             if(!isset($data['Username']) || strlen($data['Username'])<1){
-                throw new AppException('OVPN_300');
+                throw new AppException('username_no_empty');
             }
             $user_update_idx = false;
             foreach($config['system']['user'] as $idx=>$tmp_user){
@@ -911,41 +911,41 @@ class Openvpn extends Csbackend
                 $csc = array();
                 $csc['custom_options'] = $user_config['custom_options'];
                 if(empty($data['Username'])){
-                    throw new AppException('OVPN_302');
+                    throw new AppException('username_no_empty');
                 }else{
                     $csc['common_name'] = $data['Username'];
                 }
                 if(!$user_update_idx && (!isset($data['Password']) || strlen($data['Password'])<1)){
-                    throw new AppException('OVPN_301');
+                    throw new AppException('password_no_empty');
                 }
                 if(isset($user_config['block'])){
                     if('yes' != $user_config['block']) {
-                        throw new AppException('OVPN_303');
+                        throw new AppException('intercepty_connect_error');
                     }
                     $csc['block'] = 'yes';
                 }
                 $csc['description'] = Openvpn::USER_RELATE_PREFIX.$data['Username'];
                 if(!empty($user_config['tunnel_network']) && !Util::checkCidr($user_config['tunnel_network'], false, 'ipv4')){
-                    throw new AppException('OVPN_304');
+                    throw new AppException('tunnelv4_network_error');
                 }
                 $csc['tunnel_network'] = $user_config['tunnel_network'];
                 if(!empty($user_config['local_network']) && !Util::checkCidr($user_config['local_network'], true, 'ipv4')){
-                    throw new AppException('OVPN_305');
+                    throw new AppException('localv4_network_error');
                 }
                 $csc['local_network'] = $user_config['local_network'];
                 if(!empty($user_config['remote_network']) && !Util::checkCidr($user_config['remote_network'], true, 'ipv4')){
-                    throw new AppException('OVPN_306');
+                    throw new AppException('remotev4_network_error');
                 }
                 $csc['remote_network'] = $user_config['remote_network'];
                 if(isset($user_config['gwredir'])){
                     if('yes' != $user_config['gwredir']) {
-                        throw new AppException('OVPN_307');
+                        throw new AppException('redirect_gateway_error');
                     }
                     $csc['gwredir'] = 'yes';
                 }
                 if(isset($user_config['push_reset'])){
                     if('yes' != $user_config['push_reset']) {
-                        throw new AppException('OVPN_308');
+                        throw new AppException('server_define_error');
                     }
                     $csc['push_reset'] = 'yes';
                 }
@@ -959,7 +959,7 @@ class Openvpn extends Csbackend
                         break;
                     }
                     if(!is_ipaddr($user_config['dns_server'.$i])){
-                        throw new AppException('OVPN_309');
+                        throw new AppException('dns_server_error');
                     }
                     $csc['dns_server'.$i] = $user_config['dns_server'.$i];
                 }
@@ -968,7 +968,7 @@ class Openvpn extends Csbackend
                         break;
                     }
                     if(!is_ipaddr($user_config['ntp_server'.$i])){
-                        throw new AppException('OVPN_310');
+                        throw new AppException('time_server_error');
                     }
                     $csc['ntp_server'.$i] = $user_config['ntp_server'.$i];
                 }
@@ -1036,7 +1036,7 @@ class Openvpn extends Csbackend
         }
         foreach($config['cert'] as $idx=>$cert){
             if(Cert::OVPN_SERVER_CA_REFID == $cert['caref'] && Openvpn::USER_RELATE_PREFIX.$data['Username'] == $cert['desct']){
-                throw new AppException('OVPN_311');
+                throw new AppException('user_exist');
                 break;
             }
         }
@@ -1061,7 +1061,7 @@ class Openvpn extends Csbackend
             Cert::DIGEST_ALG,
             'usr_cert'
         )) {
-            throw new AppException('OVPN_312');
+            throw new AppException('create_user_ca_error');
         }
         if(!is_array($config['cert'])){
             $config['cert'] = array();
@@ -1108,7 +1108,7 @@ class Openvpn extends Csbackend
                 }
             }
             if(false === $deluser){
-                throw new AppException('OVPN_400');
+                throw new AppException('del_user_fail');
             }
             local_user_del($deluser);
 
@@ -1728,7 +1728,7 @@ class Openvpn extends Csbackend
 
         try{
             if(!isset($data['username']) || empty($data['username'])){
-                throw new AppException('OVPN_500');
+                throw new AppException('export_cfg_error');
             }
             self::svrConfInit();
 
@@ -1769,21 +1769,21 @@ class Openvpn extends Csbackend
             }else if('p2p_tls' == $config['openvpn']['openvpn-server'][0]['mode']){
                 $user = self::getUser($data['username']);
                 if(!$user){
-                    throw new AppException('OVPN_501');
+                    throw new AppException('export_conf_error');
                 }
                 $cert = Cert::getCert($user['cert'][0]);
                 if(!$cert){
-                    throw new AppException('OVPN_501');
+                    throw new AppException('export_conf_error');
                 }
                 $ca = Cert::getCa($cert['caref']);
                 if(!$ca){
-                    throw new AppException('OVPN_501');
+                    throw new AppException('export_conf_error');
                 }
                 $t = time();
                 /*$zip = new ZipArchive;
                 $res = $zip->open('/usr/local/opnsense/cs/tmp/'.$data['username'].'_'.$t.'.zip');
                 if ($res !== true) {
-                    throw new AppException('OVPN_501');
+                    throw new AppException('export_conf_error');
                 }
                 $zip->addFromString('ca.crt', base64_decode($ca['crt']));
                 $zip->addFromString($data['username'].'.crt', base64_decode($cert['crt']));
@@ -1809,7 +1809,7 @@ class Openvpn extends Csbackend
                     $nokeys = false;
                     $user = self::getUser($data['username']);
                     if(!$user){
-                        throw new AppException('OVPN_501');
+                        throw new AppException('export_conf_error');
                     }
                     $group = false;
                     foreach($config['system']['group'] as $tmp_group){
@@ -1819,10 +1819,10 @@ class Openvpn extends Csbackend
                         }
                     }
                     if(!$group){
-                        throw new AppException('OVPN_502');
+                        throw new AppException('openvpn_group_error');
                     }
                     if(!in_array($user['uid'], $group['member'])){
-                        throw new AppException('OVPN_503');
+                        throw new AppException('user_no_in_group');
                     }
                     foreach($config['cert'] as $idx=>$cert){
                         if(in_array($cert['refid'],$user['cert'])){
@@ -1840,7 +1840,7 @@ class Openvpn extends Csbackend
             $exp_name = self::openvpn_client_export_prefix(0, false, false);
 
             if (!$exp_path) {
-                throw new AppException('OVPN_501');
+                throw new AppException('export_conf_error');
             }
 
             $exp_size = strlen($exp_path);

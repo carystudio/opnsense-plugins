@@ -41,44 +41,44 @@ class Freeradius extends Csbackend
         try{
             $general = array();
             if(!isset($data['enabled'])){
-                throw new AppException("RADIUS_100");
+                throw new AppException("enabled_param_error");
             }
             $general['enabled'] = $data['enabled'];
             if(!isset($data['vlanassign'])){
-                throw new AppException("RADIUS_101");   //VLAN参数不正确
+                throw new AppException("vlan_error");   //VLAN参数不正确
             }
             $general['vlanassign'] = $data['vlanassign'];
             if(!isset($data['wispr'])){
-                throw new AppException("RADIUS_102");   //WISPr参数不正确
+                throw new AppException("wispr_error");   //WISPr参数不正确
             }
             $general['wispr'] = $data['wispr'];
             if(!isset($data['chillispot'])){
-                throw new AppException("RADIUS_103");   //ChilliSpot参数不正确
+                throw new AppException("chillispot_error");   //ChilliSpot参数不正确
             }
             $general['chillispot'] = $data['chillispot'];
             if(!isset($data['sessionlimit'])){
-                throw new AppException("RADIUS_104");   //sessionlimit参数不正确
+                throw new AppException("session_limit_error");   //sessionlimit参数不正确
             }
             $general['sessionlimit'] = $data['sessionlimit'];
             if(!isset($data['log_destination']) && !in_array($data['log_destination'],array("file","syslog"))){
-                throw new AppException("RADIUS_105");   //log_destination参数不正确
+                throw new AppException("log_type_error");   //log_destination参数不正确
             }
             $general['log_destination'] = $data['log_destination'];
             if(!isset($data['log_authentication_request'])){
-                throw new AppException("RADIUS_106");   //log_authentication_request参数不正确
+                throw new AppException("log_auth_error");   //log_authentication_request参数不正确
             }
             $general['log_authentication_request'] = $data['log_authentication_request'];
             if(!isset($data['log_authbadpass'])){
-                throw new AppException("RADIUS_107");   //Log Authentication Bad Password参数不正确
+                throw new AppException("error_pwd_save_error");   //Log Authentication Bad Password参数不正确
             }
             $general['log_authbadpass'] = $data['log_authbadpass'];
             if(!isset($data['log_authgoodpass'])){
-                throw new AppException("RADIUS_108");   //Log Authentication Good Password参数不正确
+                throw new AppException("correct_pwd_save_error");   //Log Authentication Good Password参数不正确
             }
             $general['log_authgoodpass'] = $data['log_authgoodpass'];
 
             if(!isset($data['default_eap_type']) && !in_array($data['default_eap_type'],Freeradius::default_eap_type)){
-                throw new AppException("RADIUS_109");   //default_eap_type参数不正确
+                throw new AppException("default_eap_error");   //default_eap_type参数不正确
             }
             $config['OPNsense']['freeradius']['eap']['default_eap_type'] = $data['default_eap_type'];
 
@@ -169,72 +169,72 @@ class Freeradius extends Csbackend
         try{
             $userInfo = array();
             if(!isset($data['enabled'])){
-                throw new AppException("RADIUS_200");
+                throw new AppException("enabled_param_error");
             }
             $userInfo['enabled'] = $data['enabled'];
             if(!isset($data['username']) || '' == trim($data['username'])){
-                throw new AppException("RADIUS_201");
+                throw new AppException("username_param_error");
             }
             $userInfo['username'] = $data['username'];
             if(!isset($data['password']) || '' == trim($data['password']) ){
-                throw new AppException("RADIUS_202");
+                throw new AppException("password_param_error");
             }
             $userInfo['password'] = $data['password'];
             if(!isset($data['description'])){
-                throw new AppException("RADIUS_203");
+                throw new AppException("descr_param_error");
             }
             $userInfo['description'] = $data['description'];
             if(!isset($data['ip']) || ('' != $data['ip'] && !is_ipaddr($data['ip'])) ){
-                throw new AppException("RADIUS_204");
+                throw new AppException("ip_addr_error");
             }
             $userInfo['ip'] = $data['ip'];
             if(!isset($data['subnet'])){
-                throw new AppException("RADIUS_205");
+                throw new AppException("netmask_param_error");
             }
             if('' != $data['subnet']){
                 $netmask = Util::maskip2bit($data['subnet']);
                 if (false === $netmask) {
-                    throw new AppException('RADIUS_205');
+                    throw new AppException('netmask_param_error');
                 }
             }
             $userInfo['subnet'] = $data['subnet'];
 
             if(!isset($data['vlan']) || ('' != $data['vlan'] && !is_numeric($data['vlan']))){
-                throw new AppException("RADIUS_206");
+                throw new AppException("vlan_error");
             }
             if('' != $data['vlan']){
                 $vlan = intval($data['vlan']);
                 if($vlan < 1 || $vlan > 4096){
-                    throw new AppException("RADIUS_206");
+                    throw new AppException("vlan_error");
                 }
             }
             $userInfo['vlan'] = $data['vlan'];
             if(!isset($data['wispr_bw_min_up']) || ('' != $data['wispr_bw_min_up'] && !is_numeric($data['wispr_bw_min_up']))){
-                throw new AppException("RADIUS_207");
+                throw new AppException("wispr_min_upload_error");
             }
             $userInfo['wispr_bw_min_up'] = $data['wispr_bw_min_up'];
             if(!isset($data['wispr_bw_max_up']) || ('' != $data['wispr_bw_max_up'] && !is_numeric($data['wispr_bw_max_up'])) ){
-                throw new AppException("RADIUS_208");
+                throw new AppException("wispr_max_upload_error");
             }
             $userInfo['wispr_bw_max_up'] = $data['wispr_bw_max_up'];
             if(!isset($data['wispr_bw_min_down']) || ('' != $data['wispr_bw_min_down'] && !is_numeric($data['wispr_bw_min_down'])) ){
-                throw new AppException("RADIUS_209");
+                throw new AppException("wispr_min_down_error");
             }
             $userInfo['wispr_bw_min_down'] = $data['wispr_bw_min_down'];
             if(!isset($data['wispr_bw_max_down']) || ('' != $data['wispr_bw_max_down'] && !is_numeric($data['wispr_bw_max_down'])) ){
-                throw new AppException("RADIUS_210");
+                throw new AppException("wispr_max_down_error");
             }
             $userInfo['wispr_bw_max_down'] = $data['wispr_bw_max_down'];
             if(!isset($data['chillispot_bw_max_up']) || ('' != $data['chillispot_bw_max_up'] && !is_numeric($data['chillispot_bw_max_up'])) ){
-                throw new AppException("RADIUS_211");
+                throw new AppException("chillspot_max_upload_error");
             }
             $userInfo['chillispot_bw_max_up'] = $data['chillispot_bw_max_up'];
             if(!isset($data['chillispot_bw_max_down']) || ('' != $data['chillispot_bw_max_down'] && !is_numeric($data['chillispot_bw_max_down']))){
-                throw new AppException("RADIUS_212");
+                throw new AppException("chillispot_max_down_error");
             }
             $userInfo['chillispot_bw_max_down'] = $data['chillispot_bw_max_down'];
             if(!isset($data['sessionlimit_max_session_limit']) || ('' != $data['sessionlimit_max_session_limit'] && !is_numeric($data['sessionlimit_max_session_limit'])) ){
-                throw new AppException("RADIUS_213");
+                throw new AppException("session_max_limit_error");
             }
             $userInfo['sessionlimit_max_session_limit'] = $data['sessionlimit_max_session_limit'];
 
@@ -242,7 +242,7 @@ class Freeradius extends Csbackend
             if(isset($data['uuid']) && '' != $data['uuid']){    //updata user
                 $frUser = $config['OPNsense']['freeradius']['user'][0]['users'];
                 if(!$frUser){
-                    throw new AppException("RADIUS_214");   //用户不存在
+                    throw new AppException("username_no_exist");   //用户不存在
                 }
                 $updataFlag = false;
                 foreach ($frUser['user'] as $key=>$val){
@@ -260,7 +260,7 @@ class Freeradius extends Csbackend
                     }
                 }
                 if(!$updataFlag){
-                    throw new AppException("RADIUS_214");   //用户不存在
+                    throw new AppException("username_no_exist");   //用户不存在
                 }
             }else{  //add user
                 $frUser = $config['OPNsense']['freeradius']['user'][0]['users'];
@@ -271,7 +271,7 @@ class Freeradius extends Csbackend
                         foreach ($val as $k=>$v){
                             if('username' == $k){
                                 if($v == $userInfo['username']){
-                                    throw new AppException("RADIUS_215");   //用户已存在
+                                    throw new AppException("username_exist");   //用户已存在
                                 }
                             }
                         }
@@ -299,12 +299,12 @@ class Freeradius extends Csbackend
         $result = 0;
         try{
             if(!isset($data['uuid'])){
-                throw new AppException("RADIUS_300");
+                throw new AppException("username_param_error");
             }
 
             $frUser = $config['OPNsense']['freeradius']['user'][0]['users'];
             if(!$frUser){
-                throw new AppException("RADIUS_301");   //用户不存在
+                throw new AppException("user_no_exist");   //用户不存在
             }
 
             foreach ($frUser['user'] as $key=>$val){
@@ -405,11 +405,11 @@ class Freeradius extends Csbackend
         $result = 0;
         try{
             if(isset($data['uuid']) && '' == $data['uuid']){
-                throw new AppException("RADIUS_400");   //参数不正确
+                throw new AppException("client_param_error");   //参数不正确
             }
             $client = $config['OPNsense']['freeradius']['client']['clients'];
             if(!isset($client) && '' == $client){
-                throw new AppException("RADIUS_401");   //用户不存在
+                throw new AppException("client_no_exist");   //用户不存在
             }
             $delFlag = false;
             foreach ($client['client'] as $key=>$val){
@@ -432,7 +432,7 @@ class Freeradius extends Csbackend
                 }
             }
             if(!$delFlag){
-                throw new AppException("RADIUS_401");   //用户不存在
+                throw new AppException("client_no_exist");   //用户不存在
             }
             write_config();
             self::reconfigure();
@@ -451,19 +451,19 @@ class Freeradius extends Csbackend
         $result = 0;
         try{
             if(!isset($data['enabled'])){
-                throw new AppException("RADIUS_500");   //开启参数不正确
+                throw new AppException("enabled_param_error");   //开启参数不正确
             }
             if(!isset($data['name'])){
-                throw new AppException("RADIUS_502");   //名称参数不正确
+                throw new AppException("name_param_error");   //名称参数不正确
             }
             if(!isset($data['secret'])){
-                throw new AppException("RADIUS_503");   //安全参数不正确
+                throw new AppException("key_param_error");   //安全参数不正确
             }
             if(isset($data['ip']) ){
                 if(('' != $data['ip'] && !is_ipaddr($data['ip']))){
                     $ip = explode("/",$data['ip']);
                     if(!is_ipaddr($ip[0]) || !is_numeric($ip[1])){
-                        throw new AppException("RADIUS_501");   //IP地址参数不正确
+                        throw new AppException("ip_network_error");   //IP地址参数不正确
                     }
                 }
             }
@@ -495,7 +495,7 @@ class Freeradius extends Csbackend
                                 break;
                             }
                             if($val['name'] == $data['name'] && !$editFlag){
-                                throw new AppException("RADIUS_504");   //用户名已存在
+                                throw new AppException("client_name_exist");   //用户名已存在
                             }
                         }
                     }else{   //一条数据
@@ -508,7 +508,7 @@ class Freeradius extends Csbackend
                             }
                         }else{
                             if($client['client']['name'] == $data['name']){
-                                throw new AppException("RADIUS_504");   //用户名已存在
+                                throw new AppException("client_name_exist");   //用户名已存在
                             }
                             $clientTmp = array("client"=>array($client['client']));
                             $client = $clientTmp;

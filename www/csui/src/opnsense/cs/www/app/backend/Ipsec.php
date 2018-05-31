@@ -233,95 +233,95 @@ class Ipsec extends Csbackend
             $phase1 = array();
             if(isset($data['disabled'])){
                 if('yes'!=$data['disabled']){
-                    throw new AppException('IPSEC_100');
+                    throw new AppException('enabled_params_error');
                 }
                 $phase1['disabled'] = '1';
             }
 
             if(!isset($data['auto']) || !in_array($data['auto'], Ipsec::AUTO)){
-                throw new AppException('IPSEC_101');
+                throw new AppException('connect_mode_error');
             }
             $phase1['auto'] = $data['auto'];
             if(!isset($data['iketype']) || !in_array($data['iketype'], Ipsec::IKETYPE)){
-                throw new AppException('IPSEC_102');
+                throw new AppException('key_exchange_error');
             }
             $phase1['iketype'] = $data['iketype'];
             $phase1['protocol'] = 'inet';
             if('any'!=$data['interface'] && !isset($config['interfaces'][$data['interface']])){
-                throw new AppException('IPSEC_103');
+                throw new AppException('interface_param_error');
             }
             $phase1['interface'] = $data['interface'];
 
             if(!isset($data['remote-gateway']) || !is_ipaddr($data['remote-gateway'])){
-                throw new AppException('IPSEC_104');
+                throw new AppException('remote_gateway_error');
             }
             $phase1['remote-gateway'] = $data['remote-gateway'];
 
             if(!isset($data['descr']) || strlen($data['descr'])>60){
-                throw new AppException('IPSEC_105');
+                throw new AppException('descr_long_error');
             }
             $phase1['descr'] = $data['descr'];
 
             if(!isset($data['authentication_method']) || !in_array($data['authentication_method'], Ipsec::AUTH_METHOD)){
-                throw new AppException('IPSEC_106');
+                throw new AppException('auth_mode_error');
             }
             $phase1['authentication_method'] = $data['authentication_method'];
 
             if(!isset($data['myid_type']) || !in_array($data['myid_type'], Ipsec::MYID_TYPE)){
-                throw new AppException('IPSEC_107');
+                throw new AppException('my_ident_error');
             }
             if('any' == $data['interface'] && 'myaddress' == $data['myid_type']){
-                throw new AppException('IPSEC_107');
+                throw new AppException('my_ident_error');
             }
             $phase1['myid_type'] = $data['myid_type'];
 
             if('address' == $data['myid_type'] && !is_ipaddr($data['myid_data'])) {
-                throw new AppException('IPSEC_108');
+                throw new AppException('my_ident_error');
             }else if('user_fqdn' == $data['myid_type'] && false === filter_var($data['myid_data'], FILTER_VALIDATE_EMAIL)){
-                throw new AppException('IPSEC_108');
+                throw new AppException('my_ident_error');
             }else if('myaddress' != $data['myid_type'] && empty($data['myid_data'])){
-                throw new AppException('IPSEC_108');
+                throw new AppException('my_ident_error');
             }
             $phase1['myid_data'] = $data['myid_data'];
 
             if(!isset($data['peerid_type']) || !in_array($data['peerid_type'], Ipsec::PEERID_TYPE)){
-                throw new AppException('IPSEC_109');
+                throw new AppException('p2p_ident_error');
             }
             $phase1['peerid_type'] = $data['peerid_type'];
 
             if('address' == $data['peerid_type'] && !is_ipaddr($data['peerid_data'])){
-                throw new AppException('IPSEC_110');
+                throw new AppException('p2p_ident_error');
             }else if('peeraddress' != $data['peerid_type'] && empty($data['peerid_data'])){
-                throw new AppException('IPSEC_110');
+                throw new AppException('p2p_ident_error');
             }
             $phase1['peerid_data'] = $data['peerid_data'];
 
             if('pre_shared_key' == $data['authentication_method']){
                 if(!isset($data['pre-shared-key']) || empty($data['pre-shared-key'])){
-                    throw new AppException('IPSEC_111');
+                    throw new AppException('share_key_no_empty');
                 }
                 $phase1['pre-shared-key'] = $data['pre-shared-key'];
             }else{
                 if(!isset($data['ca']) || empty($data['ca'])){
-                    throw new AppException('IPSEC_112');
+                    throw new AppException('my_ca_error');
                 }
                 $ca = base64_decode($data['ca']);
                 if(!$ca || !strstr($ca, "BEGIN CERTIFICATE") || !strstr($ca, "END CERTIFICATE")){
-                    throw new AppException('IPSEC_112');
+                    throw new AppException('my_ca_error');
                 }
                 if(!isset($data['cert']) || empty($data['cert'])){
-                    throw new AppException('IPSEC_113');
+                    throw new AppException('cert_data_error');
                 }
                 $cert = base64_decode($data['cert']);
                 if(!$cert || !strstr($cert, "BEGIN CERTIFICATE") || !strstr($cert, "END CERTIFICATE")){
-                    throw new AppException('IPSEC_113');
+                    throw new AppException('cert_data_error');
                 }
                 if(!isset($data['prv']) || empty($data['prv'])){
-                    throw new AppException('IPSEC_114');
+                    throw new AppException('private_key_error');
                 }
                 $prv = base64_decode($data['prv']);
                 if(!prv || !strstr($prv, "BEGIN PRIVATE KEY") || !strstr($prv, "END PRIVATE KEY")){
-                    throw new AppException('IPSEC_114');
+                    throw new AppException('private_key_error');
                 }
                 $ca_subject = cert_get_subject($ca, false);
                 $subject = cert_get_subject($cert, false);
@@ -331,108 +331,108 @@ class Ipsec extends Csbackend
                 }
             }
             if(!isset($data['ealgo']) || !in_array($data['ealgo'], Ipsec::EALGO)){
-                throw new AppException('IPSEC_115');
+                throw new AppException('encryption_algorithm_error');
             }
             $phase1['encryption-algorithm'] = array('name' => $data['ealgo']);
 
             if(array_key_exists($data['ealgo'], Ipsec::EALGO_KEYLEN)){
                 if(!isset($data['ealgo_keylen']) || !is_numeric($data['ealgo_keylen'])){
-                    throw new AppException('IPSEC_116');
+                    throw new AppException('encryption_algorithm_bit_error');
                 }
                 if(!in_array($data['ealgo_keylen'], Ipsec::EALGO_KEYLEN[$data['ealgo']])){
-                    throw new AppException('IPSEC_116');
+                    throw new AppException('encryption_algorithm_bit_error');
                 }
                 $phase1['encryption-algorithm']['keylen'] = $data['ealgo_keylen'];
             }
 
             if(!isset($data['hash-algorithm']) || !in_array($data['hash-algorithm'], Ipsec::HASH_ALGO)){
-                throw new AppException('IPSEC_117');
+                throw new AppException('hashi_algorithm_error');
             }
             $phase1['hash-algorithm'] = $data['hash-algorithm'];
 
             if(!isset($data['dhgroup']) || !in_array($data['dhgroup'], Ipsec::DHGROUP)){
-                throw new AppException('IPSEC_118');
+                throw new AppException('dh_key_error');
             }
             $phase1['dhgroup'] = $data['dhgroup'];
 
             if(!isset($data['lifetime']) || !is_numeric($data['lifetime'])){
-                throw new AppException('IPSEC_119');
+                throw new AppException('life_time_gt600');
             }
             $data['lifetime'] = intval($data['lifetime']);
             if($data['lifetime']<600){
-                throw new AppException('IPSEC_119');
+                throw new AppException('life_time_gt600');
             }
             $phase1['lifetime'] = $data['lifetime'];
 
             if(isset($data['rekey_enable']) && 'yes'!=$data['rekey_enable']){
-                throw new AppException('IPSEC_120');
+                throw new AppException('repeat_key_error');
             }
             $phase1['rekey_enable'] = $data['rekey_enable'];
 
             if(isset($data['reauth_enable']) && 'yes'!=$data['reauth_enable']){
-                throw new AppException('IPSEC_121');
+                throw new AppException('repeat_auth_error');
             }
             $phase1['reauth_enable'] = $data['reauth_enable'];
 
             if(isset($data['tunnel_isolation']) && 'yes'!=$data['tunnel_isolation']){
-                throw new AppException('IPSEC_121');
+                throw new AppException('repeat_auth_error');
             }
             $phase1['tunnel_isolation'] = $data['tunnel_isolation'];
 
             if(!isset($data['nat_traversal']) || !in_array($data['nat_traversal'], Ipsec::NAT_TRAVERSAL)){
-                throw new AppException('IPSEC_122');
+                throw new AppException('tunnel_isolation_error');
             }
             $phase1['nat_traversal'] = $data['nat_traversal'];
 
             if(isset($data['mobike']) && 'on'!=$data['mobike']){
-                throw new AppException('IPSEC_123');
+                throw new AppException('mobike_error');
             }
             $phase1['mobike'] = $data['mobike'];
 
             if(isset($data['dpd_enable'])){
                 if('yes'!=$data['dpd_enable']) {
-                    throw new AppException('IPSEC_124');
+                    throw new AppException('p2p_delay_error');
                 }
                 $phase1['dpd_enable'] = $data['dpd_enable'];
 
                 if(!isset($data['dpd_delay']) || !is_numeric($data['dpd_delay'])){
-                    throw new AppException('IPSEC_125');
+                    throw new AppException('p2p_delay_range');
                 }
                 $data['dpd_delay'] = intval($data['dpd_delay']);
                 if($data['dpd_delay']<2 || $data['dpd_delay']>100){
-                    throw new AppException('IPSEC_125');
+                    throw new AppException('p2p_delay_range');
                 }
                 $phase1['dpd_delay'] = $data['dpd_delay'];
 
                 if(!isset($data['dpd_maxfail']) || !is_numeric($data['dpd_maxfail'])){
-                    throw new AppException('IPSEC_126');
+                    throw new AppException('allow_fail_times');
                 }
                 $data['dpd_maxfail'] = intval($data['dpd_maxfail']);
                 if($data['dpd_maxfail']<2 || $data['dpd_maxfail']>1000){
-                    throw new AppException('IPSEC_126');
+                    throw new AppException('allow_fail_times');
                 }
                 $phase1['dpd_maxfail'] = $data['dpd_maxfail'];
             }
             if(isset($data['p1index'])){
                 if(!is_numeric($data['p1index'])){
-                    throw new AppException('IPSEC_127');
+                    throw new AppException('this_data_no_exist');
                 }
                 if(!isset($data['ikeid']) || !is_numeric($data['ikeid'])){
-                    throw new AppException('IPSEC_127');
+                    throw new AppException('this_data_no_exist');
                 }
                 if(!isset($config['ipsec']['phase1'][$data['p1index']]) || $config['ipsec']['phase1'][$data['p1index']]['ikeid']!=$data['ikeid']){
-                    throw new AppException('IPSEC_127');
+                    throw new AppException('this_data_no_exist');
                 }
                 $phase1['p1index'] = $data['p1index'];
                 $phase1['ikeid'] = $data['ikeid'];
             }else{
                 if(isset($data['ikeid'])){
-                    throw new AppException('IPSEC_127');
+                    throw new AppException('this_data_no_exist');
                 }
             }
             if('ikev1' == $phase1['iketype']){
                 if(!isset($data['mode']) || !in_array($data['mode'], Ipsec::MODE)){
-                    throw new AppException('IPSEC_128');
+                    throw new AppException('negotiation_mode_error');
                 }
                 $phase1['mode'] = $data['mode'];
             }
@@ -499,7 +499,7 @@ class Ipsec extends Csbackend
         $result = 0;
         try{
             if(!isset($data['ikeid']) || !is_numeric($data['ikeid'])){
-                throw new AppException('IPSEC_400');
+                throw new AppException('this_data_already_or_no_exist');
             }
             $deleted = false;
             foreach($config['ipsec']['phase1'] as $p1_idx=>$phase1){
@@ -522,7 +522,7 @@ class Ipsec extends Csbackend
                 }
             }
             if(!$deleted){
-                throw new AppException('IPSEC_401');
+                throw new AppException('del_fail');
             }
 
             self::setEnable();
@@ -544,7 +544,7 @@ class Ipsec extends Csbackend
         $result =0;
         try{
             if(!isset($data['ikeid']) || !is_numeric($data['ikeid'])){
-                throw new AppException('IPSEC_200');
+                throw new AppException('phase1_no_exist');
             }
             $phase2s = array();
             foreach($config['ipsec']['phase2'] as $id=>$phase2){
@@ -597,123 +597,123 @@ class Ipsec extends Csbackend
             $phase2 = array();
             if(isset($data['disabled'])){
                 if('yes'!=$data['disabled']){
-                    throw new AppException('IPSEC_300');
+                    throw new AppException('enabled_params_error');
                 }
                 $phase2['disabled'] = '1';
             }
 
             if(!isset($data['mode']) || !in_array($data['mode'], Ipsec::PHASE2MODE)){
-                throw new AppException('IPSEC_301');
+                throw new AppException('mode_param_error');
             }
             $phase2['mode'] = $data['mode'];
 
             if(!isset($data['descr']) || strlen($data['descr'])>60){
-                throw new AppException('IPSEC_302');
+                throw new AppException('descr_range_1_60');
             }
             $phase2['descr'] = $data['descr'];
 
             if(!isset($data['localid_type']) ||
                 ('address'!=$data['localid_type'] && 'network'!=$data['localid_type'] && !isset($config['interfaces'][$data['localid_type']]))){
-                throw new AppException('IPSEC_303');
+                throw new AppException('local_network_error');
             }
             $phase2['localid'] = array('type' => $data['localid_type']);
             if('address' == $data['localid_type'] || 'network' == $data['localid_type']){
                 if(!isset($data['localid_address']) || !is_ipaddr($data['localid_address'])){
-                    throw new AppException('IPSEC_304');
+                    throw new AppException('local_address_error');
                 }
                 $phase2['localid']['address'] = $data['localid_address'];
             }
             if('network' == $data['localid_type']){
                 if(!isset($data['localid_netbits']) || !is_numeric($data['localid_netbits'])){
-                    throw new AppException('IPSEC_305');
+                    throw new AppException('local_netmask_range_8_32');
                 }
                 $phase2['localid']['netbits'] = intval($data['localid_netbits']);
                 if($phase2['localid']['netbits']>32 || $phase2['localid']['netbits']<8){
-                    throw new AppException('IPSEC_305');
+                    throw new AppException('local_netmask_range_8_32');
                 }
             }
 
             if(!isset($data['remoteid_type']) ||
                 ('address'!=$data['remoteid_type'] && 'network'!=$data['remoteid_type'] && !isset($config['interfaces'][$data['remoteid_type']]))){
-                throw new AppException('IPSEC_306');
+                throw new AppException('remote_netmask_error');
             }
             $phase2['remoteid'] = array('type' => $data['remoteid_type']);
             if('address' == $data['remoteid_type'] || 'network' == $data['remoteid_type']){
                 if(!isset($data['remoteid_address']) || !is_ipaddr($data['remoteid_address'])){
-                    throw new AppException('IPSEC_307');
+                    throw new AppException('remote_netmask_addr_error');
                 }
                 $phase2['remoteid']['address'] = $data['remoteid_address'];
             }
             if('network' == $data['remoteid_type']){
                 if(!isset($data['remoteid_netbits']) || !is_numeric($data['remoteid_netbits'])){
-                    throw new AppException('IPSEC_308');
+                    throw new AppException('remote_netmask_range_8_32');
                 }
                 $phase2['remoteid']['netbits'] = intval($data['remoteid_netbits']);
                 if($phase2['remoteid']['netbits']>32 || $phase2['remoteid']['netbits']<8){
-                    throw new AppException('IPSEC_308');
+                    throw new AppException('remote_netmask_range_8_32');
                 }
             }
             if(!isset($data['protocol']) || !in_array($data['protocol'], Ipsec::PHASE2PROTO)){
-                throw new AppException('IPSEC_309');
+                throw new AppException('protocol_param_error');
             }
             $phase2['protocol'] = $data['protocol'];
             if(!isset($data['ealgos']) || !is_array($data['ealgos']) || count($data['ealgos'])<1){
-                throw new AppException('IPSEC_310');
+                throw new AppException('encryption_algorithm_error');
             }
             $ealgos_diff = array_diff ($data['ealgos'] , Ipsec::PHASE2EALGOS);
             if(count($ealgos_diff)>0){
                 var_dump($ealgos_diff);
-                throw new AppException('IPSEC_310');
+                throw new AppException('encryption_algorithm_error');
             }
             $phase2['encryption-algorithm-option'] = array();
             foreach($data['ealgos'] as $ealgos){
                 $ealgos_option = array('name'=>$ealgos);
                 if(array_key_exists($ealgos, Ipsec::PHASE2EALGOS_KEYLEN)){
                     if(!isset($data['keylen_'.$ealgos]) || !in_array($data['keylen_'.$ealgos], Ipsec::PHASE2EALGOS_KEYLEN[$ealgos])){
-                        throw new AppException('IPSEC_311');
+                        throw new AppException('hashi_algorithm_error');
                     }
                     $ealgos_option['keylen'] = $data['keylen_'.$ealgos];
                 }
                 $phase2['encryption-algorithm-option'][] = $ealgos_option;
             }
             if(!isset($data['hash-algorithm-option']) || !is_array($data['hash-algorithm-option']) || count($data['hash-algorithm-option'])<1){
-                throw new AppException('IPSEC_312');
+                throw new AppException('hashi_algorithm_error');
             }
             $hash_diff = array_diff($data['hash-algorithm-option'], Ipsec::PHASE2HASH_ALGO);
             if(count($hash_diff)>0){
-                throw new AppException('IPSEC_312');
+                throw new AppException('hashi_algorithm_error');
             }
             $phase2['hash-algorithm-option'] = array();
             foreach($data['hash-algorithm-option'] as $hash_algo){
                 $phase2['hash-algorithm-option'][] = $hash_algo;
             }
             if(!isset($data['pfsgroup']) || !in_array($data['pfsgroup'], Ipsec::PHASE2_PFSGROUP)){
-                throw new AppException('IPSEC_313');
+                throw new AppException('pfs_key_group_error');
             }
             $phase2['pfsgroup'] = $data['pfsgroup'];
             if(isset($data['lifetime'])){
                 if(!is_numeric($data['lifetime'])){
-                    throw new AppException('IPSEC_314');
+                    throw new AppException('life_time_is_int');
                 }
                 $phase2['lifetime'] = $data['lifetime'];
             }
             if(isset($data['pinghost'])){
                 if(!is_ipaddr($data['pinghost'])){
-                    throw new AppException('IPSEC_315');
+                    throw new AppException('ping_host_error');
                 }
                 $phase2['pinghost'] = $data['pinghost'];
             }
             if(isset($data['spd'])){
                 if(!Util::checkCidr($data['spd'], true, 'ipv4')){
-                    throw new AppException('IPSEC_316');
+                    throw new AppException('spd_error');
                 }
                 $phase2['spd'] = $data['spd'];
             }
             if(!isset($data['ikeid'])){
-                throw new AppException('IPSEC_317');
+                throw new AppException('this_data_no_exist');
             }
             if(false == self::getPhase1($data['ikeid'])){
-                throw new AppException('IPSEC_317');
+                throw new AppException('this_data_no_exist');
             }
             $phase2['ikeid'] = $data['ikeid'];
             if(isset($data['uniqid'])){
@@ -725,7 +725,7 @@ class Ipsec extends Csbackend
                     }
                 }
                 if(false === $p2_idx){
-                    throw new AppException('IPSEC_318');
+                    throw new AppException('this_data_no_exist');
                 }
                 $phase2['uniqid'] = $data['uniqid'];
                 $config['ipsec']['phase2'][$p2_idx] = $phase2;
@@ -753,10 +753,10 @@ class Ipsec extends Csbackend
         $result = 0;
         try{
             if(!isset($data['ikeid']) || !is_numeric($data['ikeid'])){
-                throw new AppException('IPSEC_500');
+                throw new AppException('ikeid_error');
             }
             if(!isset($data['uniqid']) || empty($data['uniqid'])){
-                throw new AppException('IPSEC_501');
+                throw new AppException('uniqid_error');
             }
             $deleted = false;
             foreach($config['ipsec']['phase2'] as $p2_idx=>$phase2){
@@ -767,7 +767,7 @@ class Ipsec extends Csbackend
                 }
             }
             if(!$deleted){
-                throw new AppException('IPSEC_502');
+                throw new AppException('del_fail');
             }
 
             self::setEnable();

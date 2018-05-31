@@ -24,7 +24,7 @@ class User extends Csbackend
                 if('root'==$user['name']){
                     $res = authenticate_user('root', $data['OldPassword']);
                     if(!$res){
-                        throw new AppException('User_100');
+                        throw new AppException('old_pwd_error');
                     }
                     local_user_set_password($config['system']['user'][$idx], $data['NewPassword']);
                     local_user_set($user);
@@ -32,7 +32,7 @@ class User extends Csbackend
                 }
             }
             if(!$changed){
-                throw new AppException('User_101');
+                throw new AppException('pwd_modify_fail');
             }
             write_config();
         } catch (AppException $aex) {

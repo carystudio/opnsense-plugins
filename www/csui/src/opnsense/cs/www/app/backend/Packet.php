@@ -146,7 +146,7 @@ class Packet extends Csbackend
     public static function downloadCapture(){
         try{
             if(!file_exists("/tmp/packetcapture.cap")){
-                throw new AppException("PACKET_200");   //文件不存在
+                throw new AppException("file_no_exist");   //文件不存在
             }
             // download capture file
             header("Content-Type: application/octet-stream");
@@ -183,29 +183,29 @@ class Packet extends Csbackend
         $result = 0;
         try{
             if(!isset($config['interfaces'][$data['interface']])){
-                throw new AppException('IPSEC_101');    //接口参数不正确
+                throw new AppException('interface_param_error');    //接口参数不正确
             }
             if ($data['fam'] !== "" && $data['fam'] !== "ip" && $data['fam'] !== "ip6") {
-                throw new AppException('IPSEC_102');    //地址簇参数不合法
+                throw new AppException('addr_fam_error');    //地址簇参数不合法
             }
             if ($data['proto'] !== "" && !in_array(ltrim(trim($data['proto']), '!'), $data)) {
-                throw new AppException('IPSEC_103');    //协议参数不合法
+                throw new AppException('protocol_param_error');    //协议参数不合法
             }
             if (!empty($data['host'])) {
                 foreach (explode(' ', $data['host']) as $token) {
                     if (!in_array(trim($token), array('and', 'or','not')) && !is_ipaddr($token) && !is_subnet($token) ) {
-                        throw new AppException('IPSEC_104');    //主机地址参数不合法，不是一个合法的IP地址或者CIDR块
+                        throw new AppException('host_addr_param_error');    //主机地址参数不合法，不是一个合法的IP地址或者CIDR块
                     }
                 }
             }
             if (!empty($data['port']) && !is_port(ltrim(trim($data['port']), 'not'))) {
-                throw new AppException('IPSEC_105');    //端口参数不合法
+                throw new AppException('port_param_error');    //端口参数不合法
             }
             if (!empty($data['snaplen']) && (!is_numeric($data['snaplen']) || $data['snaplen'] < 0)) {
-                throw new AppException('IPSEC_106');    //数据包长度参数不合法
+                throw new AppException('data_pack_length_error');    //数据包长度参数不合法
             }
             if (!empty($data['count']) && (!is_numeric($data['count']) || $data['count'] < 0)) {
-                throw new AppException('IPSEC_107');    //计算参数不合法
+                throw new AppException('calculation_error');    //计算参数不合法
             }
 
             self::start_capture($data);

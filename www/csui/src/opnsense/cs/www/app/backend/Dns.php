@@ -61,14 +61,14 @@ class Dns extends Csbackend
         $result = 0;
         try{
             if('1'!=$data['Enable'] && '0'!=$data['Enable']){
-                throw new AppException('Dns_100');
+                throw new AppException('enparams_error');
             }
             if('1'==$data['Enable']){
                 $config['dnsmasq']['enable'] = '1';
                 $config['dnsmasq']['interface'] = 'lan';
             }else{
                 if(!is_array($config['system']['dnsserver']) || count($config['system']['dnsserver'])==0){
-                    throw new AppException('Dns_101');
+                    throw new AppException('noset_dns_server');
                 }
                 unset($config['dnsmasq']['enable']);
             }
@@ -90,14 +90,14 @@ class Dns extends Csbackend
         $result = 0;
         try{
             if(!isset($data['Ip']) || !is_ipaddr($data['Ip'])){
-                throw new AppException('Dns_200');
+                throw new AppException('ip_error');
             }
             $domain = '';
             if(isset($data['Domain'])){
                 $domain = trim($data['Domain']);
             }
             if(strlen($domain)<4 || !strpos($domain, '.')){
-                throw new AppException('Dns_201');
+                throw new AppException('domain_error');
             }
             $descr = '';
             if(isset($data['Descr'])){
@@ -109,7 +109,7 @@ class Dns extends Csbackend
             if(isset($config['dnsmasq']['hosts']) && is_array($config['dnsmasq']['hosts'])){
                 foreach($config['dnsmasq']['hosts'] as $host) {//检查是否已存在
                     if($host['host'].'.'.$host['domain'] == $domain){
-                        throw new AppException('Dns_202');
+                        throw new AppException('domain_exist');
                     }
                 }
             }
@@ -146,7 +146,7 @@ class Dns extends Csbackend
                 $domain = trim($data['Domain']);
             }
             if(strlen($domain)<4 || !strpos($domain, '.')){
-                throw new AppException('Dns_201');
+                throw new AppException('domain_error');
             }
             $deleted = false;
             if(isset($config['dnsmasq']['hosts']) && is_array($config['dnsmasq']['hosts'])){
@@ -158,7 +158,7 @@ class Dns extends Csbackend
                 }
             }
             if(!$deleted){
-                throw new AppException('Dns_300');
+                throw new AppException('domain_no_exist');
             }
             write_config();
             self::apply();

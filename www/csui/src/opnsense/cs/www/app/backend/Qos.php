@@ -363,7 +363,7 @@ class Qos extends Csbackend
         $result = 0;
         try{
             if(!isset($data['Type'])){
-                throw new AppException('Qos_100');
+                throw new AppException('qos_enabled_error');
             }
             if('0' == $data['Type']){//把所有的管道,队列和规则清空
                 $config['OPNsense']['TrafficShaper']['pipes'] = array('pipe'=>array());
@@ -378,7 +378,7 @@ class Qos extends Csbackend
                 $down = intval($data['Down']);
                 $up = intval($data['Up']);
                 if($down<1 || $up <1){
-                    throw new AppException('Qos_101');
+                    throw new AppException('bandwidth_error');
                 }
                 if('1'==$data['Type']){
                     foreach($config['OPNsense']['TrafficShaper']['rules']['rule'] as $idx=>$rule) {
@@ -471,7 +471,7 @@ class Qos extends Csbackend
         $result = 0;
         try{
             if(!isset($data['Ip']) || !is_ipaddr($data['Ip'])){
-                throw new AppException('Qos_200');
+                throw new AppException('ip_error');
             }
             $up = intval($data['Up']);
             $down = intval($data['Down']);
@@ -481,9 +481,9 @@ class Qos extends Csbackend
             $type = '0';
             foreach($config['OPNsense']['TrafficShaper']['pipes']['pipe'] as $idx=>$pipe) {//检查是否已存在
                 if($pipe['description'] == $down_descr){
-                    throw new AppException('Qos_201');
+                    throw new AppException('ip_exist');
                 }elseif ($pipe['description'] == $up_descr){
-                    throw new AppException('Qos_201');
+                    throw new AppException('ip_exist');
                 }
                 if(('auto_up'==$pipe['description'] || 'auto_down'==$pipe['description'])&& '1'==$pipe['enabled']){
                     $type='1';
@@ -620,7 +620,7 @@ class Qos extends Csbackend
         $result = 0;
         try {
             if(!isset($data['Ip']) || !is_ipaddr($data['Ip'])){
-                throw new AppException('Qos_200');
+                throw new AppException('ip_error');
             }
             $pipe_up_descr = 'perip_up_'.$data['Ip'];
             $pipe_down_descr = 'perip_down_'.$data['Ip'];
@@ -774,11 +774,11 @@ class Qos extends Csbackend
         $result = 0;
         try{
             if(!isset($data['uuid'])){
-                throw new AppException("TRAFFIC_100");  //参数不正确
+                throw new AppException("param_error");  //参数不正确
             }
             $pipe = $config['OPNsense']['TrafficShaper']['pipes'];
             if(!isset($pipe['pipe']) || '' == $pipe['pipe']){
-                throw new AppException("TRAFFIC_101");  //用户不存在
+                throw new AppException("user_no_exist");  //用户不存在
             }
             $delFlag = false;
             foreach ($pipe['pipe'] as $key=>$val){
@@ -793,7 +793,7 @@ class Qos extends Csbackend
             }
 
             if(!$delFlag){
-                throw new AppException("TRAFFIC_101");  //用户不存在
+                throw new AppException("user_no_exist");  //用户不存在
             }
             write_config();
             self::reconfigure();
@@ -813,11 +813,11 @@ class Qos extends Csbackend
         $result = 0;
         try{
             if(!isset($data['uuid'])){
-                throw new AppException("TRAFFIC_200");  //参数不正确
+                throw new AppException("param_error");  //参数不正确
             }
             $pipe = $config['OPNsense']['TrafficShaper']['queues'];
             if(!isset($pipe['queue']) || '' == $pipe['queue']){
-                throw new AppException("TRAFFIC_201");  //用户不存在
+                throw new AppException("user_no_exist");  //用户不存在
             }
             $delFlag = false;
             foreach ($pipe['queue'] as $key=>$val){
@@ -842,7 +842,7 @@ class Qos extends Csbackend
             }
 
             if(!$delFlag){
-                throw new AppException("TRAFFIC_201");  //用户不存在
+                throw new AppException("user_no_exist");  //用户不存在
             }
 
             write_config();
@@ -863,11 +863,11 @@ class Qos extends Csbackend
         $result = 0;
         try{
             if(!isset($data['uuid'])){
-                throw new AppException("TRAFFIC_300");  //参数不正确
+                throw new AppException("param_error");  //参数不正确
             }
             $pipe = $config['OPNsense']['TrafficShaper']['rules'];
             if(!isset($pipe['rule']) || '' == $pipe['rule']){
-                throw new AppException("TRAFFIC_301");  //用户不存在
+                throw new AppException("user_no_exist");  //用户不存在
             }
             $delFlag = false;
             foreach ($pipe['rule'] as $key=>$val){
@@ -882,7 +882,7 @@ class Qos extends Csbackend
             }
 
             if(!$delFlag){
-                throw new AppException("TRAFFIC_301");  //用户不存在
+                throw new AppException("user_no_exist");  //用户不存在
             }
 
             write_config();
@@ -902,93 +902,93 @@ class Qos extends Csbackend
         $result = 0;
         try{
             if(!isset($data['enabled']) || !is_numeric($data['enabled'])){
-                throw new AppException("TRAFFIC_400");  //开启参数不正确
+                throw new AppException("enabled_param_error");  //开启参数不正确
             }
             if(!isset($data['bandwidth']) || !is_numeric($data['bandwidth'])){
-                throw new AppException("TRAFFIC_401");  //带宽参数不正确
+                throw new AppException("bandwidth_param_error");  //带宽参数不正确
             }
 
             if(!isset($data['bandwidthMetric']) || !in_array($data['bandwidthMetric'],self::BWMetric)){
-                throw new AppException("TRAFFIC_402");  //带宽单位参数不正确
+                throw new AppException("bandwidth_unit_error");  //带宽单位参数不正确
             }
 
             if(!isset($data['queue']) || ('' != $data['queue'] && !is_numeric($data['queue'])) ){
-                throw new AppException("TRAFFIC_403");  //队列参数不正确
+                throw new AppException("queue_error");  //队列参数不正确
             }
             if('' != $data['queue']){
                 $queueCnt = intval($data['queue']);
                 if($queueCnt<2 || $queueCnt>100){
-                    throw new AppException("TRAFFIC_404");  //队列参数不正确，范围为2~100
+                    throw new AppException("queue_range_2_100");  //队列参数不正确，范围为2~100
                 }
             }
 
             if(!isset($data['mask']) || !in_array($data['mask'],self::Mask)){
-                throw new AppException("TRAFFIC_405");  //掩码参数不正确
+                throw new AppException("mask_error");  //掩码参数不正确
             }
             if(!isset($data['scheduler']) || !in_array($data['scheduler'],self::Scheduler)){
-                throw new AppException("TRAFFIC_406");  //调度程序类型参数不正确
+                throw new AppException("sched_type_error");  //调度程序类型参数不正确
             }
 
             if(!isset($data['codel_enable']) || ('' != $data['codel_enable'] && !is_numeric($data['codel_enable'])) ){
-                throw new AppException("TRAFFIC_415");  //启用CoDel参数不正确
+                throw new AppException("fqcodel_enabled_error");  //启用CoDel参数不正确
             }
 
             if(!isset($data['codel_target']) || ('' != $data['codel_target'] && !is_numeric($data['codel_target'])) ){
-                throw new AppException("TRAFFIC_407");  //(FQ-)CoDel目标参数不正确
+                throw new AppException("fqcodel_target_error");  //(FQ-)CoDel目标参数不正确
             }
             if('' != $data['codel_target']){
                 $codel_traget = intval($data['codel_target']);
                 if($codel_traget <1 || $codel_traget > 10000){
-                    throw new AppException("TRAFFIC_407");  //(FQ-)CoDel目标参数不正确
+                    throw new AppException("fqcodel_target_error");  //(FQ-)CoDel目标参数不正确
                 }
             }
 
             if(!isset($data['codel_interval']) || ('' != $data['codel_interval'] && !is_numeric($data['codel_interval'])) ){
-                throw new AppException("TRAFFIC_407");  //(FQ-)CoDel目标参数不正确
+                throw new AppException("fqcodel_target_error");  //(FQ-)CoDel目标参数不正确
             }
             if('' != $data['codel_interval']){
                 $codel_interval = intval($data['codel_interval']);
                 if($codel_interval <1 || $codel_interval > 10000){
-                    throw new AppException("TRAFFIC_408");  //(FQ-)CoDel间隔参数不正确
+                    throw new AppException("fqcodel_interval_error");  //(FQ-)CoDel间隔参数不正确
                 }
             }
 
             if(!isset($data['codel_ecn_enable']) || ('' != $data['codel_ecn_enable'] && !is_numeric($data['codel_ecn_enable'])) ){
-                throw new AppException("TRAFFIC_409");  //FQ-)CoDel ECN参数不正确
+                throw new AppException("fqcodel_ecn_error");  //FQ-)CoDel ECN参数不正确
             }
 
             if(!isset($data['fqcodel_quantum']) || ('' != $data['fqcodel_quantum'] && !is_numeric($data['fqcodel_quantum'])) ){
-                throw new AppException("TRAFFIC_410");  //FQ-CoDel量参数不正确
+                throw new AppException("fqcodel_quantity_error");  //FQ-CoDel量参数不正确
             }
             if('' != $data['fqcodel_quantum']){
                 $fqcodel_quantum = intval($data['fqcodel_quantum']);
                 if($fqcodel_quantum <1 || $fqcodel_quantum > 65535){
-                    throw new AppException("TRAFFIC_410");  //FQ-CoDel量参数不正确
+                    throw new AppException("fqcodel_quantity_error");  //FQ-CoDel量参数不正确
                 }
             }
 
             if(!isset($data['fqcodel_limit']) || ('' != $data['fqcodel_limit'] && !is_numeric($data['fqcodel_limit'])) ){
-                throw new AppException("TRAFFIC_411");  //FQ-CoDel限制参数不正确
+                throw new AppException("fqcodel_limit_error");  //FQ-CoDel限制参数不正确
             }
             if('' != $data['fqcodel_limit']){
                 $fqcodel_limit = intval($data['fqcodel_limit']);
                 if($fqcodel_limit <1 || $fqcodel_limit > 65535){
-                    throw new AppException("TRAFFIC_411");  //FQ-CoDel限制参数不正确
+                    throw new AppException("fqcodel_limit_error");  //FQ-CoDel限制参数不正确
                 }
             }
 
             if(!isset($data['fqcodel_flows']) || ('' != $data['fqcodel_flows'] && !is_numeric($data['fqcodel_flows'])) ){
-                throw new AppException("TRAFFIC_412");  //FQ-CoDel限制参数不正确
+                throw new AppException("fqcodel_flows_error");  //FQ-CoDel限制参数不正确
             }
             if('' != $data['fqcodel_flows']){
                 $fqcodel_flows = intval($data['fqcodel_flows']);
                 if($fqcodel_flows <1 || $fqcodel_flows > 65535){
-                    throw new AppException("TRAFFIC_412");  //FQ-CoDel流参数不正确
+                    throw new AppException("fqcodel_flows_error");  //FQ-CoDel流参数不正确
                 }
             }
 
             if(!isset($data['description']) && '' == trim($data['description'])){
-                throw new AppException("TRAFFIC_414");  //描述参数不正确
+                throw new AppException("descr_error");  //描述参数不正确
             }
 
             $description = 'advanced_pipe_'.$data['description'];
@@ -1015,7 +1015,7 @@ class Qos extends Csbackend
             if(isset($data['uuid']) && '' != $data['uuid'] ){   //编辑
                 $editFlag = false;
                 if(!isset($pipe['pipe'])){
-                    throw new AppException("TRAFFIC_413");  //管道不存在
+                    throw new AppException("pipe_no_exist");  //管道不存在
                 }
                 foreach ($pipe['pipe'] as $key=>$val){
                     foreach ($val as $k=>$v){
@@ -1042,7 +1042,7 @@ class Qos extends Csbackend
                     }
                 }
                 if(!$editFlag){
-                    throw new AppException("TRAFFIC_413");  //管道不存在
+                    throw new AppException("pipe_no_exist");  //管道不存在
                 }
             }else{  //添加
                 $uuid = self::getUuid();
@@ -1121,40 +1121,40 @@ class Qos extends Csbackend
         $result = 0;
         try{
             if(!isset($data['enabled']) && !is_numeric($data['enabled'])){
-                throw new AppException("TRAFFIC_500");      //开启参数不正确
+                throw new AppException("enabled_param_error");      //开启参数不正确
             }
             if(!isset($data['pipe'])){
-                throw new AppException("TRAFFIC_501");      //管道参数不正确
+                throw new AppException("pipe_param_error");      //管道参数不正确
             }
             if(!isset($data['weight']) && !is_numeric($data['weight'])){
-                throw new AppException("TRAFFIC_502");      //权重参数不正确
+                throw new AppException("weight_param_error");      //权重参数不正确
             }
             $weight = intval($data['weight']);
             if($weight < 1 || $weight > 100){
-                throw new AppException("TRAFFIC_502");      //权重参数不正确
+                throw new AppException("weight_param_error");      //权重参数不正确
             }
             if(!isset($data['mask']) && !in_array($data['mask'],self::Mask)){
-                throw new AppException("TRAFFIC_503");      //掩码参数不正确
+                throw new AppException("mask_param_error");      //掩码参数不正确
             }
             if(!isset($data['codel_enable']) && !is_numeric($data['codel_enable'])){
-                throw new AppException("TRAFFIC_504");      //启用CoDel参数不正确
+                throw new AppException("enabled_codel_error");      //启用CoDel参数不正确
             }
             if(!isset($data['codel_target']) || ('' != $data['codel_target'] && !is_numeric($data['codel_target'])) ){
-                throw new AppException("TRAFFIC_505");      //(FQ-)CoDel目标参数不正确
+                throw new AppException("fqcodel_target_error");      //(FQ-)CoDel目标参数不正确
             }
             if(!isset($data['codel_interval']) || ('' != $data['codel_interval'] && !is_numeric($data['codel_interval']))){
-                throw new AppException("TRAFFIC_506");      // (FQ-)CoDel间隔参数不正确
+                throw new AppException("fqcodel_interval_error");      // (FQ-)CoDel间隔参数不正确
             }
             if(!isset($data['codel_ecn_enable']) && !is_numeric($data['codel_ecn_enable'])){
-                throw new AppException("TRAFFIC_507");      // (FQ-)CoDel ECN参数不正确
+                throw new AppException("fqcodel_ecn_error");      // (FQ-)CoDel ECN参数不正确
             }
             if(!isset($data['description'])){
-                throw new AppException("TRAFFIC_508");      // 描述参数不正确
+                throw new AppException("descr_error");      // 描述参数不正确
             }
 
             $pipes = $config['OPNsense']['TrafficShaper']['pipes'];
             if(!isset($pipes['pipe']) || '' == $pipes['pipe']){
-                throw new AppException("TRAFFIC_509");      //管道不存在
+                throw new AppException("pipe_no_exist");      //管道不存在
             }
             $pipeFlag = false;
             foreach ($pipes['pipe'] as $key=>$val){
@@ -1171,7 +1171,7 @@ class Qos extends Csbackend
                 }
             }
             if(!$pipeFlag){
-                throw new AppException("TRAFFIC_501");      //管道参数不正确
+                throw new AppException("pipe_param_error");      //管道参数不正确
             }
 
             $description = 'advanced_queue_'.$data['description'];
@@ -1193,7 +1193,7 @@ class Qos extends Csbackend
             if(isset($data['uuid']) && '' != trim($data['uuid'])){  //编辑
                 $editFlag = false;
                 if(!isset($queues['queue'])){
-                    throw new AppException("TRAFFIC_510");  //队列不存在
+                    throw new AppException("queue_no_exist");  //队列不存在
                 }
                 foreach ($queues['queue'] as $key=>$val){
                     if(is_numeric($key)){
@@ -1296,19 +1296,19 @@ class Qos extends Csbackend
         $result = 0;
         try{
             if(!isset($data['sequence']) && !is_numeric($data['sequence'])){
-                throw new AppException("TRAFFIC_600");  //序列不正确
+                throw new AppException("sequence_error");  //序列不正确
             }
             if(!isset($config['interfaces'][$data['interface']])){
-                throw new AppException('TRAFFIC_601');      //接口参数不正确
+                throw new AppException('interface_param_error');      //接口参数不正确
             }
             if(!isset($data['interface2']) || ('' != $data['interface2'] && !isset($config['interfaces'][$data['interface2']]) )){
-                throw new AppException('TRAFFIC_602');  //接口2参数不正确
+                throw new AppException('interface2_param_error');  //接口2参数不正确
             }
             if(!isset($data['proto']) && !in_array($data['proto'],self::Proto)){
-                throw new AppException('TRAFFIC_603');  //协议参数不正确
+                throw new AppException('protocol_param_error');  //协议参数不正确
             }
             if(!isset($data['source'])){
-                throw new AppException('TRAFFIC_604');  //源参数不正确
+                throw new AppException('source_error');  //源参数不正确
             }
             if('' == $data['source']){
                 $data['source'] = 'any';
@@ -1318,17 +1318,17 @@ class Qos extends Csbackend
                     if( !is_ipaddr($data['source'])){
                         $source = explode("/",$data['source']);
                         if(!is_ipaddr($source[0]) || !is_numeric($source[1])){
-                            throw new AppException("TRAFFIC_604");   //源参数不正确
+                            throw new AppException("source_error");   //源参数不正确
                         }
                     }
                 }
             }
             if(!isset($data['source_not']) && !is_numeric($data['source_not'])){
-                throw new AppException("TRAFFIC_605");   //源参数不正确
+                throw new AppException("invert_source_error");   //源参数不正确
             }
 
             if(!isset($data['src_port'])){
-                throw new AppException("TRAFFIC_606");   //源端口参数不正确
+                throw new AppException("source_port_error");   //源端口参数不正确
             }
             if('' == $data['src_port']){
                 $data['src_port'] = 'any';
@@ -1336,16 +1336,16 @@ class Qos extends Csbackend
             if(is_numeric($data['src_port'])){
                 $srcPort = intval($data['src_port']);
                 if($srcPort<1 || $srcPort>65535){
-                    throw new AppException("TRAFFIC_606");   //源端口参数不正确
+                    throw new AppException("source_port_error");   //源端口参数不正确
                 }
             }else{
                 if(!in_array($data['src_port'],self::SrcAnDstPort)){
-                    throw new AppException("TRAFFIC_606");   //源端口参数不正确
+                    throw new AppException("source_port_error");   //源端口参数不正确
                 }
             }
 
             if(!isset($data['destination'])){
-                throw new AppException('TRAFFIC_607');  //目的地参数不正确
+                throw new AppException('dest_param_error');  //目的地参数不正确
             }
             if('' == $data['destination']){
                 $data['destination'] = 'any';
@@ -1355,18 +1355,18 @@ class Qos extends Csbackend
                     if( !is_ipaddr($data['destination'])){
                         $destination = explode("/",$data['destination']);
                         if(!is_ipaddr($destination[0]) || !is_numeric($destination[1])){
-                            throw new AppException("TRAFFIC_607");   //目的地参数不正确
+                            throw new AppException("dest_param_error");   //目的地参数不正确
                         }
                     }
                 }
             }
 
             if(!isset($data['destination_not']) && !is_numeric($data['destination_not'])){
-                throw new AppException("TRAFFIC_608");   //反转目的地参数不正确
+                throw new AppException("invert_dest_error");   //反转目的地参数不正确
             }
 
             if(!isset($data['dst_port'])){
-                throw new AppException("TRAFFIC_609");   //目的端口参数不正确
+                throw new AppException("dest_port_error");   //目的端口参数不正确
             }
             if('' == $data['dst_port']){
                 $data['dst_port'] = 'any';
@@ -1374,24 +1374,24 @@ class Qos extends Csbackend
             if(is_numeric($data['dst_port'])){
                 $dstPort = intval($data['dst_port']);
                 if($dstPort<1 || $dstPort>65535){
-                    throw new AppException("TRAFFIC_609");   //源端口参数不正确
+                    throw new AppException("dest_port_error");   //源端口参数不正确
                 }
             }else{
                 if(!in_array($data['dst_port'],self::SrcAnDstPort)){
-                    throw new AppException("TRAFFIC_609");   //源端口参数不正确
+                    throw new AppException("dest_port_error");   //源端口参数不正确
                 }
             }
             if(!isset($data['direction']) || !in_array($data['direction'],self::Direction)){
-                throw new AppException("TRAFFIC_610");   //方向参数不正确
+                throw new AppException("dire_error");   //方向参数不正确
             }
 
             if(!isset($data['target'])){
-                throw new AppException("TRAFFIC_611");   //目标参数不正确
+                throw new AppException("target_param_error");   //目标参数不正确
             }
 
             $traffic = $config['OPNsense']['TrafficShaper'];
             if(!is_array($traffic) || ('' == $traffic['pipes'] && '' == $traffic['queues'])){
-                throw new AppException("TRAFFIC_612");      //目标参数不存在
+                throw new AppException("target_error");      //目标参数不存在
             }
             $trafficFlag = false;
             foreach ($traffic as $type=>$params){
@@ -1458,10 +1458,10 @@ class Qos extends Csbackend
                 }
             }
             if(!$trafficFlag){
-                throw new AppException("TRAFFIC_612");      //目标参数不存在
+                throw new AppException("target_no_exist");      //目标参数不存在
             }
             if(!isset($data['description']) || '' == $data['description']){
-                throw new AppException("TRAFFIC_613");      //描述参数不存在
+                throw new AppException("descr_error");      //描述参数不存在
             }
 
             $description = 'advanced_rule_'.$data['description'];
@@ -1485,7 +1485,7 @@ class Qos extends Csbackend
             if(isset($data['uuid']) && '' != $data['uuid']){    //编辑
                 $editFlag = false;
                 if(!isset($rules['rule'])){
-                    throw new AppException("TRAFFIC_614");  //规则不存在
+                    throw new AppException("rule_no_exist");  //规则不存在
                 }
                 foreach ($rules['rule'] as $key=>$val){
                     foreach ($val as $k=>$v){
@@ -1514,7 +1514,7 @@ class Qos extends Csbackend
                     }
                 }
                 if(!$editFlag){
-                    throw new AppException("TRAFFIC_614");  //规则不存在
+                    throw new AppException("rule_no_exist");  //规则不存在
                 }
 
             }else{  //添加

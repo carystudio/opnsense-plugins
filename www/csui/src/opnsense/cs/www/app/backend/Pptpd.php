@@ -134,29 +134,29 @@ class Pptpd extends Csbackend
                 $data[$var] = trim($val);
             }
             if(!isset($data['Enable']) || ('1'!=$data['Enable'] && '0'!=$data['Enable'])){
-                throw new AppException('Pptpd_100');
+                throw new AppException('enabled_params_error');
             }
             if('1'==$data['Enable']){
                 if(!isset($data['LocalIp']) || !is_ipaddr($data['LocalIp'])){
-                    throw new AppException('Pptpd_101');
+                    throw new AppException('server_ip_error');
                 }
                 if(!isset($data['ClientIpStart']) || !is_ipaddr($data['ClientIpStart'])){
-                    throw new AppException('Pptpd_102');
+                    throw new AppException('client_start_ip_error');
                 }
                 if(!isset($data['ClientIpEnd']) || !is_ipaddr($data['ClientIpEnd'])){
-                    throw new AppException('Pptpd_103');
+                    throw new AppException('client_end_ip_error');
                 }
                 if(!isset($data['Wins']) || (strlen($data['Wins'])>0 && !is_ipaddr($data['Wins']))){
-                    throw new AppException('Pptpd_104');
+                    throw new AppException('wins_server_ip_error');
                 }
                 if(!isset($data['Dns1']) || !is_ipaddr($data['Dns1'])){
-                    throw new AppException('Pptpd_105');
+                    throw new AppException('dns1_error');
                 }
                 if(isset($data['Dns2']) && strlen($data['Dns2'])>0 && !is_ipaddr($data['Dns2'])){
-                    throw new AppException('Pptpd_106');
+                    throw new AppException('dns2_error');
                 }
                 if(!isset($data['Encrypt']) || ('1'!=$data['Encrypt'] && '0'!=$data['Encrypt'])){
-                    throw new AppException('Pptpd_107');
+                    throw new AppException('encryption_error');
                 }
             }
 
@@ -233,19 +233,19 @@ class Pptpd extends Csbackend
                 $data[$var] = trim($val);
             }
             if(!isset($data['Username']) || strlen($data['Username'])<1){
-                throw new AppException('Pptpd_200');
+                throw new AppException('username_no_empty');
             }
             if(!isset($data['Password']) || strlen($data['Password'])<1){
-                throw new AppException('Pptpd_201');
+                throw new AppException('password_no_exist');
             }
             if(isset($data['Ip']) && strlen($data['Ip'])>0 && !is_ipaddr($data['Ip'])){
-                throw new AppException('Pptpd_202');
+                throw new AppException('ip_error');
             }
             $new_user = array('name'=>$data['Username'], 'password'=>$data['Password'], 'ip'=>$data['Ip']);
             if(isset($config['pptpd']['user']) && is_array($config['pptpd']['user'])) {//检查是否已存在
                 foreach ($config['pptpd']['user'] as $user){
                     if($user['name'] == $data['Username']){
-                        throw new AppException('Pptpd_203');
+                        throw new AppException('user_exist');
                     }
                 }
                 $config['pptpd']['user'][] = $new_user;
@@ -281,7 +281,7 @@ class Pptpd extends Csbackend
                 }
             }
             if(!$deleted){
-                throw new AppException('Pptpd_300');
+                throw new AppException('user_no_exist');
             }
 
             self::pptpd_users_sort();

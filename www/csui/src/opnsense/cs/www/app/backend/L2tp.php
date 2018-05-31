@@ -140,29 +140,29 @@ class L2tp extends Csbackend
                 $data[$var] = trim($val);
             }
             if(!isset($data['Enable']) || ('1'!=$data['Enable'] && '0'!=$data['Enable'])){
-                throw new AppException('L2tp_100');
+                throw new AppException('enabled_params_error');
             }
             if('1'==$data['Enable']){
                 if(!isset($data['LocalIp']) || !is_ipaddr($data['LocalIp'])){
-                    throw new AppException('L2tp_101');
+                    throw new AppException('server_ip_error');
                 }
                 if(!isset($data['ClientIpStart']) || !is_ipaddr($data['ClientIpStart'])){
-                    throw new AppException('L2tp_102');
+                    throw new AppException('client_start_ip_error');
                 }
                 if(!isset($data['ClientIpEnd']) || !is_ipaddr($data['ClientIpEnd'])){
-                    throw new AppException('L2tp_103');
+                    throw new AppException('client_end_ip_error');
                 }
                 if(!isset($data['Wins']) || (strlen($data['Wins'])>0 && !is_ipaddr($data['Wins']))){
-                    throw new AppException('L2tp_104');
+                    throw new AppException('wins_server_ip_error');
                 }
                 if(isset($data['Dns1']) && (strlen($data['Dns1'])>0) &&!is_ipaddr($data['Dns1'])){
-                    throw new AppException('L2tp_105');
+                    throw new AppException('dns1_error');
                 }
                 if(isset($data['Dns2']) && strlen($data['Dns2'])>0 && !is_ipaddr($data['Dns2'])){
-                    throw new AppException('L2tp_106');
+                    throw new AppException('dns2_error');
                 }
                 if(!isset($data['AuthType']) || ('chap'!=$data['AuthType'] && 'pap'!=$data['AuthType'])){
-                    throw new AppException('L2tp_107');
+                    throw new AppException('auth_type_error');
                 }
             }
 
@@ -237,19 +237,19 @@ class L2tp extends Csbackend
                 $data[$var] = trim($val);
             }
             if(!isset($data['Username']) || strlen($data['Username'])<1){
-                throw new AppException('L2tp_200');
+                throw new AppException('username_error');
             }
             if(!isset($data['Password']) || strlen($data['Password'])<1){
-                throw new AppException('L2tp_201');
+                throw new AppException('password_error');
             }
             if(isset($data['Ip']) && strlen($data['Ip'])>0 && !is_ipaddr($data['Ip'])){
-                throw new AppException('L2tp_202');
+                throw new AppException('user_ip_error');
             }
             $new_user = array('name'=>$data['Username'], 'password'=>$data['Password'], 'ip'=>$data['Ip']);
             if(isset($config['l2tp']['user']) && is_array($config['l2tp']['user'])) {//检查是否已存在
                 foreach ($config['l2tp']['user'] as $user){
                     if($user['name'] == $data['Username']){
-                        throw new AppException('L2tp_203');
+                        throw new AppException('user_exist');
                     }
                 }
                 $config['l2tp']['user'][] = $new_user;
@@ -285,7 +285,7 @@ class L2tp extends Csbackend
                 }
             }
             if(!$deleted){
-                throw new AppException('L2tp_300');
+                throw new AppException('user_no_exist');
             }
 
             l2tp_users_sort();

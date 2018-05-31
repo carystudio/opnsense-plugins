@@ -2395,7 +2395,7 @@ var messages = {
             "connection_success=":"Connection successfully",
             "connection_fail":"Connection fail"
         },
-        errorcode:{
+        /*errorcode:{
             'Dns_100':'Incorrectly opening parameters',
             'Dns_101':'No DNS server is not set, and DNS forwarding cannot be shut down',
             'Dns_200':'IP is incorrect',
@@ -2864,7 +2864,7 @@ var messages = {
             "dyndns":"Dynamic DNS is using this port and cannot delete the port!",
             "wol":"LAN wakeup is using the port and cannot delete the port!",
             "staticroute":"Static port settings are using this port, and the port cannot be deleted."
-        },
+        },*/
         common:{
             "enabled":"Enabled",
             "disabled":"Disabled",
@@ -5293,7 +5293,7 @@ var messages = {
             "connection_success=":"连接成功",
             "connection_fail":"连接失败"
         },
-        errorcode:{
+        /*errorcode:{
             'Dns_100':'开启参数不正确',
             'Dns_101':'未设置DNS服务器不能，不能关闭DNS转发功能',
             'Dns_200':'IP不正确',
@@ -5764,7 +5764,7 @@ var messages = {
             "dyndns":"动态DNS正在使用该端口，不能删除该端口！",
             "wol":"局域网唤醒正在使用该端口，不能删除该端口！",
             "staticroute":"静态路由设置正在使用该端口，不能删除该端口！"
-        },
+        },*/
         common:{
             enabled:"启用",
             disabled:"禁用",

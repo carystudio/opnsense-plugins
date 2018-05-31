@@ -59,7 +59,7 @@ class Firmware extends Csbackend
 	    $info = self::getFirmwareInfo(true);
 	    try{
             if($data['Fw_version']!=$info['Fw_version']){
-                throw new AppException('Firmware_100');
+                throw new AppException('version_error');
             }
             exec('/bin/sh /usr/local/opnsense/cs/script/extract_upgrade_file.sh');
             $db = self::getDbConn();
@@ -72,7 +72,7 @@ class Firmware extends Csbackend
                 $text = file_get_contents('/upgrade_tmp/files/packages/+COMPACT_MANIFEST');
                 $firmware_packages_ver = json_decode($text,true);
             }else{
-                throw new AppException('Firmware_101');
+                throw new AppException('upload_firmware_no_exist');
             }
             if(file_exists('/upgrade_tmp/files/packages/packagesite.yaml')){
                 $f = fopen('/upgrade_tmp/files/packages/packagesite.yaml', 'r');
@@ -83,7 +83,7 @@ class Firmware extends Csbackend
                     }
                 }
             }else{
-                throw new AppException('Firmware_101');
+                throw new AppException('upload_firmware_no_exist');
             }
             $to_install_packages = array();
             foreach($firmware_packages_ver['deps'] as $package_name=>$package_info){

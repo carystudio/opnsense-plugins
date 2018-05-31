@@ -223,22 +223,22 @@ class Portal extends Csbackend
         $result = 0;
         try{
             if(!isset($data['Enable']) || ('1'!=$data['Enable'] && '0'!=$data['Enable'])){
-                throw new AppException('Portal_100');
+                throw new AppException('enabled_params_error');
             }
 
             $portal = self::getPortal();
             $portal['enabled'] = $data['Enable'];
             if('1'==$portal['enabled'] && (!isset($data['Type']) || ('local'!=$data['Type'] && 'server'!=$data['Type']))){
-                throw new AppException('Portal_101');
+                throw new AppException('server_type_error');
             }
             if('1'==$portal['enabled'] && 'local'==$data['Type']){
                 $idletimeout = isset($data['IdleTimeout'])?intval($data['IdleTimeout']):0;
                 if($idletimeout<1 || $idletimeout>300){
-                    throw new AppException('Portal_102');
+                    throw new AppException('idle_error');
                 }
                 if('1'==$data['LoginPageStatus']){
                     if(!is_dir(PortalHelper::$CUSTOM_TPL_DIR)){
-                        throw new AppException('Portal_103');
+                        throw new AppException('upload_loginpage_fail');
                     }
                 }else{
                     exec('/bin/rm -rf '.PortalHelper::$CUSTOM_TPL_DIR);
@@ -250,7 +250,7 @@ class Portal extends Csbackend
                     $allowed_ips = explode(',', trim($data['AllowedIp']));
                     foreach($allowed_ips as $ip){
                         if(!is_ipaddr($ip)){
-                            throw new AppException('Portal_104');
+                            throw new AppException('white_ip_error');
                         }
                     }
                 }
@@ -259,22 +259,22 @@ class Portal extends Csbackend
                     foreach($allowed_macs as $idx=>$mac){
                         $allowed_macs[$idx] = strtolower($mac);
                         if(!is_macaddr($allowed_macs[$idx])){
-                            throw new AppException('Portal_105');
+                            throw new AppException('white_mac_error');
                         }
                     }
                 }
                 if(isset($data['wc_enable']) && 'yes' == $data['wc_enable']){
                     if(strlen(trim($data['appId']))<=0){
-                        throw new AppException('appId不能为空');
+                        throw new AppException('appid_no_empty');
                     }
                     if(strlen(trim($data['shop_id']))<=0){
-                        throw new AppException('shop_id不能为空');
+                        throw new AppException('shopid_no_empty');
                     }
                     if(strlen(trim($data['ssid']))<=0){
-                        throw new AppException('ssid不能为空');
+                        throw new AppException('ssid_no_empty');
                     }
                     if(strlen(trim($data['secretkey']))<=0){
-                        throw new AppException('secretkey不能为空');
+                        throw new AppException('secretkey_no_empty');
                     }
                     $portal['wc_enable'] = 'yes';
                     $portal['appId'] = trim($data['appId']);
@@ -319,7 +319,7 @@ class Portal extends Csbackend
                 }
             }else if('1'==$portal['enabled'] && 'server'==$data['Type']){
                 if(strlen(trim($data['GatewayId']))<=0){
-                    throw new AppException('Portal_106');
+                    throw new AppException('hotid_no_empty');
                 }
                 if(is_dir(PortalHelper::$CUSTOM_TPL_DIR)){
                     exec('/bin/rm -rf '.PortalHelper::$CUSTOM_TPL_DIR);
@@ -511,23 +511,23 @@ class Portal extends Csbackend
             $remain_time = intval($data['RemainTime']);
             $concurrent = $data['MutilLogins'];
             if(strlen($password) <6 || strlen($password)>15){
-                throw new AppException('Portal_200');
+                throw new AppException('pwd_long_error');
             }
             if(false === $expire_time){
-                throw new AppException('Portal_201');
+                throw new AppException('login_valid_cutoff_error');
             }
             if($remain_time<0){
-                throw new AppException('Portal_202');
+                throw new AppException('login_valid_time_error');
             }
             $remain_time = $remain_time * 60;
             if('0'!=$concurrent && '1'!=$concurrent){
-                throw new AppException('Portal_203');
+                throw new AppException('repeat_login_param_error');
             }
             $db = PortalHelper::getDbConn();
             $res = $db->query("select * from users where username='".SQLite3::escapeString($username)."' limit 1");
             $user = $res->fetchArray(SQLITE3_ASSOC);
             if($user) {
-                throw new AppException('Portal_204');
+                throw new AppException('user_exist');
             }
             $res = $db->exec("insert into users (username, password, expire_time, remain_time, concurrent_logins, created, deleted) values (
 '".$username."',
@@ -538,7 +538,7 @@ class Portal extends Csbackend
 '".$t."',
 '0')");
             if(!$res){
-                throw new AppException('Portal_205');
+                throw new AppException('create_user_fail');
             }
         }catch(AppException $aex){
             $result = $aex->getMessage();
@@ -557,17 +557,17 @@ class Portal extends Csbackend
         try{
             $username = SQLite3::escapeString(trim($data['Username']));
             if('WeChatUser'==$username){
-                throw new AppException('Portal_302');
+                throw new AppException('wechat_no_del');
             }
             $db = PortalHelper::getDbConn();
             $res = $db->query("select * from users where username='".SQLite3::escapeString($username)."' limit 1");
             $user = $res->fetchArray(SQLITE3_ASSOC);
             if(!$user) {
-                throw new AppException('Portal_300');
+                throw new AppException('user_no_exist');
             }
             $res = $db->exec("delete from users where username='$username'");
             if(!$res){
-                throw new AppException('Portal_301');
+                throw new AppException('del_user_fail');
             }
         }catch(AppException $aex){
             $result = $aex->getMessage();
@@ -590,23 +590,23 @@ class Portal extends Csbackend
             $remain_time = intval($data['RemainTime']);
             $concurrent = $data['MutilLogins'];
             if(strlen($password)>0 && (strlen($password) <6 || strlen($password)>15)){
-                throw new AppException('Portal_200');
+                throw new AppException('pwd_long_error');
             }
             if(false === $expire_time){
-                throw new AppException('Portal_201');
+                throw new AppException('login_valid_cutoff_error');
             }
             if($remain_time<0){
-                throw new AppException('Portal_202');
+                throw new AppException('login_valid_time_error');
             }
             $remain_time = $remain_time * 60;
             if('0'!=$concurrent && '1'!=$concurrent){
-                throw new AppException('Portal_203');
+                throw new AppException('repeat_login_param_error');
             }
             $db = PortalHelper::getDbConn();
             $res = $db->query("select * from users where username='".SQLite3::escapeString($username)."' limit 1");
             $user = $res->fetchArray(SQLITE3_ASSOC);
             if(!$user) {
-                throw new AppException('Portal_400');
+                throw new AppException('user_no_exist');
             }
 
             if(strlen($password)==0){
@@ -615,7 +615,7 @@ class Portal extends Csbackend
             $res = $db->exec("update users set password='".$password."', expire_time='".$expire_time."',remain_time='".$remain_time.
                 "', concurrent_logins='".$concurrent."', created=".$t.", deleted=0 where username='".$username."'");
             if(!$res){
-                throw new AppException('Portal_401');
+                throw new AppException('update_user_fail');
             }
         }catch(AppException $aex){
             $result = $aex->getMessage();
@@ -662,7 +662,7 @@ class Portal extends Csbackend
             $res = $db->query("select * from cp_clients where sessionid='".$sessionid."'");
             $session = $res->fetchArray(SQLITE3_ASSOC);
             if(!$session) {
-                throw new AppException('Portal_500');
+                throw new AppException('login_user_no_exist');
             }
             $db->close();
             $backend = new Backend();

@@ -86,76 +86,76 @@ class Dyndns extends Csbackend
             $ddns = array();
             if(isset($data['enable'])){
                 if('yes'!=$data['enable']){
-                    throw new AppException('DDNS_100');
+                    throw new AppException('enabled_param_error');
                 }
                 $ddns['enable'] = '1';
             }
             $type_list = dyndns_list();
             if(!isset($data['type']) || !key_exists($data['type'], $type_list)){
-                throw new AppException('DDNS_101');
+                throw new AppException('server_type_error');
             }
             $ddns['type'] = $data['type'];
 
             if(!isset($data['interface']) || (!empty($data['interface']) && !isset($config['interfaces'][$data['interface']]))){
-                throw new AppException('DDNS_102');
+                throw new AppException('interface_param_error');
             }
             $ddns['interface'] = $data['interface'];
 
             if(false && isset($data['requestif']) && !empty($data['requestif']) && !isset($config['interfaces'][$data['requestif']])){
-                throw new AppException('DDNS_103');
+                throw new AppException('from_interface_update_error');
             }
             $ddns['requestif'] = $ddns['interface'];
 
             if(!isset($data['host']) || empty($data['host'])){
-                throw new AppException('DDNS_104');
+                throw new AppException('host_name_empty');
             }
             $ddns['host'] = $data['host'];
 
             if(!isset($data['mx'])){
-                throw new AppException('DDNS_105');
+                throw new AppException('mx_error');
             }
             $ddns['mx'] = $data['mx'];
             if(isset($data['wildcard'])){
                 if('yes'!=$data['wildcard']){
-                    throw new AppException('DDNS_106');
+                    throw new AppException('wildcard_error');
                 }
                 $ddns['wildcard'] = '1';
             }
             if(isset($data['verboselog'])){
                 if('yes'!=$data['verboselog']){
-                    throw new AppException('DDNS_107');
+                    throw new AppException('verbose_log_error');
                 }
                 $ddns['verboselog'] = '1';
             }
             if(!isset($data['username']) || empty($data['username'])){
-                throw new AppException('DDNS_108');
+                throw new AppException('username_no_empty');
             }
             $ddns['username'] = $data['username'];
 
             if(!isset($data['password']) || empty($data['password'])){
-                throw new AppException('DDNS_109');
+                throw new AppException('password_no_empty');
             }
             $ddns['password'] = $data['password'];
 
             if(!isset($data['descr']) || strlen($data['descr'])>60){
-                throw new AppException('DDNS_110');
+                throw new AppException('descr_length60');
             }
             $ddns['descr'] = $data['descr'];
             $ddns['updateurl'] = isset($data['updateurl'])?$data['updateurl']:'';
             if('custom' == $ddns['type']){
                 if(empty($ddns['updateurl'])){
-                    throw new AppException('DDNS_111');
+                    throw new AppException('url_no_empty');
                 }
                 if(isset($data['curl_ipresolve_v4'])){
                     if('yes'!=$data['curl_ipresolve_v4']){
-                        throw new AppException('DDNS_112');
+                        throw new AppException('mandatory_parsingv4_error');
                     }
                     $ddns['curl_ipresolve_v4'] = '1';
                 }
 
                 if(isset($data['curl_ssl_verifypeer'])){
                     if('yes'!=$data['curl_ssl_verifypeer']){
-                        throw new AppException('DDNS_113');
+                        throw new AppException('ssl_check_error');
                     }
                     $ddns['curl_ssl_verifypeer'] = '1';
                 }
@@ -173,7 +173,7 @@ class Dyndns extends Csbackend
             }
             if(isset($data['id'])){
                 if(!isset($config['dyndnses']['dyndns'][$data['id']])){
-                    throw new AppException('DDNS_120');
+                    throw new AppException('zoneid_error');
                 }
                 $config['dyndnses']['dyndns'][$data['id']] = $ddns;
                 $id = $data['id'];
@@ -206,10 +206,10 @@ class Dyndns extends Csbackend
         try{
             if(!isset($data['id']) || !is_numeric($data['id'])){
                 print_r($data);
-                throw new AppException('DDNS_200');
+                throw new AppException('param_error');
             }
             if(!isset($config['dyndnses']['dyndns'][$data['id']])){
-                throw new AppException('DDNS_201');
+                throw new AppException('this_data_no_exist_or_delete');
             }
             $conf = $config['dyndnses']['dyndns'][$data['id']];
             @unlink(dyndns_cache_file($conf, 4));
