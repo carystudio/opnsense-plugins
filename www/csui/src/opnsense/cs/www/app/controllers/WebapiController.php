@@ -501,14 +501,44 @@ class WebapiController extends BaseController
     public function genErrorAction(){
         $errors_zh = ApiError::ERROR_ZH;
         $errors_en = ApiError::ERROR_EN;
+
+        foreach ($errors_zh as $key=>$val){
+            if(!array_key_exists($key,$errors_en)){
+                $errors_en[$key] = $val;
+                echo 'key:'.$key.' value:'.$val."\r\n";
+                echo "Not in English! \r\n";
+            }
+        }
+        foreach ($errors_en as $key=>$val){
+            if(!array_key_exists($key,$errors_zh)){
+                $errors_zh[$key] = $val;
+                echo 'key:'.$key.' value:'.$val."\r\n";
+                echo "Not in Chinese! \r\n";
+            }
+        }
+
         $array_cn_str = '';
+        $i = 0;
         foreach($errors_zh as $var=>$val){
-            $array_cn_str.="\t\"$var\":\"$val\",\n";
+            $i++;
+            if($i == count($errors_en)) {
+                $array_cn_str .= "\t\"$var\":\"$val\"\n";
+            }else{
+                $array_cn_str .= "\t\"$var\":\"$val\",\n";
+            }
+
         }
         $array_en_str = '';
+        $i = 0;
         foreach($errors_en as $var=>$val){
-            $array_en_str.="\t\"$var\":\"$val\",\n";
+            $i++;
+            if($i == count($errors_en)){
+                $array_en_str.="\t\"$var\":\"$val\"\n";
+            }else{
+                $array_en_str.="\t\"$var\":\"$val\",\n";
+            }
         }
+
         $specjs_path = APP_PATH.'public/newui/static/js/spec.js';
         if(!file_exists($specjs_path)){
             exec("/usr/bin/touch ".$specjs_path);
