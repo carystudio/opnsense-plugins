@@ -336,7 +336,9 @@ class Portal extends Csbackend
                 file_put_contents('/usr/local/opnsense/cs/conf/captiveportal/portal_loginpage.txt',$loginpage);
                 file_put_contents('/usr/local/opnsense/cs/conf/captiveportal/portal_gatewayid.txt',$portal['description']);
                 file_put_contents('/usr/local/opnsense/cs/conf/captiveportal/portal_server.txt',PortalHelper::$PORTAL_SERVER);
-                unlink('/usr/local/opnsense/cs/conf/captiveportal/portal_wc_enable.txt');
+                if(file_exists("/usr/local/opnsense/cs/conf/captiveportal/portal_wc_enable.txt")){
+                    unlink('/usr/local/opnsense/cs/conf/captiveportal/portal_wc_enable.txt');
+                }
                 if(PortalHelper::getConf()){
                     $center_conf = parse_ini_file('/usr/local/opnsense/cs/tmp/portal_server_config');
                     if(is_array($center_conf)){
