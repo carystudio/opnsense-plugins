@@ -45,11 +45,11 @@ try{
 				}
 
 				//WIFI0_STATUS
-				$apWifiInfo['APS2G']['country'] = $data['APS2G']["CountryCode"];
-				$apWifiInfo['APS2G']['htmode'] = $data['APS2G']["HT_BW"];
-				$apWifiInfo['APS2G']['channel'] = $data['APS2G']["Channel"];
-				$apWifiInfo['APS2G']['txpower'] = $data['APS2G']["TxPower"];
-				$apWifiInfo['APS2G']['clientnum'] = $data['APS2G']["StaNum"];
+				$apWifiInfo['APS2G']['country'] = $data['APS2G']["CountryCode"]==''?'CN':$data['APS2G']["CountryCode"];
+				$apWifiInfo['APS2G']['htmode'] = $data['APS2G']["HT_BW"]==''?'0':$data['APS2G']["HT_BW"];
+				$apWifiInfo['APS2G']['channel'] = $data['APS2G']["Channel"]==''?'0':$data['APS2G']["Channel"];
+				$apWifiInfo['APS2G']['txpower'] = $data['APS2G']["TxPower"]==''?'100':$data['APS2G']["TxPower"];
+				$apWifiInfo['APS2G']['clientnum'] = $data['APS2G']["StaNum"]==''?'0':$data['APS2G']["StaNum"];
 			}
 
 			if(isset($data['APS5G'])){
@@ -66,11 +66,11 @@ try{
 				}
 
 				//WIFI0_STATUS
-				$apWifiInfo['APS5G']['country'] = $data['APS5G']["CountryCode"];
-				$apWifiInfo['APS5G']['htmode'] = $data['APS5G']["HT_BW"];
-				$apWifiInfo['APS5G']['channel'] = $data['APS5G']["Channel"];
-				$apWifiInfo['APS5G']['txpower'] = $data['APS5G']["TxPower"];
-				$apWifiInfo['APS5G']['clientnum'] = $data['APS5G']["StaNum"];
+				$apWifiInfo['APS5G']['country'] = $data['APS5G']["CountryCode"]==''?'CN':$data['APS5G']["CountryCode"];
+				$apWifiInfo['APS5G']['htmode'] = $data['APS5G']["HT_BW"]==''?'0':$data['APS5G']["HT_BW"];
+				$apWifiInfo['APS5G']['channel'] = $data['APS5G']["Channel"]==''?'0':$data['APS5G']["Channel"];
+				$apWifiInfo['APS5G']['txpower'] = $data['APS5G']["TxPower"]==''?'100':$data['APS5G']["TxPower"];
+				$apWifiInfo['APS5G']['clientnum'] = $data['APS5G']["StaNum"]==''?'0':$data['APS5G']["StaNum"];
 			}
 			
 			if(isset($data['rebooSchedule'])){

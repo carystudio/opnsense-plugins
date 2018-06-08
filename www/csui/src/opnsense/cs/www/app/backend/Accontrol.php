@@ -348,13 +348,16 @@ class Accontrol extends Csbackend
                     $sth2 = $pdo->prepare($sql2);
                     $sth2->execute(array('wirelessmode'=>$data['wirelessmode'],'country'=>$data['country'],'channel'=>$data['channel'],'htmode'=>$data['htbw'],'txpower'=>$data['txpower'],'beacon'=>$data['beacon'], 'apid'=>intval($ap['id'])));
                 }else{
-                    $sql1 = "update WIFI0_STATUS set wirelessmode=:wirelessmode,country=:country,channel=:channel, htmode=:htmode,txpower=:txpower,beacon=:beacon where apid=:apid";
-                    $sth1 = $pdo->prepare($sql1);
-                    $sth1->execute(array('wirelessmode'=>$data['wirelessmode'],'country'=>$data['country'],'channel'=>$data['channel'],'htmode'=>$data['htbw'],'txpower'=>$data['txpower'],'beacon'=>$data['beacon'], 'apid'=>intval($ap['id'])));
-
-                    $sql2 = "update WIFI1_STATUS set wirelessmode=:wirelessmode,country=:country,channel=:channel, htmode=:htmode,txpower=:txpower,beacon=:beacon where apid=:apid";
-                    $sth2 = $pdo->prepare($sql2);
-                    $sth2->execute(array('wirelessmode'=>$data['wirelessmode'],'country'=>$data['country'],'channel'=>$data['channel'],'htmode'=>$data['htbw'],'txpower'=>$data['txpower'],'beacon'=>$data['beacon'], 'apid'=>intval($ap['id'])));
+                    if('1' == $data['usefor']){
+                        $sql1 = "update WIFI0_STATUS set wirelessmode=:wirelessmode,country=:country,channel=:channel, htmode=:htmode,txpower=:txpower,beacon=:beacon where apid=:apid";
+                        $sth1 = $pdo->prepare($sql1);
+                        $sth1->execute(array('wirelessmode'=>$data['wirelessmode'],'country'=>$data['country'],'channel'=>$data['channel'],'htmode'=>$data['htbw'],'txpower'=>$data['txpower'],'beacon'=>$data['beacon'], 'apid'=>intval($ap['id'])));
+                    }
+                    if('2' == $data['usefor']){
+                        $sql2 = "update WIFI1_STATUS set wirelessmode=:wirelessmode,country=:country,channel=:channel, htmode=:htmode,txpower=:txpower,beacon=:beacon where apid=:apid";
+                        $sth2 = $pdo->prepare($sql2);
+                        $sth2->execute(array('wirelessmode'=>$data['wirelessmode'],'country'=>$data['country'],'channel'=>$data['channel'],'htmode'=>$data['htbw'],'txpower'=>$data['txpower'],'beacon'=>$data['beacon'], 'apid'=>intval($ap['id'])));
+                    }
                 }
 
                 if(strlen($data['apname'])>0){
