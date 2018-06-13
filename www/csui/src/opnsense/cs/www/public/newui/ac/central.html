@@ -1134,7 +1134,10 @@
                 if(0 == res){
                     _this.$Message.error({content:_this.$t('central.msg10'),duration:5});
                     return false;
-                }else if(99 != res){
+                }else if(2 == res){
+                    _this.$Message.error({content:_this.$t('central.msg28'),duration:5});
+                    return false;
+                }else if(1 == res){
                     _this.$Message.error({content:_this.$t('central.msg11'),duration:5});
                     return false;
                 }

@@ -241,6 +241,7 @@ var messages = {
             "msg25":"The VLAN tag must be a valid number!",
             "msg26":"The countdown is 1~240！",
             "msg27":"The countdown must be a valid number！",
+            "msg28":"The maximum length of SSID can't exceed 32 characters",
 
             "tip1":"Warm hint: @:central.upload needs to be connected to the U disk. Please use the U disk."
         },
@@ -3123,6 +3124,7 @@ var messages = {
             "msg25":"VLAN标记必须是有效的数字！",
             "msg26":"倒计时为1~240的数字！",
             "msg27":"倒计时必须是有效的数字！",
+            "msg28":"SSID最大长度不能超过32个字符",
 
             "tip1":"温馨提示:@:central.upload需要接U盘。请接U盘使用！"
 
