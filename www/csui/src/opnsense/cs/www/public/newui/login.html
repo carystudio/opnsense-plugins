@@ -28,7 +28,7 @@
                 </FormItem>
                 <div @keyup.enter="handleSubmit('formInline')">
                     <FormItem prop="password">
-                        <Input :type="loginPwd" @on-focus="pwdFocus()" @on-blur="pwdBlur()"  v-model="formInline.password" name="password">
+                        <Input :type="loginPwd" @on-focus="pwdFocus()" @on-blur="pwdBlur()"  v-model="formInline.password" name="password" maxlength="32">
                         <span slot="prepend"> {{ $t("login.pass") }} </span>
                         </Input>
                     </FormItem>

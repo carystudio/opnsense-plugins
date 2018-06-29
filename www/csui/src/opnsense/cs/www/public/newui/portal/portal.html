@@ -334,15 +334,27 @@
                         _this.formValidate.status = false;
                     }
 
-                    _this.formValidate.Type = data.data.Type;
+                    if(!data.data.Type){
+                        _this.formValidate.Type = 'local';
+                    }else{
+                        _this.formValidate.Type = data.data.Type;
+                    }
                     _this.formValidate.Mcode = data.data.Mcode;
 
                     if("server" == _this.formValidate.Type){
                         _this.formValidate.GatewayId = data.data.GatewayId;
                         _this.formValidate.LoginPageStatus = data.data.LoginPageStatus;
                     }else{
-                        _this.formValidate.AllowedIp = data.data.AllowedIp;
-                        _this.formValidate.AllowedMac = data.data.AllowedMac;
+                        if(!data.data.AllowedIp){
+                            _this.formValidate.AllowedIp = '';
+                        }else{
+                            _this.formValidate.AllowedIp = data.data.AllowedIp;
+                        }
+                        if(!data.data.AllowedMac){
+                            _this.formValidate.AllowedMac = '';
+                        }else{
+                            _this.formValidate.AllowedMac = data.data.AllowedMac;
+                        }
                         _this.formValidate.IdleTimeout = data.data.IdleTimeout;
                         _this.formValidate.LoginPageStatus = data.data.LoginPageStatus;
                         _this.formValidate.SessionTimeout = data.data.SessionTimeout;
@@ -355,14 +367,12 @@
                         _this.formValidate.secretkey = data.data.secretkey;
                         _this.formValidate.shopId = data.data.shop_id;
                         _this.formValidate.ssid = data.data.ssid;
-                        if('no' == data.data.wc_enable){
+                        if(!data.data.wc_enable || 'no' == data.data.wc_enable){
                             _this.formValidate.wc_enable = false ;
                         }else{
                             _this.formValidate.wc_enable = true ;
                         }
-
                     }
-
                 }else {
                     _this.$Message.error(data.rescode);
                 }
