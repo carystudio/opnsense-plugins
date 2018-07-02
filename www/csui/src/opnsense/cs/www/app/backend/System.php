@@ -24,6 +24,18 @@ class System extends Csbackend
         'System_300'=>'请选择需要上传的配置文件'
     );
 
+    public static function getLanIp(){
+        global $config;
+
+        foreach($config['interfaces'] as $inf=>$infinfo){
+            if('lan1' == $infinfo['descr']){
+                $lan1Info   = Network::getInfInfo($infinfo['descr']);
+            }
+        }
+
+        return $lan1Info;
+    }
+
     public static function getStatusInfo(){
         global $config;
         global $csg2000p_config;
