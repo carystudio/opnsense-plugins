@@ -33,23 +33,19 @@ size_t upBw = 102400;//100KByte/s
 size_t pauseBw = 10240;//10KByte/s
 size_t total_sec = 0, total_pause[FD_SIZE] = {0};
 
-#if 1
-#define echo(fmt, args...) do { \
-	if (idebug){ printf("(%s:%d)=> " fmt, __FUNCTION__, __LINE__, ## args); } \
-}while(0)
-
-#else
 #define echo(fmt, args...) do { \
 	if (idebug){ \
-		char logfile[128]={0};sprintf(logfile, "logs/%s.log", deviceName);\
-		FILE *fp=fopen(logfile, "a");\
-		if(fp) { \
-			fprintf(fp, "[%s:%d]=> " fmt,__FUNCTION__, __LINE__, ##args); \
-		} \
-		fclose(fp);\
+		printf("(%s:%d)=> " fmt, __FUNCTION__, __LINE__, ## args); \
+	} \
+	if (ilog2file){ \
+	char logfile[128]={0};sprintf(logfile, "/var/log/%s.log", deviceName);\
+	FILE *fp=fopen(logfile, "a");\
+	if(fp) { \
+		fprintf(fp, "[%s:%d]=> " fmt,__FUNCTION__, __LINE__, ##args); \
+	} \
+	fclose(fp);\
 	} \
 }while(0)
-#endif
 
 inline int hex(char *xx,int len){
 	if (!idebug)
@@ -80,25 +76,8 @@ void register_pid() {
 	fclose(fh);
 }
 
-static sigjmp_buf jmpbuf;
-static void alarm_func()
-{
-	echo("timeout!!!\n");
-	siglongjmp(jmpbuf, 1);
-}
-
 int gngetaddrinfo(char *HostName, struct sockaddr_in *sockaddr, int timeout)
 {
-	signal(SIGALRM, alarm_func);
-	if(sigsetjmp(jmpbuf, 1) != 0)
-	{
-		alarm(0);//timout
-		signal(SIGALRM, SIG_IGN);
-		return 1;
-	}
-
-	alarm(timeout);//setting alarm
-
 	struct addrinfo *answer, hint, *curr;
 	char ipstr[16];   
 	bzero(&hint, sizeof(hint));
@@ -109,8 +88,6 @@ int gngetaddrinfo(char *HostName, struct sockaddr_in *sockaddr, int timeout)
 	int ret = getaddrinfo(HostName, NULL, &hint, &answer);
 	if (ret != 0) {
 		fprintf(stderr,"getaddrinfo: %s\n", gai_strerror(ret));
-		alarm(0);//timout
-		signal(SIGALRM, SIG_IGN);
 		return 1;
 	}
 
@@ -126,8 +103,6 @@ int gngetaddrinfo(char *HostName, struct sockaddr_in *sockaddr, int timeout)
 	}
 #endif
 	freeaddrinfo(answer);
-
-	signal(SIGALRM, SIG_IGN);
 
 	return 0;
 }
@@ -211,8 +186,7 @@ int getDevMac(char *ifname, char *devmac)
 
 	}
 
-#else
-	struct ifreq ifr;
+#else	struct ifreq ifr;
 	char *ptr;
 	int skfd;
 
@@ -306,13 +280,13 @@ unsigned char sock_connect(int *socket_fd, char *server_host, short port)
 			printf("[crpc %s:%d] gngetaddrinfo failed. (Errno : 0x%02x)\n", __FUNCTION__, __LINE__, result);
 			goto out;
 		}
-		printf("[crpc %s:%d] host(%s), ip(%s)\n", __FUNCTION__, __LINE__, server_host, inet_ntoa(socket_addr.sin_addr));
+		echo("[crpc %s:%d] host(%s), ip(%s)\n", __FUNCTION__, __LINE__, server_host, inet_ntoa(socket_addr.sin_addr));
 	}
 	
 	if((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		result = ERROR_CLIENT_SOCKET;
-		printf("[crpc %s:%d] Client socket failed. (Errno : 0x%02x)\n", __FUNCTION__, __LINE__, result);
+		echo("[crpc %s:%d] Client socket failed. (Errno : 0x%02x)\n", __FUNCTION__, __LINE__, result);
 		goto out;
 	}
 
@@ -322,7 +296,7 @@ unsigned char sock_connect(int *socket_fd, char *server_host, short port)
 	if(connect(fd, (struct sockaddr *)&socket_addr, sizeof(struct sockaddr_in)) == -1)
 	{
 		result = ERROR_CLIENT_CONNECT;
-		printf("[crpc %s:%d] Client socket connection failed. (Errno : 0x%02x)\n", __FUNCTION__, __LINE__, result);
+		echo("[crpc %s:%d] Client socket connection failed. (Errno : 0x%02x)\n", __FUNCTION__, __LINE__, result);
 		goto out;
 	}
 	*socket_fd = fd;
@@ -425,7 +399,7 @@ unsigned char server_receive(int fd)
 			reBuf = (char*)realloc(readBuf, len + nread);
 			if ( NULL == reBuf )
 			{
-				printf("Can not realloc to read from server!\n");
+				echo("Can not realloc to read from server!\n");
 				result = ERROR_LOCAL_MEMORY;
 				goto out;
 			}
@@ -475,6 +449,8 @@ unsigned char server_receive(int fd)
 #endif
 
 	pos = 0;
+	result = ERROR_NONE;
+
 	while( pos + 3 < len ) //DATA_HEAD_SIZE = 3
 	{
 		memset(&cmd_data, 0, sizeof(data_frp_t));
@@ -581,7 +557,10 @@ unsigned char server_receive(int fd)
 				//send(fd, data, data_len, 0);
 				result = crpc_safe_send(fd, data, data_len);
 				if ( ERROR_NONE != result )
+				{
+					result = ERROR_SERVER_SOCKET;
 					goto out;
+				}
 				
 				break;
 			case PKG_REVERSE_DATA:
@@ -708,11 +687,12 @@ unsigned char server_receive(int fd)
 				break;
 			default:
 				echo("unknow server cmd.\n");
+				result = ERROR_SERVER_RECEIVE;
 				break;
 		}
 		
 	}
-	echo("done...\n");
+	echo("result[%d], done...\n", result);
 out:
 	if (ERROR_NOT_COMPLETE == result)
 	{
@@ -854,14 +834,11 @@ unsigned char crpc_connect(int fd)
 	memcpy(data+3, (char *)&connect_req, 16);
 	len += 16;
 	
-	tsize = send(fd, data, len, 0);
-	echo("send size [%d]\n", tsize);
-	return 0;
+	return  crpc_safe_send(fd, data, len);
 }
 
 unsigned char crpc_heartbeat(int fd)
 {
-	size_t tsize = 0;
 	data_frp_t rsp_data;
 	pkg_new_reverse_res_t new_reverse_res;
 
@@ -870,9 +847,7 @@ unsigned char crpc_heartbeat(int fd)
 	rsp_data.version = VERSION;
 	rsp_data.type = PKG_HEART_BEAT;
 
-	tsize = send(fd, (char *)&rsp_data, 3, 0);
-	echo("send size [%d]\n", tsize);
-	return 0;
+	return  crpc_safe_send(fd, (char *)&rsp_data, 3);
 }
 
 void init_config(int argc, char **argv)
@@ -881,13 +856,16 @@ void init_config(int argc, char **argv)
 	char			c;
 	char devMac[16]={0};
 
-	while ((c = getopt(argc, argv, "fdh:p:n:?")) != EOF) {
+	while ((c = getopt(argc, argv, "fdlh:p:n:?")) != EOF) {
 		switch(c) {
 		case 'f':
 			isdaemon = 0;
 			break;
 		case 'd':
 			idebug = 1;
+			break;
+		case 'l':
+			ilog2file = 1;
 			break;
 		case 'h':
 			if (!optarg) {
@@ -911,7 +889,7 @@ void init_config(int argc, char **argv)
 			strcpy(deviceName, optarg);
 			break;
 		case '?':
-			fprintf(stderr, "Usage: %s [-f] [-d] [-n device name] [-h host] [-p port]\n", argv[0]);
+			fprintf(stderr, "Usage: %s [-f] [-d] [-l] [-n device name] [-h host] [-p port]\n", argv[0]);
 			exit(1);
 			break;
 		}
@@ -927,21 +905,10 @@ void init_config(int argc, char **argv)
 	if (isdaemon) {
 		//localback
 		if( f_exists(CRPC_PID) )
-			exit(-1);
-		
-		if ((newpid = fork()) < 0) {
-			perror("fork");
-			exit(-1);
-		}
-		if (newpid) { /* parent */
 			exit(0);
-		}
-		fclose(stdin);
-		fclose(stdout);
-		fclose(stderr);
-		setsid();
-		setpgid(0, 0);
-		openlog("crpc", LOG_PID, LOG_DAEMON);
+		
+		if( daemon(0, 0) < 0 )
+			perror("daemon()");
 	}
 
 	signal(SIGCHLD, SIG_IGN);
@@ -964,7 +931,7 @@ void sig_handler(int sig)
 			}
 		}
 		SAFE_CLOSE(sockfd);
-		printf("crpc exit!!!\n");
+		echo("crpc exit!!!\n");
 		if (isdaemon) remove(CRPC_PID);
 		exit(1);
 	case SIGUSR1:
@@ -989,9 +956,11 @@ int main(int argc, char **argv)
 	char echo_crpc_url[256]={0};
 	
 	init_config(argc, argv);
+	if ( ilog2file )
+		system("mkdir -p /var/log");
 	
-	printf("[crpc %s:%d] device url: [http://%s.d.carystudio.com:9080]\n\n", __FUNCTION__, __LINE__, deviceName);
-	sprintf(echo_crpc_url, "echo 'http://%s.d.carystudio.com:9080' > /usr/local/opnsense/cs/tmp/crpc_url", deviceName);
+	echo("[crpc %s:%d] device url: [http://%s.d.carystudio.com:9080]\n\n", __FUNCTION__, __LINE__, deviceName);
+	sprintf(echo_crpc_url, "echo 'http://%s.d.carystudio.com:9080' > /tmp/crpc_url", deviceName);
 	system(echo_crpc_url);
 
 	sa.sa_handler = sig_handler;
@@ -1002,6 +971,7 @@ int main(int argc, char **argv)
 	sigaction(SIGUSR1, &sa, NULL);
 
 reConnServ:
+	echo("connect server ...\n");
 	for ( i=sockfd+1; i<FD_SIZE; i++ )
 	{
 		if (conns[i]>0)
@@ -1018,7 +988,12 @@ reConnServ:
 	}
 	
 	echo("connect server ok.\n\n");
-	crpc_connect(sockfd);
+	rsp_info = crpc_connect(sockfd);
+	if(rsp_info != ERROR_NONE)
+	{
+		sleep(10);
+		goto reConnServ;
+	}
 
 	maxfd = sockfd;
 	while (1) {
@@ -1048,14 +1023,19 @@ reConnServ:
 		rel = select(maxfd + 1, &rfds, NULL, NULL, &tv);
 		if (rel < 0)
 		{
-			printf("[crpc %s:%d] select error. (Errno : 0x%02x)\n", __FUNCTION__, __LINE__, errno);
+			echo("[crpc %s:%d] select error. (Errno : 0x%02x)\n", __FUNCTION__, __LINE__, errno);
 			sleep(10);
 			goto reConnServ;
 		}
 		else if(rel == 0)
 		{
 			echo("timeout %d s.\n", KEEPALIVE_SEC);
-			crpc_heartbeat(sockfd);
+			rsp_info = crpc_heartbeat(sockfd);
+			if(rsp_info != ERROR_NONE)
+			{
+				sleep(10);
+				goto reConnServ;
+			}
 			usleep(10000);
 			continue;
 		}

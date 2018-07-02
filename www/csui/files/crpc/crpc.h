@@ -29,8 +29,8 @@
 #include <net/if_dl.h>
 #include <net/if_types.h>
 #include <signal.h>
-
 int idebug = 0;
+int ilog2file = 0;
 int isdaemon = 1;
 #define CRPC_PID "/var/run/crpc.pid"
 
